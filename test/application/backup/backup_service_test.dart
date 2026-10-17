@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,7 @@ import 'package:patrion/core/errors/app_error.dart';
 import 'package:patrion/data/db/app_database.dart';
 import 'package:patrion/data/repositories/backup_registry_repository.dart';
 import 'package:patrion/data/repositories/portfolio_repositories.dart';
+import 'package:patrion/data/sync/sync_tables_gateway.dart';
 import 'package:patrion/domain/backup/backup_metadata.dart';
 import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
@@ -265,6 +267,79 @@ void main() {
         expect(identities.single.deviceId, deviceId);
       },
     );
+
+    test('falha ao reabrir no meio da restauração: o banco anterior volta '
+        'intacto e o app continua aberto', () async {
+      await addInstitution(session, 'Antes do backup');
+      final backup = await session.backupService().createManual();
+      await addInstitution(session, 'Depois do backup');
+      final gateway = SyncTablesGateway(session.db, session.sync);
+      final before = await gateway.readAll(await gateway.schemas());
+      final deviceId = session.identity.deviceId;
+      final hlcBefore = session.sync.lastHlc;
+
+      var attempts = 0;
+      String? swappedIn;
+      Future<AppSession> failingOnce(
+        AppPaths paths, {
+        SessionCarryOver? carry,
+        Clock wallClock = const Clock(),
+      }) async {
+        attempts++;
+        if (attempts == 1) {
+          // O arquivo do backup já está no lugar do banco quando a reabertura
+          // falha.
+          final db = sqlite3.open(paths.databaseFile, mode: OpenMode.readOnly);
+          swappedIn = db
+              .select('SELECT name FROM institutions')
+              .map((r) => r['name'] as String)
+              .join(',');
+          db.close();
+          throw const DataError('falha simulada ao reabrir');
+        }
+        return openSession(paths, carry: carry, wallClock: wallClock);
+      }
+
+      final manager = SessionManager(
+        session,
+        beforeClose: () async {},
+        opener: failingOnce,
+      );
+      await manager.restore(backup.path);
+      session = manager.session;
+
+      expect(attempts, 2);
+      expect(swappedIn, 'Antes do backup');
+      expect(manager.phase, SessionPhase.ready);
+      expect(manager.generation, 1);
+      expect(manager.notice, contains('voltaram ao estado anterior'));
+      expect(manager.notice, contains('falha simulada ao reabrir'));
+
+      // Mesmos registros, campo a campo (inclusive HLCs), e banco íntegro.
+      final after = SyncTablesGateway(session.db, session.sync);
+      expect(await after.readAll(await after.schemas()), before);
+      expect(await institutionNames(session), [
+        'Antes do backup',
+        'Depois do backup',
+      ]);
+      final integrity = await session.db
+          .customSelect('PRAGMA integrity_check')
+          .getSingle();
+      expect(integrity.data.values.single, 'ok');
+      expect(session.identity.deviceId, deviceId);
+      expect(session.sync.lastHlc.compareTo(hlcBefore), 0);
+      // O backup restaurado e o do estado anterior continuam registrados.
+      final reasons = [
+        for (final r in await BackupRegistryRepository(session.db).all())
+          r.reason,
+      ]..sort();
+      expect(reasons, ['manual', 'pre-restauracao']);
+      // Nenhum arquivo temporário da troca sobrou.
+      expect(
+        Directory(paths.dataDir).listSync().map((f) => p.basename(f.path)),
+        isNot(contains(endsWith('.restaurando'))),
+      );
+    });
 
     test('arquivo recusado na conferência: nada muda', () async {
       await addInstitution(session, 'Atual');

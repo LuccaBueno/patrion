@@ -117,6 +117,14 @@ Future<AppSession> openSession(
 
 enum SessionPhase { ready, restoring }
 
+/// Abre uma sessão; o padrão é [openSession]. Os testes trocam para simular
+/// falhas na reabertura.
+typedef SessionOpener = Future<AppSession> Function(
+  AppPaths paths, {
+  SessionCarryOver? carry,
+  Clock wallClock,
+});
+
 /// Controla a sessão aberta: a interface observa e se reconstrói quando a
 /// sessão troca.
 class SessionManager extends ChangeNotifier implements SessionController {
@@ -124,12 +132,15 @@ class SessionManager extends ChangeNotifier implements SessionController {
     this._session, {
     Clock wallClock = const Clock(),
     Future<void> Function()? beforeClose,
+    SessionOpener opener = openSession,
   }) : _clock = wallClock,
-       _beforeClose = beforeClose ?? _endOfFrame;
+       _beforeClose = beforeClose ?? _endOfFrame,
+       _open = opener;
 
   static Future<void> _endOfFrame() => WidgetsBinding.instance.endOfFrame;
 
   final Future<void> Function() _beforeClose;
+  final SessionOpener _open;
 
   AppSession _session;
   final Clock _clock;
@@ -184,7 +195,7 @@ class SessionManager extends ChangeNotifier implements SessionController {
         backup: candidate.path,
         databaseFile: paths.databaseFile,
       );
-      _session = await openSession(paths, carry: carry, wallClock: _clock);
+      _session = await _open(paths, carry: carry, wallClock: _clock);
       _notice =
           'Backup restaurado. O estado anterior foi guardado em '
           '${safety.path}.';
@@ -199,7 +210,7 @@ class SessionManager extends ChangeNotifier implements SessionController {
         backup: safety.path,
         databaseFile: paths.databaseFile,
       );
-      _session = await openSession(paths, carry: carry, wallClock: _clock);
+      _session = await _open(paths, carry: carry, wallClock: _clock);
       _notice =
           'A restauração falhou e os dados voltaram ao estado anterior. '
           '${error is AppError ? error.message : ''}';
