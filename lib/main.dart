@@ -13,6 +13,7 @@ import 'core/config/launch_options.dart';
 import 'data/db/app_database.dart';
 import 'data/sync/device_identity_store.dart';
 import 'data/sync/sync_context.dart';
+import 'infrastructure/backup/pre_migration_backup.dart';
 import 'infrastructure/logging/rotating_file_log.dart';
 import 'infrastructure/system/app_paths_resolver.dart';
 import 'infrastructure/system/window_setup.dart';
@@ -42,6 +43,14 @@ Future<void> main(List<String> args) async {
     };
     _log.info('Iniciando ${AppInfo.name} ${AppInfo.version}');
 
+    // Sem backup válido, o banco não é aberto e a migração não acontece.
+    PreMigrationBackup(
+      backupsDir: paths.backupsDir,
+      appVersion: AppInfo.version,
+    ).run(
+      databaseFile: paths.databaseFile,
+      targetVersion: AppDatabase.latestSchemaVersion,
+    );
     final db = AppDatabase.open(paths.databaseFile);
     final identityStore = DeviceIdentityStore(db);
     final identity = await identityStore.loadOrCreate(

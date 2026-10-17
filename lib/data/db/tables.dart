@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import 'converters.dart';
+
 /// Campos de sincronização de toda tabela com dados do usuário
 /// (CLAUDE.md e `docs/BANCO.md` §2).
 ///
@@ -69,4 +71,134 @@ class DevSettings extends Table {
 class SharedSettings extends Table with SyncColumns {
   TextColumn get key => text()();
   TextColumn get valueJson => text()();
+}
+
+// ---------------------------------------------------------------------------
+// Cadastros e carteira real (sincronizáveis, schema 2).
+// Chaves naturais aplicadas pelo app, não por índice único (BANCO.md §2).
+// ---------------------------------------------------------------------------
+
+/// Corretoras, bancos e exchanges.
+@DataClassName('InstitutionRow')
+@TableIndex(name: 'institutions_hlc', columns: {#hlc})
+@TableIndex(name: 'institutions_name_key', columns: {#nameKey})
+class Institutions extends Table with SyncColumns {
+  TextColumn get name => text()();
+
+  /// Nome normalizado: chave natural para detectar duplicatas.
+  TextColumn get nameKey => text()();
+  TextColumn get kind => text()();
+  TextColumn get country => text()();
+  TextColumn get notes => text().nullable()();
+}
+
+/// Contas dentro de uma instituição.
+@DataClassName('AccountRow')
+@TableIndex(name: 'accounts_hlc', columns: {#hlc})
+@TableIndex(name: 'accounts_institution', columns: {#institutionId})
+class Accounts extends Table with SyncColumns {
+  TextColumn get institutionId => text().references(Institutions, #id)();
+  TextColumn get name => text()();
+  TextColumn get kind => text()();
+  TextColumn get currency => text()();
+  TextColumn get archivedAt => text().nullable()();
+}
+
+/// Catálogo de ativos, compartilhado com as carteiras hipotéticas (F9).
+@DataClassName('AssetRow')
+@TableIndex(name: 'assets_hlc', columns: {#hlc})
+@TableIndex(name: 'assets_symbol', columns: {#symbol, #market})
+class Assets extends Table with SyncColumns {
+  TextColumn get symbol => text()();
+  TextColumn get market => text()();
+  TextColumn get assetClass => text()();
+  TextColumn get name => text()();
+  TextColumn get currency => text()();
+  TextColumn get country => text()();
+  TextColumn get isin => text().nullable()();
+  TextColumn get sector => text().nullable()();
+  TextColumn get segment => text().nullable()();
+  TextColumn get liquidity => text().nullable()();
+
+  /// `market` (cotação dos provedores, F6) ou `manual`.
+  TextColumn get priceSource => text()();
+  TextColumn get notes => text().nullable()();
+}
+
+/// Características de renda fixa (1:1 com ativos `fixed_income`/`treasury`).
+@DataClassName('FixedIncomeTermsRow')
+@TableIndex(name: 'fixed_income_terms_hlc', columns: {#hlc})
+@TableIndex(name: 'fixed_income_terms_asset', columns: {#assetId})
+class FixedIncomeTerms extends Table with SyncColumns {
+  TextColumn get assetId => text().references(Assets, #id)();
+  TextColumn get product => text()();
+  TextColumn get issuer => text().nullable()();
+  TextColumn get indexer => text()();
+  TextColumn get rate => text().map(const DecimalTextConverter())();
+  TextColumn get spread =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get dayCount => text()();
+  TextColumn get issueDate => text()();
+  TextColumn get maturityDate => text()();
+  TextColumn get graceUntil => text().nullable()();
+  TextColumn get liquidity => text()();
+  TextColumn get taxRegime => text()();
+  TextColumn get costsNotes => text().nullable()();
+}
+
+/// Operações da carteira real (SPEC §7).
+@DataClassName('OperationRow')
+@TableIndex(name: 'operations_hlc', columns: {#hlc})
+@TableIndex(name: 'operations_asset_date', columns: {#assetId, #tradeDate})
+@TableIndex(name: 'operations_account_date', columns: {#accountId, #tradeDate})
+@TableIndex(name: 'operations_date', columns: {#tradeDate})
+class Operations extends Table with SyncColumns {
+  TextColumn get accountId => text().references(Accounts, #id)();
+
+  /// Nulo para movimentos só de caixa.
+  TextColumn get assetId => text().nullable().references(Assets, #id)();
+  TextColumn get type => text()();
+  TextColumn get tradeDate => text()();
+  TextColumn get settlementDate => text().nullable()();
+  TextColumn get quantity =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get unitPrice =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get grossAmount =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get fees => text().map(const DecimalTextConverter())();
+  TextColumn get taxes => text().map(const DecimalTextConverter())();
+  TextColumn get currency => text()();
+  TextColumn get fxRate =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get ratioFrom =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get ratioTo =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get transferGroupId => text().nullable()();
+  TextColumn get relatedOperationId =>
+      text().nullable().references(Operations, #id)();
+  TextColumn get justification => text().nullable()();
+  TextColumn get notes => text().nullable()();
+
+  /// `manual`, `csv_import` ou `save_merge`.
+  TextColumn get origin => text()();
+}
+
+/// Preços e saldos informados pelo usuário.
+@DataClassName('ManualValuationRow')
+@TableIndex(name: 'manual_valuations_hlc', columns: {#hlc})
+@TableIndex(name: 'manual_valuations_asset_date', columns: {#assetId, #refDate})
+class ManualValuations extends Table with SyncColumns {
+  TextColumn get assetId => text().references(Assets, #id)();
+
+  /// Obrigatório para saldos (`kind = balance`).
+  TextColumn get accountId => text().nullable().references(Accounts, #id)();
+  TextColumn get refDate => text()();
+
+  /// `unit_price` ou `balance`.
+  TextColumn get kind => text()();
+  TextColumn get value => text().map(const DecimalTextConverter())();
+  TextColumn get currency => text()();
+  TextColumn get notes => text().nullable()();
 }

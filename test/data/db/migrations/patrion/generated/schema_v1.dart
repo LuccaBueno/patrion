@@ -4,7 +4,7 @@
 //
 import 'package:drift/drift.dart';
 
-class DevIdentity extends Table with TableInfo {
+class DevIdentity extends Table with TableInfo<DevIdentity, DevIdentityData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -56,8 +56,26 @@ class DevIdentity extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {deviceId};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  DevIdentityData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DevIdentityData(
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      deviceName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_name'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      lastHlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_hlc'],
+      )!,
+    );
   }
 
   @override
@@ -71,7 +89,194 @@ class DevIdentity extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class DevSettings extends Table with TableInfo {
+class DevIdentityData extends DataClass implements Insertable<DevIdentityData> {
+  final String deviceId;
+  final String deviceName;
+  final String createdAt;
+  final String lastHlc;
+  const DevIdentityData({
+    required this.deviceId,
+    required this.deviceName,
+    required this.createdAt,
+    required this.lastHlc,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['device_id'] = Variable<String>(deviceId);
+    map['device_name'] = Variable<String>(deviceName);
+    map['created_at'] = Variable<String>(createdAt);
+    map['last_hlc'] = Variable<String>(lastHlc);
+    return map;
+  }
+
+  DevIdentityCompanion toCompanion(bool nullToAbsent) {
+    return DevIdentityCompanion(
+      deviceId: Value(deviceId),
+      deviceName: Value(deviceName),
+      createdAt: Value(createdAt),
+      lastHlc: Value(lastHlc),
+    );
+  }
+
+  factory DevIdentityData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DevIdentityData(
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      deviceName: serializer.fromJson<String>(json['deviceName']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      lastHlc: serializer.fromJson<String>(json['lastHlc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'deviceId': serializer.toJson<String>(deviceId),
+      'deviceName': serializer.toJson<String>(deviceName),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'lastHlc': serializer.toJson<String>(lastHlc),
+    };
+  }
+
+  DevIdentityData copyWith({
+    String? deviceId,
+    String? deviceName,
+    String? createdAt,
+    String? lastHlc,
+  }) => DevIdentityData(
+    deviceId: deviceId ?? this.deviceId,
+    deviceName: deviceName ?? this.deviceName,
+    createdAt: createdAt ?? this.createdAt,
+    lastHlc: lastHlc ?? this.lastHlc,
+  );
+  DevIdentityData copyWithCompanion(DevIdentityCompanion data) {
+    return DevIdentityData(
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      deviceName: data.deviceName.present
+          ? data.deviceName.value
+          : this.deviceName,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastHlc: data.lastHlc.present ? data.lastHlc.value : this.lastHlc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevIdentityData(')
+          ..write('deviceId: $deviceId, ')
+          ..write('deviceName: $deviceName, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastHlc: $lastHlc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(deviceId, deviceName, createdAt, lastHlc);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DevIdentityData &&
+          other.deviceId == this.deviceId &&
+          other.deviceName == this.deviceName &&
+          other.createdAt == this.createdAt &&
+          other.lastHlc == this.lastHlc);
+}
+
+class DevIdentityCompanion extends UpdateCompanion<DevIdentityData> {
+  final Value<String> deviceId;
+  final Value<String> deviceName;
+  final Value<String> createdAt;
+  final Value<String> lastHlc;
+  final Value<int> rowid;
+  const DevIdentityCompanion({
+    this.deviceId = const Value.absent(),
+    this.deviceName = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastHlc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DevIdentityCompanion.insert({
+    required String deviceId,
+    required String deviceName,
+    required String createdAt,
+    required String lastHlc,
+    this.rowid = const Value.absent(),
+  }) : deviceId = Value(deviceId),
+       deviceName = Value(deviceName),
+       createdAt = Value(createdAt),
+       lastHlc = Value(lastHlc);
+  static Insertable<DevIdentityData> custom({
+    Expression<String>? deviceId,
+    Expression<String>? deviceName,
+    Expression<String>? createdAt,
+    Expression<String>? lastHlc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (deviceId != null) 'device_id': deviceId,
+      if (deviceName != null) 'device_name': deviceName,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastHlc != null) 'last_hlc': lastHlc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DevIdentityCompanion copyWith({
+    Value<String>? deviceId,
+    Value<String>? deviceName,
+    Value<String>? createdAt,
+    Value<String>? lastHlc,
+    Value<int>? rowid,
+  }) {
+    return DevIdentityCompanion(
+      deviceId: deviceId ?? this.deviceId,
+      deviceName: deviceName ?? this.deviceName,
+      createdAt: createdAt ?? this.createdAt,
+      lastHlc: lastHlc ?? this.lastHlc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (deviceName.present) {
+      map['device_name'] = Variable<String>(deviceName.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (lastHlc.present) {
+      map['last_hlc'] = Variable<String>(lastHlc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevIdentityCompanion(')
+          ..write('deviceId: $deviceId, ')
+          ..write('deviceName: $deviceName, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastHlc: $lastHlc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class DevSettings extends Table with TableInfo<DevSettings, DevSettingsData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -110,8 +315,22 @@ class DevSettings extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {key};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  DevSettingsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DevSettingsData(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      valueJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value_json'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
   }
 
   @override
@@ -125,7 +344,170 @@ class DevSettings extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class SharedSettings extends Table with TableInfo {
+class DevSettingsData extends DataClass implements Insertable<DevSettingsData> {
+  final String key;
+  final String valueJson;
+  final String updatedAt;
+  const DevSettingsData({
+    required this.key,
+    required this.valueJson,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['value_json'] = Variable<String>(valueJson);
+    map['updated_at'] = Variable<String>(updatedAt);
+    return map;
+  }
+
+  DevSettingsCompanion toCompanion(bool nullToAbsent) {
+    return DevSettingsCompanion(
+      key: Value(key),
+      valueJson: Value(valueJson),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory DevSettingsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DevSettingsData(
+      key: serializer.fromJson<String>(json['key']),
+      valueJson: serializer.fromJson<String>(json['valueJson']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'valueJson': serializer.toJson<String>(valueJson),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+    };
+  }
+
+  DevSettingsData copyWith({
+    String? key,
+    String? valueJson,
+    String? updatedAt,
+  }) => DevSettingsData(
+    key: key ?? this.key,
+    valueJson: valueJson ?? this.valueJson,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  DevSettingsData copyWithCompanion(DevSettingsCompanion data) {
+    return DevSettingsData(
+      key: data.key.present ? data.key.value : this.key,
+      valueJson: data.valueJson.present ? data.valueJson.value : this.valueJson,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevSettingsData(')
+          ..write('key: $key, ')
+          ..write('valueJson: $valueJson, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, valueJson, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DevSettingsData &&
+          other.key == this.key &&
+          other.valueJson == this.valueJson &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DevSettingsCompanion extends UpdateCompanion<DevSettingsData> {
+  final Value<String> key;
+  final Value<String> valueJson;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const DevSettingsCompanion({
+    this.key = const Value.absent(),
+    this.valueJson = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DevSettingsCompanion.insert({
+    required String key,
+    required String valueJson,
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       valueJson = Value(valueJson),
+       updatedAt = Value(updatedAt);
+  static Insertable<DevSettingsData> custom({
+    Expression<String>? key,
+    Expression<String>? valueJson,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (valueJson != null) 'value_json': valueJson,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DevSettingsCompanion copyWith({
+    Value<String>? key,
+    Value<String>? valueJson,
+    Value<String>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return DevSettingsCompanion(
+      key: key ?? this.key,
+      valueJson: valueJson ?? this.valueJson,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (valueJson.present) {
+      map['value_json'] = Variable<String>(valueJson.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevSettingsCompanion(')
+          ..write('key: $key, ')
+          ..write('valueJson: $valueJson, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class SharedSettings extends Table
+    with TableInfo<SharedSettings, SharedSettingsData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -213,8 +595,42 @@ class SharedSettings extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  SharedSettingsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SharedSettingsData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      valueJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value_json'],
+      )!,
+    );
   }
 
   @override
@@ -226,6 +642,296 @@ class SharedSettings extends Table with TableInfo {
   List<String> get customConstraints => const ['PRIMARY KEY(id)'];
   @override
   bool get dontWriteConstraints => true;
+}
+
+class SharedSettingsData extends DataClass
+    implements Insertable<SharedSettingsData> {
+  final String id;
+  final String createdAt;
+  final String updatedAt;
+  final String hlc;
+  final String deviceId;
+  final String? deletedAt;
+  final String key;
+  final String valueJson;
+  const SharedSettingsData({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.hlc,
+    required this.deviceId,
+    this.deletedAt,
+    required this.key,
+    required this.valueJson,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['hlc'] = Variable<String>(hlc);
+    map['device_id'] = Variable<String>(deviceId);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<String>(deletedAt);
+    }
+    map['key'] = Variable<String>(key);
+    map['value_json'] = Variable<String>(valueJson);
+    return map;
+  }
+
+  SharedSettingsCompanion toCompanion(bool nullToAbsent) {
+    return SharedSettingsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      hlc: Value(hlc),
+      deviceId: Value(deviceId),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      key: Value(key),
+      valueJson: Value(valueJson),
+    );
+  }
+
+  factory SharedSettingsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SharedSettingsData(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      key: serializer.fromJson<String>(json['key']),
+      valueJson: serializer.fromJson<String>(json['valueJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'hlc': serializer.toJson<String>(hlc),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'key': serializer.toJson<String>(key),
+      'valueJson': serializer.toJson<String>(valueJson),
+    };
+  }
+
+  SharedSettingsData copyWith({
+    String? id,
+    String? createdAt,
+    String? updatedAt,
+    String? hlc,
+    String? deviceId,
+    Value<String?> deletedAt = const Value.absent(),
+    String? key,
+    String? valueJson,
+  }) => SharedSettingsData(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    hlc: hlc ?? this.hlc,
+    deviceId: deviceId ?? this.deviceId,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    key: key ?? this.key,
+    valueJson: valueJson ?? this.valueJson,
+  );
+  SharedSettingsData copyWithCompanion(SharedSettingsCompanion data) {
+    return SharedSettingsData(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      key: data.key.present ? data.key.value : this.key,
+      valueJson: data.valueJson.present ? data.valueJson.value : this.valueJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SharedSettingsData(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('key: $key, ')
+          ..write('valueJson: $valueJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    key,
+    valueJson,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SharedSettingsData &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.hlc == this.hlc &&
+          other.deviceId == this.deviceId &&
+          other.deletedAt == this.deletedAt &&
+          other.key == this.key &&
+          other.valueJson == this.valueJson);
+}
+
+class SharedSettingsCompanion extends UpdateCompanion<SharedSettingsData> {
+  final Value<String> id;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String> hlc;
+  final Value<String> deviceId;
+  final Value<String?> deletedAt;
+  final Value<String> key;
+  final Value<String> valueJson;
+  final Value<int> rowid;
+  const SharedSettingsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.key = const Value.absent(),
+    this.valueJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SharedSettingsCompanion.insert({
+    required String id,
+    required String createdAt,
+    required String updatedAt,
+    required String hlc,
+    required String deviceId,
+    this.deletedAt = const Value.absent(),
+    required String key,
+    required String valueJson,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       hlc = Value(hlc),
+       deviceId = Value(deviceId),
+       key = Value(key),
+       valueJson = Value(valueJson);
+  static Insertable<SharedSettingsData> custom({
+    Expression<String>? id,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? hlc,
+    Expression<String>? deviceId,
+    Expression<String>? deletedAt,
+    Expression<String>? key,
+    Expression<String>? valueJson,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (hlc != null) 'hlc': hlc,
+      if (deviceId != null) 'device_id': deviceId,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (key != null) 'key': key,
+      if (valueJson != null) 'value_json': valueJson,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SharedSettingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<String>? hlc,
+    Value<String>? deviceId,
+    Value<String?>? deletedAt,
+    Value<String>? key,
+    Value<String>? valueJson,
+    Value<int>? rowid,
+  }) {
+    return SharedSettingsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      hlc: hlc ?? this.hlc,
+      deviceId: deviceId ?? this.deviceId,
+      deletedAt: deletedAt ?? this.deletedAt,
+      key: key ?? this.key,
+      valueJson: valueJson ?? this.valueJson,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (valueJson.present) {
+      map['value_json'] = Variable<String>(valueJson.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SharedSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('key: $key, ')
+          ..write('valueJson: $valueJson, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class DatabaseAtV1 extends GeneratedDatabase {

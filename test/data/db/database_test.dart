@@ -22,7 +22,15 @@ void main() {
 
     test('toda tabela sincronizável tem os campos e o índice de hlc', () async {
       final db = AppDatabase.memory();
-      const syncTables = ['shared_settings'];
+      const syncTables = [
+        'shared_settings',
+        'institutions',
+        'accounts',
+        'assets',
+        'fixed_income_terms',
+        'operations',
+        'manual_valuations',
+      ];
       for (final table in syncTables) {
         final columns = await db
             .customSelect('PRAGMA table_info($table)')
