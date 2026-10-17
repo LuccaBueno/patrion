@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # Snapshots do schema e testes de migração (docs/BANCO.md §9).
+          databases:
+            patrion: lib/data/db/app_database.dart
+          schema_dir: drift_schemas/
+          test_dir: test/data/db/migrations/
+          sql:
+            dialect: sqlite
+            options:
+              version: "3.45"
