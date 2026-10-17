@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../screens/home_screen.dart';
+import '../screens/dashboard/dashboard_screen.dart';
+import '../screens/operations/operations_screen.dart';
+import '../screens/portfolio/asset_detail_screen.dart';
+import '../screens/portfolio/portfolio_screen.dart';
+import '../screens/registry/registry_screen.dart';
 import '../screens/settings_screen.dart';
 import '../shell/app_shell.dart';
 
@@ -29,12 +33,32 @@ const navDestinations = [
     selectedIcon: Icons.space_dashboard,
   ),
   NavDestination(
+    path: '/carteira',
+    label: 'Carteira',
+    icon: Icons.pie_chart_outline,
+    selectedIcon: Icons.pie_chart,
+  ),
+  NavDestination(
+    path: '/operacoes',
+    label: 'Operações',
+    icon: Icons.receipt_long_outlined,
+    selectedIcon: Icons.receipt_long,
+  ),
+  NavDestination(
+    path: '/cadastros',
+    label: 'Cadastros',
+    icon: Icons.account_balance_outlined,
+    selectedIcon: Icons.account_balance,
+  ),
+  NavDestination(
     path: '/configuracoes',
     label: 'Configurações',
     icon: Icons.settings_outlined,
     selectedIcon: Icons.settings,
   ),
 ];
+
+Page<void> _page(Widget child) => NoTransitionPage(child: child);
 
 GoRouter createRouter({String initialLocation = '/'}) {
   return GoRouter(
@@ -46,13 +70,31 @@ GoRouter createRouter({String initialLocation = '/'}) {
         routes: [
           GoRoute(
             path: '/',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: HomeScreen()),
+            pageBuilder: (context, state) => _page(const DashboardScreen()),
+          ),
+          GoRoute(
+            path: '/carteira',
+            pageBuilder: (context, state) => _page(const PortfolioScreen()),
+            routes: [
+              GoRoute(
+                path: 'ativo/:id',
+                pageBuilder: (context, state) => _page(
+                  AssetDetailScreen(assetId: state.pathParameters['id']!),
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/operacoes',
+            pageBuilder: (context, state) => _page(const OperationsScreen()),
+          ),
+          GoRoute(
+            path: '/cadastros',
+            pageBuilder: (context, state) => _page(const RegistryScreen()),
           ),
           GoRoute(
             path: '/configuracoes',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: SettingsScreen()),
+            pageBuilder: (context, state) => _page(const SettingsScreen()),
           ),
         ],
       ),

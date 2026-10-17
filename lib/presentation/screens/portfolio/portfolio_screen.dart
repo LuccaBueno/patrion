@@ -1,0 +1,266 @@
+import 'package:decimal/decimal.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../application/portfolio/portfolio_query.dart';
+import '../../../domain/portfolio/codes.dart';
+import '../../../domain/portfolio/portfolio_valuation.dart';
+import '../../format/formatters.dart';
+import '../../format/labels.dart';
+import '../../providers.dart';
+import '../../widgets/common.dart';
+
+/// Carteira real: posições por conta e ativo (SPEC §16).
+class PortfolioScreen extends ConsumerWidget {
+  const PortfolioScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final snapshot = ref.watch(portfolioSnapshotProvider);
+    return PageScaffold(
+      title: 'Carteira',
+      subtitle: 'Posições calculadas a partir das operações',
+      child: AsyncBody(
+        value: snapshot,
+        builder: (snap) => PositionsTable(snap: snap),
+      ),
+    );
+  }
+}
+
+enum _Col { asset, assetClass, account, quantity, avgPrice, cost, value, pnl }
+
+/// Tabela de posições, ordenável, com busca e opção de mostrar encerradas.
+class PositionsTable extends StatefulWidget {
+  const PositionsTable({required this.snap, super.key});
+
+  final PortfolioSnapshot snap;
+
+  @override
+  State<PositionsTable> createState() => _PositionsTableState();
+}
+
+class _PositionsTableState extends State<PositionsTable> {
+  String _search = '';
+  bool _showClosed = false;
+  _Col _sort = _Col.value;
+  bool _ascending = false;
+
+  List<ValuedPosition> _rows() {
+    final snap = widget.snap;
+    final s = _search.toLowerCase();
+    final rows = snap.valued.where((v) {
+      if (!_showClosed && !v.position.isOpen) return false;
+      if (s.isEmpty) return true;
+      return [
+        v.asset?.symbol ?? '',
+        v.asset?.name ?? '',
+        snap.accountLabel(v.position.accountId),
+      ].any((t) => t.toLowerCase().contains(s));
+    }).toList();
+
+    int compare(ValuedPosition a, ValuedPosition b) => switch (_sort) {
+      _Col.asset => (a.asset?.symbol ?? '').compareTo(b.asset?.symbol ?? ''),
+      _Col.assetClass => (a.asset?.assetClass.label ?? '').compareTo(
+        b.asset?.assetClass.label ?? '',
+      ),
+      _Col.account =>
+        snap
+            .accountLabel(a.position.accountId)
+            .compareTo(snap.accountLabel(b.position.accountId)),
+      _Col.quantity => a.position.quantity.compareTo(b.position.quantity),
+      _Col.avgPrice => _cmp(a.position.averagePrice, b.position.averagePrice),
+      _Col.cost => a.position.totalCost.compareTo(b.position.totalCost),
+      _Col.value => _cmp(a.marketValue, b.marketValue),
+      _Col.pnl => _cmp(a.unrealizedPnl, b.unrealizedPnl),
+    };
+    rows.sort((a, b) => _ascending ? compare(a, b) : compare(b, a));
+    return rows;
+  }
+
+  DataColumn _column(String label, _Col column, {bool numeric = false}) =>
+      DataColumn(
+        label: Text(label),
+        numeric: numeric,
+        onSort: (_, _) => setState(() {
+          if (_sort == column) {
+            _ascending = !_ascending;
+          } else {
+            _sort = column;
+            _ascending = !numeric;
+          }
+        }),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final snap = widget.snap;
+    if (snap.state.positions.isEmpty) {
+      return const Align(
+        alignment: Alignment.topLeft,
+        child: MessageCard(
+          icon: Icons.pie_chart_outline,
+          title: 'Nenhuma posição',
+          message:
+              'As posições aparecem aqui depois que você registrar compras, '
+              'aportes ou outras operações em Operações.',
+        ),
+      );
+    }
+    final rows = _rows();
+    final theme = Theme.of(context);
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 24),
+      children: [
+        Wrap(
+          spacing: 16,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            SizedBox(
+              width: 260,
+              child: TextField(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Buscar ativo ou conta',
+                  isDense: true,
+                ),
+                onChanged: (v) => setState(() => _search = v.trim()),
+              ),
+            ),
+            FilterChip(
+              label: const Text('Mostrar encerradas'),
+              selected: _showClosed,
+              onSelected: (v) => setState(() => _showClosed = v),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TableCard(
+          child: DataTable(
+            showCheckboxColumn: false,
+            sortColumnIndex: _Col.values.indexOf(_sort),
+            sortAscending: _ascending,
+            columns: [
+              _column('Ativo', _Col.asset),
+              _column('Classe', _Col.assetClass),
+              _column('Conta', _Col.account),
+              _column('Quantidade', _Col.quantity, numeric: true),
+              _column('Preço médio', _Col.avgPrice, numeric: true),
+              _column('Custo', _Col.cost, numeric: true),
+              _column('Valor de mercado', _Col.value, numeric: true),
+              _column('Resultado', _Col.pnl, numeric: true),
+            ],
+            rows: [
+              for (final v in rows)
+                DataRow(
+                  onSelectChanged: (_) =>
+                      context.go('/carteira/ativo/${v.position.assetId}'),
+                  cells: [
+                    DataCell(
+                      Text(
+                        v.asset?.symbol ?? '?',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    DataCell(Text(v.asset?.assetClass.label ?? '—')),
+                    DataCell(Text(snap.accountLabel(v.position.accountId))),
+                    DataCell(
+                      Text(
+                        v.position.quantity == Decimal.zero
+                            ? '—'
+                            : Fmt.number(v.position.quantity),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        v.position.averagePrice == null
+                            ? '—'
+                            : Fmt.money(
+                                v.position.averagePrice!,
+                                v.position.currency,
+                              ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        Fmt.money(v.position.totalCost, v.position.currency),
+                      ),
+                    ),
+                    DataCell(_MarketValueCell(v: v)),
+                    DataCell(
+                      v.unrealizedPnl == null
+                          ? const Text('—')
+                          : PnlText(
+                              value: v.unrealizedPnl!,
+                              text:
+                                  '${Fmt.signedMoney(v.unrealizedPnl!, v.position.currency)}'
+                                  '${v.simpleReturn == null ? '' : ' (${Fmt.percent(v.simpleReturn!)})'}',
+                            ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Resultado = valor de mercado − custo (retorno simples sobre o '
+          'custo, sem proventos). Preços e saldos informados por você; a '
+          'data de referência aparece ao passar o mouse.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MarketValueCell extends StatelessWidget {
+  const _MarketValueCell({required this.v});
+
+  final ValuedPosition v;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!v.position.isOpen) return const Text('—');
+    if (v.marketValue == null) {
+      return const UnavailableText(
+        tooltip: 'Sem preço ou saldo informado. Informe no detalhe do ativo.',
+      );
+    }
+    final source = v.valuationKind == ValuationKind.balance
+        ? 'Saldo informado'
+        : 'Preço informado';
+    final stale = v.valuationStale
+        ? '\nHá operações depois desta data: o valor pode estar desatualizado.'
+        : '';
+    return Tooltip(
+      message: '$source em ${Fmt.date(v.valuationDate!)}$stale',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (v.valuationStale)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Icon(
+                Icons.history,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                semanticLabel: 'Valor desatualizado',
+              ),
+            ),
+          Text(Fmt.money(v.marketValue!, v.position.currency)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Compara valores opcionais; ausentes ficam antes de todos.
+int _cmp(Decimal? a, Decimal? b) {
+  if (a == null) return b == null ? 0 : -1;
+  if (b == null) return 1;
+  return a.compareTo(b);
+}

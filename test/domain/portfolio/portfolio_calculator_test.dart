@@ -237,6 +237,28 @@ void main() {
       expect(s.issues, isEmpty);
     });
 
+    test('entrada com id menor que a saída ainda recebe o custo', () {
+      // Ids no mesmo milissegundo não têm ordem garantida.
+      final buy = op(OperationType.buy, '2024-01-01', qty: '10', price: '10');
+      final into = op(
+        OperationType.transferIn,
+        '2024-02-01',
+        account: acc2,
+        qty: '4',
+        group: 'g',
+      );
+      final out = op(
+        OperationType.transferOut,
+        '2024-02-01',
+        qty: '4',
+        group: 'g',
+      );
+      final s = PortfolioCalculator.compute(operations: [buy, into, out]);
+      expect(s.issues, isEmpty);
+      expect(positionOf(s, acc2).totalCost, d('40'));
+      expect(positionOf(s).totalCost, d('60'));
+    });
+
     test('entrada de transferência sem a saída é sinalizada', () {
       final s = PortfolioCalculator.compute(
         operations: [
