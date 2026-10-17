@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
@@ -60,10 +61,90 @@ void main() {
       expect(find.text(r'R$ 5.005,00'), findsOneWidget);
       expect(find.text(r'R$ 5.600,00'), findsOneWidget);
       expect(find.text(r'R$ 4.995,00'), findsWidgets);
-      expect(find.text(r'+R$ 595,00 (+11,89%)'), findsOneWidget);
+      // Resultado não realizado e resultado total (sem vendas nem proventos).
+      expect(find.text(r'+R$ 595,00'), findsNWidgets(2));
+      expect(find.textContaining('+11,89% sobre o custo'), findsOneWidget);
+      // TIR: −5.005 em 10/01 e +5.600 em 31/05/2024; menos de um ano, então
+      // mostra o retorno do período.
+      expect(find.text('+11,89% no período'), findsOneWidget);
+      expect(find.textContaining('de 10/01/2024 a 31/05/2024'), findsOneWidget);
       expect(find.text('Alocação por classe'), findsOneWidget);
       expect(find.text('Ações BR'), findsOneWidget);
       expect(find.textContaining('informados até 31/05/2024'), findsOneWidget);
+    });
+  });
+
+  testWidgets('valores grandes nos cards do dashboard não quebram linha', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      await f.add(
+        f.draft(
+          OperationType.deposit,
+          '2024-01-02',
+          asset: null,
+          gross: '123456789012.34',
+        ),
+      );
+      await f.add(
+        f.draft(OperationType.buy, '2024-01-10', qty: '1000000', price: '30'),
+      );
+      await f.valuations.setUnitPrice(
+        assetId: f.petr,
+        refDate: LocalDate(2024, 5, 31),
+        price: dec('35.5'),
+      );
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(size: const Size(960, 640), () async {
+      for (final key in [
+        'stat-equity',
+        'stat-cash',
+        'stat-unrealized',
+        'stat-total-result',
+        'stat-mwr',
+      ]) {
+        final card = find.byKey(Key(key));
+        expect(card, findsOneWidget, reason: key);
+        final paragraphs = tester.renderObjectList<RenderParagraph>(
+          find.descendant(of: card, matching: find.byType(RichText)),
+        );
+        // O primeiro parágrafo depois do rótulo é o valor.
+        final value = paragraphs.elementAt(1);
+        final lineHeight = value.getFullHeightForCaret(
+          const TextPosition(offset: 0),
+        );
+        expect(value.size.height, lessThan(lineHeight * 1.5), reason: key);
+        expect(value.didExceedMaxLines, isFalse, reason: key);
+      }
+      expect(find.text(r'R$ 123.426.789.012,34'), findsOneWidget);
+    });
+  });
+
+  testWidgets('detalhe do ativo mostra o desempenho com a metodologia', (
+    tester,
+  ) async {
+    await tester.runAsync(seed);
+    final app = AppHarness(tester, f.t);
+    await app.run(location: '/carteira/ativo/${f.petr}', () async {
+      final card = find.byKey(const Key('asset-performance'));
+      expect(card, findsOneWidget);
+      // −3.005 em 10/01 e +3.500 em 31/05/2024.
+      expect(
+        find.descendant(of: card, matching: find.text(r'+R$ 495,00')),
+        findsNWidgets(2),
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('+16,47% no período')),
+        findsNWidgets(2),
+      );
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.textContaining('de 10/01/2024 a 31/05/2024'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 

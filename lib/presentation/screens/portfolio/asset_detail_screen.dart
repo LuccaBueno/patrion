@@ -1,12 +1,15 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
+import '../../../domain/finance/returns.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
+import '../../format/performance_format.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
 import '../operations/operation_dialogs.dart';
@@ -82,6 +85,7 @@ class AssetDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 24),
             children: [
               _PositionsCard(snap: snap, asset: asset),
+              _PerformanceCard(snap: snap, asset: asset),
               if (snap.fixedIncome[asset.id] != null)
                 _TermsCard(terms: snap.fixedIncome[asset.id]!),
               _ValuationsCard(snap: snap, asset: asset),
@@ -171,13 +175,90 @@ class _PositionsCard extends StatelessWidget {
   }
 }
 
+/// Desempenho do ativo em todas as contas: resultado em dinheiro e TIR
+/// (MWR) líquida, sem proventos e bruta (SPEC §9).
+class _PerformanceCard extends StatelessWidget {
+  const _PerformanceCard({required this.snap, required this.asset});
+
+  final PortfolioSnapshot snap;
+  final Asset asset;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = snap.assetPerformance(asset.id);
+    if (p == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final c = asset.currency;
+    final reason = p.gap?.label;
+    String? money(Decimal? v) => v == null ? null : Fmt.signedMoney(v, c);
+    return Card(
+      key: const Key('asset-performance'),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('Desempenho', style: theme.textTheme.titleMedium),
+                const SizedBox(width: 4),
+                Tooltip(
+                  message: ReturnMethod.mwr.description,
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    semanticLabel: 'Sobre a métrica',
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              p.net == null
+                  ? 'Todas as contas. ${reason ?? ''}'
+                  : 'Todas as contas, ${p.net!.range}. TIR (MWR): '
+                        'ponderada pelo dinheiro, com o valor de mercado como '
+                        'fluxo final.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 32,
+              runSpacing: 8,
+              children: [
+                _Metric('Resultado total', money(p.totalResult), reason),
+                _Metric(
+                  'Resultado sem proventos',
+                  money(p.resultWithoutIncome),
+                  reason,
+                ),
+                _Metric('TIR líquida, com proventos', p.net?.text, reason),
+                _Metric('TIR sem proventos', p.netWithoutIncome?.text, reason),
+                _Metric('TIR bruta (antes de custos)', p.gross?.text, reason),
+                _Metric('Aplicado', Fmt.money(p.invested, c)),
+                _Metric('Vendas e resgates', Fmt.money(p.returned, c)),
+                _Metric('Custos e impostos', Fmt.money(p.costs, c)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _Metric extends StatelessWidget {
-  const _Metric(this.label, this.value);
+  const _Metric(this.label, this.value, [this.unavailableReason]);
 
   final String label;
 
   /// Nulo mostra "indisponível".
   final String? value;
+
+  /// Motivo mostrado no tooltip de "indisponível".
+  final String? unavailableReason;
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +274,7 @@ class _Metric extends StatelessWidget {
           ),
         ),
         if (value == null)
-          const UnavailableText()
+          UnavailableText(tooltip: unavailableReason)
         else
           SelectableText(value!, style: theme.textTheme.bodyLarge),
       ],

@@ -5,19 +5,21 @@ import 'package:go_router/go_router.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../core/config/app_info.dart';
+import '../../../domain/finance/returns.dart';
 import '../../../domain/portfolio/portfolio_summary.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
+import '../../format/performance_format.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
 
-/// Dashboard inicial da carteira real (SPEC §8, F3).
+/// Dashboard da carteira real (SPEC §8).
 ///
-/// Mostra só o que os dados sustentam hoje: totais, resultado, proventos,
-/// alocação, maiores posições e vencimentos. Rentabilidade por período,
-/// evolução e benchmarks dependem do motor financeiro (F4) e dos dados de
-/// mercado (F6).
+/// Mostra só o que os dados sustentam hoje: totais, resultado, TIR (MWR),
+/// proventos, alocação, maiores posições e vencimentos. TWR, rentabilidade
+/// por período, evolução e benchmarks dependem do histórico de cotações
+/// (F6).
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -106,6 +108,7 @@ class _DashboardState extends State<_Dashboard> {
         ? _currency!
         : currencies.first;
     final totals = summary.byCurrency[currency]!;
+    final performance = widget.snap.performance(currency);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
@@ -178,10 +181,36 @@ class _DashboardState extends State<_Dashboard> {
                 key: const Key('stat-unrealized'),
                 label: 'Resultado não realizado',
                 pnl: totals.unrealizedPnl,
-                value:
-                    '${Fmt.signedMoney(totals.unrealizedPnl, currency)}'
-                    '${totals.simpleReturn == null ? '' : ' (${Fmt.percent(totals.simpleReturn!)})'}',
-                note: 'Retorno simples sobre o custo, sem proventos',
+                value: Fmt.signedMoney(totals.unrealizedPnl, currency),
+                info: ReturnMethod.simple.description,
+                note: totals.simpleReturn == null
+                    ? 'Valor de mercado − custo, sem proventos'
+                    : '${Fmt.percent(totals.simpleReturn!)} sobre o custo '
+                          '(retorno simples, sem proventos)',
+              ),
+              _StatCard(
+                key: const Key('stat-total-result'),
+                label: 'Resultado total',
+                pnl: performance.totalResult,
+                value: performance.totalResult == null
+                    ? null
+                    : Fmt.signedMoney(performance.totalResult!, currency),
+                unavailableReason: performance.gap?.label,
+                note:
+                    'Realizado + não realizado + proventos, líquido de '
+                    'custos e impostos',
+              ),
+              _StatCard(
+                key: const Key('stat-mwr'),
+                label: 'Rentabilidade (TIR)',
+                pnl: performance.net?.annual,
+                value: performance.net?.text,
+                info: ReturnMethod.mwr.description,
+                unavailableReason: performance.gap?.label,
+                note: performance.net == null
+                    ? 'Ponderada pelo dinheiro (MWR), dos investimentos'
+                    : 'MWR dos investimentos ${performance.net!.range}, '
+                          'líquida de custos, com proventos; sem o caixa',
               ),
               _StatCard(
                 key: const Key('stat-realized'),
@@ -246,9 +275,10 @@ class _DashboardState extends State<_Dashboard> {
           ],
           const SizedBox(height: 16),
           Text(
-            'Rentabilidade por período, evolução patrimonial e comparação '
-            'com benchmarks aparecem quando o motor financeiro e as cotações '
-            'automáticas estiverem prontos.',
+            'O TWR, a rentabilidade por mês e por ano, a evolução '
+            'patrimonial e a comparação com benchmarks precisam do histórico '
+            'de cotações e aparecem quando as cotações automáticas estiverem '
+            'prontas.',
             style: muted,
           ),
         ],
@@ -315,20 +345,47 @@ class _StatCard extends StatelessWidget {
     required this.value,
     required this.note,
     this.pnl,
+    this.info,
+    this.unavailableReason,
     super.key,
   });
 
   final String label;
-  final String value;
+
+  /// Nulo mostra "indisponível" com [unavailableReason].
+  final String? value;
   final String note;
 
   /// Quando informado, o valor é mostrado como ganho ou perda.
   final Decimal? pnl;
 
+  /// Explicação da metodologia, num ícone com tooltip ao lado do rótulo.
+  final String? info;
+  final String? unavailableReason;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final style = theme.textTheme.titleLarge;
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final Widget valueWidget;
+    if (value == null) {
+      valueWidget = UnavailableText(tooltip: unavailableReason);
+    } else {
+      // O valor nunca quebra linha: se não couber, a fonte diminui.
+      valueWidget = FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: pnl == null
+            ? Text(value!, maxLines: 1, softWrap: false, style: style)
+            : PnlText(
+                value: pnl!,
+                text: value!,
+                style: style,
+                singleLine: true,
+              ),
+      );
+    }
     return SizedBox(
       width: 280,
       child: Card(
@@ -337,23 +394,40 @@ class _StatCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: theme.textTheme.labelLarge?.copyWith(color: muted),
+                    ),
+                  ),
+                  if (info != null) ...[
+                    const SizedBox(width: 4),
+                    Tooltip(
+                      message: info,
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: muted,
+                        semanticLabel: 'Sobre a métrica',
+                      ),
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: 8),
-              if (pnl == null)
-                SelectableText(value, style: style)
-              else
-                PnlText(value: pnl!, text: value, style: style),
+              SizedBox(
+                width: double.infinity,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: valueWidget,
+                ),
+              ),
               const SizedBox(height: 4),
               Text(
                 note,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
             ],
           ),

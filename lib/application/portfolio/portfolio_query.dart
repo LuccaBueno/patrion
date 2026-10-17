@@ -5,6 +5,7 @@ import 'package:clock/clock.dart';
 import '../../core/time/local_date.dart';
 import '../../data/repositories/portfolio_repositories.dart';
 import '../../domain/portfolio/entities.dart';
+import '../../domain/portfolio/performance.dart';
 import '../../domain/portfolio/portfolio_calculator.dart';
 import '../../domain/portfolio/portfolio_summary.dart';
 import '../../domain/portfolio/portfolio_valuation.dart';
@@ -87,6 +88,36 @@ class PortfolioSnapshot {
   /// Todas as posições (inclusive encerradas), com valor de mercado.
   final List<ValuedPosition> valued;
   final PortfolioSummary summary;
+
+  final _performanceByCurrency = <String, Performance>{};
+  final _performanceByAsset = <String, Performance>{};
+
+  /// Desempenho (MWR) da carteira na moeda [currency], calculado na
+  /// primeira consulta.
+  Performance performance(String currency) =>
+      _performanceByCurrency.putIfAbsent(
+        currency,
+        () => PerformanceCalculator.compute(
+          currency: currency,
+          operations: operations,
+          positions: valued,
+        ),
+      );
+
+  /// Desempenho de um ativo, somando todas as contas. Nulo se o ativo não
+  /// existe.
+  Performance? assetPerformance(String assetId) {
+    final asset = assets[assetId];
+    if (asset == null) return null;
+    return _performanceByAsset.putIfAbsent(
+      assetId,
+      () => PerformanceCalculator.forAsset(
+        asset: asset,
+        operations: operations,
+        positions: valued,
+      ),
+    );
+  }
 
   Institution? institutionOfAccount(String accountId) {
     final account = accounts[accountId];

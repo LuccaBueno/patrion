@@ -180,12 +180,16 @@ class PnlText extends StatelessWidget {
     required this.value,
     required this.text,
     this.style,
+    this.singleLine = false,
     super.key,
   });
 
   final Decimal value;
   final String text;
   final TextStyle? style;
+
+  /// Uma linha só, sem quebra (para caber num [FittedBox]).
+  final bool singleLine;
 
   @override
   Widget build(BuildContext context) {
@@ -207,9 +211,17 @@ class PnlText extends StatelessWidget {
           semanticLabel: label,
         ),
         const SizedBox(width: 2),
-        Flexible(
-          child: Text(text, style: base?.copyWith(color: color)),
-        ),
+        if (singleLine)
+          Text(
+            text,
+            maxLines: 1,
+            softWrap: false,
+            style: base?.copyWith(color: color),
+          )
+        else
+          Flexible(
+            child: Text(text, style: base?.copyWith(color: color)),
+          ),
       ],
     );
   }

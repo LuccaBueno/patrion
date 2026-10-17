@@ -1,5 +1,7 @@
+import '../../domain/finance/returns.dart';
 import '../../domain/portfolio/codes.dart';
 import '../../domain/portfolio/operation_type.dart';
+import '../../domain/portfolio/performance.dart';
 
 /// Rótulos em português das enumerações do domínio.
 extension InstitutionKindLabel on InstitutionKind {
@@ -137,5 +139,45 @@ extension OperationGroupLabel on OperationGroup {
     OperationGroup.event => 'Eventos',
     OperationGroup.cost => 'Custos',
     OperationGroup.adjustment => 'Ajuste',
+  };
+}
+
+extension ReturnMethodLabel on ReturnMethod {
+  String get label => switch (this) {
+    ReturnMethod.simple => 'Retorno simples',
+    ReturnMethod.accumulated => 'Retorno acumulado',
+    ReturnMethod.cagr => 'CAGR',
+    ReturnMethod.twr => 'TWR',
+    ReturnMethod.mwr => 'TIR (MWR)',
+  };
+
+  /// O que a métrica mede, para tooltips e notas (SPEC §9: informar a
+  /// metodologia ao comparar números).
+  String get description => switch (this) {
+    ReturnMethod.simple =>
+      'Variação sobre o custo, sem considerar quando o dinheiro entrou.',
+    ReturnMethod.accumulated =>
+      'Retornos de cada período multiplicados entre si.',
+    ReturnMethod.cagr =>
+      'Taxa anual composta equivalente ao retorno do período.',
+    ReturnMethod.twr =>
+      'Retorno ponderado pelo tempo: neutraliza aportes e retiradas e mede '
+          'o desempenho dos ativos.',
+    ReturnMethod.mwr =>
+      'Retorno ponderado pelo dinheiro (TIR, como o XIRR do Excel): pesa o '
+          'tamanho e a data de cada aporte e retirada, e mede o resultado do '
+          'investidor. Pode diferir bastante do TWR quando há aportes em '
+          'momentos de alta ou de queda.',
+  };
+}
+
+extension PerformanceGapLabel on PerformanceGap {
+  String get label => switch (this) {
+    PerformanceGap.unpricedPosition =>
+      'Há posições abertas sem preço ou saldo informado.',
+    PerformanceGap.noFlows => 'Não há aplicações registradas.',
+    PerformanceGap.noSolution =>
+      'Os fluxos não permitem calcular a taxa (por exemplo, tudo no mesmo '
+          'dia).',
   };
 }
