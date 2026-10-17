@@ -52,7 +52,7 @@ class ValuedPosition {
 
 /// Aplica preços e saldos informados às posições (SPEC §8, preço manual).
 ///
-/// Regras (`docs/FORMULAS.md` §1.4):
+/// Regras (`docs/FORMULAS.md` §2):
 /// - Se há saldo informado para a conta e o ativo, vale o mais recente até
 ///   [asOf].
 /// - Senão, vale quantidade × o preço unitário mais recente até [asOf].

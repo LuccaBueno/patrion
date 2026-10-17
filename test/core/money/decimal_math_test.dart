@@ -36,4 +36,37 @@ void main() {
     expect(DecimalMath.roundHalfUp(d('2885.404')), d('2885.4'));
     expect(DecimalMath.roundHalfUp(d('-0.125')), d('-0.13'));
   });
+
+  group('funções transcendentes (20 casas)', () {
+    test('ln e exp de valores conhecidos', () {
+      expect(DecimalMath.ln(d('2')), d('0.69314718055994530942'));
+      expect(DecimalMath.ln(d('10')), d('2.30258509299404568402'));
+      expect(DecimalMath.ln(Decimal.one), Decimal.zero);
+      expect(DecimalMath.exp(Decimal.one), d('2.71828182845904523536'));
+      expect(DecimalMath.exp(d('-1')), d('0.3678794411714423216'));
+      expect(DecimalMath.exp(Decimal.zero), Decimal.one);
+    });
+
+    test('exp desfaz ln', () {
+      for (final x in ['0.0001', '0.5', '1.1065', '37', '12345.678']) {
+        final back = DecimalMath.exp(DecimalMath.ln(d(x)));
+        expect((back - d(x)).abs() < d('1e-15') * d(x), isTrue, reason: x);
+      }
+    });
+
+    test('pow com expoente inteiro, negativo e fracionário', () {
+      expect(DecimalMath.pow(d('1.01'), d('12')), d('1.12682503013196972066'));
+      expect(DecimalMath.pow(d('2'), d('-2')), d('0.25'));
+      expect(DecimalMath.pow(d('-2'), d('3')), d('-8'));
+      expect(DecimalMath.pow(d('2'), d('0.5')), d('1.4142135623730950488'));
+      expect(DecimalMath.pow(d('5'), Decimal.zero), Decimal.one);
+    });
+
+    test('casos indefinidos lançam erro', () {
+      expect(() => DecimalMath.ln(Decimal.zero), throwsArgumentError);
+      expect(() => DecimalMath.ln(d('-1')), throwsArgumentError);
+      expect(() => DecimalMath.pow(d('-2'), d('0.5')), throwsArgumentError);
+      expect(() => DecimalMath.pow(Decimal.zero, d('-1')), throwsArgumentError);
+    });
+  });
 }

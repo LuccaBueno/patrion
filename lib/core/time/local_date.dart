@@ -24,6 +24,22 @@ final class LocalDate implements Comparable<LocalDate> {
 
   LocalDate addDays(int days) => LocalDate._(_utc.add(Duration(days: days)));
 
+  /// Soma [months] meses; o dia é limitado ao último dia do mês de destino
+  /// (31/01 + 1 mês = 28/02 ou 29/02).
+  LocalDate addMonths(int months) {
+    final total = year * 12 + (month - 1) + months;
+    final y = total ~/ 12;
+    final m = total % 12 + 1;
+    final lastDay = DateTime.utc(y, m + 1, 0).day;
+    return LocalDate(y, m, day <= lastDay ? day : lastDay);
+  }
+
+  /// Dia da semana: 1 = segunda-feira … 7 = domingo (como `DateTime`).
+  int get weekday => _utc.weekday;
+
+  bool get isWeekend =>
+      weekday == DateTime.saturday || weekday == DateTime.sunday;
+
   /// Dias corridos de [other] até esta data.
   int daysSince(LocalDate other) => _utc.difference(other._utc).inDays;
 

@@ -25,4 +25,18 @@ void main() {
     expect(LocalDate(2024, 1, 1), a);
     expect({a, LocalDate(2024, 1, 1)}, hasLength(1));
   });
+
+  test('soma de meses limita ao último dia do mês', () {
+    expect(LocalDate(2024, 1, 31).addMonths(1), LocalDate(2024, 2, 29));
+    expect(LocalDate(2023, 1, 31).addMonths(1), LocalDate(2023, 2, 28));
+    expect(LocalDate(2024, 11, 15).addMonths(3), LocalDate(2025, 2, 15));
+    expect(LocalDate(2024, 3, 31).addMonths(-1), LocalDate(2024, 2, 29));
+    expect(LocalDate(2024, 1, 10).addMonths(-13), LocalDate(2022, 12, 10));
+  });
+
+  test('dia da semana e fim de semana', () {
+    expect(LocalDate(2026, 10, 17).weekday, DateTime.saturday);
+    expect(LocalDate(2026, 10, 17).isWeekend, isTrue);
+    expect(LocalDate(2026, 10, 19).isWeekend, isFalse);
+  });
 }
