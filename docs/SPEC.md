@@ -49,6 +49,19 @@ Funções que precisam de internet avisam quando não há conexão.
 - O app não guarda chaves privadas de cripto.
 - A tela "Fontes de dados" explica o que é enviado a cada provedor.
 
+**Bloqueio do app (v1.x, fase F5B)**
+
+Proteção dos dados deste PC contra quem tem acesso ao computador ou a uma cópia da pasta de dados. Impacto na arquitetura e preparação em `DECISIONS.md` D-24.
+
+- **Banco criptografado com SQLCipher.** Sem a chave, o arquivo `patrion.db` não pode ser lido. Os backups (§11) também ficam criptografados.
+- **Senha na abertura.** O banco só é aberto depois da senha correta. A senha não é guardada: dela se deriva, com uma função de derivação lenta (KDF), a chave que libera a chave do banco.
+- **Desbloqueio opcional pelo Windows Hello** (rosto, digital ou PIN), configurável por PC. A senha continua valendo como alternativa.
+- **Bloqueio por inatividade.** Depois de um tempo configurável sem uso (padrão: 15 minutos; opção "nunca"), o app fecha o banco, limpa os dados da memória e volta à tela de desbloqueio. Também há um botão "Bloquear agora".
+- **Chave de recuperação.** Ao ativar o bloqueio, o app mostra uma chave de recuperação, uma única vez, para o usuário guardar fora do PC. Ela libera o banco se a senha for esquecida e permite definir uma nova. Sem senha e sem chave de recuperação, os dados não podem ser recuperados, e o app avisa isso claramente.
+- **Ativação opcional.** O bloqueio é ativado nas Configurações. A conversão do banco aberto para criptografado é feita com backup antes e pode ser desfeita (desativar volta ao banco aberto, com a senha).
+- **Por PC.** Cada computador tem a própria senha. O arquivo de save (§10) tem proteção própria (senha do arquivo), definida junto com esta fase.
+- **Testes obrigatórios:** banco ilegível sem a chave; senha errada recusada; troca de senha sem perda de dados; recuperação pela chave; bloqueio por inatividade fecha o banco; backup criptografado restaurável; migração de schema com o banco criptografado.
+
 ## 4. Fontes de dados
 
 Antes de implementar (Fase 1), pesquise a documentação atual de cada fonte. Não presuma que um serviço é gratuito, ilimitado, oficial ou em tempo real.
@@ -886,6 +899,20 @@ Pronto quando:
 - a versão v1.0.0 existe, com instalador testado em ambiente limpo.
 
 ### v1.x
+
+**F5B. Bloqueio do app**
+
+Entregas:
+
+- §3, "Bloqueio do app": SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação.
+- Proteção por senha do arquivo de save.
+
+Pronto quando:
+
+- os testes obrigatórios de §3 passam;
+- um banco já existente é convertido para criptografado e volta a abrir no app real, com Windows Hello e com a senha.
+
+A numeração "F5B" indica que a fase depende da F5 (backup e save). Ela é a primeira da v1.x e não renumera as seguintes.
 
 **F8. Classes, benchmarks, risco e renda passiva**
 

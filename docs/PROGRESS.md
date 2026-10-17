@@ -10,7 +10,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ### Fase 3 — Carteira real
 
-Critério de pronto atendido: os dados persistem depois de reiniciar o app. Isso foi verificado por teste automático (banco em arquivo fechado e reaberto) e no executável real (dados gravados, app fechado e reaberto, mesmos valores na tela).
+Critério de pronto atendido: os dados persistem depois de reiniciar o app. Isso foi verificado por teste automático (banco em arquivo fechado e reaberto) e no executável real (dados gravados, app fechado e reaberto, mesmos valores na tela). CI verde ([run 39064585361](https://github.com/LuccaBueno/patrion/actions/runs/39064585361), commit `f99c5f2`, 175 testes).
 
 **1. O que foi implementado**
 
@@ -72,6 +72,8 @@ Critério de pronto atendido: os dados persistem depois de reiniciar o app. Isso
 **5. Pendências**
 
 - F5: registrar backups em `dev_backups`, backup manual, restauração e procedimento de recuperação (SPEC §11).
+- F5: deixar backup, restauração e o manifesto do save preparados para o bloqueio do app (DECISIONS D-24, itens 1 a 6).
+- F5B (v1.x, registrada na SPEC §3 e §21): bloqueio do app com SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação. Não implementada.
 - Da F1: confirmar Finnhub e Twelve Data (F6); licenças do CKAN do Tesouro e do portal da CVM (F6); toolchain Android (futuro).
 
 **6. Como executar e o que testar manualmente**

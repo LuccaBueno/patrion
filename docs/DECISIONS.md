@@ -302,3 +302,53 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 
 - Decisão: campos numéricos aceitam `1.234,56`, `1234,56`, `0.5` e `1234`. Com vírgula, ela é a decimal e os pontos são de milhar; sem vírgula, um único ponto é decimal e mais de um são de milhar. Datas em `dd/mm/aaaa` (ou `AAAA-MM-DD`) e por calendário. A leitura e a formatação são feitas direto sobre o `Decimal` (`lib/presentation/format/formatters.dart`), sem passar por ponto flutuante.
 - Motivo: uso em pt-BR, com tolerância a quem digita com ponto decimal; regra 6.
+
+### 2026-10-17 — D-24: Bloqueio do app com SQLCipher — impacto e preparação (registrado, implementação na F5B)
+
+- Contexto: pedido do usuário para registrar na SPEC (§3, "Bloqueio do app"; fase F5B na v1.x) banco criptografado com SQLCipher, senha na abertura, Windows Hello opcional, bloqueio por inatividade e chave de recuperação. **Nada foi implementado.** Esta entrada avalia o impacto na arquitetura atual e lista o que as fases anteriores precisam deixar preparado.
+
+**Viabilidade com a stack atual (sem trocar a stack)**
+
+- O pacote `sqlite3` 3.x, já usado pelo Drift (D-14), distribui builds do SQLCipher Community Edition para Windows x64 (e Android, iOS, Linux e macOS). A troca é por configuração do build hook no `pubspec.yaml` (`hooks: user_defines: sqlite3: source: sqlcipher`), sem pacote novo e sem o `sqlcipher_flutter_libs` (fim de vida, D-02).
+- Licenças: SQLCipher CE é BSD-3; no Windows o build liga o OpenSSL (Apache-2.0). A distribuição (F7) precisa incluir os avisos de licença. Alternativa registrada: SQLite3MultipleCiphers (`source: sqlite3mc`, MIT), que tem modo compatível com o formato do SQLCipher. A escolha final entre os dois fica para o início da F5B.
+- O build do SQLCipher pode trazer um SQLite um pouco mais antigo que o padrão (aviso do próprio pacote). Conferir na F5B se `VACUUM INTO` e os recursos usados pelo Drift estão disponíveis.
+- Windows Hello: o plugin `local_auth` (com `local_auth_windows`) usa o `UserConsentVerifier`, que só confirma a presença do usuário e não protege uma chave. Opção mais forte a avaliar: guardar a chave do banco protegida pelo Windows (Credential Manager/DPAPI, já usado em D-11) e liberá-la só depois da confirmação do Hello. Isso protege contra quem copia a pasta de dados, mas não contra quem já está logado na mesma conta do Windows. A limitação deve aparecer nas Configurações.
+
+**Desenho proposto das chaves**
+
+- Uma chave aleatória do banco (256 bits) é passada ao SQLCipher como chave bruta (`PRAGMA key = "x'...'"`), sem a KDF interna.
+- Essa chave é guardada "embrulhada" (criptografada com AES-GCM) duas vezes: com uma chave derivada da senha (Argon2id ou PBKDF2-SHA256 com muitas iterações; escolher e registrar na F5B) e com uma chave derivada da chave de recuperação. Opcionalmente, uma terceira cópia fica protegida pelo Windows para o Hello.
+- As chaves embrulhadas, os sais e os parâmetros da KDF ficam num arquivo pequeno ao lado do banco (por exemplo, `patrion.keys.json`), fora do banco. Trocar a senha só reembrulha a chave: o banco não é recriptografado.
+- Novo pacote provável: um de criptografia (AES-GCM e KDF), avaliado e registrado aqui antes de usar, como pede o CLAUDE.md.
+
+**Impacto na arquitetura atual**
+
+| Ponto | Hoje | Com o bloqueio |
+|---|---|---|
+| Inicialização (`main.dart`) | Abre o banco antes do `runApp` e entrega o `AppDatabase` como provedor fixo | O app sobe primeiro numa tela de desbloqueio; o banco, o `SyncContext` e os provedores que dependem dele só existem depois da chave. Pede um estado "bloqueado/desbloqueado" na raiz e provedores do banco que possam ser descartados e recriados. |
+| Backup antes de migrar (`PreMigrationBackup`, D-19) | Abre o arquivo com `sqlite3` sem chave | Precisa receber a chave (ou uma função que abre a conexão) antes de ler o `user_version`. Por isso ele roda depois do desbloqueio. `VACUUM INTO` num banco SQLCipher gera cópia criptografada com a mesma chave; conferir na F5B. |
+| Backups e restauração (F5) | Ainda não implementados | Backups criptografados só servem com a chave: os metadados do backup precisam dizer se ele é criptografado e qual arquivo de chaves usar. Na restauração, o app valida a chave antes de substituir o banco. |
+| Arquivo de save (F5) | Formato ainda não implementado | O save leva a carteira inteira em JSONL dentro de um ZIP: com o banco protegido, um save aberto seria a maior brecha. O manifesto precisa prever, desde a F5, um campo de criptografia (`encryption: none` na v1.0), para a F5B adicionar a senha do arquivo sem quebrar o formato. |
+| Bloqueio por inatividade | — | Fechar o banco com streams do Drift ativos: desmontar as telas, cancelar as assinaturas (`PortfolioQuery.watch` já cancela sem esperar), fechar o `AppDatabase` e descartar os provedores. |
+| Testes | Banco em memória sem chave | Os testes atuais continuam sem criptografia. Os testes de criptografia usam arquivo temporário com o build SQLCipher. |
+| Conversão do banco existente | — | Uma vez: backup, `sqlcipher_export` do banco aberto para um novo criptografado, verificação e troca dos arquivos. A desativação faz o caminho inverso. |
+| Sincronização (HLC, UUID) | Independente do armazenamento | Sem impacto. Cada PC tem a própria chave; os dados viajam pelo save. |
+| Móvel (futuro) | — | SQLCipher existe para Android e iOS no mesmo pacote; Windows Hello vira biometria do sistema. Sem obstáculo. |
+| Logs (D-16) | Sem valores patrimoniais | Continuam assim; a senha, as chaves e a chave de recuperação nunca vão para o log. |
+
+**Preparação exigida até a F5B (vale para as próximas fases)**
+
+1. Toda abertura do banco passa por um único ponto: `AppDatabase.open` e o `PreMigrationBackup`. Nenhum código novo abre `patrion.db` por conta própria (relatórios, F6 e F5 incluídos).
+2. A F5 desenha backup, restauração e `dev_backups` sabendo que o arquivo pode ser criptografado: metadados com o campo de criptografia e validação da chave na restauração.
+3. A F5 reserva no `manifest.json` do save um campo de criptografia (`none` na v1.0).
+4. Nenhum dado da carteira é gravado fora do banco sem pedido explícito do usuário: o cache (F6) guarda só dados de mercado; arquivos temporários de importação e exportação são apagados ao terminar.
+5. Código que roda em segundo plano (atualização de cotações na F6, alertas na F13) depende do provedor do banco e para quando ele deixa de existir, em vez de guardar uma referência ao `AppDatabase` aberto na inicialização.
+6. O `main.dart` continua só compondo: a ordem "pastas → logs → backup antes de migrar → banco → identidade" deve poder ganhar o passo "desbloqueio" antes do backup sem mexer nas telas.
+
+- Alternativas consideradas: criptografar só o arquivo de save e os backups, com o banco aberto (protege menos: uma cópia da pasta de dados expõe tudo); usar o BitLocker do Windows (protege o disco, não a pasta copiada nem o PC logado; continua recomendado como complemento).
+- Motivo: registrar o impacto agora evita que as fases 4 a 7 criem obstáculos para a F5B (CLAUDE.md, "não crie obstáculos").
+
+### 2026-10-17 — D-25: Versões das actions do CI
+
+- Decisão: `actions/checkout@v7` (v7.0.1, de 20/07/2026, roda em Node.js 24), no lugar da v4, que usava o Node.js 20 descontinuado e gerava aviso no CI. `subosito/flutter-action@v2` continua (v2.23.0 é composta e usa `actions/cache@v5`, que já roda em Node.js 24).
+- Motivo: aviso de descontinuação do Node.js 20 nos runners do GitHub.
