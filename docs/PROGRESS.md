@@ -10,7 +10,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ### Fase 4 — Motor financeiro
 
-Critério de pronto: os casos de `CASOS_DE_TESTE.md` que pertencem ao motor financeiro (§1 a §7) passam. O §8 (backtest) é da F9 e o §9 (sincronização) é da F5, conforme a SPEC §21; eles ficam para essas fases. CI: ver o fim do item 3.
+Critério de pronto: os casos de `CASOS_DE_TESTE.md` que pertencem ao motor financeiro (§1 a §7) passam. O §8 (backtest) é da F9 e o §9 (sincronização) é da F5, conforme a SPEC §21; eles ficam para essas fases. CI verde ([run 39068071876](https://github.com/LuccaBueno/patrion/actions/runs/39068071876), commit `88cc5f0`, 232 testes).
 
 **1. O que foi implementado**
 
