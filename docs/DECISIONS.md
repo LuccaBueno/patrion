@@ -44,7 +44,7 @@ Versões consultadas no pub.dev em 17/10/2026. No `pubspec.yaml` elas entram com
 | Pacote | Versão | Licença | Uso |
 |---|---|---|---|
 | `drift` | 2.35.2 | MIT | ORM e migrações SQLite |
-| `drift_flutter` | 0.3.1 | MIT | Abertura do banco no Flutter |
+| `drift_flutter` | 0.3.1 | MIT | Abertura do banco no Flutter (não adotado, ver D-14) |
 | `sqlite3` | 3.7.1 | MIT | SQLite nativo, embutido pelos build hooks do Dart |
 | `flutter_riverpod` | 3.4.3 | MIT | Estado e injeção de dependências |
 | `dio` | 5.11.1 | MIT | HTTP (adaptadores de dados de mercado) |
@@ -191,3 +191,46 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - Decisão: versão vetorial simplificada em `assets/branding/patrion-simbolo.svg`: três cristais em verde chapado (#1F6B4F e #2A8A64) com facetas douradas (#C9A86A) sobre fundo #0E1A16 com cantos arredondados. Conferida em 256, 48, 32 e 16 px. Ela gera o `.ico` (16 a 256 px) na F2/F7.
 - Alternativas: o usuário fornece um símbolo próprio.
 - Motivo: SPEC §16 pede uma versão legível em 16 px.
+
+### 2026-10-17 — D-13: Paleta, temas e navegação (Fase 2)
+
+- Decisão:
+  - Paleta da marca (SPEC §16) sem ajustes: fundo `#0E1A16`, esmeralda `#1F6B4F` (e `#2A8A64` nas faces claras do símbolo), dourado `#C9A86A`, marfim `#F2E9D8`.
+  - Tema escuro: fundo `#0E1A16`, texto marfim, primária `#7FD3AE` (esmeralda clara, para ter contraste sobre o fundo escuro) e superfícies em tons de verde-escuro. Tema claro: gerado a partir da esmeralda (`ColorScheme.fromSeed`), com primária `#1F6B4F`.
+  - O dourado é só de marca (nome, símbolo). No tema claro ele vira `#8A6D2F`, porque o `#C9A86A` não tem contraste suficiente sobre fundo claro.
+  - Cores de dado, próprias de cada tema (`SemanticColors`): ganho `#1B7F4B` / `#6FD39B`, perda `#B3261E` / `#FF8A80`, hipotético `#6A4FB3` / `#B9A6F2` (identidade das telas de simulação). A cor nunca é o único indicador: ganho e perda também levam sinal e ícone, e telas hipotéticas levam o rótulo.
+  - Tema "Seguir o Windows" por padrão, com opção Claro/Escuro. É configuração do dispositivo (`dev_settings`), não vai no save.
+  - Navegação lateral (`NavigationRail`) com `go_router` (`ShellRoute`). Rótulos ao lado dos ícones a partir de 1100 px de largura. Janela com tamanho mínimo de 960 × 640.
+- Alternativas: `NavigationDrawer` fixo (ocupa mais espaço em telas menores).
+- Motivo: SPEC §16 (desktop, navegação lateral, tema claro e escuro, cor não é o único indicador).
+
+### 2026-10-17 — D-14: Abertura do banco sem `drift_flutter`
+
+- Decisão: o banco é aberto com `NativeDatabase.createInBackground` (de `package:drift/native.dart`) no caminho calculado pelo próprio app (D-05). O `drift_flutter` (D-02) não é usado.
+- Alternativas: `drift_flutter`, que abre o banco em uma pasta do `path_provider`.
+- Motivo: o `drift_flutter` 0.3.1 ainda puxa `sqlite3_flutter_libs` e `sqlcipher_flutter_libs`, ambos marcados como fim de vida (`+eol`), que a D-02 já tinha descartado. Como o caminho do banco vem de D-05 (inclusive `--data-dir`), o `drift_flutter` não traria vantagem. O SQLite nativo continua vindo do `sqlite3` 3.x (build hooks).
+- Observação: o `drift_dev` 2.35.1 limita o `build_runner` a 2.16.2 (D-02 citava 2.17.1). A versão sobe quando o `drift_dev` permitir.
+
+### 2026-10-17 — D-15: Código gerado versionado
+
+- Decisão: os arquivos gerados (`*.g.dart`), os snapshots do schema (`drift_schemas/`) e os auxiliares gerados dos testes de migração (`test/data/db/migrations/*/generated/`) **vão para o repositório**. O CI roda `dart run build_runner build` e falha se o resultado for diferente do versionado.
+- Alternativas: gerar só no CI e no PC, sem versionar.
+- Motivo: o projeto compila logo depois do `git clone`, as diferenças de schema aparecem na revisão do commit, e o snapshot é obrigatório para testar migrações (`BANCO.md` §9).
+
+### 2026-10-17 — D-16: Logs
+
+- Decisão:
+  - Pacote `logging`, com gravador rotativo próprio em `%APPDATA%\Patrion\logs\` (ou `<--data-dir>\logs\`).
+  - Arquivo atual `patrion.log`; ao passar de 1 MB, ele vira `patrion.1.log` e assim por diante, mantendo 5 arquivos antigos (no máximo ~6 MB).
+  - Formato: `<instante UTC> <NÍVEL> [origem] mensagem | erro de <tipo>: ...`, com a pilha quando houver. Nível padrão: INFO.
+  - Tipos de erro (SPEC §18): rede, dados, cálculo e interno (`core/errors/app_error.dart`).
+  - Os logs são técnicos: nenhum valor patrimonial, quantidade, preço da carteira ou chave de API vai para o log (regra 7). Isso é responsabilidade de quem registra; a revisão de código confere.
+- Alternativas: pacote `logger` (já descartado em D-02); gravar no banco (cresce sem controle e viraria dado do usuário).
+- Motivo: SPEC §18 e regra 7.
+
+### 2026-10-17 — D-17: Geração do ícone
+
+- Decisão: o `.ico` (16, 20, 24, 32, 40, 48, 64, 128 e 256 px) e o PNG do símbolo usado no app (`assets/branding/patrion-simbolo-256.png`) são gerados por um script Dart próprio, `tool/gen_app_icon.dart`, a partir de `assets/branding/patrion-simbolo.svg`. O script rasteriza com superamostragem (16 × 16 amostras por pixel até 64 px; 8 × 8 acima) e grava DIB de 32 bits até 128 px e PNG em 256 px, como o Windows espera.
+- O script só aceita os elementos usados no símbolo (`rect` com cantos arredondados e `polygon`, cores chapadas) e para com erro se o SVG mudar para algo que ele não desenha.
+- Alternativas: Inkscape ou ImageMagick (não instalados e sem fixação de versão no CI); pacote `flutter_launcher_icons` (não gera `.ico` a partir de SVG).
+- Motivo: reprodutível, sem ferramenta externa, e o resultado foi conferido carregando o `.ico` pelo próprio Windows (System.Drawing) em 16, 24, 32 e 48 px.

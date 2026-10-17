@@ -1,6 +1,8 @@
 # Modelo de dados
 
-**Situação:** aprovado na Fase 1 (17/10/2026). A implementação começa na F2 (infraestrutura) e na F3 (tabelas da carteira). Este documento deve sempre refletir o schema real.
+**Situação:** aprovado na Fase 1 (17/10/2026). Este documento deve sempre refletir o schema real.
+
+**Implementado (schema versão 1, Fase 2, 17/10/2026):** `dev_identity`, `dev_settings` e `shared_settings`. As demais tabelas entram nas fases seguintes, cada uma com nova versão de schema e migração (§9). Todas as outras tabelas descritas abaixo ainda são planejadas.
 
 ## 1. Visão geral
 

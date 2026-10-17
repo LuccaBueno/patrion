@@ -102,7 +102,9 @@ Atualize esta lista quando os comandos mudarem.
 
 ```powershell
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
+dart run drift_dev make-migrations   # depois de mudar o schema
+dart run tool/gen_app_icon.dart     # depois de mudar o símbolo SVG
 dart format .
 flutter analyze
 flutter test
