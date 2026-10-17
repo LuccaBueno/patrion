@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Proposta de símbolo simplificado (Fase 1): cores chapadas, sem textura. -->
+  <rect width="256" height="256" rx="48" fill="#0E1A16"/>
+  <!-- Cristal da esquerda -->
+  <polygon points="28,212 82,120 112,212" fill="#1F6B4F"/>
+  <polygon points="82,120 112,212 98,212 70,140" fill="#C9A86A"/>
+  <!-- Cristal central -->
+  <polygon points="94,212 94,84 140,36 160,60 160,212" fill="#2A8A64"/>
+  <polygon points="94,84 140,36 160,60 116,100" fill="#C9A86A"/>
+  <polygon points="116,100 160,60 160,212 116,212" fill="#1F6B4F"/>
+  <!-- Cristal da direita -->
+  <polygon points="142,212 188,108 232,212" fill="#2A8A64"/>
+  <polygon points="188,108 232,212 214,212 182,130" fill="#C9A86A"/>
+  <polygon points="166,212 188,156 214,212" fill="#1F6B4F"/>
+</svg>
