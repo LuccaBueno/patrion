@@ -1,0 +1,58 @@
+# Verificação em todo push e PR (SPEC §19): formatação, análise, testes e
+# build Windows. A versão do Flutter é a de DECISIONS D-01.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Formatação, análise, testes e build
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Instalar o Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+
+      - name: Versões
+        run: flutter --version
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Código gerado está atualizado
+        shell: pwsh
+        run: |
+          dart run build_runner build
+          git diff --exit-code -- lib test
+
+      - name: Formatação
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Análise
+        run: flutter analyze
+
+      - name: Testes
+        run: flutter test --timeout 2m
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
