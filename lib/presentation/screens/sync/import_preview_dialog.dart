@@ -67,8 +67,18 @@ class _ImportPreviewDialogState extends State<ImportPreviewDialog> {
               'Nenhuma alteração: este computador já tem tudo o que está no '
               'arquivo.',
         )
-      else
-        _ChangesTable(plan: plan),
+      else ...[
+        if (plan.visibleChanges > 0) _ChangesTable(plan: plan),
+        if (plan.alreadyDeleted > 0)
+          _Note(
+            icon: Icons.info_outline,
+            text:
+                'Também vêm ${plan.alreadyDeleted} '
+                '${plan.alreadyDeleted == 1 ? 'registro que já estava excluído' : 'registros que já estavam excluídos'} '
+                'no outro computador (por exemplo, cadastros unificados lá). '
+                'Nada deste computador é excluído por eles.',
+          ),
+      ],
       if (plan.conflicts.isNotEmpty) ...[
         const SizedBox(height: 24),
         Text(
@@ -217,14 +227,15 @@ class _ChangesTable extends StatelessWidget {
       ],
       rows: [
         for (final MapEntry(key: table, value: c) in plan.changes.entries)
-          DataRow(
-            cells: [
-              DataCell(Text(SyncLabels.table(table))),
-              DataCell(Text('${c.inserted}')),
-              DataCell(Text('${c.updated}')),
-              DataCell(Text('${c.deleted}')),
-            ],
-          ),
+          if (c.visible > 0)
+            DataRow(
+              cells: [
+                DataCell(Text(SyncLabels.table(table))),
+                DataCell(Text('${c.inserted}')),
+                DataCell(Text('${c.updated}')),
+                DataCell(Text('${c.deleted}')),
+              ],
+            ),
       ],
     );
   }

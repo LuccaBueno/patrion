@@ -123,9 +123,15 @@ class SyncTablesGateway {
         'VALUES (${List.filled(columns.length, '?').join(', ')}) '
         'ON CONFLICT(id) DO UPDATE SET $updates',
         variables: [for (final c in columns) Variable<String>(row[c])],
+        // Avisa as consultas observadas (telas e `PortfolioQuery`): os dados
+        // derivados são recalculados depois da importação (SPEC §10.3).
+        updates: {_tableNamed(schema.name)},
       );
     }
   }
+
+  TableInfo<Table, dynamic> _tableNamed(String name) =>
+      _db.allTables.firstWhere((t) => t.actualTableName == name);
 
   static SyncRow _toSyncRow(QueryRow row, SyncTableSchema schema) {
     final result = <String, String?>{};

@@ -106,10 +106,10 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
       SnackBar(
         showCloseIcon: true,
         content: Text(
-          plan.isEmpty
-              ? 'Importação concluída: nenhuma alteração.'
-              : 'Importação concluída: ${plan.totalChanges} '
-                    '${plan.totalChanges == 1 ? 'alteração' : 'alterações'}.',
+          plan.visibleChanges == 0
+              ? 'Importação concluída: nenhuma alteração visível.'
+              : 'Importação concluída: ${plan.visibleChanges} '
+                    '${plan.visibleChanges == 1 ? 'alteração' : 'alterações'}.',
         ),
       ),
     );

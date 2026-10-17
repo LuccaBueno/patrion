@@ -70,7 +70,10 @@ class PossibleDuplicateGroup {
   final List<SyncRow> operations;
 }
 
-enum ChangeKind { inserted, updated, deleted }
+/// Efeito de uma escrita neste PC. [alreadyDeleted]: registro que este PC não
+/// tinha e que chega já excluído (ex.: cadastro absorvido numa unificação
+/// feita no outro PC); não aparece em nenhuma tela.
+enum ChangeKind { inserted, updated, deleted, alreadyDeleted }
 
 /// Uma escrita da mesclagem.
 ///
@@ -101,13 +104,16 @@ class TableChanges {
   int inserted = 0;
   int updated = 0;
   int deleted = 0;
+  int alreadyDeleted = 0;
 
-  int get total => inserted + updated + deleted;
+  /// Alterações visíveis (sem os registros que já chegam excluídos).
+  int get visible => inserted + updated + deleted;
 
   Map<String, int> toJson() => {
     'inserted': inserted,
     'updated': updated,
     'deleted': deleted,
+    'alreadyDeleted': alreadyDeleted,
   };
 }
 
@@ -134,6 +140,13 @@ class MergePlan {
   final String? maxIncomingHlc;
 
   int get totalChanges => writes.length;
+
+  /// Alterações que aparecem nas telas deste PC.
+  int get visibleChanges => changes.values.fold(0, (sum, c) => sum + c.visible);
+
+  /// Registros que chegam já excluídos (não aparecem nas telas).
+  int get alreadyDeleted =>
+      changes.values.fold(0, (sum, c) => sum + c.alreadyDeleted);
   bool get isEmpty => writes.isEmpty;
 }
 
@@ -485,7 +498,7 @@ class _Run {
     final before = original[table]![id];
     final after = rows[table]![id]!;
     if (before == null) {
-      return after.isDeleted ? ChangeKind.deleted : ChangeKind.inserted;
+      return after.isDeleted ? ChangeKind.alreadyDeleted : ChangeKind.inserted;
     }
     if (!before.isDeleted && after.isDeleted) return ChangeKind.deleted;
     return ChangeKind.updated;
@@ -503,6 +516,8 @@ class _Run {
             c.updated++;
           case ChangeKind.deleted:
             c.deleted++;
+          case ChangeKind.alreadyDeleted:
+            c.alreadyDeleted++;
         }
       }
     }

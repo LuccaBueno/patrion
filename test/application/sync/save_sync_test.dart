@@ -82,6 +82,26 @@ void main() {
     expect(await b.dump(), await a.dump());
   });
 
+  test(
+    'a carteira observada (telas) é recalculada depois da importação',
+    () async {
+      await a.buy(account, asset, '10');
+      final save = await a.export();
+      final snapshots = <int>[];
+      final sub = b.query.watch().listen(
+        (s) => snapshots.add(s.state.positions.length),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(snapshots.last, 0);
+
+      await b.import(save);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(snapshots.last, 1);
+      await sub.cancel();
+    },
+  );
+
   test('S2: importar o mesmo arquivo de novo não muda nada', () async {
     await a.buy(account, asset, '10');
     final save = await a.export();

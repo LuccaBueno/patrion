@@ -212,6 +212,25 @@ void main() {
     expect(o1.row['asset_id'], 'a1');
   });
 
+  test('registro que chega já excluído não conta como exclusão deste PC', () {
+    final p = plan(
+      {
+        'assets': [asset('a1', 100)],
+      },
+      {
+        'assets': [
+          asset('a1', 200, deleted: true),
+          asset('a9', 150, symbol: 'X', deleted: true),
+        ],
+      },
+    );
+    expect(p.changes['assets']!.deleted, 1); // a1: estava vivo aqui
+    expect(p.changes['assets']!.alreadyDeleted, 1); // a9: nunca existiu aqui
+    expect(p.visibleChanges, 1);
+    expect(p.alreadyDeleted, 1);
+    expect(p.totalChanges, 2);
+  });
+
   test('referência a um registro inexistente recusa o save', () {
     expect(
       () => plan({}, {
