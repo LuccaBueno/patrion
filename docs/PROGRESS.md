@@ -10,7 +10,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ### Fase 5 — Backup e save
 
-Critério de pronto: os testes de SPEC §10.7 passam (com os casos S1 a S10 de `CASOS_DE_TESTE.md` §9) e a sincronização manual entre duas pastas de dados funciona. As duas coisas foram verificadas: pelos testes automáticos e no executável real, com duas pastas de dados, clicando na interface e nos diálogos do Windows (detalhes no item 3). CI: ver o fim desta seção.
+Critério de pronto: os testes de SPEC §10.7 passam (com os casos S1 a S10 de `CASOS_DE_TESTE.md` §9) e a sincronização manual entre duas pastas de dados funciona. As duas coisas foram verificadas: pelos testes automáticos e no executável real, com duas pastas de dados, clicando na interface e nos diálogos do Windows (detalhes no item 3). CI verde ([run 39073060690](https://github.com/LuccaBueno/patrion/actions/runs/39073060690), commit `67c5b2f`, 285 testes).
 
 **1. O que foi implementado**
 
