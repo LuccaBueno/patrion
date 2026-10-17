@@ -123,6 +123,7 @@ Entram só quando a fase correspondente começar (registradas agora para aprova�
   ```
 
 - O cache pode ser apagado a qualquer momento sem perda de dados: o que importa já foi gravado no banco.
+- **Complemento (pedido do usuário em 17/10/2026):** os arquivos brutos do COTAHIST são **temporários**. Depois que os tickers de interesse forem extraídos e gravados no banco (`mkt_prices`), o arquivo baixado (ZIP e TXT) é **apagado do cache**. Se o mesmo ano for necessário de novo (outro ticker, por exemplo), ele é baixado outra vez. Implementação na F6.
 - O COTAHIST é baixado **sob demanda**, só os anos necessários (para os ativos e o período pedidos), a partir de um **ano inicial configurável** nas configurações do dispositivo. Depois de processado, o app guarda só os tickers de interesse no banco.
 - O caminho dos dados pode ser trocado pelo argumento `--data-dir <pasta>` (e o do cache por `--cache-dir <pasta>`). Isso é necessário para testar a sincronização entre duas pastas de dados no mesmo PC (critério da F5) e para a versão portátil, se o usuário quiser.
 - A versão portátil (ZIP) usa a mesma pasta por padrão, documentada em `DISTRIBUICAO.md`.
