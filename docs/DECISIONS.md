@@ -192,7 +192,7 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - Alternativas: o usuário fornece um símbolo próprio.
 - Motivo: SPEC §16 pede uma versão legível em 16 px.
 
-### 2026-10-17 — D-13: Paleta, temas e navegação (Fase 2)
+### 2026-10-17 — D-13: Paleta, temas e navegação (Fase 2) — paleta e temas substituídos por D-18; navegação continua valendo
 
 - Decisão:
   - Paleta da marca (SPEC §16) sem ajustes: fundo `#0E1A16`, esmeralda `#1F6B4F` (e `#2A8A64` nas faces claras do símbolo), dourado `#C9A86A`, marfim `#F2E9D8`.
@@ -234,3 +234,26 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - O script só aceita os elementos usados no símbolo (`rect` com cantos arredondados e `polygon`, cores chapadas) e para com erro se o SVG mudar para algo que ele não desenha.
 - Alternativas: Inkscape ou ImageMagick (não instalados e sem fixação de versão no CI); pacote `flutter_launcher_icons` (não gera `.ico` a partir de SVG).
 - Motivo: reprodutível, sem ferramenta externa, e o resultado foi conferido carregando o `.ico` pelo próprio Windows (System.Drawing) em 16, 24, 32 e 48 px.
+
+### 2026-10-17 — D-18: Temas neutros, verde só em destaques (substitui a paleta e os temas da D-13)
+
+- Contexto: o usuário reprovou o tema escuro da D-13, todo esverdeado (fundo e superfícies verdes, geradas por `ColorScheme.fromSeed`).
+- Decisão (regras também na SPEC §16):
+  - **Fundo e superfícies neutros**, sem tom verde. O esquema de cores é montado à mão (sem `fromSeed`) e sem tinta de elevação (`surfaceTint` transparente), que também tingiria as superfícies.
+
+    | Papel | Escuro | Claro |
+    |---|---|---|
+    | Fundo da janela | `#0F1113` | `#F4F5F6` |
+    | Superfície (cartões, menu lateral) | `#16191C` | `#FFFFFF` |
+    | Superfície elevada (campos, menus, diálogos) | `#1D2125` | `#ECEEF0` |
+    | Bordas e divisórias | `#2A2F34` | `#D9DDE1` |
+    | Texto | `#ECEDEE` | `#16191C` |
+    | Texto secundário | `#9BA1A6` | `#565C61` |
+
+  - **Verde-esmeralda só em destaques** (item selecionado do menu, botão principal, foco, toggles, links): primária `#3DAA80` com texto `#0F1113` no escuro (o `#1F6B4F` não tem contraste sobre o fundo quase preto) e `#1F6B4F` com texto branco no claro. Indicador de seleção: `#1F6B4F` no escuro e `#D4EBE1` no claro. A cor terciária é neutra, para o dourado não aparecer em componentes automáticos.
+  - **Dourado com muita moderação:** símbolo, nome PATRION e no máximo um destaque por tela; nunca em texto comum. `#C9A86A` no escuro e `#7E6329` no claro (o `#8A6D2F` da D-13 ficava com contraste 4,46 sobre o fundo claro).
+  - **Ganho e perda com cores próprias**, diferentes do verde da marca: ganho `#4ADE6F` / `#167A33` (verde mais amarelado e saturado que o esmeralda), perda `#FF7B72` / `#B3261E`. Hipotético continua `#B9A6F2` / `#6A4FB3`. A cor nunca é o único indicador (sinal, ícone, rótulo).
+  - Ícones e textos informativos comuns usam o cinza secundário, não o verde.
+- Verificação automática (`test/presentation/theme/app_theme_test.dart`): fundos, superfícies, bordas e textos sem matiz verde; contraste WCAG AA (texto ≥ 7:1, texto secundário, cores de dado e dourado ≥ 4,5:1, texto sobre primária ≥ 4,5:1); dourado fora das cores automáticas; ganho distinguível da primária.
+- Alternativas: manter o `fromSeed` e só sobrescrever o fundo (os demais tons gerados continuariam esverdeados).
+- Motivo: pedido do usuário; interface mais sóbria, em que o verde e o dourado chamam atenção justamente por aparecerem pouco.

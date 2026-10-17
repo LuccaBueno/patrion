@@ -48,7 +48,7 @@ Outra verificação automática: fora de `presentation/`, nenhum arquivo usa `do
 
 ## Interface
 
-- `presentation/app.dart`: `MaterialApp.router`, pt-BR, temas claro e escuro (D-13).
+- `presentation/app.dart`: `MaterialApp.router`, pt-BR, temas claro e escuro (D-18).
 - `presentation/router/app_router.dart`: rotas e itens da navegação lateral. Uma tela nova entra na lista `navDestinations` e ganha uma rota.
 - `presentation/providers.dart`: provedores do Riverpod. Banco, contexto de sincronização e ambiente são sobrescritos em `main.dart` (e nos testes, com banco em memória).
 - Telas atuais: Início (placeholder até a F3) e Configurações (tema, pastas, identificador do dispositivo, versão).

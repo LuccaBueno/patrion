@@ -110,7 +110,12 @@ class _InfoRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 220,
-            child: Text(label, style: theme.textTheme.bodyMedium),
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
           Expanded(
             child: SelectableText(value, style: theme.textTheme.bodyMedium),

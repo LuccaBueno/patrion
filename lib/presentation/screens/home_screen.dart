@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: theme.colorScheme.primary,
+                      color: theme.colorScheme.onSurfaceVariant,
                       semanticLabel: 'Informação',
                     ),
                     const SizedBox(width: 16),
@@ -53,7 +53,9 @@ class HomeScreen extends StatelessWidget {
                             'O cadastro de instituições, contas, ativos e '
                             'operações e o dashboard da carteira chegam na '
                             'próxima etapa do desenvolvimento.',
-                            style: theme.textTheme.bodyMedium,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),

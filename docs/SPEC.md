@@ -621,12 +621,12 @@ Cada indicador traz fórmula, unidade, período, fonte e limitações.
 
 - Nome: Patrion. Subtítulo: "Investimentos e Patrimônio".
 - Esboço da logo em `assets/branding/patrion-logo-esboco.png`: cristais facetados em verde-esmeralda com arestas douradas, sobre fundo verde quase preto, e nome em caixa alta com o "A" sem a barra.
-- Paleta de partida (ajustar e registrar em `DECISIONS.md`):
-  - fundo escuro: verde quase preto (~#0E1A16);
-  - primária: verde-esmeralda (~#1F6B4F);
-  - destaque: dourado (~#C9A86A);
-  - texto em fundo escuro: marfim (~#F2E9D8).
-- O dourado é cor de marca, não de dado: ganho e perda usam cores próprias, com bom contraste nos dois temas.
+- Cores da marca: verde-esmeralda (~#1F6B4F) e dourado (~#C9A86A). O fundo verde quase preto (~#0E1A16) fica só no símbolo e na logo, não na interface.
+- Regras de cor da interface (valores exatos em `DECISIONS.md` D-18):
+  - **Fundo e superfícies neutros**, sem tom verde. Tema escuro: quase preto/grafite (fundo #0F1113, superfícies #16191C e #1D2125, bordas sutis #2A2F34, texto #ECEDEE e secundário #9BA1A6). Tema claro: branco e cinza-claro neutros, com texto grafite.
+  - **Verde-esmeralda só em destaques:** item selecionado do menu (indicador), botão principal, foco, toggles e links.
+  - **Dourado com muita moderação:** símbolo, nome PATRION e, no máximo, um destaque por tela. Nunca em texto comum.
+  - O dourado é cor de marca, não de dado: **ganho e perda usam cores próprias**, diferentes do verde da marca, com bom contraste nos dois temas.
 - O esboço é uma imagem com textura e brilho, boa para tela de abertura e README. Para ícone do app (.ico de 16 a 256 px), favicon e instalador, crie uma versão vetorial simplificada só do símbolo (cores chapadas, sem textura), legível em 16 px. Na Fase 1, proponha essa versão ou peça uma ao usuário.
 
 **Geral**
