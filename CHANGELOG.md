@@ -6,12 +6,22 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ### Alterado
 
+- Dashboard: os valores dos cards ficam sempre numa linha (a fonte diminui se não couber); o percentual do resultado não realizado passou para a nota do card.
 - CI: `actions/checkout` atualizado para a v7 (Node.js 24), eliminando o aviso de descontinuação do Node.js 20.
 - Especificação: bloqueio do app (banco criptografado com SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação) planejado para a fase F5B da v1.x, com o impacto na arquitetura registrado em DECISIONS D-24. Ainda não implementado.
 - Temas claro e escuro refeitos: fundo e superfícies neutros (grafite no escuro, branco e cinza-claro no claro), verde-esmeralda só em destaques e dourado só no símbolo e no nome (DECISIONS D-18).
 
 ### Adicionado
 
+- Fase 4 (motor financeiro):
+  - Juros simples e compostos, equivalência de taxas, taxa nominal e efetiva, bases de 252 dias úteis, /365, /360 e 30/360.
+  - Calendário de dias úteis com os feriados nacionais (Carnaval, Sexta-feira Santa e Corpus Christi calculados pela Páscoa).
+  - CDI e Selic acumulados na base 252, com percentual do indexador e taxa adicional.
+  - XIRR com datas irregulares, TWR, retorno simples, acumulado, real e anualizado (CAGR), retornos por dia, mês e ano, e separação do efeito cambial.
+  - Potências, logaritmos e exponenciais calculados com decimais exatos, sem ponto flutuante.
+  - Dashboard: cards "Resultado total" e "Rentabilidade (TIR)", com o período e a explicação da metodologia.
+  - Detalhe do ativo: card "Desempenho" com resultado e TIR com e sem proventos e antes de custos.
+  - `docs/FORMULAS.md` com as fórmulas do motor financeiro.
 - Fase 3 (carteira real):
   - Cadastro de instituições, contas (com arquivamento) e ativos de todas as classes, incluindo as características de títulos de renda fixa.
   - Todos os tipos de operação da SPEC §7: compra, venda, aporte, resgate, depósito, retirada, transferência entre contas (dinheiro ou custódia), dividendos, JCP, rendimentos de FII, juros, amortização, bonificação, desdobramento, grupamento, vencimento, taxas, impostos, retenções, reinvestimento e ajuste manual com justificativa.

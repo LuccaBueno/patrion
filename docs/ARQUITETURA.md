@@ -1,6 +1,6 @@
 # Arquitetura
 
-Estado em 17/10/2026 (Fase 3). Este documento descreve o código que existe; o que ainda não foi feito aparece como "a partir da F*n*".
+Estado em 17/10/2026 (Fase 4). Este documento descreve o código que existe; o que ainda não foi feito aparece como "a partir da F*n*".
 
 ## Camadas
 
@@ -66,6 +66,24 @@ Fluxo de uma alteração: tela → serviço (`application/portfolio/`) → repos
 | | `portfolio_query.dart` | `PortfolioSnapshot`: cadastros, operações, posições e resumo, recalculados a cada alteração |
 
 Posições e totais não são gravados (D-20).
+
+## Motor financeiro (Fase 4)
+
+Funções puras em `domain/finance/` (Dart puro, sem `double`), com fórmulas em `FORMULAS.md` §4 a §10 e decisões em D-26 e D-27.
+
+| Camada | Arquivos | Papel |
+|---|---|---|
+| `core/` | `money/decimal_math.dart` | Também `ln`, `exp` e `pow` com expoente fracionário, em ponto fixo (D-26) |
+| | `time/local_date.dart` | Também soma de meses e dia da semana |
+| `domain/finance/` | `business_calendar.dart` | Dias úteis com os feriados nacionais (base 252) |
+| | `interest.dart` | Juros simples e compostos, equivalência de taxas, nominal e efetiva, bases de dias |
+| | `index_accrual.dart` | CDI e Selic acumulados, percentual do indexador e spread |
+| | `cash_flow.dart` | Fluxos de caixa e XIRR |
+| | `returns.dart` | Retorno simples, acumulado, real, CAGR, anualização, TWR, retornos por dia, mês e ano, decomposição cambial e `ReturnMethod` |
+| `domain/portfolio/` | `performance.dart` | Fluxos do investidor a partir das operações e MWR líquido, bruto e sem proventos, por ativo e por moeda |
+| `application/portfolio/` | `portfolio_query.dart` | `PortfolioSnapshot.performance(moeda)` e `assetPerformance(id)`, calculados na primeira consulta |
+
+Na interface, o dashboard mostra o resultado total e a TIR (MWR) da moeda, e o detalhe do ativo mostra resultado e TIR com e sem proventos e antes de custos, sempre com a metodologia num tooltip. TWR, retornos por período, retorno real, efeito cambial e benchmarks estão prontos no domínio e aparecem quando houver histórico de cotações, IPCA e câmbio (F6).
 
 ## Interface
 

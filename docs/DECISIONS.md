@@ -352,3 +352,22 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 
 - Decisão: `actions/checkout@v7` (v7.0.1, de 20/07/2026, roda em Node.js 24), no lugar da v4, que usava o Node.js 20 descontinuado e gerava aviso no CI. `subosito/flutter-action@v2` continua (v2.23.0 é composta e usa `actions/cache@v5`, que já roda em Node.js 24).
 - Motivo: aviso de descontinuação do Node.js 20 nos runners do GitHub.
+
+### 2026-10-17 — D-26: Funções transcendentes em `Decimal` (Fase 4)
+
+- Decisão: `DecimalMath.ln`, `exp` e `pow` (expoente fracionário ou negativo) implementados no próprio app, em ponto fixo sobre `BigInt` com 60 casas internas, e devolvidos com 20 casas, meio para o par (D-03). `exp` reduz o argumento por potências de 2 até |x| ≤ 1/16 e soma a série de Taylor; `ln` traz o argumento para [1, 2) com potências de 2 e usa `2·atanh((m − 1)/(m + 1))`. Expoente inteiro usa multiplicações sucessivas.
+- Alternativas: converter para `double` e usar `dart:math` (viola a regra 6 e perde precisão: `double` tem ~16 dígitos); adicionar um pacote de precisão arbitrária (nenhum mantido que trabalhe com o `Decimal` do pacote `decimal`).
+- Motivo: XIRR, equivalência de taxas, base 252 e CAGR precisam de potências fracionárias. As funções são testadas contra valores conhecidos (ln 2, ln 10, e, √2) com 20 casas.
+
+### 2026-10-17 — D-27: Motor financeiro — convenções (Fase 4)
+
+- Decisão (fórmulas em `FORMULAS.md` §4 a §10):
+  - **XIRR**: dias corridos ÷ 365, como o Excel. Resolvido por Newton protegido por bisseção, num intervalo de −99% a 100.000% a.a. onde o valor presente troca de sinal; precisão de 10⁻¹² na taxa. Sem troca de sinal, o resultado é "indisponível". Com mais de uma troca de sinal nos fluxos (pode haver mais de uma TIR), escolhe a raiz mais perto de 10% a.a. e sinaliza.
+  - **MWR na interface**: XIRR dos fluxos do investidor nos ativos (compras, vendas, proventos, custos), com o valor de mercado como fluxo final na data do preço mais recente (ou da última operação, se for depois). O caixa parado nas contas fica fora. Com menos de 365 dias, a tela mostra o retorno do período em vez da taxa anual (anualizar prazos curtos exagera o número).
+  - **TWR**: fluxos no fim do dia; o motor está pronto e testado (`CASOS_DE_TESTE.md` §6), mas a tela ainda não mostra, porque precisa do valor da carteira em cada data de fluxo. Com preços informados só de vez em quando, isso seria inventar valores intermediários (regra 1). Entra com o histórico de cotações da F6.
+  - **Base 252**: calendário de feriados nacionais da ANBIMA calculado pelo app (fixos, Carnaval, Sexta-feira Santa e Corpus Christi a partir da Páscoa; 20/11 a partir de 2024). Dias úteis contados com o início incluído e o fim excluído. Feriados extraordinários podem ser passados ao calendário.
+  - **CDI/Selic**: fator diário `(1 + taxa)^(1/252)` com precisão total; os truncamentos da B3 (8 casas no fator diário, 16 no acumulado) não são aplicados.
+  - **30/360**: convenção europeia (30E/360).
+  - Retorno real, efeito cambial e benchmarks: funções prontas e testadas; aparecem na tela quando houver IPCA, câmbio e índices (F6/F8).
+- Alternativas: Modified Dietz como aproximação do TWR com preços esparsos (continua precisando do valor nas datas dos fluxos); mostrar a TIR anualizada sempre (números absurdos em prazos de dias).
+- Motivo: SPEC §9 ("informe a metodologia"; "nunca divida uma taxa anual por 365") e regra 1.

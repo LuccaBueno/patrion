@@ -4,9 +4,95 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 3 concluída** em 17/10/2026. Próxima: Fase 4 (Motor financeiro).
+**Fase 4 concluída** em 17/10/2026. Próxima: Fase 5 (Backup e save).
 
 ## Concluído
+
+### Fase 4 — Motor financeiro
+
+Critério de pronto: os casos de `CASOS_DE_TESTE.md` que pertencem ao motor financeiro (§1 a §7) passam. O §8 (backtest) é da F9 e o §9 (sincronização) é da F5, conforme a SPEC §21; eles ficam para essas fases. CI: ver o fim do item 3.
+
+**1. O que foi implementado**
+
+- **Potência, logaritmo e exponencial em `Decimal`** (`DecimalMath.ln`, `exp`, `pow` com expoente fracionário), sem `double`, em ponto fixo de 60 casas e resultado com 20 (D-26).
+- **Juros** (`Interest`): simples e compostos, taxa equivalente, nominal ↔ efetiva, fatores compostos e lineares entre datas nas bases 252, /365, /360 e 30E/360.
+- **Calendário de dias úteis** (`BusinessCalendar`): feriados nacionais da ANBIMA (fixos; Carnaval, Sexta-feira Santa e Corpus Christi pela Páscoa; 20/11 a partir de 2024), contagem de dias úteis, próximo dia útil e soma de dias úteis.
+- **CDI e Selic** (`IndexAccrual`): fator diário na base 252, percentual do indexador, acumulado de séries diárias, taxa constante e spread.
+- **XIRR** (`Xirr`): dias corridos ÷ 365, Newton protegido por bisseção, "indisponível" sem solução e aviso quando há várias trocas de sinal.
+- **Retornos** (`Returns`, `Twr`, `PeriodReturns`, `FxDecomposition`): simples, acumulado, real, anualização e CAGR, TWR, retornos diários, mensais e anuais, decomposição do efeito cambial, e `ReturnMethod` para rotular a metodologia.
+- **Desempenho da carteira real** (`PerformanceCalculator`): fluxos do investidor a partir das operações; resultado total com e sem proventos; MWR (TIR) líquido, sem proventos e bruto (antes de custos); por ativo e por moeda (D-27).
+- **Interface:**
+  - Dashboard: novos cards "Resultado total" e "Rentabilidade (TIR)", com o período e um tooltip que explica a metodologia (MWR × TWR). Com menos de um ano, a TIR aparece como retorno do período.
+  - **Os valores dos cards não quebram mais linha** (pedido do usuário): o valor fica numa linha e a fonte diminui se não couber. O percentual do resultado não realizado foi para a nota do card.
+  - Detalhe do ativo: card "Desempenho" com resultado total e sem proventos, TIR líquida, sem proventos e bruta, aplicado, vendas e resgates, custos e impostos.
+- `FORMULAS.md` §4 a §10; decisões D-26 e D-27; `ARQUITETURA.md` atualizado.
+
+**2. Arquivos criados ou alterados**
+
+- `lib/core/`: `money/decimal_math.dart` (`ln`, `exp`, `pow`, `rescale`), `time/local_date.dart` (`addMonths`, `weekday`, `isWeekend`).
+- `lib/domain/finance/` (novo): `business_calendar.dart`, `interest.dart`, `index_accrual.dart`, `cash_flow.dart`, `returns.dart`.
+- `lib/domain/portfolio/performance.dart` (novo); `portfolio_valuation.dart` (referência da documentação).
+- `lib/application/portfolio/portfolio_query.dart` (`performance` e `assetPerformance`).
+- `lib/presentation/`: `screens/dashboard/dashboard_screen.dart`, `screens/portfolio/asset_detail_screen.dart`, `widgets/common.dart` (`PnlText.singleLine`), `format/labels.dart`, `format/performance_format.dart` (novo).
+- `test/`: `domain/finance/reference_cases_test.dart`, `finance_functions_test.dart`, `business_calendar_test.dart`, `domain/portfolio/performance_test.dart` (novos); `core/money/decimal_math_test.dart`, `core/time/local_date_test.dart`, `presentation/portfolio_screens_test.dart` (ampliados).
+- Docs: `FORMULAS.md`, `DECISIONS.md`, `ARQUITETURA.md`, `PROGRESS.md`, `CHANGELOG.md`.
+
+**3. Testes executados (17/10/2026)**
+
+- `dart format --set-exit-if-changed .`: 101 arquivos, 0 alterados.
+- `flutter analyze`: "No issues found!".
+- `flutter test`: **232 testes, todos passaram** (175 na F3). Entre os novos:
+  - `CASOS_DE_TESTE.md`:
+    - §2: R$ 11.268,25;
+    - §3: 0,948879% a.m. e 0,044982% ao dia útil;
+    - §4: 0,846915% e R$ 1.008,47, também acumulando 21 taxas diárias e contando os 21 dias úteis pelo calendário;
+    - §5: 9,9714% a.a.;
+    - §6: TWR −1,00% e MWR −3,7093% a.a., também a partir de operações;
+    - §7: USD 10%, BRL 21%, efeitos de 10%, 10% e 1%;
+    - o §1 continua passando (`portfolio_calculator_test.dart`) e foi repetido no cálculo de desempenho.
+  - `ln`, `exp` e `pow` contra valores conhecidos com 20 casas.
+  - Feriados de 2025, Páscoa e os 252 dias úteis de 2025.
+  - XIRR negativo, fora de ordem, sem solução e com várias trocas de sinal; TWR com retirada e sem capital; retornos por mês, ano e dia.
+  - Widget: os valores dos cards do dashboard ficam numa linha com valores na casa das centenas de bilhões, em janela de 960 × 640. Conferi que esse teste falha se o ajuste for removido.
+- `flutter build windows --release`: compilou `patrion.exe`.
+- **Execução real do `.exe`** com `--data-dir` temporário e uma carteira de exemplo gravada pelos serviços do app:
+  - dashboard com todos os valores numa linha (patrimônio R$ 1.410.149,56, resultado total +R$ 160.149,56, TIR +8,23% a.a. de 10/01/2023 a 16/10/2026);
+  - detalhe do ativo com o card "Desempenho" (resultado total +R$ 108.915,00, conferido à mão);
+  - o fechamento pela janela encerrou o processo.
+
+**4. Problemas e limitações**
+
+- **TWR, retornos por mês e ano, retorno real, efeito cambial e benchmarks** estão prontos e testados no domínio, mas **não aparecem na tela**: dependem do histórico de cotações, do IPCA e do câmbio (F6). Calcular o TWR com preços informados de vez em quando exigiria inventar valores intermediários (regra 1, D-27).
+- A TIR da carteira considera só os investimentos: o caixa parado nas contas fica fora (o card diz isso).
+- Os truncamentos da B3 no CDI (8 e 16 casas) não são aplicados; a diferença fica abaixo de um centavo em valores usuais.
+- O calendário tem só os feriados nacionais. Feriados extraordinários podem ser passados ao calendário, mas ainda não há tela para isso.
+- IPCA+ (pró-rata da inflação) e a marcação a mercado de títulos ficam para a F8 (SPEC §12.2), quando houver as séries.
+- `CASOS_DE_TESTE.md` §8 (backtest) e §9 (sincronização) não foram executados nesta fase: são da F9 e da F5.
+
+**5. Pendências**
+
+- F5: backup, restauração, `dev_backups` e o arquivo de save (§10 e §11), com a preparação de D-24.
+- F6: mostrar TWR, rentabilidade por período, evolução, benchmarks, retorno real e efeito cambial com dados reais.
+- Da F1: confirmar Finnhub e Twelve Data (F6); licenças do CKAN do Tesouro e do portal da CVM (F6); toolchain Android (futuro).
+
+**6. Como executar e o que testar manualmente**
+
+```powershell
+flutter run -d windows
+# ou
+build\windows\x64\runner\Release\patrion.exe
+```
+
+Roteiro sugerido:
+
+1. Com a carteira da F3 (ou o caso de `CASOS_DE_TESTE.md` §1), informe um preço para o ativo e abra o **Início**:
+   - "Resultado total" = lucro realizado + resultado não realizado + proventos;
+   - "Rentabilidade (TIR)" mostra o período; passe o mouse no ícone (i) para ler a explicação MWR × TWR;
+   - com menos de um ano de histórico, aparece "% no período" em vez de "% a.a.".
+2. Diminua a janela até o tamanho mínimo: nenhum valor dos cards deve quebrar linha (a fonte diminui).
+3. No detalhe do ativo, confira o card "Desempenho": com proventos, a TIR é maior que "sem proventos"; a bruta é maior que a líquida quando há custos.
+4. Apague o preço do ativo: resultado total e TIR ficam "indisponíveis", com o motivo no tooltip.
+5. Para conferir o §6: compre 100 × R$ 10,00 em 01/01/2024 e 50 × R$ 20,00 em 01/01/2025, e informe o preço R$ 12,60 em 01/01/2026. A TIR do ativo deve ser −3,71% a.a.
 
 ### Fase 3 — Carteira real
 
@@ -214,11 +300,11 @@ ou abra `build\windows\x64\runner\Release\patrion.exe`. Conferir: a janela abre 
 
 ## Pendências e problemas conhecidos
 
-Ver as seções 4 e 5 das Fases 3, 2 e 1 acima.
+Ver as seções 4 e 5 das Fases 4, 3, 2 e 1 acima.
 
 ## Próximo passo
 
-Fase 4 (Motor financeiro), conforme `docs/SPEC.md` §21: §9 completo e `FORMULAS.md`, até todos os casos de `CASOS_DE_TESTE.md` passarem.
+Fase 5 (Backup e save), conforme `docs/SPEC.md` §21: §11 e §10 (exceto §10.6), até os testes de §10.7 passarem e a sincronização manual entre duas pastas de dados funcionar, seguindo a preparação para o bloqueio do app (DECISIONS D-24).
 
 ## Histórico de sessões
 
@@ -227,3 +313,4 @@ Fase 4 (Motor financeiro), conforme `docs/SPEC.md` §21: §9 completo e `FORMULA
 | 2026-10-17 | F1 | Ambiente, fontes de dados, decisões e modelo de dados aprovados; projeto criado e primeiro build Windows |
 | 2026-10-17 | F2 | Fundação: camadas, Drift, HLC e repositórios base, navegação, tema, logs, ícone e CI verde |
 | 2026-10-17 | F3 | Carteira real: schema 2 com backup automático antes de migrar, cadastros, todos os tipos de operação, preço manual, posições, dashboard inicial e telas de carteira, operações e cadastros |
+| 2026-10-17 | F4 | Motor financeiro: ln/exp/pow em Decimal, juros e bases, calendário de dias úteis, CDI, XIRR, TWR, retornos e câmbio; resultado total e TIR por ativo e por moeda na interface; cards do dashboard sem quebra de linha |
