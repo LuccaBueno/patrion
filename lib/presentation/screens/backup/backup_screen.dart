@@ -102,30 +102,35 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       subtitle:
           'Cópias integrais do banco deste computador, para recuperação. '
           'Restaurar substitui todos os dados',
-      actions: [
-        FilledButton.icon(
-          onPressed: _busy
-              ? null
-              : () => _run(() => _backup(chooseFolder: false)),
-          icon: const Icon(Icons.backup_outlined),
-          label: const Text('Fazer backup agora'),
-        ),
-        OutlinedButton.icon(
-          onPressed: _busy
-              ? null
-              : () => _run(() => _backup(chooseFolder: true)),
-          icon: const Icon(Icons.drive_folder_upload_outlined),
-          label: const Text('Backup em outra pasta…'),
-        ),
-        OutlinedButton.icon(
-          onPressed: _busy ? null : () => _run(_restoreFromFile),
-          icon: const Icon(Icons.restore),
-          label: const Text('Restaurar de um arquivo…'),
-        ),
-      ],
       child: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => _run(() => _backup(chooseFolder: false)),
+                icon: const Icon(Icons.backup_outlined),
+                label: const Text('Fazer backup agora'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => _run(() => _backup(chooseFolder: true)),
+                icon: const Icon(Icons.drive_folder_upload_outlined),
+                label: const Text('Backup em outra pasta…'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : () => _run(_restoreFromFile),
+                icon: const Icon(Icons.restore),
+                label: const Text('Restaurar de um arquivo…'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           if (_busy) const LinearProgressIndicator(),
           if (notice != null && !_noticeDismissed)
             Card(

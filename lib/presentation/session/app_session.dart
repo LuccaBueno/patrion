@@ -36,16 +36,19 @@ class AppSession {
   final DeviceIdentity identity;
   final SyncContext sync;
 
-  BackupService backupService({Clock wallClock = const Clock()}) =>
-      BackupService(
-        registry: BackupRegistryRepository(db),
-        files: const LocalBackupFileSystem(),
-        backupsDir: paths.backupsDir,
-        appVersion: AppInfo.version,
-        deviceId: identity.deviceId,
-        deviceName: identity.deviceName,
-        wallClock: wallClock,
-      );
+  BackupService backupService({
+    Clock wallClock = const Clock(),
+    int keepAutomatic = 10,
+  }) => BackupService(
+    registry: BackupRegistryRepository(db),
+    files: const LocalBackupFileSystem(),
+    backupsDir: paths.backupsDir,
+    appVersion: AppInfo.version,
+    deviceId: identity.deviceId,
+    deviceName: identity.deviceName,
+    wallClock: wallClock,
+    keepAutomatic: keepAutomatic,
+  );
 }
 
 /// O que sobrevive à troca do banco numa restauração: a identidade deste PC
@@ -117,8 +120,16 @@ enum SessionPhase { ready, restoring }
 /// Controla a sessão aberta: a interface observa e se reconstrói quando a
 /// sessão troca.
 class SessionManager extends ChangeNotifier implements SessionController {
-  SessionManager(this._session, {Clock wallClock = const Clock()})
-    : _clock = wallClock;
+  SessionManager(
+    this._session, {
+    Clock wallClock = const Clock(),
+    Future<void> Function()? beforeClose,
+  }) : _clock = wallClock,
+       _beforeClose = beforeClose ?? _endOfFrame;
+
+  static Future<void> _endOfFrame() => WidgetsBinding.instance.endOfFrame;
+
+  final Future<void> Function() _beforeClose;
 
   AppSession _session;
   final Clock _clock;
@@ -164,7 +175,7 @@ class SessionManager extends ChangeNotifier implements SessionController {
     notifyListeners();
     // Deixa a interface desmontar as telas (e cancelar as consultas) antes
     // de fechar o banco.
-    await WidgetsBinding.instance.endOfFrame;
+    await _beforeClose();
     await _session.db.close();
 
     const files = LocalBackupFileSystem();

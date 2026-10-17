@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrion/core/config/app_info.dart';
 import 'package:patrion/core/config/app_paths.dart';
@@ -15,9 +16,16 @@ class AppHarness {
   final WidgetTester tester;
   final TestDb t;
 
+  static const _defaultPaths = AppPaths(
+    dataDir: r'C:\dados',
+    cacheDir: r'C:\cache',
+  );
+
   Future<void> pump({
     String location = '/',
     Size size = const Size(1280, 900),
+    AppPaths paths = _defaultPaths,
+    List<Override> overrides = const [],
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -27,10 +35,7 @@ class AppHarness {
         overrides: [
           appEnvironmentProvider.overrideWithValue(
             AppEnvironment(
-              paths: const AppPaths(
-                dataDir: r'C:\dados',
-                cacheDir: r'C:\cache',
-              ),
+              paths: paths,
               deviceId: t.identity.deviceId,
               deviceName: t.identity.deviceName,
               appVersion: AppInfo.version,
@@ -38,6 +43,7 @@ class AppHarness {
           ),
           databaseProvider.overrideWithValue(t.db),
           syncContextProvider.overrideWithValue(t.sync),
+          ...overrides,
         ],
         child: PatrionApp(initialLocation: location),
       ),
@@ -57,6 +63,30 @@ class AppHarness {
     await tester.pumpAndSettle();
   }
 
+  /// Deixa o tempo real andar (E/S de arquivo e banco) até [finder]
+  /// aparecer. Para ações que mostram um indicador de progresso animado,
+  /// com o qual o `pumpAndSettle` nunca termina.
+  Future<void> pumpUntil(Finder finder, {int attempts = 200}) async {
+    for (var i = 0; i < attempts; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump(const Duration(milliseconds: 20));
+      if (finder.evaluate().isNotEmpty) {
+        await tester.pump(const Duration(milliseconds: 300));
+        return;
+      }
+    }
+    throw TestFailure('Não apareceu: $finder');
+  }
+
+  /// Toca em [finder] sem esperar a tela estabilizar.
+  Future<void> press(Finder finder) async {
+    await tester.ensureVisible(finder);
+    await tester.tap(finder);
+    await tester.pump();
+  }
+
   /// Desmonta o app e deixa o Drift encerrar os streams (ele usa um timer).
   Future<void> unmount() async {
     await tester.pumpWidget(const SizedBox.shrink());
@@ -69,8 +99,15 @@ class AppHarness {
     Future<void> Function() body, {
     String location = '/',
     Size size = const Size(1280, 900),
+    AppPaths paths = _defaultPaths,
+    List<Override> overrides = const [],
   }) async {
-    await pump(location: location, size: size);
+    await pump(
+      location: location,
+      size: size,
+      paths: paths,
+      overrides: overrides,
+    );
     try {
       await body();
     } finally {

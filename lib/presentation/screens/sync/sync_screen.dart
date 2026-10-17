@@ -123,28 +123,35 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
       subtitle:
           'Leve os dados de um computador para outro com o arquivo de save '
           '(.invsave), sem internet',
-      actions: [
-        FilledButton.icon(
-          onPressed: _busy ? null : () => _run(_export),
-          icon: const Icon(Icons.save_alt),
-          label: const Text('Salvar arquivo de save'),
-        ),
-        OutlinedButton.icon(
-          onPressed: _busy
-              ? null
-              : () => _run(() => _import(thenExport: false)),
-          icon: const Icon(Icons.file_open_outlined),
-          label: const Text('Importar save…'),
-        ),
-        OutlinedButton.icon(
-          onPressed: _busy ? null : () => _run(() => _import(thenExport: true)),
-          icon: const Icon(Icons.sync),
-          label: const Text('Importar e gerar novo save…'),
-        ),
-      ],
       child: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                onPressed: _busy ? null : () => _run(_export),
+                icon: const Icon(Icons.save_alt),
+                label: const Text('Salvar arquivo de save'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => _run(() => _import(thenExport: false)),
+                icon: const Icon(Icons.file_open_outlined),
+                label: const Text('Importar save…'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => _run(() => _import(thenExport: true)),
+                icon: const Icon(Icons.sync),
+                label: const Text('Importar e gerar novo save…'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           if (_busy) const LinearProgressIndicator(),
           const _HowTo(),
           const _PeersCard(),

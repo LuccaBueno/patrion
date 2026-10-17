@@ -330,10 +330,12 @@ class _ConflictTile extends StatelessWidget {
                   _RadioOption(
                     value: MergeSide.local,
                     label: label(MergeSide.local, 'Manter a deste computador'),
+                    onSelected: onChanged,
                   ),
                   _RadioOption(
                     value: MergeSide.incoming,
                     label: label(MergeSide.incoming, 'Usar a recebida'),
+                    onSelected: onChanged,
                   ),
                 ],
               ),
@@ -346,19 +348,28 @@ class _ConflictTile extends StatelessWidget {
 }
 
 class _RadioOption extends StatelessWidget {
-  const _RadioOption({required this.value, required this.label});
+  const _RadioOption({
+    required this.value,
+    required this.label,
+    required this.onSelected,
+  });
 
   final MergeSide value;
   final String label;
+  final ValueChanged<MergeSide> onSelected;
 
+  // O texto também seleciona a opção.
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Radio<MergeSide>(value: value),
-        Text(label),
-      ],
+    return InkWell(
+      onTap: () => onSelected(value),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Radio<MergeSide>(value: value),
+          Text(label),
+        ],
+      ),
     );
   }
 }

@@ -63,6 +63,34 @@ void main() {
     expect(violations, isEmpty);
   });
 
+  test(
+    'a carteira real não lê nem grava as tabelas hipotéticas (BANCO.md §8)',
+    () {
+      final violations = <String>[];
+      for (final folder in [
+        p.join('lib', 'application', 'portfolio'),
+        p.join('lib', 'domain', 'portfolio'),
+        p.join('lib', 'presentation', 'screens', 'dashboard'),
+        p.join('lib', 'presentation', 'screens', 'portfolio'),
+      ]) {
+        for (final file in Directory(folder).listSync(recursive: true)) {
+          if (file is! File || !file.path.endsWith('.dart')) continue;
+          if (RegExp(
+            r'hypo',
+            caseSensitive: false,
+          ).hasMatch(file.readAsStringSync())) {
+            violations.add(file.path);
+          }
+        }
+      }
+      final repos = File(
+        p.join('lib', 'data', 'repositories', 'portfolio_repositories.dart'),
+      ).readAsStringSync();
+      if (repos.contains('hypo')) violations.add('portfolio_repositories.dart');
+      expect(violations, isEmpty);
+    },
+  );
+
   test('só presentation/ converte para double (regra 6)', () {
     final violations = <String>[];
     for (final layer in [
