@@ -2,7 +2,12 @@
 
 **Situação:** aprovado na Fase 1 (17/10/2026). Este documento deve sempre refletir o schema real.
 
-**Implementado (schema versão 1, Fase 2, 17/10/2026):** `dev_identity`, `dev_settings` e `shared_settings`. As demais tabelas entram nas fases seguintes, cada uma com nova versão de schema e migração (§9). Todas as outras tabelas descritas abaixo ainda são planejadas.
+**Implementado:**
+
+- Schema versão 1 (Fase 2, 17/10/2026): `dev_identity`, `dev_settings` e `shared_settings`.
+- Schema versão 2 (Fase 3, 17/10/2026): `institutions`, `accounts`, `assets`, `fixed_income_terms`, `operations` e `manual_valuations`, com os campos e índices descritos em §3, mais índice em `hlc` em todas. As colunas que referenciam outras tabelas são chaves estrangeiras (`PRAGMA foreign_keys = ON`). Migração 1 → 2 só cria tabelas e índices; o backup automático antes dela está em §9.
+
+As demais tabelas descritas abaixo ainda são planejadas, cada uma com nova versão de schema e migração. Posições e totais ainda não usam as tabelas `drv_` (§7): são recalculados em memória (DECISIONS D-20).
 
 ## 1. Visão geral
 
@@ -340,6 +345,6 @@ Podem ser apagadas a qualquer momento. São recalculadas a partir da operação 
 
 - `schemaVersion` do Drift começa em 1 na F2 e sobe a cada mudança.
 - Cada versão tem migração passo a passo e um snapshot do schema gerado pelo `drift_dev` (`drift_schemas/`), usado em testes de migração.
-- Antes de migrar, o app faz um backup automático (SPEC §11).
+- Antes de migrar, o app faz um backup automático (SPEC §11, DECISIONS D-19): antes de abrir o banco, lê o `user_version`; se for antigo, grava uma cópia com `VACUUM INTO` em `backups\`, confere a integridade e só então deixa o Drift migrar. Sem backup válido, o banco não é aberto. Banco de versão mais nova que a do app é recusado. Ficam os 10 backups de migração mais recentes.
 - O save registra `schema_version`. Saves mais antigos são convertidos na importação; mais novos são recusados.
 - Mudanças incompatíveis no schema só com aprovação do usuário (CLAUDE.md).

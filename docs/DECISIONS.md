@@ -257,3 +257,48 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - Verificação automática (`test/presentation/theme/app_theme_test.dart`): fundos, superfícies, bordas e textos sem matiz verde; contraste WCAG AA (texto ≥ 7:1, texto secundário, cores de dado e dourado ≥ 4,5:1, texto sobre primária ≥ 4,5:1); dourado fora das cores automáticas; ganho distinguível da primária.
 - Alternativas: manter o `fromSeed` e só sobrescrever o fundo (os demais tons gerados continuariam esverdeados).
 - Motivo: pedido do usuário; interface mais sóbria, em que o verde e o dourado chamam atenção justamente por aparecerem pouco.
+
+### 2026-10-17 — D-19: Backup automático antes de migrar o schema (Fase 3)
+
+- Decisão:
+  - Antes de abrir o banco, o app lê o `PRAGMA user_version` do arquivo (`PreMigrationBackup`, `lib/infrastructure/backup/`). Se for menor que `AppDatabase.latestSchemaVersion`, grava uma cópia com `VACUUM INTO` em `<pasta de dados>\backups\` e confere a cópia (`PRAGMA integrity_check` = `ok` e `user_version` igual ao original).
+  - Nome do arquivo: `patrion_<AAAA-MM-DD_hh-mm-ss-mmmZ>_pre-migracao_v<de>-v<para>_app-<versão>.db` (data UTC primeiro, para a ordem do nome ser a cronológica; sem `:`, proibido no Windows).
+  - Se o backup falhar, o banco **não é aberto** e a migração não acontece: o app mostra a tela de erro de inicialização.
+  - Banco de uma versão mais nova do app (`user_version` maior que o conhecido) é recusado com mensagem, sem tocar no arquivo.
+  - Retenção: os 10 backups de migração mais recentes. Backups de outros tipos (manuais, F5) não entram nessa conta.
+  - O registro em `dev_backups` (com SHA-256) e a restauração entram na F5, com o resto da SPEC §11.
+- Alternativas: fazer o backup dentro do `onUpgrade` do Drift (o banco já estaria aberto e no meio da migração); copiar o arquivo com `File.copy` (pode copiar um estado inconsistente se houver diário pendente).
+- Motivo: SPEC §11 e `BANCO.md` §9. A primeira migração real (schema 1 → 2) acontece nesta fase.
+
+### 2026-10-17 — D-20: Posições recalculadas em memória (Fase 3)
+
+- Decisão: posições, caixa e totais são calculados em memória a partir de todas as operações (função pura `PortfolioCalculator`) a cada alteração nas tabelas da carteira. As tabelas derivadas `drv_*` de `BANCO.md` §7 ainda não existem.
+- Alternativas: gravar `drv_positions` e recalcular a partir da operação alterada.
+- Motivo: com o volume de um usuário (centenas a poucos milhares de operações), o recálculo completo leva milissegundos, é mais simples e não tem como ficar dessincronizado. As tabelas `drv_` entram quando a evolução diária (F4/F6) exigir; a regra "dados derivados não são sincronizáveis" continua valendo.
+
+### 2026-10-17 — D-21: Regras das operações (Fase 3)
+
+- Decisão (fórmulas em `FORMULAS.md` §1):
+  - Cada conta tem caixa por moeda, calculado de todas as operações: compras debitam, vendas e proventos creditam. Caixa negativo gera um aviso no dashboard ("registre os depósitos"), sem esconder nem ajustar nada.
+  - Transferência = duas operações (`transfer_out` e `transfer_in`) com o mesmo `transfer_group_id`, criadas, editadas e excluídas juntas. Transferência de ativo leva quantidade e custo proporcional, sem lucro realizado.
+  - Resgate sem quantidade (produtos acompanhados por saldo) baixa o custo na proporção valor resgatado ÷ último saldo informado até a data; sem saldo informado, baixa pelo próprio valor.
+  - Bonificação: o valor bruto, se informado, é o custo atribuído e entra no custo.
+  - Ajuste manual exige justificativa e é o único tipo que aceita quantidade e valor negativos. Com ativo, muda quantidade e custo; sem ativo, muda o caixa.
+  - Antes de gravar, editar ou excluir, o serviço recalcula a carteira e recusa o que criaria inconsistência nova (por exemplo, editar uma compra antiga de modo que uma venda posterior fique maior que a posição).
+  - Duplicata: operação viva com a mesma conta, ativo, tipo, data, quantidade, preço e valor. O app avisa e só grava com confirmação.
+  - A moeda da operação precisa ser a do ativo. O câmbio da operação é opcional e só registrado.
+- Motivo: SPEC §7 e §9. Regras simples, explicáveis e cobertas por testes, que o motor da F4 reaproveita.
+
+### 2026-10-17 — D-22: Preço manual e totais por moeda (Fase 3)
+
+- Decisão:
+  - Preço unitário informado (`manual_valuations.kind = unit_price`) vale para o ativo em todas as contas; saldo informado (`balance`) vale para uma conta. Informar de novo na mesma data substitui o valor (mesmo registro, novo HLC).
+  - A fonte é "informado por você", com a data de referência visível. Sem preço nem saldo, o valor de mercado aparece como "indisponível" e o patrimônio é marcado como parcial (regra 1).
+  - Sem câmbio (F6), o dashboard mostra os totais de cada moeda separadamente, sem converter.
+- Alternativas: estimar o valor pelo custo quando não houver preço (viola a regra 1); converter com o câmbio da última operação (seria um câmbio antigo apresentado como atual).
+- Motivo: regras invioláveis 1 e 2; a SPEC pede BRL como padrão "com opção de ver a moeda original", o que fica completo na F6.
+
+### 2026-10-17 — D-23: Entrada de números e datas na interface (Fase 3)
+
+- Decisão: campos numéricos aceitam `1.234,56`, `1234,56`, `0.5` e `1234`. Com vírgula, ela é a decimal e os pontos são de milhar; sem vírgula, um único ponto é decimal e mais de um são de milhar. Datas em `dd/mm/aaaa` (ou `AAAA-MM-DD`) e por calendário. A leitura e a formatação são feitas direto sobre o `Decimal` (`lib/presentation/format/formatters.dart`), sem passar por ponto flutuante.
+- Motivo: uso em pt-BR, com tolerância a quem digita com ponto decimal; regra 6.

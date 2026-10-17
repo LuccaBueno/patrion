@@ -31,8 +31,10 @@ build\windows\x64\runner\Release\patrion.exe --data-dir D:\PatrionB
 
 1. Altere as tabelas em `lib/data/db/tables.dart` e suba `schemaVersion` em `app_database.dart`.
 2. Rode `dart run build_runner build` e `dart run drift_dev make-migrations`. Isso grava o snapshot `drift_schemas/patrion/drift_schema_vN.json`, gera os auxiliares de teste em `test/data/db/migrations/` e o arquivo de passos de migração.
-3. Escreva o passo de migração e o teste de migração da versão anterior para a nova.
+3. Escreva o passo de migração (`from<N-1>To<N>` em `onUpgrade: stepByStep(...)`, `app_database.dart`) e o teste de preservação de dados em `test/data/db/migrations/patrion/migration_test.dart`.
 4. Atualize `docs/BANCO.md`.
+
+Não é preciso mexer no backup: ao abrir um banco com `user_version` menor que `AppDatabase.latestSchemaVersion`, o app grava a cópia em `backups\` antes de migrar (DECISIONS D-19). Para conferir à mão, rode o executável com `--data-dir` apontando para uma cópia de um banco antigo e veja a pasta `backups\` e o log ("Backup antes da migração vN→vM").
 
 Mudanças incompatíveis no schema só com aprovação do usuário (CLAUDE.md). O código gerado e os snapshots são versionados (DECISIONS D-15); o CI falha se estiverem desatualizados.
 
@@ -48,14 +50,22 @@ Rode de novo sempre que `assets/branding/patrion-simbolo.svg` mudar e faça comm
 
 ## Testes de widget com o banco
 
-Os testes de interface usam banco em memória (`test/helpers/test_database.dart`). Ao final de cada teste, o app precisa ser desmontado (`withApp` em `test/presentation/app_test.dart`): o Drift encerra os streams de consulta com um timer, e sem isso o fechamento do banco trava a execução dos testes.
+Os testes de interface usam banco em memória (`test/helpers/test_database.dart`). Ao final de cada teste, o app precisa ser desmontado (`AppHarness.run` em `test/helpers/app_harness.dart`, ou `withApp` em `test/presentation/app_test.dart`): o Drift encerra os streams de consulta com um timer, e sem isso o fechamento do banco trava a execução dos testes.
+
+- As consultas do Drift rodam fora do relógio falso do teste: depois de cada ação, use `AppHarness.settle()` (deixa o tempo real andar e redesenha).
+- Escritas feitas pelo teste depois de montar o app vão dentro de `tester.runAsync(...)`.
+- `test/helpers/portfolio_fixture.dart` cria serviços da carteira com uma instituição, duas contas e dois ativos.
+
+## Ícones novos não aparecem no build de release
+
+O build de release reduz a fonte de ícones aos ícones usados no código. Na F3 o build incremental reaproveitou a fonte antiga e os ícones novos da navegação apareceram vazios. Se isso acontecer, rode `flutter clean` e gere o build de novo (o CI sempre parte do zero).
 
 ## Onde ficam os dados e os logs
 
 | O quê | Onde |
 |---|---|
 | Banco | `%APPDATA%\Patrion\patrion.db` |
-| Backups (F5) | `%APPDATA%\Patrion\backups\` |
+| Backups | `%APPDATA%\Patrion\backups\` (antes de migrações desde a F3; manuais na F5) |
 | Logs | `%APPDATA%\Patrion\logs\patrion.log` (rotativos, D-16) |
 | Cache | `%LOCALAPPDATA%\Patrion\cache\` |
 

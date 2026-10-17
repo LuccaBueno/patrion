@@ -4,7 +4,7 @@ Aplicativo desktop pessoal para Windows 10 e 11 que registra, acompanha, analisa
 
 O app não é corretora, não executa ordens e não faz recomendações de investimento. Simulações e projeções são sempre hipotéticas.
 
-**Situação:** em desenvolvimento. Fase 2 concluída: fundação com banco, infraestrutura de sincronização, navegação, tema e logs; o cadastro de investimentos chega na Fase 3. Veja `docs/PROGRESS.md`.
+**Situação:** em desenvolvimento. Fase 3 concluída: cadastro de instituições, contas e ativos, todos os tipos de operação, preço informado manualmente, posições e dashboard inicial da carteira real. Cotações automáticas chegam na Fase 6. Veja `docs/PROGRESS.md`.
 
 ## Documentação
 
@@ -14,6 +14,7 @@ O app não é corretora, não executa ordens e não faz recomendações de inves
 | `docs/DECISIONS.md` | Decisões técnicas |
 | `docs/ARQUITETURA.md` | Camadas e organização do código |
 | `docs/BANCO.md` | Modelo de dados |
+| `docs/FORMULAS.md` | Fórmulas financeiras (posições, valor de mercado, totais) |
 | `docs/SINCRONIZACAO.md` | Identidade dos registros, HLC e tombstones |
 | `docs/FONTES_DE_DADOS.md` | Provedores de dados avaliados |
 | `docs/DESENVOLVIMENTO.md` | Ambiente, comandos, migrações e CI |
@@ -37,6 +38,7 @@ flutter build windows --release
 ## Onde ficam os dados
 
 - Banco, backups e logs: `%APPDATA%\Patrion\` (logs em `logs\patrion.log`)
+- Antes de atualizar o formato do banco, o app guarda uma cópia em `%APPDATA%\Patrion\backups\`
 - Cache descartável (arquivos baixados): `%LOCALAPPDATA%\Patrion\cache\`
 
 Esses dados ficam fora da pasta de instalação e sobrevivem a atualização e desinstalação. Para usar outra pasta: `patrion.exe --data-dir <pasta> --cache-dir <pasta>`.
