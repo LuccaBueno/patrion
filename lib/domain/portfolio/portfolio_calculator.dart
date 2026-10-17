@@ -119,6 +119,7 @@ abstract final class PortfolioCalculator {
             .where((o) => until == null || !o.tradeDate.isAfter(until))
             .toList()
           ..sort(Operation.chronological);
+    _placeTransferOutsFirst(ordered);
     final balances = _BalanceHistory(valuations);
     final acc = <(String, String), _Acc>{};
     final cash = <String, Map<String, Decimal>>{};
@@ -294,6 +295,28 @@ abstract final class PortfolioCalculator {
       cash: cash,
       issues: issues,
     );
+  }
+
+  /// As duas pontas de uma transferência têm a mesma data, e a ordem dos
+  /// ids no mesmo milissegundo não é garantida: a saída vai para antes da
+  /// entrada, para a entrada receber o custo transferido.
+  static void _placeTransferOutsFirst(List<Operation> ops) {
+    for (var i = 0; i < ops.length; i++) {
+      final op = ops[i];
+      final group = op.transferGroupId;
+      if (op.type != OperationType.transferIn || group == null) continue;
+      final j = ops.indexWhere(
+        (o) =>
+            o.type == OperationType.transferOut &&
+            o.transferGroupId == group &&
+            o.tradeDate == op.tradeDate,
+        i + 1,
+      );
+      if (j > i) {
+        ops.insert(i, ops.removeAt(j));
+        i++;
+      }
+    }
   }
 
   /// Retira [quantity] da posição e devolve o custo correspondente

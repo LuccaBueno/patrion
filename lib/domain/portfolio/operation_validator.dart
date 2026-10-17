@@ -30,6 +30,18 @@ class ValidationIssue {
   String toString() => '${field.name}: $message';
 }
 
+/// Operação recusada por problemas de preenchimento ou de consistência.
+class ValidationFailure implements Exception {
+  const ValidationFailure(this.issues);
+
+  final List<ValidationIssue> issues;
+
+  String get message => issues.map((i) => i.message).join('\n');
+
+  @override
+  String toString() => 'ValidationFailure: $issues';
+}
+
 /// Regras de preenchimento de cada tipo de operação (SPEC §7).
 ///
 /// Só confere a operação isolada. Regras que dependem das demais (vender
