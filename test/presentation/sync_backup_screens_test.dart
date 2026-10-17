@@ -141,6 +141,54 @@ void main() {
     });
   });
 
+  testWidgets('prévia avisa, antes de aplicar, que a carteira fica com uma '
+      'venda maior que a posição', (tester) async {
+    final a = (await tester.runAsync(() => SyncPc.open('PC-A', tmp)))!;
+    final b = (await tester.runAsync(() => SyncPc.open('PC-B', tmp)))!;
+    final saveFile = p.join(tmp.path, 'de-a.invsave');
+    await tester.runAsync(() async {
+      final inst = await a.institution('Corretora');
+      final acc = await a.account(inst, 'Principal');
+      final asset = await a.stock('VALE3');
+      await a.buy(acc, asset, '100');
+      await syncBoth(a, b);
+      await a.sell(acc, asset, '80');
+      await b.sell(acc, asset, '50', date: '2026-02-11');
+      File(saveFile).writeAsBytesSync(await a.export());
+    });
+    final dialogs = _FakeDialogs(tmp.path)..fileToPick = saveFile;
+    final h = AppHarness(tester, b.t);
+
+    await h.run(
+      () async {
+        await h.press(find.text('Importar save…'));
+        await h.pumpUntil(find.text('Prévia da importação'));
+        expect(find.byKey(const Key('import-warnings')), findsOneWidget);
+        expect(
+          find.text(
+            'Depois de aplicar, a carteira fica com 1 operação inconsistente',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining(
+            'Venda VALE3 em Corretora · Principal, '
+            '11/02/2026: a quantidade vendida',
+          ),
+          findsOneWidget,
+        );
+        await h.press(find.text('Cancelar'));
+      },
+      location: '/sincronizacao',
+      paths: pathsIn('b'),
+      overrides: [fileDialogsProvider.overrideWithValue(dialogs)],
+    );
+    await tester.runAsync(() async {
+      await a.close();
+      await b.close();
+    });
+  });
+
   testWidgets('arquivo que não é save é recusado com mensagem', (tester) async {
     final pc = (await tester.runAsync(() => SyncPc.open('PC-A', tmp)))!;
     final bad = File(p.join(tmp.path, 'ruim.invsave'))..writeAsStringSync('x');

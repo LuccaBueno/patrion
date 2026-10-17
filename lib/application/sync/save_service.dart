@@ -10,15 +10,40 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/sync_peers_repository.dart';
 import '../../data/sync/sync_context.dart';
 import '../../data/sync/sync_tables_gateway.dart';
+import '../../core/time/local_date.dart';
 import '../../domain/backup/backup_metadata.dart';
+import '../../domain/portfolio/operation_type.dart';
+import '../../domain/portfolio/portfolio_calculator.dart';
 import '../../domain/sync/invsave_codec.dart';
 import '../../domain/sync/merge_planner.dart';
 import '../../domain/sync/save_contents.dart';
 import '../../domain/sync/save_manifest.dart';
 import '../../domain/sync/sync_rows.dart';
 import '../backup/backup_service.dart';
+import '../portfolio/portfolio_query.dart';
 
 final _log = Logger('save');
+
+/// Inconsistência que a carteira real passaria a ter se a importação fosse
+/// aplicada (por exemplo, uma venda maior que a posição depois de edições
+/// concorrentes nos dois PCs). Só avisa: a importação continua permitida.
+class ImportWarning {
+  const ImportWarning({
+    required this.kind,
+    required this.date,
+    this.operationType,
+    this.assetSymbol,
+    this.accountLabel,
+  });
+
+  final PortfolioIssueKind kind;
+  final LocalDate date;
+  final OperationType? operationType;
+  final String? assetSymbol;
+
+  /// "Instituição · Conta".
+  final String? accountLabel;
+}
 
 /// Save pronto para gravar.
 class SaveExport {
@@ -47,6 +72,7 @@ class ImportPreview {
     required this.schemas,
     required this.plan,
     required this.fromThisDevice,
+    this.warnings = const [],
   });
 
   final String fileName;
@@ -61,6 +87,10 @@ class ImportPreview {
 
   /// O save foi gerado por este mesmo PC.
   final bool fromThisDevice;
+
+  /// Inconsistências novas da carteira real depois de aplicar, com as
+  /// escolhas padrão dos conflitos.
+  final List<ImportWarning> warnings;
 
   bool get upgradedFromOlderSchema =>
       manifest.schemaVersion < AppDatabase.latestSchemaVersion;
@@ -91,9 +121,14 @@ class SaveService {
     required this.deviceName,
     Clock wallClock = const Clock(),
     this.beforeWrite,
+    this._portfolio,
   }) : _clock = wallClock;
 
   final SyncTablesGateway _tables;
+
+  /// Carteira real do mesmo banco, para conferir a consistência do resultado
+  /// na prévia. Sem ela, a prévia não confere.
+  final PortfolioQuery? _portfolio;
   final SyncPeersRepository _peers;
   final SyncContext _sync;
   final BackupService _backups;
@@ -197,7 +232,65 @@ class SaveService {
       schemas: schemas,
       plan: plan,
       fromThisDevice: manifest.deviceId == _sync.deviceId,
+      warnings: await _consistencyOf(plan, schemas),
     );
+  }
+
+  /// Inconsistências novas que a carteira real teria depois de aplicar
+  /// [preview] com as escolhas [resolutions] (a prévia recalcula quando o
+  /// usuário troca a versão de um conflito). Não altera nada.
+  Future<List<ImportWarning>> consistency(
+    ImportPreview preview, {
+    Map<RowRef, MergeSide> resolutions = const {},
+  }) async {
+    final schemas = await _tables.schemas();
+    final plan = await _plan(
+      preview.manifest,
+      preview.tables,
+      schemas,
+      resolutions,
+    );
+    return _consistencyOf(plan, schemas);
+  }
+
+  /// Aplica [plan] numa transação que é sempre desfeita, recalcula a
+  /// carteira dentro dela e compara as inconsistências com as de antes.
+  Future<List<ImportWarning>> _consistencyOf(
+    MergePlan plan,
+    Map<String, SyncTableSchema> schemas,
+  ) async {
+    final portfolio = _portfolio;
+    if (portfolio == null || plan.isEmpty) return const [];
+    String keyOf(PortfolioIssue i) => '${i.kind.name}|${i.operationId}';
+    final before = {
+      for (final i in (await portfolio.load()).state.issues) keyOf(i),
+    };
+    var warnings = const <ImportWarning>[];
+    try {
+      await _tables.transaction(() async {
+        await _tables.apply(plan, schemas, dryRun: true);
+        final after = await portfolio.load();
+        final operations = {for (final o in after.operations) o.id: o};
+        warnings = [
+          for (final issue in after.state.issues)
+            if (!before.contains(keyOf(issue)))
+              if (operations[issue.operationId] case final op?)
+                ImportWarning(
+                  kind: issue.kind,
+                  date: issue.date,
+                  operationType: op.type,
+                  assetSymbol: after.assets[op.assetId]?.symbol,
+                  accountLabel: after.accountLabel(op.accountId),
+                )
+              else
+                ImportWarning(kind: issue.kind, date: issue.date),
+        ];
+        throw const _DryRunRollback();
+      });
+    } on _DryRunRollback {
+      // Esperado: a transação da prévia nunca é confirmada.
+    }
+    return warnings;
   }
 
   /// Aplica a importação: backup automático, depois mesclagem numa única
@@ -316,4 +409,9 @@ class SaveService {
     if (b == null || b.isEmpty) return a;
     return a.compareTo(b) >= 0 ? a : b;
   }
+}
+
+/// Desfaz a transação da prévia (nunca sai de [SaveService]).
+class _DryRunRollback implements Exception {
+  const _DryRunRollback();
 }

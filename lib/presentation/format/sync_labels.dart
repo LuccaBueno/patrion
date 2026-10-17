@@ -1,9 +1,11 @@
 import 'package:decimal/decimal.dart';
 
+import '../../application/sync/save_service.dart';
 import '../../core/time/instant_format.dart';
 import '../../core/time/local_date.dart';
 import '../../domain/portfolio/codes.dart';
 import '../../domain/portfolio/operation_type.dart';
+import '../../domain/portfolio/portfolio_calculator.dart';
 import '../../domain/sync/sync_rows.dart';
 import 'formatters.dart';
 import 'labels.dart';
@@ -160,6 +162,28 @@ abstract final class SyncLabels {
     if (size < 1024 * 1024) return '${(size + 512) ~/ 1024} KB';
     final tenths = (size * 10 + 524288) ~/ 1048576;
     return '${tenths ~/ 10},${tenths % 10} MB';
+  }
+
+  /// Uma inconsistência que a importação criaria na carteira real.
+  static String warning(ImportWarning w) {
+    final what = [
+      if (w.operationType != null) w.operationType!.label,
+      if (w.assetSymbol != null) w.assetSymbol!,
+      if (w.accountLabel != null) 'em ${w.accountLabel}',
+    ].join(' ');
+    final when = Fmt.date(w.date);
+    final subject = what.isEmpty ? 'Operação de $when' : '$what, $when';
+    return switch (w.kind) {
+      PortfolioIssueKind.oversold =>
+        '$subject: a quantidade vendida ou transferida fica maior que a '
+            'posição na data.',
+      PortfolioIssueKind.missingTransferLeg =>
+        '$subject: transferência sem a ponta de saída.',
+      PortfolioIssueKind.unknownAsset =>
+        '$subject: o ativo da operação não está cadastrado.',
+      PortfolioIssueKind.currencyMismatch =>
+        '$subject: moeda diferente da moeda da posição.',
+    };
   }
 
   static String _operationType(String? code) {

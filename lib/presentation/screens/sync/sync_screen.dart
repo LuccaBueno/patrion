@@ -95,8 +95,12 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     final choices = await showDialog<Map<RowRef, MergeSide>>(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-          ImportPreviewDialog(preview: preview, thenExport: thenExport),
+      builder: (context) => ImportPreviewDialog(
+        preview: preview,
+        thenExport: thenExport,
+        recheck: (choices) =>
+            service.consistency(preview, resolutions: choices),
+      ),
     );
     if (choices == null) return;
     final result = await service.apply(preview, resolutions: choices);

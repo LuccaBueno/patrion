@@ -12,10 +12,15 @@ class ImportPreviewDialog extends StatefulWidget {
   const ImportPreviewDialog({
     required this.preview,
     this.thenExport = false,
+    this.recheck,
     super.key,
   });
 
   final ImportPreview preview;
+
+  /// Recalcula os avisos de consistência com outras escolhas de conflito.
+  final Future<List<ImportWarning>> Function(Map<RowRef, MergeSide> choices)?
+  recheck;
 
   /// "Importar e gerar novo save": o botão muda de nome.
   final bool thenExport;
@@ -28,6 +33,29 @@ class _ImportPreviewDialogState extends State<ImportPreviewDialog> {
   late final Map<RowRef, MergeSide> _choices = {
     for (final c in widget.preview.plan.conflicts) c.ref: c.defaultSide,
   };
+  late List<ImportWarning> _warnings = widget.preview.warnings;
+  bool _checking = false;
+  int _checkSeq = 0;
+
+  void _choose(RowRef ref, MergeSide side) {
+    setState(() => _choices[ref] = side);
+    final recheck = widget.recheck;
+    if (recheck == null) return;
+    final seq = ++_checkSeq;
+    setState(() => _checking = true);
+    recheck(Map.of(_choices)).then(
+      (warnings) {
+        if (!mounted || seq != _checkSeq) return;
+        setState(() {
+          _warnings = warnings;
+          _checking = false;
+        });
+      },
+      onError: (Object _) {
+        if (mounted && seq == _checkSeq) setState(() => _checking = false);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +87,12 @@ class _ImportPreviewDialogState extends State<ImportPreviewDialog> {
               'O save é de uma versão anterior do banco (schema '
               '${m.schemaVersion}) e foi convertido para a atual.',
         ),
+      if (_checking)
+        const Padding(
+          padding: EdgeInsets.only(top: 8),
+          child: LinearProgressIndicator(),
+        ),
+      if (_warnings.isNotEmpty) _WarningsCard(warnings: _warnings),
       const SizedBox(height: 16),
       if (plan.isEmpty)
         const _Note(
@@ -96,7 +130,7 @@ class _ImportPreviewDialogState extends State<ImportPreviewDialog> {
             conflict: c,
             preview: preview,
             choice: _choices[c.ref]!,
-            onChanged: (side) => setState(() => _choices[c.ref] = side),
+            onChanged: (side) => _choose(c.ref, side),
           ),
       ],
       if (plan.unifications.isNotEmpty) ...[
@@ -182,6 +216,67 @@ class _ImportPreviewDialogState extends State<ImportPreviewDialog> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Inconsistências que a carteira real passaria a ter. Avisa sem bloquear.
+class _WarningsCard extends StatelessWidget {
+  const _WarningsCard({required this.warnings});
+
+  final List<ImportWarning> warnings;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final n = warnings.length;
+    return Card(
+      key: const Key('import-warnings'),
+      margin: const EdgeInsets.only(top: 12),
+      color: theme.colorScheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_outlined,
+                  color: theme.colorScheme.onErrorContainer,
+                  semanticLabel: 'Atenção',
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Depois de aplicar, a carteira fica com $n '
+                    '${n == 1 ? 'operação inconsistente' : 'operações inconsistentes'}',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.onErrorContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            for (final w in warnings)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '• ${SyncLabels.warning(w)}',
+                  style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                ),
+              ),
+            const SizedBox(height: 8),
+            Text(
+              'Isso acontece, por exemplo, quando a mesma posição foi alterada '
+              'nos dois computadores. Você pode aplicar e corrigir depois em '
+              'Operações, ou escolher outra versão nos conflitos abaixo.',
+              style: TextStyle(color: theme.colorScheme.onErrorContainer),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

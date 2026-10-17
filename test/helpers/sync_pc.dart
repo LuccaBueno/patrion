@@ -49,6 +49,7 @@ class SyncPc {
       appVersion: '0.1.0',
       deviceName: name,
       wallClock: t.wall.clock,
+      portfolio: query,
       beforeWrite: (i) {
         if (failAtWrite != null && i == failAtWrite) {
           throw StateError('falha simulada na escrita $i');
@@ -166,16 +167,39 @@ class SyncPc {
     String qty, {
     String price = '10',
     String date = '2026-01-05',
+    OperationType type = OperationType.buy,
   }) => OperationDraft(
     accountId: account,
     assetId: asset,
-    type: OperationType.buy,
+    type: type,
     tradeDate: LocalDate.parse(date),
     currency: 'BRL',
     quantity: dec(qty),
     unitPrice: dec(price),
     fees: dec('0'),
   );
+
+  Future<String> sell(
+    String account,
+    String asset,
+    String qty, {
+    String price = '12',
+    String date = '2026-02-10',
+  }) async {
+    tick();
+    final outcome = await operations.save(
+      buyDraft(
+        account,
+        asset,
+        qty,
+        price: price,
+        date: date,
+        type: OperationType.sell,
+      ),
+      allowDuplicate: true,
+    );
+    return (outcome as Saved).id;
+  }
 
   Future<String> buy(
     String account,

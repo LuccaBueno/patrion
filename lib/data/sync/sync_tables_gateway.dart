@@ -93,10 +93,13 @@ class SyncTablesGateway {
   /// a ordem das linhas não importa e uma falha desfaz tudo.
   ///
   /// [beforeWrite] existe para os testes simularem uma falha no meio.
+  /// Com [dryRun], as alterações locais não avançam o HLC: a prévia grava
+  /// numa transação que é desfeita, só para conferir a carteira resultante.
   Future<void> apply(
     MergePlan plan,
     Map<String, SyncTableSchema> schemas, {
     void Function(int index)? beforeWrite,
+    bool dryRun = false,
   }) async {
     await _db.customStatement('PRAGMA defer_foreign_keys = ON');
     for (final (index, write) in plan.writes.indexed) {
@@ -104,7 +107,9 @@ class SyncTablesGateway {
       final schema = schemas[write.table]!;
       final row = Map.of(write.row);
       if (write.localStamp) {
-        final stamp = await _sync!.nextStamp();
+        final stamp = dryRun
+            ? SyncStamp(at: row['updated_at']!, hlc: _sync!.lastHlc)
+            : await _sync!.nextStamp();
         row
           ..['updated_at'] = stamp.at
           ..['hlc'] = stamp.hlc.toString()

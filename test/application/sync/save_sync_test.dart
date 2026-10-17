@@ -8,6 +8,8 @@ import 'package:patrion/core/errors/app_error.dart';
 import 'package:patrion/core/sync/hlc.dart';
 import 'package:patrion/data/db/app_database.dart';
 import 'package:patrion/data/repositories/sync_repository.dart';
+import 'package:patrion/domain/portfolio/operation_type.dart';
+import 'package:patrion/domain/portfolio/portfolio_calculator.dart';
 import 'package:patrion/domain/sync/invsave_codec.dart';
 import 'package:patrion/domain/sync/merge_planner.dart';
 import 'package:patrion/domain/sync/save_manifest.dart';
@@ -160,6 +162,90 @@ void main() {
       expect(await qtyOf(a, o1), '20');
       expect(await qtyOf(b, o1), '20');
       expect(await b.dump(), await a.dump());
+    });
+  });
+
+  group('prévia avisa quando a carteira resultante fica inconsistente', () {
+    test('vendas feitas nos dois PCs somam mais que a posição: aviso de '
+        'venda maior que a posição, sem alterar nada', () async {
+      await a.buy(account, asset, '100');
+      await syncBoth(a, b);
+      final sellA = await a.sell(account, asset, '80');
+      await b.sell(account, asset, '50', date: '2026-02-11');
+      expect((await b.query.load()).state.issues, isEmpty);
+      final before = await b.dump();
+      final hlcBefore = b.t.sync.lastHlc;
+
+      final preview = await b.preview(await a.export());
+
+      final warning = preview.warnings.single;
+      expect(warning.kind, PortfolioIssueKind.oversold);
+      expect(warning.assetSymbol, 'VALE3');
+      expect(warning.accountLabel, 'Corretora Exemplo · Principal');
+      // A venda de A (10/02) passa; a de B (11/02) é a que fica sem posição.
+      expect(warning.date.toString(), '2026-02-11');
+      expect(warning.operationType, OperationType.sell);
+      // A prévia não grava nada nem avança o relógio.
+      expect(await b.dump(), before);
+      expect(b.t.sync.lastHlc, hlcBefore);
+      expect((await b.query.load()).state.issues, isEmpty);
+
+      // A importação continua permitida; a inconsistência aparece depois.
+      await b.save.apply(preview);
+      final issues = (await b.query.load()).state.issues;
+      expect(issues.single.kind, PortfolioIssueKind.oversold);
+      expect((await b.row('operations', sellA)), isNotNull);
+    });
+
+    test('inconsistências que já existiam não são repetidas; importação '
+        'consistente não avisa', () async {
+      await a.buy(account, asset, '100');
+      final preview = await b.preview(await a.export());
+      expect(preview.plan.isEmpty, isFalse);
+      expect(preview.warnings, isEmpty);
+    });
+
+    test('a escolha da versão num conflito recalcula o aviso', () async {
+      final o1 = await a.buy(account, asset, '100');
+      final o2 = await a.sell(account, asset, '50');
+      await syncBoth(a, b);
+      // B reduz a compra para 60 (a venda de 50 cabe).
+      await b.editBuy(o1, account, asset, '60');
+      // Depois, A aumenta a venda para 90 e ajusta a compra para 95.
+      a.tick(const Duration(hours: 1));
+      await a.operations.save(
+        a.buyDraft(
+          account,
+          asset,
+          '90',
+          price: '12',
+          date: '2026-02-10',
+          type: OperationType.sell,
+        ),
+        id: o2,
+      );
+      await a.editBuy(o1, account, asset, '95');
+
+      final preview = await b.preview(await a.export());
+      final conflict = preview.plan.conflicts.single;
+      expect(conflict.id, o1);
+      expect(conflict.defaultSide, MergeSide.incoming);
+      // Padrão (compra de 95 e venda de 90): consistente.
+      expect(preview.warnings, isEmpty);
+
+      // Mantendo a compra de 60 deste PC, a venda de 90 fica sem posição.
+      final keepingLocal = await b.save.consistency(
+        preview,
+        resolutions: {conflict.ref: MergeSide.local},
+      );
+      expect(keepingLocal.single.kind, PortfolioIssueKind.oversold);
+      expect(
+        await b.save.consistency(
+          preview,
+          resolutions: {conflict.ref: MergeSide.incoming},
+        ),
+        isEmpty,
+      );
     });
   });
 

@@ -146,6 +146,7 @@ final saveServiceProvider = Provider<SaveService>((ref) {
     backups: ref.watch(backupServiceProvider),
     appVersion: env.appVersion,
     deviceName: env.deviceName,
+    portfolio: ref.watch(portfolioQueryProvider),
   );
 });
 
