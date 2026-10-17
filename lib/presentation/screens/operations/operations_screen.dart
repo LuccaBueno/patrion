@@ -221,7 +221,7 @@ class _OperationsTableState extends ConsumerState<OperationsTable> {
               ),
             ),
             Text(
-              '${rows.length} de ${snap.operations.length}',
+              '${rows.length} de ${widget.assetId == null ? snap.operations.length : snap.operations.where((o) => o.assetId == widget.assetId).length}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
