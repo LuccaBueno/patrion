@@ -109,7 +109,7 @@ void main() {
     expect(settings.single.key, 'display_currency');
     expect(await db.select(db.operations).get(), isEmpty);
     await db.close();
-    expect(userVersion(dbFile), 2);
+    expect(userVersion(dbFile), AppDatabase.latestSchemaVersion);
     expect(userVersion(path), 1);
   });
 
@@ -158,7 +158,7 @@ void main() {
         Directory(backupsDir)
             .listSync()
             .map((f) => p.basename(f.path))
-            .where((n) => n.contains('pre-migracao'))
+            .where((n) => n.contains('pre-migracao') && n.endsWith('.db'))
             .toList()
           ..sort();
     expect(remaining, [for (final path in paths.skip(2)) p.basename(path)]);

@@ -26,6 +26,14 @@ part 'app_database.g.dart';
     FixedIncomeTerms,
     Operations,
     ManualValuations,
+    AssetAliases,
+    HypoPortfolios,
+    HypoHoldings,
+    HypoCashflowRules,
+    HypoScenarios,
+    DevSyncPeers,
+    DevSyncHistory,
+    DevBackups,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -40,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Versão atual do schema. Também é lida antes de abrir o banco, para
   /// decidir se é preciso o backup anterior à migração (SPEC §11).
-  static const latestSchemaVersion = 2;
+  static const latestSchemaVersion = 3;
 
   @override
   int get schemaVersion => latestSchemaVersion;
@@ -78,6 +86,33 @@ class AppDatabase extends _$AppDatabase {
           schema.operationsDate,
           schema.manualValuationsHlc,
           schema.manualValuationsAssetDate,
+        ]) {
+          await m.createIndex(index);
+        }
+      },
+      // F5: aliases da mesclagem, carteiras hipotéticas (só as tabelas) e
+      // tabelas de sincronização e backups do dispositivo. Só cria.
+      from2To3: (m, schema) async {
+        for (final table in [
+          schema.assetAliases,
+          schema.hypoPortfolios,
+          schema.hypoHoldings,
+          schema.hypoCashflowRules,
+          schema.hypoScenarios,
+          schema.devSyncPeers,
+          schema.devSyncHistory,
+          schema.devBackups,
+        ]) {
+          await m.createTable(table);
+        }
+        for (final index in [
+          schema.assetAliasesHlc,
+          schema.assetAliasesAlias,
+          schema.hypoPortfoliosHlc,
+          schema.hypoHoldingsHlc,
+          schema.hypoHoldingsPortfolio,
+          schema.hypoCashflowRulesHlc,
+          schema.hypoScenariosHlc,
         ]) {
           await m.createIndex(index);
         }

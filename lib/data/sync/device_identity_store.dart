@@ -61,6 +61,47 @@ class DeviceIdentityStore {
     });
   }
 
+  /// Depois de restaurar um backup, mantém a identidade deste PC: o banco
+  /// restaurado pode ser de outro PC ou de antes de alterações já exportadas.
+  /// O último HLC fica no maior entre o atual, o restaurado e [atLeast] (o
+  /// maior HLC dos registros), para o relógio nunca voltar (DECISIONS D-28).
+  Future<DeviceIdentity> adopt(
+    DeviceIdentity identity, {
+    required DateTime now,
+    String? atLeast,
+  }) {
+    return _db.transaction(() async {
+      final restored = await _db.select(_db.devIdentity).get();
+      var last = identity.lastHlc;
+      for (final candidate in [
+        for (final r in restored) Hlc.parse(r.lastHlc),
+        if (atLeast != null) Hlc.parse(atLeast),
+      ]) {
+        if (candidate.millis > last.millis ||
+            (candidate.millis == last.millis &&
+                candidate.counter > last.counter)) {
+          last = Hlc(candidate.millis, candidate.counter, identity.deviceId);
+        }
+      }
+      await _db.delete(_db.devIdentity).go();
+      await _db
+          .into(_db.devIdentity)
+          .insert(
+            DevIdentityCompanion.insert(
+              deviceId: identity.deviceId,
+              deviceName: identity.deviceName,
+              createdAt: formatInstant(now),
+              lastHlc: last.toString(),
+            ),
+          );
+      return DeviceIdentity(
+        deviceId: identity.deviceId,
+        deviceName: identity.deviceName,
+        lastHlc: last,
+      );
+    });
+  }
+
   /// Grava o último HLC. Chamado dentro da transação de cada escrita.
   Future<void> saveLastHlc(Hlc hlc) async {
     await (_db.update(_db.devIdentity)

@@ -6,6 +6,7 @@ import 'package:patrion/data/db/app_database.dart';
 import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v2.dart' as v2;
+import 'generated/schema_v3.dart' as v3;
 
 /// Migrações do schema (`docs/BANCO.md` §9).
 ///
@@ -135,6 +136,53 @@ void main() {
         );
         expect(await newDb.select(newDb.sharedSettings).get(), expectedShared);
         expect(await newDb.select(newDb.operations).get(), isEmpty);
+      },
+    );
+  });
+
+  test('v2 para v3 preserva os dados existentes', () async {
+    const deviceId = '0199f2a0-0000-7000-8000-000000000001';
+    const hlc = '001760702400000-00003-$deviceId';
+    const at = '2026-10-17T12:00:00.000Z';
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 2,
+      newVersion: 3,
+      createOld: v2.DatabaseAtV2.new,
+      createNew: v3.DatabaseAtV3.new,
+      openTestedDatabase: AppDatabase.new,
+      createItems: (batch, oldDb) {
+        batch.insertAll(oldDb.institutions, [
+          const v2.InstitutionsData(
+            id: '0199f2a0-0000-7000-8000-0000000000cc',
+            createdAt: at,
+            updatedAt: at,
+            hlc: hlc,
+            deviceId: deviceId,
+            name: 'Corretora',
+            nameKey: 'corretora',
+            kind: 'broker',
+            country: 'BR',
+          ),
+        ]);
+      },
+      validateItems: (newDb) async {
+        expect(await newDb.select(newDb.institutions).get(), [
+          const v3.InstitutionsData(
+            id: '0199f2a0-0000-7000-8000-0000000000cc',
+            createdAt: at,
+            updatedAt: at,
+            hlc: hlc,
+            deviceId: deviceId,
+            name: 'Corretora',
+            nameKey: 'corretora',
+            kind: 'broker',
+            country: 'BR',
+          ),
+        ]);
+        expect(await newDb.select(newDb.assetAliases).get(), isEmpty);
+        expect(await newDb.select(newDb.hypoPortfolios).get(), isEmpty);
+        expect(await newDb.select(newDb.devBackups).get(), isEmpty);
       },
     );
   });

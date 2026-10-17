@@ -202,3 +202,157 @@ class ManualValuations extends Table with SyncColumns {
   TextColumn get currency => text()();
   TextColumn get notes => text().nullable()();
 }
+
+// ---------------------------------------------------------------------------
+// Sincronização (schema 3).
+// ---------------------------------------------------------------------------
+
+/// Unificações feitas pela mesclagem do save (SPEC §10.4): o registro
+/// `alias_id` foi absorvido por `canonical_id`. Permite remapear referências
+/// que cheguem depois, vindas de saves antigos.
+@DataClassName('AssetAliasRow')
+@TableIndex(name: 'asset_aliases_hlc', columns: {#hlc})
+@TableIndex(name: 'asset_aliases_alias', columns: {#aliasId})
+class AssetAliases extends Table with SyncColumns {
+  /// `institution`, `account`, `asset`, `fixed_income_terms` ou
+  /// `shared_setting`.
+  TextColumn get entity => text()();
+  TextColumn get aliasId => text()();
+  TextColumn get canonicalId => text()();
+}
+
+// ---------------------------------------------------------------------------
+// Carteiras hipotéticas (sincronizáveis, separadas da carteira real).
+// Criadas no schema 3 para o save já levá-las (SPEC §10.4); telas e cálculos
+// na F9. `hypo_runs` entra na F9 (DECISIONS D-29).
+// ---------------------------------------------------------------------------
+
+@DataClassName('HypoPortfolioRow')
+@TableIndex(name: 'hypo_portfolios_hlc', columns: {#hlc})
+class HypoPortfolios extends Table with SyncColumns {
+  TextColumn get name => text()();
+  TextColumn get description => text().nullable()();
+  TextColumn get objective => text().nullable()();
+  TextColumn get startDate => text()();
+  TextColumn get baseCurrency => text()();
+  TextColumn get initialCapital => text().map(const DecimalTextConverter())();
+
+  /// `weight` ou `quantity`.
+  TextColumn get compositionMode => text()();
+  TextColumn get benchmarkJson => text().nullable()();
+  TextColumn get rebalanceJson => text()();
+  TextColumn get assumptionsJson => text()();
+  TextColumn get methodology => text().nullable()();
+  TextColumn get archivedAt => text().nullable()();
+  TextColumn get duplicatedFromId => text().nullable()();
+}
+
+@DataClassName('HypoHoldingRow')
+@TableIndex(name: 'hypo_holdings_hlc', columns: {#hlc})
+@TableIndex(name: 'hypo_holdings_portfolio', columns: {#portfolioId})
+class HypoHoldings extends Table with SyncColumns {
+  TextColumn get portfolioId => text().references(HypoPortfolios, #id)();
+  TextColumn get assetId => text().references(Assets, #id)();
+  TextColumn get weightPct =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get quantity =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get amount =>
+      text().map(const DecimalTextConverter()).nullable()();
+}
+
+@DataClassName('HypoCashflowRuleRow')
+@TableIndex(name: 'hypo_cashflow_rules_hlc', columns: {#hlc})
+class HypoCashflowRules extends Table with SyncColumns {
+  TextColumn get portfolioId => text().references(HypoPortfolios, #id)();
+
+  /// `contribution` ou `withdrawal`.
+  TextColumn get kind => text()();
+  TextColumn get frequency => text()();
+  TextColumn get amount =>
+      text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get pct => text().map(const DecimalTextConverter()).nullable()();
+  TextColumn get adjustment => text()();
+  TextColumn get startDate => text()();
+  TextColumn get endDate => text().nullable()();
+}
+
+@DataClassName('HypoScenarioRow')
+@TableIndex(name: 'hypo_scenarios_hlc', columns: {#hlc})
+class HypoScenarios extends Table with SyncColumns {
+  /// Nulo para cenários dos simuladores.
+  TextColumn get portfolioId =>
+      text().nullable().references(HypoPortfolios, #id)();
+  TextColumn get name => text()();
+  TextColumn get kind => text()();
+  TextColumn get assumptionsJson => text()();
+}
+
+// ---------------------------------------------------------------------------
+// Dispositivo: sincronização e backups (nunca vão no save).
+// ---------------------------------------------------------------------------
+
+/// O que este PC sabe de cada dispositivo com quem já trocou saves. Base da
+/// detecção de conflitos (SPEC §10.4) e do aviso de sincronização antiga.
+@DataClassName('DevSyncPeerRow')
+class DevSyncPeers extends Table {
+  TextColumn get peerDeviceId => text()();
+  TextColumn get peerName => text()();
+
+  /// Maior HLC do último save importado desse dispositivo.
+  TextColumn get lastHlcReceived => text()();
+
+  /// Maior HLC deste PC que esse dispositivo confirmou ter recebido (vem no
+  /// manifesto dos saves dele).
+  TextColumn get lastHlcSent => text().nullable()();
+  TextColumn get lastSyncAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {peerDeviceId};
+}
+
+/// Histórico de exportações e importações de save.
+@DataClassName('DevSyncHistoryRow')
+class DevSyncHistory extends Table {
+  TextColumn get id => text()();
+
+  /// `export` ou `import`.
+  TextColumn get direction => text()();
+  TextColumn get peerDeviceId => text().nullable()();
+  TextColumn get peerName => text().nullable()();
+  TextColumn get fileName => text()();
+  TextColumn get at => text()();
+  TextColumn get maxHlc => text().nullable()();
+
+  /// Contagens por tabela (JSON). Nunca valores patrimoniais.
+  TextColumn get countsJson => text()();
+
+  /// `ok` ou `failed`.
+  TextColumn get result => text()();
+  TextColumn get message => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Backups conhecidos por este PC (SPEC §11).
+@DataClassName('DevBackupRow')
+class DevBackups extends Table {
+  TextColumn get id => text()();
+  TextColumn get path => text()();
+  TextColumn get at => text()();
+
+  /// `manual`, `pre-migracao`, `pre-importacao` ou `pre-restauracao`.
+  TextColumn get reason => text()();
+  IntColumn get schemaVersion => integer()();
+  TextColumn get appVersion => text()();
+  IntColumn get size => integer()();
+  TextColumn get sha256 => text()();
+
+  /// `none` na v1.0. Preparação para o banco criptografado da F5B
+  /// (DECISIONS D-24).
+  TextColumn get encryption => text().withDefault(const Constant('none'))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

@@ -1,11 +1,16 @@
 import 'dart:io';
 
 import 'package:clock/clock.dart';
+import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
 import '../../core/errors/app_error.dart';
+import '../../core/time/instant_format.dart';
+import '../../domain/backup/backup_metadata.dart';
+import 'database_file_inspector.dart';
+import 'local_backup_file_system.dart';
 
 final _log = Logger('backup');
 
@@ -19,6 +24,8 @@ final _log = Logger('backup');
 /// [DataError] e o banco não é aberto, ou seja, a migração não acontece sem
 /// um backup válido.
 ///
+/// Grava os metadados ao lado da cópia (`<backup>.json`); o registro em
+/// `dev_backups` é feito depois que o banco abre (`BackupService`).
 /// Guarda só os [keep] backups de migração mais recentes.
 class PreMigrationBackup {
   const PreMigrationBackup({
@@ -29,7 +36,7 @@ class PreMigrationBackup {
   }) : _clock = wallClock;
 
   /// Sufixo que identifica os backups de migração (para a retenção).
-  static const reasonTag = 'pre-migracao';
+  static final reasonTag = BackupReason.preMigration.code;
 
   final String backupsDir;
   final String appVersion;
@@ -44,7 +51,7 @@ class PreMigrationBackup {
   String? run({required String databaseFile, required int targetVersion}) {
     if (!File(databaseFile).existsSync()) return null;
 
-    final fromVersion = _userVersion(databaseFile);
+    final fromVersion = DatabaseFileInspector.userVersion(databaseFile);
     if (fromVersion == 0 || fromVersion == targetVersion) return null;
     if (fromVersion > targetVersion) {
       throw DataError(
@@ -54,10 +61,11 @@ class PreMigrationBackup {
       );
     }
 
+    final at = _clock.now();
     final target = p.join(
       backupsDir,
       fileNameFor(
-        at: _clock.now(),
+        at: at,
         fromVersion: fromVersion,
         toVersion: targetVersion,
         appVersion: appVersion,
@@ -71,7 +79,29 @@ class PreMigrationBackup {
       } finally {
         source.close();
       }
-      _verify(target, fromVersion);
+      final check = DatabaseFileInspector.inspect(target);
+      if (!check.integrityOk) {
+        throw StateError('integrity_check: ${check.integrity}');
+      }
+      if (check.userVersion != fromVersion) {
+        throw StateError(
+          'versão ${check.userVersion} no backup, esperada $fromVersion',
+        );
+      }
+      final bytes = File(target).readAsBytesSync();
+      const LocalBackupFileSystem().writeMetadata(
+        target,
+        BackupMetadata(
+          createdAt: formatInstant(at),
+          reason: BackupReason.preMigration,
+          schemaVersion: fromVersion,
+          appVersion: appVersion,
+          deviceId: check.deviceId,
+          deviceName: check.deviceName,
+          size: bytes.length,
+          sha256: sha256.convert(bytes).toString(),
+        ),
+      );
     } catch (error) {
       _deleteQuietly(target);
       _log.severe('Backup anterior à migração falhou', error);
@@ -86,7 +116,11 @@ class PreMigrationBackup {
       'Backup antes da migração v$fromVersion→v$targetVersion: '
       '${p.basename(target)}',
     );
-    _applyRetention();
+    LocalBackupFileSystem.retain(
+      directory: backupsDir,
+      reasonCode: reasonTag,
+      keep: keep,
+    );
     return target;
   }
 
@@ -97,68 +131,13 @@ class PreMigrationBackup {
     required int fromVersion,
     required int toVersion,
     required String appVersion,
-  }) {
-    final u = at.toUtc();
-    String two(int v) => v.toString().padLeft(2, '0');
-    final stamp =
-        '${u.year}-${two(u.month)}-${two(u.day)}_'
-        '${two(u.hour)}-${two(u.minute)}-${two(u.second)}-'
-        '${u.millisecond.toString().padLeft(3, '0')}Z';
-    return 'patrion_${stamp}_${reasonTag}_v$fromVersion-v${toVersion}_'
-        'app-$appVersion.db';
-  }
-
-  static int _userVersion(String file) {
-    final db = sqlite3.open(file, mode: OpenMode.readOnly);
-    try {
-      return db.select('PRAGMA user_version').single.columnAt(0) as int;
-    } finally {
-      db.close();
-    }
-  }
-
-  static void _verify(String backup, int expectedVersion) {
-    final db = sqlite3.open(backup, mode: OpenMode.readOnly);
-    try {
-      final check = db.select('PRAGMA integrity_check').first.columnAt(0);
-      if (check != 'ok') {
-        throw StateError('integrity_check: $check');
-      }
-      final version =
-          db.select('PRAGMA user_version').single.columnAt(0) as int;
-      if (version != expectedVersion) {
-        throw StateError(
-          'versão $version no backup, esperada $expectedVersion',
-        );
-      }
-    } finally {
-      db.close();
-    }
-  }
-
-  void _applyRetention() {
-    final files =
-        Directory(backupsDir).listSync().whereType<File>().where((f) {
-            final name = p.basename(f.path);
-            return name.startsWith('patrion_') &&
-                name.contains('_${reasonTag}_') &&
-                name.endsWith('.db');
-          }).toList()
-          // O nome começa pela data UTC: ordem de nome = ordem cronológica.
-          ..sort((a, b) => p.basename(b.path).compareTo(p.basename(a.path)));
-    for (final old in files.skip(keep)) {
-      try {
-        old.deleteSync();
-      } on FileSystemException catch (error) {
-        _log.warning('Não consegui apagar um backup antigo', error);
-      }
-    }
-  }
+  }) =>
+      'patrion_${LocalBackupFileSystem.stampOf(at)}_${reasonTag}_'
+      'v$fromVersion-v${toVersion}_app-$appVersion.db';
 
   static void _deleteQuietly(String path) {
     try {
-      final file = File(path);
-      if (file.existsSync()) file.deleteSync();
+      const LocalBackupFileSystem().delete(path);
     } on FileSystemException {
       // Nada a fazer: o erro original é o que importa.
     }

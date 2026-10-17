@@ -6693,6 +6693,5409 @@ class ManualValuationsCompanion extends UpdateCompanion<ManualValuationRow> {
   }
 }
 
+class $AssetAliasesTable extends AssetAliases
+    with TableInfo<$AssetAliasesTable, AssetAliasRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssetAliasesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _aliasIdMeta = const VerificationMeta(
+    'aliasId',
+  );
+  @override
+  late final GeneratedColumn<String> aliasId = GeneratedColumn<String>(
+    'alias_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _canonicalIdMeta = const VerificationMeta(
+    'canonicalId',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalId = GeneratedColumn<String>(
+    'canonical_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    entity,
+    aliasId,
+    canonicalId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'asset_aliases';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AssetAliasRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    if (data.containsKey('alias_id')) {
+      context.handle(
+        _aliasIdMeta,
+        aliasId.isAcceptableOrUnknown(data['alias_id']!, _aliasIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_aliasIdMeta);
+    }
+    if (data.containsKey('canonical_id')) {
+      context.handle(
+        _canonicalIdMeta,
+        canonicalId.isAcceptableOrUnknown(
+          data['canonical_id']!,
+          _canonicalIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_canonicalIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AssetAliasRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssetAliasRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      aliasId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alias_id'],
+      )!,
+      canonicalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_id'],
+      )!,
+    );
+  }
+
+  @override
+  $AssetAliasesTable createAlias(String alias) {
+    return $AssetAliasesTable(attachedDatabase, alias);
+  }
+}
+
+class AssetAliasRow extends DataClass implements Insertable<AssetAliasRow> {
+  /// UUID v7 gerado no app.
+  final String id;
+
+  /// Instante UTC da criação (ISO-8601 com ms).
+  final String createdAt;
+
+  /// Instante UTC da última escrita.
+  final String updatedAt;
+
+  /// HLC da última alteração.
+  final String hlc;
+
+  /// Dispositivo que fez a última alteração.
+  final String deviceId;
+
+  /// Tombstone: preenchido na exclusão lógica.
+  final String? deletedAt;
+
+  /// `institution`, `account`, `asset`, `fixed_income_terms` ou
+  /// `shared_setting`.
+  final String entity;
+  final String aliasId;
+  final String canonicalId;
+  const AssetAliasRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.hlc,
+    required this.deviceId,
+    this.deletedAt,
+    required this.entity,
+    required this.aliasId,
+    required this.canonicalId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['hlc'] = Variable<String>(hlc);
+    map['device_id'] = Variable<String>(deviceId);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<String>(deletedAt);
+    }
+    map['entity'] = Variable<String>(entity);
+    map['alias_id'] = Variable<String>(aliasId);
+    map['canonical_id'] = Variable<String>(canonicalId);
+    return map;
+  }
+
+  AssetAliasesCompanion toCompanion(bool nullToAbsent) {
+    return AssetAliasesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      hlc: Value(hlc),
+      deviceId: Value(deviceId),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      entity: Value(entity),
+      aliasId: Value(aliasId),
+      canonicalId: Value(canonicalId),
+    );
+  }
+
+  factory AssetAliasRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssetAliasRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      entity: serializer.fromJson<String>(json['entity']),
+      aliasId: serializer.fromJson<String>(json['aliasId']),
+      canonicalId: serializer.fromJson<String>(json['canonicalId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'hlc': serializer.toJson<String>(hlc),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'entity': serializer.toJson<String>(entity),
+      'aliasId': serializer.toJson<String>(aliasId),
+      'canonicalId': serializer.toJson<String>(canonicalId),
+    };
+  }
+
+  AssetAliasRow copyWith({
+    String? id,
+    String? createdAt,
+    String? updatedAt,
+    String? hlc,
+    String? deviceId,
+    Value<String?> deletedAt = const Value.absent(),
+    String? entity,
+    String? aliasId,
+    String? canonicalId,
+  }) => AssetAliasRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    hlc: hlc ?? this.hlc,
+    deviceId: deviceId ?? this.deviceId,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    entity: entity ?? this.entity,
+    aliasId: aliasId ?? this.aliasId,
+    canonicalId: canonicalId ?? this.canonicalId,
+  );
+  AssetAliasRow copyWithCompanion(AssetAliasesCompanion data) {
+    return AssetAliasRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      entity: data.entity.present ? data.entity.value : this.entity,
+      aliasId: data.aliasId.present ? data.aliasId.value : this.aliasId,
+      canonicalId: data.canonicalId.present
+          ? data.canonicalId.value
+          : this.canonicalId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetAliasRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('entity: $entity, ')
+          ..write('aliasId: $aliasId, ')
+          ..write('canonicalId: $canonicalId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    entity,
+    aliasId,
+    canonicalId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssetAliasRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.hlc == this.hlc &&
+          other.deviceId == this.deviceId &&
+          other.deletedAt == this.deletedAt &&
+          other.entity == this.entity &&
+          other.aliasId == this.aliasId &&
+          other.canonicalId == this.canonicalId);
+}
+
+class AssetAliasesCompanion extends UpdateCompanion<AssetAliasRow> {
+  final Value<String> id;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String> hlc;
+  final Value<String> deviceId;
+  final Value<String?> deletedAt;
+  final Value<String> entity;
+  final Value<String> aliasId;
+  final Value<String> canonicalId;
+  final Value<int> rowid;
+  const AssetAliasesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.entity = const Value.absent(),
+    this.aliasId = const Value.absent(),
+    this.canonicalId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AssetAliasesCompanion.insert({
+    required String id,
+    required String createdAt,
+    required String updatedAt,
+    required String hlc,
+    required String deviceId,
+    this.deletedAt = const Value.absent(),
+    required String entity,
+    required String aliasId,
+    required String canonicalId,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       hlc = Value(hlc),
+       deviceId = Value(deviceId),
+       entity = Value(entity),
+       aliasId = Value(aliasId),
+       canonicalId = Value(canonicalId);
+  static Insertable<AssetAliasRow> custom({
+    Expression<String>? id,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? hlc,
+    Expression<String>? deviceId,
+    Expression<String>? deletedAt,
+    Expression<String>? entity,
+    Expression<String>? aliasId,
+    Expression<String>? canonicalId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (hlc != null) 'hlc': hlc,
+      if (deviceId != null) 'device_id': deviceId,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (entity != null) 'entity': entity,
+      if (aliasId != null) 'alias_id': aliasId,
+      if (canonicalId != null) 'canonical_id': canonicalId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AssetAliasesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<String>? hlc,
+    Value<String>? deviceId,
+    Value<String?>? deletedAt,
+    Value<String>? entity,
+    Value<String>? aliasId,
+    Value<String>? canonicalId,
+    Value<int>? rowid,
+  }) {
+    return AssetAliasesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      hlc: hlc ?? this.hlc,
+      deviceId: deviceId ?? this.deviceId,
+      deletedAt: deletedAt ?? this.deletedAt,
+      entity: entity ?? this.entity,
+      aliasId: aliasId ?? this.aliasId,
+      canonicalId: canonicalId ?? this.canonicalId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (aliasId.present) {
+      map['alias_id'] = Variable<String>(aliasId.value);
+    }
+    if (canonicalId.present) {
+      map['canonical_id'] = Variable<String>(canonicalId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetAliasesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('entity: $entity, ')
+          ..write('aliasId: $aliasId, ')
+          ..write('canonicalId: $canonicalId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HypoPortfoliosTable extends HypoPortfolios
+    with TableInfo<$HypoPortfoliosTable, HypoPortfolioRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HypoPortfoliosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _objectiveMeta = const VerificationMeta(
+    'objective',
+  );
+  @override
+  late final GeneratedColumn<String> objective = GeneratedColumn<String>(
+    'objective',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _baseCurrencyMeta = const VerificationMeta(
+    'baseCurrency',
+  );
+  @override
+  late final GeneratedColumn<String> baseCurrency = GeneratedColumn<String>(
+    'base_currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> initialCapital =
+      GeneratedColumn<String>(
+        'initial_capital',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<Decimal>($HypoPortfoliosTable.$converterinitialCapital);
+  static const VerificationMeta _compositionModeMeta = const VerificationMeta(
+    'compositionMode',
+  );
+  @override
+  late final GeneratedColumn<String> compositionMode = GeneratedColumn<String>(
+    'composition_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _benchmarkJsonMeta = const VerificationMeta(
+    'benchmarkJson',
+  );
+  @override
+  late final GeneratedColumn<String> benchmarkJson = GeneratedColumn<String>(
+    'benchmark_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rebalanceJsonMeta = const VerificationMeta(
+    'rebalanceJson',
+  );
+  @override
+  late final GeneratedColumn<String> rebalanceJson = GeneratedColumn<String>(
+    'rebalance_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assumptionsJsonMeta = const VerificationMeta(
+    'assumptionsJson',
+  );
+  @override
+  late final GeneratedColumn<String> assumptionsJson = GeneratedColumn<String>(
+    'assumptions_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _methodologyMeta = const VerificationMeta(
+    'methodology',
+  );
+  @override
+  late final GeneratedColumn<String> methodology = GeneratedColumn<String>(
+    'methodology',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _archivedAtMeta = const VerificationMeta(
+    'archivedAt',
+  );
+  @override
+  late final GeneratedColumn<String> archivedAt = GeneratedColumn<String>(
+    'archived_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _duplicatedFromIdMeta = const VerificationMeta(
+    'duplicatedFromId',
+  );
+  @override
+  late final GeneratedColumn<String> duplicatedFromId = GeneratedColumn<String>(
+    'duplicated_from_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    name,
+    description,
+    objective,
+    startDate,
+    baseCurrency,
+    initialCapital,
+    compositionMode,
+    benchmarkJson,
+    rebalanceJson,
+    assumptionsJson,
+    methodology,
+    archivedAt,
+    duplicatedFromId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hypo_portfolios';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HypoPortfolioRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('objective')) {
+      context.handle(
+        _objectiveMeta,
+        objective.isAcceptableOrUnknown(data['objective']!, _objectiveMeta),
+      );
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('base_currency')) {
+      context.handle(
+        _baseCurrencyMeta,
+        baseCurrency.isAcceptableOrUnknown(
+          data['base_currency']!,
+          _baseCurrencyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_baseCurrencyMeta);
+    }
+    if (data.containsKey('composition_mode')) {
+      context.handle(
+        _compositionModeMeta,
+        compositionMode.isAcceptableOrUnknown(
+          data['composition_mode']!,
+          _compositionModeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_compositionModeMeta);
+    }
+    if (data.containsKey('benchmark_json')) {
+      context.handle(
+        _benchmarkJsonMeta,
+        benchmarkJson.isAcceptableOrUnknown(
+          data['benchmark_json']!,
+          _benchmarkJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rebalance_json')) {
+      context.handle(
+        _rebalanceJsonMeta,
+        rebalanceJson.isAcceptableOrUnknown(
+          data['rebalance_json']!,
+          _rebalanceJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_rebalanceJsonMeta);
+    }
+    if (data.containsKey('assumptions_json')) {
+      context.handle(
+        _assumptionsJsonMeta,
+        assumptionsJson.isAcceptableOrUnknown(
+          data['assumptions_json']!,
+          _assumptionsJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_assumptionsJsonMeta);
+    }
+    if (data.containsKey('methodology')) {
+      context.handle(
+        _methodologyMeta,
+        methodology.isAcceptableOrUnknown(
+          data['methodology']!,
+          _methodologyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+        _archivedAtMeta,
+        archivedAt.isAcceptableOrUnknown(data['archived_at']!, _archivedAtMeta),
+      );
+    }
+    if (data.containsKey('duplicated_from_id')) {
+      context.handle(
+        _duplicatedFromIdMeta,
+        duplicatedFromId.isAcceptableOrUnknown(
+          data['duplicated_from_id']!,
+          _duplicatedFromIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HypoPortfolioRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HypoPortfolioRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      objective: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}objective'],
+      ),
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date'],
+      )!,
+      baseCurrency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}base_currency'],
+      )!,
+      initialCapital: $HypoPortfoliosTable.$converterinitialCapital.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}initial_capital'],
+        )!,
+      ),
+      compositionMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}composition_mode'],
+      )!,
+      benchmarkJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}benchmark_json'],
+      ),
+      rebalanceJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rebalance_json'],
+      )!,
+      assumptionsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assumptions_json'],
+      )!,
+      methodology: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}methodology'],
+      ),
+      archivedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}archived_at'],
+      ),
+      duplicatedFromId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}duplicated_from_id'],
+      ),
+    );
+  }
+
+  @override
+  $HypoPortfoliosTable createAlias(String alias) {
+    return $HypoPortfoliosTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Decimal, String> $converterinitialCapital =
+      const DecimalTextConverter();
+}
+
+class HypoPortfolioRow extends DataClass
+    implements Insertable<HypoPortfolioRow> {
+  /// UUID v7 gerado no app.
+  final String id;
+
+  /// Instante UTC da criação (ISO-8601 com ms).
+  final String createdAt;
+
+  /// Instante UTC da última escrita.
+  final String updatedAt;
+
+  /// HLC da última alteração.
+  final String hlc;
+
+  /// Dispositivo que fez a última alteração.
+  final String deviceId;
+
+  /// Tombstone: preenchido na exclusão lógica.
+  final String? deletedAt;
+  final String name;
+  final String? description;
+  final String? objective;
+  final String startDate;
+  final String baseCurrency;
+  final Decimal initialCapital;
+
+  /// `weight` ou `quantity`.
+  final String compositionMode;
+  final String? benchmarkJson;
+  final String rebalanceJson;
+  final String assumptionsJson;
+  final String? methodology;
+  final String? archivedAt;
+  final String? duplicatedFromId;
+  const HypoPortfolioRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.hlc,
+    required this.deviceId,
+    this.deletedAt,
+    required this.name,
+    this.description,
+    this.objective,
+    required this.startDate,
+    required this.baseCurrency,
+    required this.initialCapital,
+    required this.compositionMode,
+    this.benchmarkJson,
+    required this.rebalanceJson,
+    required this.assumptionsJson,
+    this.methodology,
+    this.archivedAt,
+    this.duplicatedFromId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['hlc'] = Variable<String>(hlc);
+    map['device_id'] = Variable<String>(deviceId);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<String>(deletedAt);
+    }
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || objective != null) {
+      map['objective'] = Variable<String>(objective);
+    }
+    map['start_date'] = Variable<String>(startDate);
+    map['base_currency'] = Variable<String>(baseCurrency);
+    {
+      map['initial_capital'] = Variable<String>(
+        $HypoPortfoliosTable.$converterinitialCapital.toSql(initialCapital),
+      );
+    }
+    map['composition_mode'] = Variable<String>(compositionMode);
+    if (!nullToAbsent || benchmarkJson != null) {
+      map['benchmark_json'] = Variable<String>(benchmarkJson);
+    }
+    map['rebalance_json'] = Variable<String>(rebalanceJson);
+    map['assumptions_json'] = Variable<String>(assumptionsJson);
+    if (!nullToAbsent || methodology != null) {
+      map['methodology'] = Variable<String>(methodology);
+    }
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<String>(archivedAt);
+    }
+    if (!nullToAbsent || duplicatedFromId != null) {
+      map['duplicated_from_id'] = Variable<String>(duplicatedFromId);
+    }
+    return map;
+  }
+
+  HypoPortfoliosCompanion toCompanion(bool nullToAbsent) {
+    return HypoPortfoliosCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      hlc: Value(hlc),
+      deviceId: Value(deviceId),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      objective: objective == null && nullToAbsent
+          ? const Value.absent()
+          : Value(objective),
+      startDate: Value(startDate),
+      baseCurrency: Value(baseCurrency),
+      initialCapital: Value(initialCapital),
+      compositionMode: Value(compositionMode),
+      benchmarkJson: benchmarkJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(benchmarkJson),
+      rebalanceJson: Value(rebalanceJson),
+      assumptionsJson: Value(assumptionsJson),
+      methodology: methodology == null && nullToAbsent
+          ? const Value.absent()
+          : Value(methodology),
+      archivedAt: archivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAt),
+      duplicatedFromId: duplicatedFromId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(duplicatedFromId),
+    );
+  }
+
+  factory HypoPortfolioRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HypoPortfolioRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      objective: serializer.fromJson<String?>(json['objective']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      baseCurrency: serializer.fromJson<String>(json['baseCurrency']),
+      initialCapital: serializer.fromJson<Decimal>(json['initialCapital']),
+      compositionMode: serializer.fromJson<String>(json['compositionMode']),
+      benchmarkJson: serializer.fromJson<String?>(json['benchmarkJson']),
+      rebalanceJson: serializer.fromJson<String>(json['rebalanceJson']),
+      assumptionsJson: serializer.fromJson<String>(json['assumptionsJson']),
+      methodology: serializer.fromJson<String?>(json['methodology']),
+      archivedAt: serializer.fromJson<String?>(json['archivedAt']),
+      duplicatedFromId: serializer.fromJson<String?>(json['duplicatedFromId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'hlc': serializer.toJson<String>(hlc),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'objective': serializer.toJson<String?>(objective),
+      'startDate': serializer.toJson<String>(startDate),
+      'baseCurrency': serializer.toJson<String>(baseCurrency),
+      'initialCapital': serializer.toJson<Decimal>(initialCapital),
+      'compositionMode': serializer.toJson<String>(compositionMode),
+      'benchmarkJson': serializer.toJson<String?>(benchmarkJson),
+      'rebalanceJson': serializer.toJson<String>(rebalanceJson),
+      'assumptionsJson': serializer.toJson<String>(assumptionsJson),
+      'methodology': serializer.toJson<String?>(methodology),
+      'archivedAt': serializer.toJson<String?>(archivedAt),
+      'duplicatedFromId': serializer.toJson<String?>(duplicatedFromId),
+    };
+  }
+
+  HypoPortfolioRow copyWith({
+    String? id,
+    String? createdAt,
+    String? updatedAt,
+    String? hlc,
+    String? deviceId,
+    Value<String?> deletedAt = const Value.absent(),
+    String? name,
+    Value<String?> description = const Value.absent(),
+    Value<String?> objective = const Value.absent(),
+    String? startDate,
+    String? baseCurrency,
+    Decimal? initialCapital,
+    String? compositionMode,
+    Value<String?> benchmarkJson = const Value.absent(),
+    String? rebalanceJson,
+    String? assumptionsJson,
+    Value<String?> methodology = const Value.absent(),
+    Value<String?> archivedAt = const Value.absent(),
+    Value<String?> duplicatedFromId = const Value.absent(),
+  }) => HypoPortfolioRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    hlc: hlc ?? this.hlc,
+    deviceId: deviceId ?? this.deviceId,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    objective: objective.present ? objective.value : this.objective,
+    startDate: startDate ?? this.startDate,
+    baseCurrency: baseCurrency ?? this.baseCurrency,
+    initialCapital: initialCapital ?? this.initialCapital,
+    compositionMode: compositionMode ?? this.compositionMode,
+    benchmarkJson: benchmarkJson.present
+        ? benchmarkJson.value
+        : this.benchmarkJson,
+    rebalanceJson: rebalanceJson ?? this.rebalanceJson,
+    assumptionsJson: assumptionsJson ?? this.assumptionsJson,
+    methodology: methodology.present ? methodology.value : this.methodology,
+    archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    duplicatedFromId: duplicatedFromId.present
+        ? duplicatedFromId.value
+        : this.duplicatedFromId,
+  );
+  HypoPortfolioRow copyWithCompanion(HypoPortfoliosCompanion data) {
+    return HypoPortfolioRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      objective: data.objective.present ? data.objective.value : this.objective,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      baseCurrency: data.baseCurrency.present
+          ? data.baseCurrency.value
+          : this.baseCurrency,
+      initialCapital: data.initialCapital.present
+          ? data.initialCapital.value
+          : this.initialCapital,
+      compositionMode: data.compositionMode.present
+          ? data.compositionMode.value
+          : this.compositionMode,
+      benchmarkJson: data.benchmarkJson.present
+          ? data.benchmarkJson.value
+          : this.benchmarkJson,
+      rebalanceJson: data.rebalanceJson.present
+          ? data.rebalanceJson.value
+          : this.rebalanceJson,
+      assumptionsJson: data.assumptionsJson.present
+          ? data.assumptionsJson.value
+          : this.assumptionsJson,
+      methodology: data.methodology.present
+          ? data.methodology.value
+          : this.methodology,
+      archivedAt: data.archivedAt.present
+          ? data.archivedAt.value
+          : this.archivedAt,
+      duplicatedFromId: data.duplicatedFromId.present
+          ? data.duplicatedFromId.value
+          : this.duplicatedFromId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoPortfolioRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('objective: $objective, ')
+          ..write('startDate: $startDate, ')
+          ..write('baseCurrency: $baseCurrency, ')
+          ..write('initialCapital: $initialCapital, ')
+          ..write('compositionMode: $compositionMode, ')
+          ..write('benchmarkJson: $benchmarkJson, ')
+          ..write('rebalanceJson: $rebalanceJson, ')
+          ..write('assumptionsJson: $assumptionsJson, ')
+          ..write('methodology: $methodology, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('duplicatedFromId: $duplicatedFromId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    name,
+    description,
+    objective,
+    startDate,
+    baseCurrency,
+    initialCapital,
+    compositionMode,
+    benchmarkJson,
+    rebalanceJson,
+    assumptionsJson,
+    methodology,
+    archivedAt,
+    duplicatedFromId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HypoPortfolioRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.hlc == this.hlc &&
+          other.deviceId == this.deviceId &&
+          other.deletedAt == this.deletedAt &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.objective == this.objective &&
+          other.startDate == this.startDate &&
+          other.baseCurrency == this.baseCurrency &&
+          other.initialCapital == this.initialCapital &&
+          other.compositionMode == this.compositionMode &&
+          other.benchmarkJson == this.benchmarkJson &&
+          other.rebalanceJson == this.rebalanceJson &&
+          other.assumptionsJson == this.assumptionsJson &&
+          other.methodology == this.methodology &&
+          other.archivedAt == this.archivedAt &&
+          other.duplicatedFromId == this.duplicatedFromId);
+}
+
+class HypoPortfoliosCompanion extends UpdateCompanion<HypoPortfolioRow> {
+  final Value<String> id;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String> hlc;
+  final Value<String> deviceId;
+  final Value<String?> deletedAt;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<String?> objective;
+  final Value<String> startDate;
+  final Value<String> baseCurrency;
+  final Value<Decimal> initialCapital;
+  final Value<String> compositionMode;
+  final Value<String?> benchmarkJson;
+  final Value<String> rebalanceJson;
+  final Value<String> assumptionsJson;
+  final Value<String?> methodology;
+  final Value<String?> archivedAt;
+  final Value<String?> duplicatedFromId;
+  final Value<int> rowid;
+  const HypoPortfoliosCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.objective = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.baseCurrency = const Value.absent(),
+    this.initialCapital = const Value.absent(),
+    this.compositionMode = const Value.absent(),
+    this.benchmarkJson = const Value.absent(),
+    this.rebalanceJson = const Value.absent(),
+    this.assumptionsJson = const Value.absent(),
+    this.methodology = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.duplicatedFromId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HypoPortfoliosCompanion.insert({
+    required String id,
+    required String createdAt,
+    required String updatedAt,
+    required String hlc,
+    required String deviceId,
+    this.deletedAt = const Value.absent(),
+    required String name,
+    this.description = const Value.absent(),
+    this.objective = const Value.absent(),
+    required String startDate,
+    required String baseCurrency,
+    required Decimal initialCapital,
+    required String compositionMode,
+    this.benchmarkJson = const Value.absent(),
+    required String rebalanceJson,
+    required String assumptionsJson,
+    this.methodology = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.duplicatedFromId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       hlc = Value(hlc),
+       deviceId = Value(deviceId),
+       name = Value(name),
+       startDate = Value(startDate),
+       baseCurrency = Value(baseCurrency),
+       initialCapital = Value(initialCapital),
+       compositionMode = Value(compositionMode),
+       rebalanceJson = Value(rebalanceJson),
+       assumptionsJson = Value(assumptionsJson);
+  static Insertable<HypoPortfolioRow> custom({
+    Expression<String>? id,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? hlc,
+    Expression<String>? deviceId,
+    Expression<String>? deletedAt,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? objective,
+    Expression<String>? startDate,
+    Expression<String>? baseCurrency,
+    Expression<String>? initialCapital,
+    Expression<String>? compositionMode,
+    Expression<String>? benchmarkJson,
+    Expression<String>? rebalanceJson,
+    Expression<String>? assumptionsJson,
+    Expression<String>? methodology,
+    Expression<String>? archivedAt,
+    Expression<String>? duplicatedFromId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (hlc != null) 'hlc': hlc,
+      if (deviceId != null) 'device_id': deviceId,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (objective != null) 'objective': objective,
+      if (startDate != null) 'start_date': startDate,
+      if (baseCurrency != null) 'base_currency': baseCurrency,
+      if (initialCapital != null) 'initial_capital': initialCapital,
+      if (compositionMode != null) 'composition_mode': compositionMode,
+      if (benchmarkJson != null) 'benchmark_json': benchmarkJson,
+      if (rebalanceJson != null) 'rebalance_json': rebalanceJson,
+      if (assumptionsJson != null) 'assumptions_json': assumptionsJson,
+      if (methodology != null) 'methodology': methodology,
+      if (archivedAt != null) 'archived_at': archivedAt,
+      if (duplicatedFromId != null) 'duplicated_from_id': duplicatedFromId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HypoPortfoliosCompanion copyWith({
+    Value<String>? id,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<String>? hlc,
+    Value<String>? deviceId,
+    Value<String?>? deletedAt,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<String?>? objective,
+    Value<String>? startDate,
+    Value<String>? baseCurrency,
+    Value<Decimal>? initialCapital,
+    Value<String>? compositionMode,
+    Value<String?>? benchmarkJson,
+    Value<String>? rebalanceJson,
+    Value<String>? assumptionsJson,
+    Value<String?>? methodology,
+    Value<String?>? archivedAt,
+    Value<String?>? duplicatedFromId,
+    Value<int>? rowid,
+  }) {
+    return HypoPortfoliosCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      hlc: hlc ?? this.hlc,
+      deviceId: deviceId ?? this.deviceId,
+      deletedAt: deletedAt ?? this.deletedAt,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      objective: objective ?? this.objective,
+      startDate: startDate ?? this.startDate,
+      baseCurrency: baseCurrency ?? this.baseCurrency,
+      initialCapital: initialCapital ?? this.initialCapital,
+      compositionMode: compositionMode ?? this.compositionMode,
+      benchmarkJson: benchmarkJson ?? this.benchmarkJson,
+      rebalanceJson: rebalanceJson ?? this.rebalanceJson,
+      assumptionsJson: assumptionsJson ?? this.assumptionsJson,
+      methodology: methodology ?? this.methodology,
+      archivedAt: archivedAt ?? this.archivedAt,
+      duplicatedFromId: duplicatedFromId ?? this.duplicatedFromId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (objective.present) {
+      map['objective'] = Variable<String>(objective.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (baseCurrency.present) {
+      map['base_currency'] = Variable<String>(baseCurrency.value);
+    }
+    if (initialCapital.present) {
+      map['initial_capital'] = Variable<String>(
+        $HypoPortfoliosTable.$converterinitialCapital.toSql(
+          initialCapital.value,
+        ),
+      );
+    }
+    if (compositionMode.present) {
+      map['composition_mode'] = Variable<String>(compositionMode.value);
+    }
+    if (benchmarkJson.present) {
+      map['benchmark_json'] = Variable<String>(benchmarkJson.value);
+    }
+    if (rebalanceJson.present) {
+      map['rebalance_json'] = Variable<String>(rebalanceJson.value);
+    }
+    if (assumptionsJson.present) {
+      map['assumptions_json'] = Variable<String>(assumptionsJson.value);
+    }
+    if (methodology.present) {
+      map['methodology'] = Variable<String>(methodology.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<String>(archivedAt.value);
+    }
+    if (duplicatedFromId.present) {
+      map['duplicated_from_id'] = Variable<String>(duplicatedFromId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoPortfoliosCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('objective: $objective, ')
+          ..write('startDate: $startDate, ')
+          ..write('baseCurrency: $baseCurrency, ')
+          ..write('initialCapital: $initialCapital, ')
+          ..write('compositionMode: $compositionMode, ')
+          ..write('benchmarkJson: $benchmarkJson, ')
+          ..write('rebalanceJson: $rebalanceJson, ')
+          ..write('assumptionsJson: $assumptionsJson, ')
+          ..write('methodology: $methodology, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('duplicatedFromId: $duplicatedFromId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HypoHoldingsTable extends HypoHoldings
+    with TableInfo<$HypoHoldingsTable, HypoHoldingRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HypoHoldingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _portfolioIdMeta = const VerificationMeta(
+    'portfolioId',
+  );
+  @override
+  late final GeneratedColumn<String> portfolioId = GeneratedColumn<String>(
+    'portfolio_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES hypo_portfolios (id)',
+    ),
+  );
+  static const VerificationMeta _assetIdMeta = const VerificationMeta(
+    'assetId',
+  );
+  @override
+  late final GeneratedColumn<String> assetId = GeneratedColumn<String>(
+    'asset_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES assets (id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal?, String> weightPct =
+      GeneratedColumn<String>(
+        'weight_pct',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Decimal?>($HypoHoldingsTable.$converterweightPctn);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal?, String> quantity =
+      GeneratedColumn<String>(
+        'quantity',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Decimal?>($HypoHoldingsTable.$converterquantityn);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal?, String> amount =
+      GeneratedColumn<String>(
+        'amount',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Decimal?>($HypoHoldingsTable.$converteramountn);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    portfolioId,
+    assetId,
+    weightPct,
+    quantity,
+    amount,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hypo_holdings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HypoHoldingRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('portfolio_id')) {
+      context.handle(
+        _portfolioIdMeta,
+        portfolioId.isAcceptableOrUnknown(
+          data['portfolio_id']!,
+          _portfolioIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_portfolioIdMeta);
+    }
+    if (data.containsKey('asset_id')) {
+      context.handle(
+        _assetIdMeta,
+        assetId.isAcceptableOrUnknown(data['asset_id']!, _assetIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_assetIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HypoHoldingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HypoHoldingRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      portfolioId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}portfolio_id'],
+      )!,
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      weightPct: $HypoHoldingsTable.$converterweightPctn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}weight_pct'],
+        ),
+      ),
+      quantity: $HypoHoldingsTable.$converterquantityn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}quantity'],
+        ),
+      ),
+      amount: $HypoHoldingsTable.$converteramountn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}amount'],
+        ),
+      ),
+    );
+  }
+
+  @override
+  $HypoHoldingsTable createAlias(String alias) {
+    return $HypoHoldingsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Decimal, String> $converterweightPct =
+      const DecimalTextConverter();
+  static TypeConverter<Decimal?, String?> $converterweightPctn =
+      NullAwareTypeConverter.wrap($converterweightPct);
+  static TypeConverter<Decimal, String> $converterquantity =
+      const DecimalTextConverter();
+  static TypeConverter<Decimal?, String?> $converterquantityn =
+      NullAwareTypeConverter.wrap($converterquantity);
+  static TypeConverter<Decimal, String> $converteramount =
+      const DecimalTextConverter();
+  static TypeConverter<Decimal?, String?> $converteramountn =
+      NullAwareTypeConverter.wrap($converteramount);
+}
+
+class HypoHoldingRow extends DataClass implements Insertable<HypoHoldingRow> {
+  /// UUID v7 gerado no app.
+  final String id;
+
+  /// Instante UTC da criação (ISO-8601 com ms).
+  final String createdAt;
+
+  /// Instante UTC da última escrita.
+  final String updatedAt;
+
+  /// HLC da última alteração.
+  final String hlc;
+
+  /// Dispositivo que fez a última alteração.
+  final String deviceId;
+
+  /// Tombstone: preenchido na exclusão lógica.
+  final String? deletedAt;
+  final String portfolioId;
+  final String assetId;
+  final Decimal? weightPct;
+  final Decimal? quantity;
+  final Decimal? amount;
+  const HypoHoldingRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.hlc,
+    required this.deviceId,
+    this.deletedAt,
+    required this.portfolioId,
+    required this.assetId,
+    this.weightPct,
+    this.quantity,
+    this.amount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['hlc'] = Variable<String>(hlc);
+    map['device_id'] = Variable<String>(deviceId);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<String>(deletedAt);
+    }
+    map['portfolio_id'] = Variable<String>(portfolioId);
+    map['asset_id'] = Variable<String>(assetId);
+    if (!nullToAbsent || weightPct != null) {
+      map['weight_pct'] = Variable<String>(
+        $HypoHoldingsTable.$converterweightPctn.toSql(weightPct),
+      );
+    }
+    if (!nullToAbsent || quantity != null) {
+      map['quantity'] = Variable<String>(
+        $HypoHoldingsTable.$converterquantityn.toSql(quantity),
+      );
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<String>(
+        $HypoHoldingsTable.$converteramountn.toSql(amount),
+      );
+    }
+    return map;
+  }
+
+  HypoHoldingsCompanion toCompanion(bool nullToAbsent) {
+    return HypoHoldingsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      hlc: Value(hlc),
+      deviceId: Value(deviceId),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      portfolioId: Value(portfolioId),
+      assetId: Value(assetId),
+      weightPct: weightPct == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightPct),
+      quantity: quantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quantity),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+    );
+  }
+
+  factory HypoHoldingRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HypoHoldingRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      portfolioId: serializer.fromJson<String>(json['portfolioId']),
+      assetId: serializer.fromJson<String>(json['assetId']),
+      weightPct: serializer.fromJson<Decimal?>(json['weightPct']),
+      quantity: serializer.fromJson<Decimal?>(json['quantity']),
+      amount: serializer.fromJson<Decimal?>(json['amount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'hlc': serializer.toJson<String>(hlc),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'portfolioId': serializer.toJson<String>(portfolioId),
+      'assetId': serializer.toJson<String>(assetId),
+      'weightPct': serializer.toJson<Decimal?>(weightPct),
+      'quantity': serializer.toJson<Decimal?>(quantity),
+      'amount': serializer.toJson<Decimal?>(amount),
+    };
+  }
+
+  HypoHoldingRow copyWith({
+    String? id,
+    String? createdAt,
+    String? updatedAt,
+    String? hlc,
+    String? deviceId,
+    Value<String?> deletedAt = const Value.absent(),
+    String? portfolioId,
+    String? assetId,
+    Value<Decimal?> weightPct = const Value.absent(),
+    Value<Decimal?> quantity = const Value.absent(),
+    Value<Decimal?> amount = const Value.absent(),
+  }) => HypoHoldingRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    hlc: hlc ?? this.hlc,
+    deviceId: deviceId ?? this.deviceId,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    portfolioId: portfolioId ?? this.portfolioId,
+    assetId: assetId ?? this.assetId,
+    weightPct: weightPct.present ? weightPct.value : this.weightPct,
+    quantity: quantity.present ? quantity.value : this.quantity,
+    amount: amount.present ? amount.value : this.amount,
+  );
+  HypoHoldingRow copyWithCompanion(HypoHoldingsCompanion data) {
+    return HypoHoldingRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      portfolioId: data.portfolioId.present
+          ? data.portfolioId.value
+          : this.portfolioId,
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      weightPct: data.weightPct.present ? data.weightPct.value : this.weightPct,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      amount: data.amount.present ? data.amount.value : this.amount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoHoldingRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('portfolioId: $portfolioId, ')
+          ..write('assetId: $assetId, ')
+          ..write('weightPct: $weightPct, ')
+          ..write('quantity: $quantity, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    portfolioId,
+    assetId,
+    weightPct,
+    quantity,
+    amount,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HypoHoldingRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.hlc == this.hlc &&
+          other.deviceId == this.deviceId &&
+          other.deletedAt == this.deletedAt &&
+          other.portfolioId == this.portfolioId &&
+          other.assetId == this.assetId &&
+          other.weightPct == this.weightPct &&
+          other.quantity == this.quantity &&
+          other.amount == this.amount);
+}
+
+class HypoHoldingsCompanion extends UpdateCompanion<HypoHoldingRow> {
+  final Value<String> id;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String> hlc;
+  final Value<String> deviceId;
+  final Value<String?> deletedAt;
+  final Value<String> portfolioId;
+  final Value<String> assetId;
+  final Value<Decimal?> weightPct;
+  final Value<Decimal?> quantity;
+  final Value<Decimal?> amount;
+  final Value<int> rowid;
+  const HypoHoldingsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.portfolioId = const Value.absent(),
+    this.assetId = const Value.absent(),
+    this.weightPct = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HypoHoldingsCompanion.insert({
+    required String id,
+    required String createdAt,
+    required String updatedAt,
+    required String hlc,
+    required String deviceId,
+    this.deletedAt = const Value.absent(),
+    required String portfolioId,
+    required String assetId,
+    this.weightPct = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       hlc = Value(hlc),
+       deviceId = Value(deviceId),
+       portfolioId = Value(portfolioId),
+       assetId = Value(assetId);
+  static Insertable<HypoHoldingRow> custom({
+    Expression<String>? id,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? hlc,
+    Expression<String>? deviceId,
+    Expression<String>? deletedAt,
+    Expression<String>? portfolioId,
+    Expression<String>? assetId,
+    Expression<String>? weightPct,
+    Expression<String>? quantity,
+    Expression<String>? amount,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (hlc != null) 'hlc': hlc,
+      if (deviceId != null) 'device_id': deviceId,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (portfolioId != null) 'portfolio_id': portfolioId,
+      if (assetId != null) 'asset_id': assetId,
+      if (weightPct != null) 'weight_pct': weightPct,
+      if (quantity != null) 'quantity': quantity,
+      if (amount != null) 'amount': amount,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HypoHoldingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<String>? hlc,
+    Value<String>? deviceId,
+    Value<String?>? deletedAt,
+    Value<String>? portfolioId,
+    Value<String>? assetId,
+    Value<Decimal?>? weightPct,
+    Value<Decimal?>? quantity,
+    Value<Decimal?>? amount,
+    Value<int>? rowid,
+  }) {
+    return HypoHoldingsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      hlc: hlc ?? this.hlc,
+      deviceId: deviceId ?? this.deviceId,
+      deletedAt: deletedAt ?? this.deletedAt,
+      portfolioId: portfolioId ?? this.portfolioId,
+      assetId: assetId ?? this.assetId,
+      weightPct: weightPct ?? this.weightPct,
+      quantity: quantity ?? this.quantity,
+      amount: amount ?? this.amount,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (portfolioId.present) {
+      map['portfolio_id'] = Variable<String>(portfolioId.value);
+    }
+    if (assetId.present) {
+      map['asset_id'] = Variable<String>(assetId.value);
+    }
+    if (weightPct.present) {
+      map['weight_pct'] = Variable<String>(
+        $HypoHoldingsTable.$converterweightPctn.toSql(weightPct.value),
+      );
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<String>(
+        $HypoHoldingsTable.$converterquantityn.toSql(quantity.value),
+      );
+    }
+    if (amount.present) {
+      map['amount'] = Variable<String>(
+        $HypoHoldingsTable.$converteramountn.toSql(amount.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoHoldingsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('portfolioId: $portfolioId, ')
+          ..write('assetId: $assetId, ')
+          ..write('weightPct: $weightPct, ')
+          ..write('quantity: $quantity, ')
+          ..write('amount: $amount, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HypoCashflowRulesTable extends HypoCashflowRules
+    with TableInfo<$HypoCashflowRulesTable, HypoCashflowRuleRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HypoCashflowRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _portfolioIdMeta = const VerificationMeta(
+    'portfolioId',
+  );
+  @override
+  late final GeneratedColumn<String> portfolioId = GeneratedColumn<String>(
+    'portfolio_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES hypo_portfolios (id)',
+    ),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _frequencyMeta = const VerificationMeta(
+    'frequency',
+  );
+  @override
+  late final GeneratedColumn<String> frequency = GeneratedColumn<String>(
+    'frequency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal?, String> amount =
+      GeneratedColumn<String>(
+        'amount',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Decimal?>($HypoCashflowRulesTable.$converteramountn);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal?, String> pct =
+      GeneratedColumn<String>(
+        'pct',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Decimal?>($HypoCashflowRulesTable.$converterpctn);
+  static const VerificationMeta _adjustmentMeta = const VerificationMeta(
+    'adjustment',
+  );
+  @override
+  late final GeneratedColumn<String> adjustment = GeneratedColumn<String>(
+    'adjustment',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
+    'end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    portfolioId,
+    kind,
+    frequency,
+    amount,
+    pct,
+    adjustment,
+    startDate,
+    endDate,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hypo_cashflow_rules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HypoCashflowRuleRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('portfolio_id')) {
+      context.handle(
+        _portfolioIdMeta,
+        portfolioId.isAcceptableOrUnknown(
+          data['portfolio_id']!,
+          _portfolioIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_portfolioIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('frequency')) {
+      context.handle(
+        _frequencyMeta,
+        frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_frequencyMeta);
+    }
+    if (data.containsKey('adjustment')) {
+      context.handle(
+        _adjustmentMeta,
+        adjustment.isAcceptableOrUnknown(data['adjustment']!, _adjustmentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_adjustmentMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HypoCashflowRuleRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HypoCashflowRuleRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      portfolioId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}portfolio_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      frequency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}frequency'],
+      )!,
+      amount: $HypoCashflowRulesTable.$converteramountn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}amount'],
+        ),
+      ),
+      pct: $HypoCashflowRulesTable.$converterpctn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}pct'],
+        ),
+      ),
+      adjustment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}adjustment'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date'],
+      )!,
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_date'],
+      ),
+    );
+  }
+
+  @override
+  $HypoCashflowRulesTable createAlias(String alias) {
+    return $HypoCashflowRulesTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Decimal, String> $converteramount =
+      const DecimalTextConverter();
+  static TypeConverter<Decimal?, String?> $converteramountn =
+      NullAwareTypeConverter.wrap($converteramount);
+  static TypeConverter<Decimal, String> $converterpct =
+      const DecimalTextConverter();
+  static TypeConverter<Decimal?, String?> $converterpctn =
+      NullAwareTypeConverter.wrap($converterpct);
+}
+
+class HypoCashflowRuleRow extends DataClass
+    implements Insertable<HypoCashflowRuleRow> {
+  /// UUID v7 gerado no app.
+  final String id;
+
+  /// Instante UTC da criação (ISO-8601 com ms).
+  final String createdAt;
+
+  /// Instante UTC da última escrita.
+  final String updatedAt;
+
+  /// HLC da última alteração.
+  final String hlc;
+
+  /// Dispositivo que fez a última alteração.
+  final String deviceId;
+
+  /// Tombstone: preenchido na exclusão lógica.
+  final String? deletedAt;
+  final String portfolioId;
+
+  /// `contribution` ou `withdrawal`.
+  final String kind;
+  final String frequency;
+  final Decimal? amount;
+  final Decimal? pct;
+  final String adjustment;
+  final String startDate;
+  final String? endDate;
+  const HypoCashflowRuleRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.hlc,
+    required this.deviceId,
+    this.deletedAt,
+    required this.portfolioId,
+    required this.kind,
+    required this.frequency,
+    this.amount,
+    this.pct,
+    required this.adjustment,
+    required this.startDate,
+    this.endDate,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['hlc'] = Variable<String>(hlc);
+    map['device_id'] = Variable<String>(deviceId);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<String>(deletedAt);
+    }
+    map['portfolio_id'] = Variable<String>(portfolioId);
+    map['kind'] = Variable<String>(kind);
+    map['frequency'] = Variable<String>(frequency);
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<String>(
+        $HypoCashflowRulesTable.$converteramountn.toSql(amount),
+      );
+    }
+    if (!nullToAbsent || pct != null) {
+      map['pct'] = Variable<String>(
+        $HypoCashflowRulesTable.$converterpctn.toSql(pct),
+      );
+    }
+    map['adjustment'] = Variable<String>(adjustment);
+    map['start_date'] = Variable<String>(startDate);
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<String>(endDate);
+    }
+    return map;
+  }
+
+  HypoCashflowRulesCompanion toCompanion(bool nullToAbsent) {
+    return HypoCashflowRulesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      hlc: Value(hlc),
+      deviceId: Value(deviceId),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      portfolioId: Value(portfolioId),
+      kind: Value(kind),
+      frequency: Value(frequency),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+      pct: pct == null && nullToAbsent ? const Value.absent() : Value(pct),
+      adjustment: Value(adjustment),
+      startDate: Value(startDate),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
+    );
+  }
+
+  factory HypoCashflowRuleRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HypoCashflowRuleRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      portfolioId: serializer.fromJson<String>(json['portfolioId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      frequency: serializer.fromJson<String>(json['frequency']),
+      amount: serializer.fromJson<Decimal?>(json['amount']),
+      pct: serializer.fromJson<Decimal?>(json['pct']),
+      adjustment: serializer.fromJson<String>(json['adjustment']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      endDate: serializer.fromJson<String?>(json['endDate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'hlc': serializer.toJson<String>(hlc),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'portfolioId': serializer.toJson<String>(portfolioId),
+      'kind': serializer.toJson<String>(kind),
+      'frequency': serializer.toJson<String>(frequency),
+      'amount': serializer.toJson<Decimal?>(amount),
+      'pct': serializer.toJson<Decimal?>(pct),
+      'adjustment': serializer.toJson<String>(adjustment),
+      'startDate': serializer.toJson<String>(startDate),
+      'endDate': serializer.toJson<String?>(endDate),
+    };
+  }
+
+  HypoCashflowRuleRow copyWith({
+    String? id,
+    String? createdAt,
+    String? updatedAt,
+    String? hlc,
+    String? deviceId,
+    Value<String?> deletedAt = const Value.absent(),
+    String? portfolioId,
+    String? kind,
+    String? frequency,
+    Value<Decimal?> amount = const Value.absent(),
+    Value<Decimal?> pct = const Value.absent(),
+    String? adjustment,
+    String? startDate,
+    Value<String?> endDate = const Value.absent(),
+  }) => HypoCashflowRuleRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    hlc: hlc ?? this.hlc,
+    deviceId: deviceId ?? this.deviceId,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    portfolioId: portfolioId ?? this.portfolioId,
+    kind: kind ?? this.kind,
+    frequency: frequency ?? this.frequency,
+    amount: amount.present ? amount.value : this.amount,
+    pct: pct.present ? pct.value : this.pct,
+    adjustment: adjustment ?? this.adjustment,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate.present ? endDate.value : this.endDate,
+  );
+  HypoCashflowRuleRow copyWithCompanion(HypoCashflowRulesCompanion data) {
+    return HypoCashflowRuleRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      portfolioId: data.portfolioId.present
+          ? data.portfolioId.value
+          : this.portfolioId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      frequency: data.frequency.present ? data.frequency.value : this.frequency,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      pct: data.pct.present ? data.pct.value : this.pct,
+      adjustment: data.adjustment.present
+          ? data.adjustment.value
+          : this.adjustment,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoCashflowRuleRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('portfolioId: $portfolioId, ')
+          ..write('kind: $kind, ')
+          ..write('frequency: $frequency, ')
+          ..write('amount: $amount, ')
+          ..write('pct: $pct, ')
+          ..write('adjustment: $adjustment, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    portfolioId,
+    kind,
+    frequency,
+    amount,
+    pct,
+    adjustment,
+    startDate,
+    endDate,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HypoCashflowRuleRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.hlc == this.hlc &&
+          other.deviceId == this.deviceId &&
+          other.deletedAt == this.deletedAt &&
+          other.portfolioId == this.portfolioId &&
+          other.kind == this.kind &&
+          other.frequency == this.frequency &&
+          other.amount == this.amount &&
+          other.pct == this.pct &&
+          other.adjustment == this.adjustment &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate);
+}
+
+class HypoCashflowRulesCompanion extends UpdateCompanion<HypoCashflowRuleRow> {
+  final Value<String> id;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String> hlc;
+  final Value<String> deviceId;
+  final Value<String?> deletedAt;
+  final Value<String> portfolioId;
+  final Value<String> kind;
+  final Value<String> frequency;
+  final Value<Decimal?> amount;
+  final Value<Decimal?> pct;
+  final Value<String> adjustment;
+  final Value<String> startDate;
+  final Value<String?> endDate;
+  final Value<int> rowid;
+  const HypoCashflowRulesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.portfolioId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.frequency = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.pct = const Value.absent(),
+    this.adjustment = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HypoCashflowRulesCompanion.insert({
+    required String id,
+    required String createdAt,
+    required String updatedAt,
+    required String hlc,
+    required String deviceId,
+    this.deletedAt = const Value.absent(),
+    required String portfolioId,
+    required String kind,
+    required String frequency,
+    this.amount = const Value.absent(),
+    this.pct = const Value.absent(),
+    required String adjustment,
+    required String startDate,
+    this.endDate = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       hlc = Value(hlc),
+       deviceId = Value(deviceId),
+       portfolioId = Value(portfolioId),
+       kind = Value(kind),
+       frequency = Value(frequency),
+       adjustment = Value(adjustment),
+       startDate = Value(startDate);
+  static Insertable<HypoCashflowRuleRow> custom({
+    Expression<String>? id,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? hlc,
+    Expression<String>? deviceId,
+    Expression<String>? deletedAt,
+    Expression<String>? portfolioId,
+    Expression<String>? kind,
+    Expression<String>? frequency,
+    Expression<String>? amount,
+    Expression<String>? pct,
+    Expression<String>? adjustment,
+    Expression<String>? startDate,
+    Expression<String>? endDate,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (hlc != null) 'hlc': hlc,
+      if (deviceId != null) 'device_id': deviceId,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (portfolioId != null) 'portfolio_id': portfolioId,
+      if (kind != null) 'kind': kind,
+      if (frequency != null) 'frequency': frequency,
+      if (amount != null) 'amount': amount,
+      if (pct != null) 'pct': pct,
+      if (adjustment != null) 'adjustment': adjustment,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HypoCashflowRulesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<String>? hlc,
+    Value<String>? deviceId,
+    Value<String?>? deletedAt,
+    Value<String>? portfolioId,
+    Value<String>? kind,
+    Value<String>? frequency,
+    Value<Decimal?>? amount,
+    Value<Decimal?>? pct,
+    Value<String>? adjustment,
+    Value<String>? startDate,
+    Value<String?>? endDate,
+    Value<int>? rowid,
+  }) {
+    return HypoCashflowRulesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      hlc: hlc ?? this.hlc,
+      deviceId: deviceId ?? this.deviceId,
+      deletedAt: deletedAt ?? this.deletedAt,
+      portfolioId: portfolioId ?? this.portfolioId,
+      kind: kind ?? this.kind,
+      frequency: frequency ?? this.frequency,
+      amount: amount ?? this.amount,
+      pct: pct ?? this.pct,
+      adjustment: adjustment ?? this.adjustment,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (portfolioId.present) {
+      map['portfolio_id'] = Variable<String>(portfolioId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (frequency.present) {
+      map['frequency'] = Variable<String>(frequency.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<String>(
+        $HypoCashflowRulesTable.$converteramountn.toSql(amount.value),
+      );
+    }
+    if (pct.present) {
+      map['pct'] = Variable<String>(
+        $HypoCashflowRulesTable.$converterpctn.toSql(pct.value),
+      );
+    }
+    if (adjustment.present) {
+      map['adjustment'] = Variable<String>(adjustment.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<String>(endDate.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoCashflowRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('portfolioId: $portfolioId, ')
+          ..write('kind: $kind, ')
+          ..write('frequency: $frequency, ')
+          ..write('amount: $amount, ')
+          ..write('pct: $pct, ')
+          ..write('adjustment: $adjustment, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HypoScenariosTable extends HypoScenarios
+    with TableInfo<$HypoScenariosTable, HypoScenarioRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HypoScenariosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _portfolioIdMeta = const VerificationMeta(
+    'portfolioId',
+  );
+  @override
+  late final GeneratedColumn<String> portfolioId = GeneratedColumn<String>(
+    'portfolio_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES hypo_portfolios (id)',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assumptionsJsonMeta = const VerificationMeta(
+    'assumptionsJson',
+  );
+  @override
+  late final GeneratedColumn<String> assumptionsJson = GeneratedColumn<String>(
+    'assumptions_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    portfolioId,
+    name,
+    kind,
+    assumptionsJson,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hypo_scenarios';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HypoScenarioRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('portfolio_id')) {
+      context.handle(
+        _portfolioIdMeta,
+        portfolioId.isAcceptableOrUnknown(
+          data['portfolio_id']!,
+          _portfolioIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('assumptions_json')) {
+      context.handle(
+        _assumptionsJsonMeta,
+        assumptionsJson.isAcceptableOrUnknown(
+          data['assumptions_json']!,
+          _assumptionsJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_assumptionsJsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HypoScenarioRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HypoScenarioRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      portfolioId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}portfolio_id'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      assumptionsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assumptions_json'],
+      )!,
+    );
+  }
+
+  @override
+  $HypoScenariosTable createAlias(String alias) {
+    return $HypoScenariosTable(attachedDatabase, alias);
+  }
+}
+
+class HypoScenarioRow extends DataClass implements Insertable<HypoScenarioRow> {
+  /// UUID v7 gerado no app.
+  final String id;
+
+  /// Instante UTC da criação (ISO-8601 com ms).
+  final String createdAt;
+
+  /// Instante UTC da última escrita.
+  final String updatedAt;
+
+  /// HLC da última alteração.
+  final String hlc;
+
+  /// Dispositivo que fez a última alteração.
+  final String deviceId;
+
+  /// Tombstone: preenchido na exclusão lógica.
+  final String? deletedAt;
+
+  /// Nulo para cenários dos simuladores.
+  final String? portfolioId;
+  final String name;
+  final String kind;
+  final String assumptionsJson;
+  const HypoScenarioRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.hlc,
+    required this.deviceId,
+    this.deletedAt,
+    this.portfolioId,
+    required this.name,
+    required this.kind,
+    required this.assumptionsJson,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['hlc'] = Variable<String>(hlc);
+    map['device_id'] = Variable<String>(deviceId);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<String>(deletedAt);
+    }
+    if (!nullToAbsent || portfolioId != null) {
+      map['portfolio_id'] = Variable<String>(portfolioId);
+    }
+    map['name'] = Variable<String>(name);
+    map['kind'] = Variable<String>(kind);
+    map['assumptions_json'] = Variable<String>(assumptionsJson);
+    return map;
+  }
+
+  HypoScenariosCompanion toCompanion(bool nullToAbsent) {
+    return HypoScenariosCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      hlc: Value(hlc),
+      deviceId: Value(deviceId),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      portfolioId: portfolioId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(portfolioId),
+      name: Value(name),
+      kind: Value(kind),
+      assumptionsJson: Value(assumptionsJson),
+    );
+  }
+
+  factory HypoScenarioRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HypoScenarioRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      portfolioId: serializer.fromJson<String?>(json['portfolioId']),
+      name: serializer.fromJson<String>(json['name']),
+      kind: serializer.fromJson<String>(json['kind']),
+      assumptionsJson: serializer.fromJson<String>(json['assumptionsJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'hlc': serializer.toJson<String>(hlc),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'portfolioId': serializer.toJson<String?>(portfolioId),
+      'name': serializer.toJson<String>(name),
+      'kind': serializer.toJson<String>(kind),
+      'assumptionsJson': serializer.toJson<String>(assumptionsJson),
+    };
+  }
+
+  HypoScenarioRow copyWith({
+    String? id,
+    String? createdAt,
+    String? updatedAt,
+    String? hlc,
+    String? deviceId,
+    Value<String?> deletedAt = const Value.absent(),
+    Value<String?> portfolioId = const Value.absent(),
+    String? name,
+    String? kind,
+    String? assumptionsJson,
+  }) => HypoScenarioRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    hlc: hlc ?? this.hlc,
+    deviceId: deviceId ?? this.deviceId,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    portfolioId: portfolioId.present ? portfolioId.value : this.portfolioId,
+    name: name ?? this.name,
+    kind: kind ?? this.kind,
+    assumptionsJson: assumptionsJson ?? this.assumptionsJson,
+  );
+  HypoScenarioRow copyWithCompanion(HypoScenariosCompanion data) {
+    return HypoScenarioRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      portfolioId: data.portfolioId.present
+          ? data.portfolioId.value
+          : this.portfolioId,
+      name: data.name.present ? data.name.value : this.name,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      assumptionsJson: data.assumptionsJson.present
+          ? data.assumptionsJson.value
+          : this.assumptionsJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoScenarioRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('portfolioId: $portfolioId, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('assumptionsJson: $assumptionsJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    hlc,
+    deviceId,
+    deletedAt,
+    portfolioId,
+    name,
+    kind,
+    assumptionsJson,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HypoScenarioRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.hlc == this.hlc &&
+          other.deviceId == this.deviceId &&
+          other.deletedAt == this.deletedAt &&
+          other.portfolioId == this.portfolioId &&
+          other.name == this.name &&
+          other.kind == this.kind &&
+          other.assumptionsJson == this.assumptionsJson);
+}
+
+class HypoScenariosCompanion extends UpdateCompanion<HypoScenarioRow> {
+  final Value<String> id;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String> hlc;
+  final Value<String> deviceId;
+  final Value<String?> deletedAt;
+  final Value<String?> portfolioId;
+  final Value<String> name;
+  final Value<String> kind;
+  final Value<String> assumptionsJson;
+  final Value<int> rowid;
+  const HypoScenariosCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.portfolioId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.assumptionsJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HypoScenariosCompanion.insert({
+    required String id,
+    required String createdAt,
+    required String updatedAt,
+    required String hlc,
+    required String deviceId,
+    this.deletedAt = const Value.absent(),
+    this.portfolioId = const Value.absent(),
+    required String name,
+    required String kind,
+    required String assumptionsJson,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       hlc = Value(hlc),
+       deviceId = Value(deviceId),
+       name = Value(name),
+       kind = Value(kind),
+       assumptionsJson = Value(assumptionsJson);
+  static Insertable<HypoScenarioRow> custom({
+    Expression<String>? id,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? hlc,
+    Expression<String>? deviceId,
+    Expression<String>? deletedAt,
+    Expression<String>? portfolioId,
+    Expression<String>? name,
+    Expression<String>? kind,
+    Expression<String>? assumptionsJson,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (hlc != null) 'hlc': hlc,
+      if (deviceId != null) 'device_id': deviceId,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (portfolioId != null) 'portfolio_id': portfolioId,
+      if (name != null) 'name': name,
+      if (kind != null) 'kind': kind,
+      if (assumptionsJson != null) 'assumptions_json': assumptionsJson,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HypoScenariosCompanion copyWith({
+    Value<String>? id,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<String>? hlc,
+    Value<String>? deviceId,
+    Value<String?>? deletedAt,
+    Value<String?>? portfolioId,
+    Value<String>? name,
+    Value<String>? kind,
+    Value<String>? assumptionsJson,
+    Value<int>? rowid,
+  }) {
+    return HypoScenariosCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      hlc: hlc ?? this.hlc,
+      deviceId: deviceId ?? this.deviceId,
+      deletedAt: deletedAt ?? this.deletedAt,
+      portfolioId: portfolioId ?? this.portfolioId,
+      name: name ?? this.name,
+      kind: kind ?? this.kind,
+      assumptionsJson: assumptionsJson ?? this.assumptionsJson,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (portfolioId.present) {
+      map['portfolio_id'] = Variable<String>(portfolioId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (assumptionsJson.present) {
+      map['assumptions_json'] = Variable<String>(assumptionsJson.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HypoScenariosCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('portfolioId: $portfolioId, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('assumptionsJson: $assumptionsJson, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DevSyncPeersTable extends DevSyncPeers
+    with TableInfo<$DevSyncPeersTable, DevSyncPeerRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DevSyncPeersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _peerDeviceIdMeta = const VerificationMeta(
+    'peerDeviceId',
+  );
+  @override
+  late final GeneratedColumn<String> peerDeviceId = GeneratedColumn<String>(
+    'peer_device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _peerNameMeta = const VerificationMeta(
+    'peerName',
+  );
+  @override
+  late final GeneratedColumn<String> peerName = GeneratedColumn<String>(
+    'peer_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastHlcReceivedMeta = const VerificationMeta(
+    'lastHlcReceived',
+  );
+  @override
+  late final GeneratedColumn<String> lastHlcReceived = GeneratedColumn<String>(
+    'last_hlc_received',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastHlcSentMeta = const VerificationMeta(
+    'lastHlcSent',
+  );
+  @override
+  late final GeneratedColumn<String> lastHlcSent = GeneratedColumn<String>(
+    'last_hlc_sent',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSyncAtMeta = const VerificationMeta(
+    'lastSyncAt',
+  );
+  @override
+  late final GeneratedColumn<String> lastSyncAt = GeneratedColumn<String>(
+    'last_sync_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    peerDeviceId,
+    peerName,
+    lastHlcReceived,
+    lastHlcSent,
+    lastSyncAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dev_sync_peers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DevSyncPeerRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('peer_device_id')) {
+      context.handle(
+        _peerDeviceIdMeta,
+        peerDeviceId.isAcceptableOrUnknown(
+          data['peer_device_id']!,
+          _peerDeviceIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_peerDeviceIdMeta);
+    }
+    if (data.containsKey('peer_name')) {
+      context.handle(
+        _peerNameMeta,
+        peerName.isAcceptableOrUnknown(data['peer_name']!, _peerNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_peerNameMeta);
+    }
+    if (data.containsKey('last_hlc_received')) {
+      context.handle(
+        _lastHlcReceivedMeta,
+        lastHlcReceived.isAcceptableOrUnknown(
+          data['last_hlc_received']!,
+          _lastHlcReceivedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastHlcReceivedMeta);
+    }
+    if (data.containsKey('last_hlc_sent')) {
+      context.handle(
+        _lastHlcSentMeta,
+        lastHlcSent.isAcceptableOrUnknown(
+          data['last_hlc_sent']!,
+          _lastHlcSentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_sync_at')) {
+      context.handle(
+        _lastSyncAtMeta,
+        lastSyncAt.isAcceptableOrUnknown(
+          data['last_sync_at']!,
+          _lastSyncAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastSyncAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {peerDeviceId};
+  @override
+  DevSyncPeerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DevSyncPeerRow(
+      peerDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}peer_device_id'],
+      )!,
+      peerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}peer_name'],
+      )!,
+      lastHlcReceived: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_hlc_received'],
+      )!,
+      lastHlcSent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_hlc_sent'],
+      ),
+      lastSyncAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_sync_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DevSyncPeersTable createAlias(String alias) {
+    return $DevSyncPeersTable(attachedDatabase, alias);
+  }
+}
+
+class DevSyncPeerRow extends DataClass implements Insertable<DevSyncPeerRow> {
+  final String peerDeviceId;
+  final String peerName;
+
+  /// Maior HLC do último save importado desse dispositivo.
+  final String lastHlcReceived;
+
+  /// Maior HLC deste PC que esse dispositivo confirmou ter recebido (vem no
+  /// manifesto dos saves dele).
+  final String? lastHlcSent;
+  final String lastSyncAt;
+  const DevSyncPeerRow({
+    required this.peerDeviceId,
+    required this.peerName,
+    required this.lastHlcReceived,
+    this.lastHlcSent,
+    required this.lastSyncAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['peer_device_id'] = Variable<String>(peerDeviceId);
+    map['peer_name'] = Variable<String>(peerName);
+    map['last_hlc_received'] = Variable<String>(lastHlcReceived);
+    if (!nullToAbsent || lastHlcSent != null) {
+      map['last_hlc_sent'] = Variable<String>(lastHlcSent);
+    }
+    map['last_sync_at'] = Variable<String>(lastSyncAt);
+    return map;
+  }
+
+  DevSyncPeersCompanion toCompanion(bool nullToAbsent) {
+    return DevSyncPeersCompanion(
+      peerDeviceId: Value(peerDeviceId),
+      peerName: Value(peerName),
+      lastHlcReceived: Value(lastHlcReceived),
+      lastHlcSent: lastHlcSent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastHlcSent),
+      lastSyncAt: Value(lastSyncAt),
+    );
+  }
+
+  factory DevSyncPeerRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DevSyncPeerRow(
+      peerDeviceId: serializer.fromJson<String>(json['peerDeviceId']),
+      peerName: serializer.fromJson<String>(json['peerName']),
+      lastHlcReceived: serializer.fromJson<String>(json['lastHlcReceived']),
+      lastHlcSent: serializer.fromJson<String?>(json['lastHlcSent']),
+      lastSyncAt: serializer.fromJson<String>(json['lastSyncAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'peerDeviceId': serializer.toJson<String>(peerDeviceId),
+      'peerName': serializer.toJson<String>(peerName),
+      'lastHlcReceived': serializer.toJson<String>(lastHlcReceived),
+      'lastHlcSent': serializer.toJson<String?>(lastHlcSent),
+      'lastSyncAt': serializer.toJson<String>(lastSyncAt),
+    };
+  }
+
+  DevSyncPeerRow copyWith({
+    String? peerDeviceId,
+    String? peerName,
+    String? lastHlcReceived,
+    Value<String?> lastHlcSent = const Value.absent(),
+    String? lastSyncAt,
+  }) => DevSyncPeerRow(
+    peerDeviceId: peerDeviceId ?? this.peerDeviceId,
+    peerName: peerName ?? this.peerName,
+    lastHlcReceived: lastHlcReceived ?? this.lastHlcReceived,
+    lastHlcSent: lastHlcSent.present ? lastHlcSent.value : this.lastHlcSent,
+    lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+  );
+  DevSyncPeerRow copyWithCompanion(DevSyncPeersCompanion data) {
+    return DevSyncPeerRow(
+      peerDeviceId: data.peerDeviceId.present
+          ? data.peerDeviceId.value
+          : this.peerDeviceId,
+      peerName: data.peerName.present ? data.peerName.value : this.peerName,
+      lastHlcReceived: data.lastHlcReceived.present
+          ? data.lastHlcReceived.value
+          : this.lastHlcReceived,
+      lastHlcSent: data.lastHlcSent.present
+          ? data.lastHlcSent.value
+          : this.lastHlcSent,
+      lastSyncAt: data.lastSyncAt.present
+          ? data.lastSyncAt.value
+          : this.lastSyncAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevSyncPeerRow(')
+          ..write('peerDeviceId: $peerDeviceId, ')
+          ..write('peerName: $peerName, ')
+          ..write('lastHlcReceived: $lastHlcReceived, ')
+          ..write('lastHlcSent: $lastHlcSent, ')
+          ..write('lastSyncAt: $lastSyncAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    peerDeviceId,
+    peerName,
+    lastHlcReceived,
+    lastHlcSent,
+    lastSyncAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DevSyncPeerRow &&
+          other.peerDeviceId == this.peerDeviceId &&
+          other.peerName == this.peerName &&
+          other.lastHlcReceived == this.lastHlcReceived &&
+          other.lastHlcSent == this.lastHlcSent &&
+          other.lastSyncAt == this.lastSyncAt);
+}
+
+class DevSyncPeersCompanion extends UpdateCompanion<DevSyncPeerRow> {
+  final Value<String> peerDeviceId;
+  final Value<String> peerName;
+  final Value<String> lastHlcReceived;
+  final Value<String?> lastHlcSent;
+  final Value<String> lastSyncAt;
+  final Value<int> rowid;
+  const DevSyncPeersCompanion({
+    this.peerDeviceId = const Value.absent(),
+    this.peerName = const Value.absent(),
+    this.lastHlcReceived = const Value.absent(),
+    this.lastHlcSent = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DevSyncPeersCompanion.insert({
+    required String peerDeviceId,
+    required String peerName,
+    required String lastHlcReceived,
+    this.lastHlcSent = const Value.absent(),
+    required String lastSyncAt,
+    this.rowid = const Value.absent(),
+  }) : peerDeviceId = Value(peerDeviceId),
+       peerName = Value(peerName),
+       lastHlcReceived = Value(lastHlcReceived),
+       lastSyncAt = Value(lastSyncAt);
+  static Insertable<DevSyncPeerRow> custom({
+    Expression<String>? peerDeviceId,
+    Expression<String>? peerName,
+    Expression<String>? lastHlcReceived,
+    Expression<String>? lastHlcSent,
+    Expression<String>? lastSyncAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (peerDeviceId != null) 'peer_device_id': peerDeviceId,
+      if (peerName != null) 'peer_name': peerName,
+      if (lastHlcReceived != null) 'last_hlc_received': lastHlcReceived,
+      if (lastHlcSent != null) 'last_hlc_sent': lastHlcSent,
+      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DevSyncPeersCompanion copyWith({
+    Value<String>? peerDeviceId,
+    Value<String>? peerName,
+    Value<String>? lastHlcReceived,
+    Value<String?>? lastHlcSent,
+    Value<String>? lastSyncAt,
+    Value<int>? rowid,
+  }) {
+    return DevSyncPeersCompanion(
+      peerDeviceId: peerDeviceId ?? this.peerDeviceId,
+      peerName: peerName ?? this.peerName,
+      lastHlcReceived: lastHlcReceived ?? this.lastHlcReceived,
+      lastHlcSent: lastHlcSent ?? this.lastHlcSent,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (peerDeviceId.present) {
+      map['peer_device_id'] = Variable<String>(peerDeviceId.value);
+    }
+    if (peerName.present) {
+      map['peer_name'] = Variable<String>(peerName.value);
+    }
+    if (lastHlcReceived.present) {
+      map['last_hlc_received'] = Variable<String>(lastHlcReceived.value);
+    }
+    if (lastHlcSent.present) {
+      map['last_hlc_sent'] = Variable<String>(lastHlcSent.value);
+    }
+    if (lastSyncAt.present) {
+      map['last_sync_at'] = Variable<String>(lastSyncAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevSyncPeersCompanion(')
+          ..write('peerDeviceId: $peerDeviceId, ')
+          ..write('peerName: $peerName, ')
+          ..write('lastHlcReceived: $lastHlcReceived, ')
+          ..write('lastHlcSent: $lastHlcSent, ')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DevSyncHistoryTable extends DevSyncHistory
+    with TableInfo<$DevSyncHistoryTable, DevSyncHistoryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DevSyncHistoryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _directionMeta = const VerificationMeta(
+    'direction',
+  );
+  @override
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+    'direction',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _peerDeviceIdMeta = const VerificationMeta(
+    'peerDeviceId',
+  );
+  @override
+  late final GeneratedColumn<String> peerDeviceId = GeneratedColumn<String>(
+    'peer_device_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _peerNameMeta = const VerificationMeta(
+    'peerName',
+  );
+  @override
+  late final GeneratedColumn<String> peerName = GeneratedColumn<String>(
+    'peer_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fileNameMeta = const VerificationMeta(
+    'fileName',
+  );
+  @override
+  late final GeneratedColumn<String> fileName = GeneratedColumn<String>(
+    'file_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _atMeta = const VerificationMeta('at');
+  @override
+  late final GeneratedColumn<String> at = GeneratedColumn<String>(
+    'at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _maxHlcMeta = const VerificationMeta('maxHlc');
+  @override
+  late final GeneratedColumn<String> maxHlc = GeneratedColumn<String>(
+    'max_hlc',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _countsJsonMeta = const VerificationMeta(
+    'countsJson',
+  );
+  @override
+  late final GeneratedColumn<String> countsJson = GeneratedColumn<String>(
+    'counts_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resultMeta = const VerificationMeta('result');
+  @override
+  late final GeneratedColumn<String> result = GeneratedColumn<String>(
+    'result',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messageMeta = const VerificationMeta(
+    'message',
+  );
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+    'message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    direction,
+    peerDeviceId,
+    peerName,
+    fileName,
+    at,
+    maxHlc,
+    countsJson,
+    result,
+    message,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dev_sync_history';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DevSyncHistoryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('direction')) {
+      context.handle(
+        _directionMeta,
+        direction.isAcceptableOrUnknown(data['direction']!, _directionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_directionMeta);
+    }
+    if (data.containsKey('peer_device_id')) {
+      context.handle(
+        _peerDeviceIdMeta,
+        peerDeviceId.isAcceptableOrUnknown(
+          data['peer_device_id']!,
+          _peerDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('peer_name')) {
+      context.handle(
+        _peerNameMeta,
+        peerName.isAcceptableOrUnknown(data['peer_name']!, _peerNameMeta),
+      );
+    }
+    if (data.containsKey('file_name')) {
+      context.handle(
+        _fileNameMeta,
+        fileName.isAcceptableOrUnknown(data['file_name']!, _fileNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fileNameMeta);
+    }
+    if (data.containsKey('at')) {
+      context.handle(_atMeta, at.isAcceptableOrUnknown(data['at']!, _atMeta));
+    } else if (isInserting) {
+      context.missing(_atMeta);
+    }
+    if (data.containsKey('max_hlc')) {
+      context.handle(
+        _maxHlcMeta,
+        maxHlc.isAcceptableOrUnknown(data['max_hlc']!, _maxHlcMeta),
+      );
+    }
+    if (data.containsKey('counts_json')) {
+      context.handle(
+        _countsJsonMeta,
+        countsJson.isAcceptableOrUnknown(data['counts_json']!, _countsJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_countsJsonMeta);
+    }
+    if (data.containsKey('result')) {
+      context.handle(
+        _resultMeta,
+        result.isAcceptableOrUnknown(data['result']!, _resultMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_resultMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(
+        _messageMeta,
+        message.isAcceptableOrUnknown(data['message']!, _messageMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DevSyncHistoryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DevSyncHistoryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      direction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direction'],
+      )!,
+      peerDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}peer_device_id'],
+      ),
+      peerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}peer_name'],
+      ),
+      fileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_name'],
+      )!,
+      at: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}at'],
+      )!,
+      maxHlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}max_hlc'],
+      ),
+      countsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}counts_json'],
+      )!,
+      result: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result'],
+      )!,
+      message: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message'],
+      ),
+    );
+  }
+
+  @override
+  $DevSyncHistoryTable createAlias(String alias) {
+    return $DevSyncHistoryTable(attachedDatabase, alias);
+  }
+}
+
+class DevSyncHistoryRow extends DataClass
+    implements Insertable<DevSyncHistoryRow> {
+  final String id;
+
+  /// `export` ou `import`.
+  final String direction;
+  final String? peerDeviceId;
+  final String? peerName;
+  final String fileName;
+  final String at;
+  final String? maxHlc;
+
+  /// Contagens por tabela (JSON). Nunca valores patrimoniais.
+  final String countsJson;
+
+  /// `ok` ou `failed`.
+  final String result;
+  final String? message;
+  const DevSyncHistoryRow({
+    required this.id,
+    required this.direction,
+    this.peerDeviceId,
+    this.peerName,
+    required this.fileName,
+    required this.at,
+    this.maxHlc,
+    required this.countsJson,
+    required this.result,
+    this.message,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['direction'] = Variable<String>(direction);
+    if (!nullToAbsent || peerDeviceId != null) {
+      map['peer_device_id'] = Variable<String>(peerDeviceId);
+    }
+    if (!nullToAbsent || peerName != null) {
+      map['peer_name'] = Variable<String>(peerName);
+    }
+    map['file_name'] = Variable<String>(fileName);
+    map['at'] = Variable<String>(at);
+    if (!nullToAbsent || maxHlc != null) {
+      map['max_hlc'] = Variable<String>(maxHlc);
+    }
+    map['counts_json'] = Variable<String>(countsJson);
+    map['result'] = Variable<String>(result);
+    if (!nullToAbsent || message != null) {
+      map['message'] = Variable<String>(message);
+    }
+    return map;
+  }
+
+  DevSyncHistoryCompanion toCompanion(bool nullToAbsent) {
+    return DevSyncHistoryCompanion(
+      id: Value(id),
+      direction: Value(direction),
+      peerDeviceId: peerDeviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(peerDeviceId),
+      peerName: peerName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(peerName),
+      fileName: Value(fileName),
+      at: Value(at),
+      maxHlc: maxHlc == null && nullToAbsent
+          ? const Value.absent()
+          : Value(maxHlc),
+      countsJson: Value(countsJson),
+      result: Value(result),
+      message: message == null && nullToAbsent
+          ? const Value.absent()
+          : Value(message),
+    );
+  }
+
+  factory DevSyncHistoryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DevSyncHistoryRow(
+      id: serializer.fromJson<String>(json['id']),
+      direction: serializer.fromJson<String>(json['direction']),
+      peerDeviceId: serializer.fromJson<String?>(json['peerDeviceId']),
+      peerName: serializer.fromJson<String?>(json['peerName']),
+      fileName: serializer.fromJson<String>(json['fileName']),
+      at: serializer.fromJson<String>(json['at']),
+      maxHlc: serializer.fromJson<String?>(json['maxHlc']),
+      countsJson: serializer.fromJson<String>(json['countsJson']),
+      result: serializer.fromJson<String>(json['result']),
+      message: serializer.fromJson<String?>(json['message']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'direction': serializer.toJson<String>(direction),
+      'peerDeviceId': serializer.toJson<String?>(peerDeviceId),
+      'peerName': serializer.toJson<String?>(peerName),
+      'fileName': serializer.toJson<String>(fileName),
+      'at': serializer.toJson<String>(at),
+      'maxHlc': serializer.toJson<String?>(maxHlc),
+      'countsJson': serializer.toJson<String>(countsJson),
+      'result': serializer.toJson<String>(result),
+      'message': serializer.toJson<String?>(message),
+    };
+  }
+
+  DevSyncHistoryRow copyWith({
+    String? id,
+    String? direction,
+    Value<String?> peerDeviceId = const Value.absent(),
+    Value<String?> peerName = const Value.absent(),
+    String? fileName,
+    String? at,
+    Value<String?> maxHlc = const Value.absent(),
+    String? countsJson,
+    String? result,
+    Value<String?> message = const Value.absent(),
+  }) => DevSyncHistoryRow(
+    id: id ?? this.id,
+    direction: direction ?? this.direction,
+    peerDeviceId: peerDeviceId.present ? peerDeviceId.value : this.peerDeviceId,
+    peerName: peerName.present ? peerName.value : this.peerName,
+    fileName: fileName ?? this.fileName,
+    at: at ?? this.at,
+    maxHlc: maxHlc.present ? maxHlc.value : this.maxHlc,
+    countsJson: countsJson ?? this.countsJson,
+    result: result ?? this.result,
+    message: message.present ? message.value : this.message,
+  );
+  DevSyncHistoryRow copyWithCompanion(DevSyncHistoryCompanion data) {
+    return DevSyncHistoryRow(
+      id: data.id.present ? data.id.value : this.id,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      peerDeviceId: data.peerDeviceId.present
+          ? data.peerDeviceId.value
+          : this.peerDeviceId,
+      peerName: data.peerName.present ? data.peerName.value : this.peerName,
+      fileName: data.fileName.present ? data.fileName.value : this.fileName,
+      at: data.at.present ? data.at.value : this.at,
+      maxHlc: data.maxHlc.present ? data.maxHlc.value : this.maxHlc,
+      countsJson: data.countsJson.present
+          ? data.countsJson.value
+          : this.countsJson,
+      result: data.result.present ? data.result.value : this.result,
+      message: data.message.present ? data.message.value : this.message,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevSyncHistoryRow(')
+          ..write('id: $id, ')
+          ..write('direction: $direction, ')
+          ..write('peerDeviceId: $peerDeviceId, ')
+          ..write('peerName: $peerName, ')
+          ..write('fileName: $fileName, ')
+          ..write('at: $at, ')
+          ..write('maxHlc: $maxHlc, ')
+          ..write('countsJson: $countsJson, ')
+          ..write('result: $result, ')
+          ..write('message: $message')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    direction,
+    peerDeviceId,
+    peerName,
+    fileName,
+    at,
+    maxHlc,
+    countsJson,
+    result,
+    message,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DevSyncHistoryRow &&
+          other.id == this.id &&
+          other.direction == this.direction &&
+          other.peerDeviceId == this.peerDeviceId &&
+          other.peerName == this.peerName &&
+          other.fileName == this.fileName &&
+          other.at == this.at &&
+          other.maxHlc == this.maxHlc &&
+          other.countsJson == this.countsJson &&
+          other.result == this.result &&
+          other.message == this.message);
+}
+
+class DevSyncHistoryCompanion extends UpdateCompanion<DevSyncHistoryRow> {
+  final Value<String> id;
+  final Value<String> direction;
+  final Value<String?> peerDeviceId;
+  final Value<String?> peerName;
+  final Value<String> fileName;
+  final Value<String> at;
+  final Value<String?> maxHlc;
+  final Value<String> countsJson;
+  final Value<String> result;
+  final Value<String?> message;
+  final Value<int> rowid;
+  const DevSyncHistoryCompanion({
+    this.id = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.peerDeviceId = const Value.absent(),
+    this.peerName = const Value.absent(),
+    this.fileName = const Value.absent(),
+    this.at = const Value.absent(),
+    this.maxHlc = const Value.absent(),
+    this.countsJson = const Value.absent(),
+    this.result = const Value.absent(),
+    this.message = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DevSyncHistoryCompanion.insert({
+    required String id,
+    required String direction,
+    this.peerDeviceId = const Value.absent(),
+    this.peerName = const Value.absent(),
+    required String fileName,
+    required String at,
+    this.maxHlc = const Value.absent(),
+    required String countsJson,
+    required String result,
+    this.message = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       direction = Value(direction),
+       fileName = Value(fileName),
+       at = Value(at),
+       countsJson = Value(countsJson),
+       result = Value(result);
+  static Insertable<DevSyncHistoryRow> custom({
+    Expression<String>? id,
+    Expression<String>? direction,
+    Expression<String>? peerDeviceId,
+    Expression<String>? peerName,
+    Expression<String>? fileName,
+    Expression<String>? at,
+    Expression<String>? maxHlc,
+    Expression<String>? countsJson,
+    Expression<String>? result,
+    Expression<String>? message,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (direction != null) 'direction': direction,
+      if (peerDeviceId != null) 'peer_device_id': peerDeviceId,
+      if (peerName != null) 'peer_name': peerName,
+      if (fileName != null) 'file_name': fileName,
+      if (at != null) 'at': at,
+      if (maxHlc != null) 'max_hlc': maxHlc,
+      if (countsJson != null) 'counts_json': countsJson,
+      if (result != null) 'result': result,
+      if (message != null) 'message': message,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DevSyncHistoryCompanion copyWith({
+    Value<String>? id,
+    Value<String>? direction,
+    Value<String?>? peerDeviceId,
+    Value<String?>? peerName,
+    Value<String>? fileName,
+    Value<String>? at,
+    Value<String?>? maxHlc,
+    Value<String>? countsJson,
+    Value<String>? result,
+    Value<String?>? message,
+    Value<int>? rowid,
+  }) {
+    return DevSyncHistoryCompanion(
+      id: id ?? this.id,
+      direction: direction ?? this.direction,
+      peerDeviceId: peerDeviceId ?? this.peerDeviceId,
+      peerName: peerName ?? this.peerName,
+      fileName: fileName ?? this.fileName,
+      at: at ?? this.at,
+      maxHlc: maxHlc ?? this.maxHlc,
+      countsJson: countsJson ?? this.countsJson,
+      result: result ?? this.result,
+      message: message ?? this.message,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
+    }
+    if (peerDeviceId.present) {
+      map['peer_device_id'] = Variable<String>(peerDeviceId.value);
+    }
+    if (peerName.present) {
+      map['peer_name'] = Variable<String>(peerName.value);
+    }
+    if (fileName.present) {
+      map['file_name'] = Variable<String>(fileName.value);
+    }
+    if (at.present) {
+      map['at'] = Variable<String>(at.value);
+    }
+    if (maxHlc.present) {
+      map['max_hlc'] = Variable<String>(maxHlc.value);
+    }
+    if (countsJson.present) {
+      map['counts_json'] = Variable<String>(countsJson.value);
+    }
+    if (result.present) {
+      map['result'] = Variable<String>(result.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevSyncHistoryCompanion(')
+          ..write('id: $id, ')
+          ..write('direction: $direction, ')
+          ..write('peerDeviceId: $peerDeviceId, ')
+          ..write('peerName: $peerName, ')
+          ..write('fileName: $fileName, ')
+          ..write('at: $at, ')
+          ..write('maxHlc: $maxHlc, ')
+          ..write('countsJson: $countsJson, ')
+          ..write('result: $result, ')
+          ..write('message: $message, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DevBackupsTable extends DevBackups
+    with TableInfo<$DevBackupsTable, DevBackupRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DevBackupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _atMeta = const VerificationMeta('at');
+  @override
+  late final GeneratedColumn<String> at = GeneratedColumn<String>(
+    'at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<int> schemaVersion = GeneratedColumn<int>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _appVersionMeta = const VerificationMeta(
+    'appVersion',
+  );
+  @override
+  late final GeneratedColumn<String> appVersion = GeneratedColumn<String>(
+    'app_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sizeMeta = const VerificationMeta('size');
+  @override
+  late final GeneratedColumn<int> size = GeneratedColumn<int>(
+    'size',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sha256Meta = const VerificationMeta('sha256');
+  @override
+  late final GeneratedColumn<String> sha256 = GeneratedColumn<String>(
+    'sha256',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _encryptionMeta = const VerificationMeta(
+    'encryption',
+  );
+  @override
+  late final GeneratedColumn<String> encryption = GeneratedColumn<String>(
+    'encryption',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('none'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    path,
+    at,
+    reason,
+    schemaVersion,
+    appVersion,
+    size,
+    sha256,
+    encryption,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dev_backups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DevBackupRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathMeta);
+    }
+    if (data.containsKey('at')) {
+      context.handle(_atMeta, at.isAcceptableOrUnknown(data['at']!, _atMeta));
+    } else if (isInserting) {
+      context.missing(_atMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_schemaVersionMeta);
+    }
+    if (data.containsKey('app_version')) {
+      context.handle(
+        _appVersionMeta,
+        appVersion.isAcceptableOrUnknown(data['app_version']!, _appVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_appVersionMeta);
+    }
+    if (data.containsKey('size')) {
+      context.handle(
+        _sizeMeta,
+        size.isAcceptableOrUnknown(data['size']!, _sizeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sizeMeta);
+    }
+    if (data.containsKey('sha256')) {
+      context.handle(
+        _sha256Meta,
+        sha256.isAcceptableOrUnknown(data['sha256']!, _sha256Meta),
+      );
+    } else if (isInserting) {
+      context.missing(_sha256Meta);
+    }
+    if (data.containsKey('encryption')) {
+      context.handle(
+        _encryptionMeta,
+        encryption.isAcceptableOrUnknown(data['encryption']!, _encryptionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DevBackupRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DevBackupRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      )!,
+      at: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}at'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schema_version'],
+      )!,
+      appVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_version'],
+      )!,
+      size: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}size'],
+      )!,
+      sha256: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sha256'],
+      )!,
+      encryption: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}encryption'],
+      )!,
+    );
+  }
+
+  @override
+  $DevBackupsTable createAlias(String alias) {
+    return $DevBackupsTable(attachedDatabase, alias);
+  }
+}
+
+class DevBackupRow extends DataClass implements Insertable<DevBackupRow> {
+  final String id;
+  final String path;
+  final String at;
+
+  /// `manual`, `pre-migracao`, `pre-importacao` ou `pre-restauracao`.
+  final String reason;
+  final int schemaVersion;
+  final String appVersion;
+  final int size;
+  final String sha256;
+
+  /// `none` na v1.0. Preparação para o banco criptografado da F5B
+  /// (DECISIONS D-24).
+  final String encryption;
+  const DevBackupRow({
+    required this.id,
+    required this.path,
+    required this.at,
+    required this.reason,
+    required this.schemaVersion,
+    required this.appVersion,
+    required this.size,
+    required this.sha256,
+    required this.encryption,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['path'] = Variable<String>(path);
+    map['at'] = Variable<String>(at);
+    map['reason'] = Variable<String>(reason);
+    map['schema_version'] = Variable<int>(schemaVersion);
+    map['app_version'] = Variable<String>(appVersion);
+    map['size'] = Variable<int>(size);
+    map['sha256'] = Variable<String>(sha256);
+    map['encryption'] = Variable<String>(encryption);
+    return map;
+  }
+
+  DevBackupsCompanion toCompanion(bool nullToAbsent) {
+    return DevBackupsCompanion(
+      id: Value(id),
+      path: Value(path),
+      at: Value(at),
+      reason: Value(reason),
+      schemaVersion: Value(schemaVersion),
+      appVersion: Value(appVersion),
+      size: Value(size),
+      sha256: Value(sha256),
+      encryption: Value(encryption),
+    );
+  }
+
+  factory DevBackupRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DevBackupRow(
+      id: serializer.fromJson<String>(json['id']),
+      path: serializer.fromJson<String>(json['path']),
+      at: serializer.fromJson<String>(json['at']),
+      reason: serializer.fromJson<String>(json['reason']),
+      schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+      appVersion: serializer.fromJson<String>(json['appVersion']),
+      size: serializer.fromJson<int>(json['size']),
+      sha256: serializer.fromJson<String>(json['sha256']),
+      encryption: serializer.fromJson<String>(json['encryption']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'path': serializer.toJson<String>(path),
+      'at': serializer.toJson<String>(at),
+      'reason': serializer.toJson<String>(reason),
+      'schemaVersion': serializer.toJson<int>(schemaVersion),
+      'appVersion': serializer.toJson<String>(appVersion),
+      'size': serializer.toJson<int>(size),
+      'sha256': serializer.toJson<String>(sha256),
+      'encryption': serializer.toJson<String>(encryption),
+    };
+  }
+
+  DevBackupRow copyWith({
+    String? id,
+    String? path,
+    String? at,
+    String? reason,
+    int? schemaVersion,
+    String? appVersion,
+    int? size,
+    String? sha256,
+    String? encryption,
+  }) => DevBackupRow(
+    id: id ?? this.id,
+    path: path ?? this.path,
+    at: at ?? this.at,
+    reason: reason ?? this.reason,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+    appVersion: appVersion ?? this.appVersion,
+    size: size ?? this.size,
+    sha256: sha256 ?? this.sha256,
+    encryption: encryption ?? this.encryption,
+  );
+  DevBackupRow copyWithCompanion(DevBackupsCompanion data) {
+    return DevBackupRow(
+      id: data.id.present ? data.id.value : this.id,
+      path: data.path.present ? data.path.value : this.path,
+      at: data.at.present ? data.at.value : this.at,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+      appVersion: data.appVersion.present
+          ? data.appVersion.value
+          : this.appVersion,
+      size: data.size.present ? data.size.value : this.size,
+      sha256: data.sha256.present ? data.sha256.value : this.sha256,
+      encryption: data.encryption.present
+          ? data.encryption.value
+          : this.encryption,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevBackupRow(')
+          ..write('id: $id, ')
+          ..write('path: $path, ')
+          ..write('at: $at, ')
+          ..write('reason: $reason, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('appVersion: $appVersion, ')
+          ..write('size: $size, ')
+          ..write('sha256: $sha256, ')
+          ..write('encryption: $encryption')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    path,
+    at,
+    reason,
+    schemaVersion,
+    appVersion,
+    size,
+    sha256,
+    encryption,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DevBackupRow &&
+          other.id == this.id &&
+          other.path == this.path &&
+          other.at == this.at &&
+          other.reason == this.reason &&
+          other.schemaVersion == this.schemaVersion &&
+          other.appVersion == this.appVersion &&
+          other.size == this.size &&
+          other.sha256 == this.sha256 &&
+          other.encryption == this.encryption);
+}
+
+class DevBackupsCompanion extends UpdateCompanion<DevBackupRow> {
+  final Value<String> id;
+  final Value<String> path;
+  final Value<String> at;
+  final Value<String> reason;
+  final Value<int> schemaVersion;
+  final Value<String> appVersion;
+  final Value<int> size;
+  final Value<String> sha256;
+  final Value<String> encryption;
+  final Value<int> rowid;
+  const DevBackupsCompanion({
+    this.id = const Value.absent(),
+    this.path = const Value.absent(),
+    this.at = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.appVersion = const Value.absent(),
+    this.size = const Value.absent(),
+    this.sha256 = const Value.absent(),
+    this.encryption = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DevBackupsCompanion.insert({
+    required String id,
+    required String path,
+    required String at,
+    required String reason,
+    required int schemaVersion,
+    required String appVersion,
+    required int size,
+    required String sha256,
+    this.encryption = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       path = Value(path),
+       at = Value(at),
+       reason = Value(reason),
+       schemaVersion = Value(schemaVersion),
+       appVersion = Value(appVersion),
+       size = Value(size),
+       sha256 = Value(sha256);
+  static Insertable<DevBackupRow> custom({
+    Expression<String>? id,
+    Expression<String>? path,
+    Expression<String>? at,
+    Expression<String>? reason,
+    Expression<int>? schemaVersion,
+    Expression<String>? appVersion,
+    Expression<int>? size,
+    Expression<String>? sha256,
+    Expression<String>? encryption,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (path != null) 'path': path,
+      if (at != null) 'at': at,
+      if (reason != null) 'reason': reason,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (appVersion != null) 'app_version': appVersion,
+      if (size != null) 'size': size,
+      if (sha256 != null) 'sha256': sha256,
+      if (encryption != null) 'encryption': encryption,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DevBackupsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? path,
+    Value<String>? at,
+    Value<String>? reason,
+    Value<int>? schemaVersion,
+    Value<String>? appVersion,
+    Value<int>? size,
+    Value<String>? sha256,
+    Value<String>? encryption,
+    Value<int>? rowid,
+  }) {
+    return DevBackupsCompanion(
+      id: id ?? this.id,
+      path: path ?? this.path,
+      at: at ?? this.at,
+      reason: reason ?? this.reason,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      appVersion: appVersion ?? this.appVersion,
+      size: size ?? this.size,
+      sha256: sha256 ?? this.sha256,
+      encryption: encryption ?? this.encryption,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (at.present) {
+      map['at'] = Variable<String>(at.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (appVersion.present) {
+      map['app_version'] = Variable<String>(appVersion.value);
+    }
+    if (size.present) {
+      map['size'] = Variable<int>(size.value);
+    }
+    if (sha256.present) {
+      map['sha256'] = Variable<String>(sha256.value);
+    }
+    if (encryption.present) {
+      map['encryption'] = Variable<String>(encryption.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevBackupsCompanion(')
+          ..write('id: $id, ')
+          ..write('path: $path, ')
+          ..write('at: $at, ')
+          ..write('reason: $reason, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('appVersion: $appVersion, ')
+          ..write('size: $size, ')
+          ..write('sha256: $sha256, ')
+          ..write('encryption: $encryption, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6709,6 +12112,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ManualValuationsTable manualValuations = $ManualValuationsTable(
     this,
   );
+  late final $AssetAliasesTable assetAliases = $AssetAliasesTable(this);
+  late final $HypoPortfoliosTable hypoPortfolios = $HypoPortfoliosTable(this);
+  late final $HypoHoldingsTable hypoHoldings = $HypoHoldingsTable(this);
+  late final $HypoCashflowRulesTable hypoCashflowRules =
+      $HypoCashflowRulesTable(this);
+  late final $HypoScenariosTable hypoScenarios = $HypoScenariosTable(this);
+  late final $DevSyncPeersTable devSyncPeers = $DevSyncPeersTable(this);
+  late final $DevSyncHistoryTable devSyncHistory = $DevSyncHistoryTable(this);
+  late final $DevBackupsTable devBackups = $DevBackupsTable(this);
   late final Index sharedSettingsHlc = Index(
     'shared_settings_hlc',
     'CREATE INDEX shared_settings_hlc ON shared_settings (hlc)',
@@ -6773,6 +12185,34 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'manual_valuations_asset_date',
     'CREATE INDEX manual_valuations_asset_date ON manual_valuations (asset_id, ref_date)',
   );
+  late final Index assetAliasesHlc = Index(
+    'asset_aliases_hlc',
+    'CREATE INDEX asset_aliases_hlc ON asset_aliases (hlc)',
+  );
+  late final Index assetAliasesAlias = Index(
+    'asset_aliases_alias',
+    'CREATE INDEX asset_aliases_alias ON asset_aliases (alias_id)',
+  );
+  late final Index hypoPortfoliosHlc = Index(
+    'hypo_portfolios_hlc',
+    'CREATE INDEX hypo_portfolios_hlc ON hypo_portfolios (hlc)',
+  );
+  late final Index hypoHoldingsHlc = Index(
+    'hypo_holdings_hlc',
+    'CREATE INDEX hypo_holdings_hlc ON hypo_holdings (hlc)',
+  );
+  late final Index hypoHoldingsPortfolio = Index(
+    'hypo_holdings_portfolio',
+    'CREATE INDEX hypo_holdings_portfolio ON hypo_holdings (portfolio_id)',
+  );
+  late final Index hypoCashflowRulesHlc = Index(
+    'hypo_cashflow_rules_hlc',
+    'CREATE INDEX hypo_cashflow_rules_hlc ON hypo_cashflow_rules (hlc)',
+  );
+  late final Index hypoScenariosHlc = Index(
+    'hypo_scenarios_hlc',
+    'CREATE INDEX hypo_scenarios_hlc ON hypo_scenarios (hlc)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6787,6 +12227,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     fixedIncomeTerms,
     operations,
     manualValuations,
+    assetAliases,
+    hypoPortfolios,
+    hypoHoldings,
+    hypoCashflowRules,
+    hypoScenarios,
+    devSyncPeers,
+    devSyncHistory,
+    devBackups,
     sharedSettingsHlc,
     sharedSettingsKey,
     institutionsHlc,
@@ -6803,6 +12251,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     operationsDate,
     manualValuationsHlc,
     manualValuationsAssetDate,
+    assetAliasesHlc,
+    assetAliasesAlias,
+    hypoPortfoliosHlc,
+    hypoHoldingsHlc,
+    hypoHoldingsPortfolio,
+    hypoCashflowRulesHlc,
+    hypoScenariosHlc,
   ];
 }
 
@@ -8588,6 +14043,24 @@ final class $$AssetsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$HypoHoldingsTable, List<HypoHoldingRow>>
+  _hypoHoldingsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.hypoHoldings,
+    aliasName: 'assets__id__hypo_holdings__asset_id',
+  );
+
+  $$HypoHoldingsTableProcessedTableManager get hypoHoldingsRefs {
+    final manager = $$HypoHoldingsTableTableManager(
+      $_db,
+      $_db.hypoHoldings,
+    ).filter((f) => f.assetId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_hypoHoldingsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$AssetsTableFilterComposer
@@ -8755,6 +14228,31 @@ class $$AssetsTableFilterComposer
           }) => $$ManualValuationsTableFilterComposer(
             $db: $db,
             $table: $db.manualValuations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> hypoHoldingsRefs(
+    Expression<bool> Function($$HypoHoldingsTableFilterComposer f) f,
+  ) {
+    final $$HypoHoldingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.hypoHoldings,
+      getReferencedColumn: (t) => t.assetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoHoldingsTableFilterComposer(
+            $db: $db,
+            $table: $db.hypoHoldings,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -9006,6 +14504,31 @@ class $$AssetsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> hypoHoldingsRefs<T extends Object>(
+    Expression<T> Function($$HypoHoldingsTableAnnotationComposer a) f,
+  ) {
+    final $$HypoHoldingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.hypoHoldings,
+      getReferencedColumn: (t) => t.assetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoHoldingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hypoHoldings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$AssetsTableTableManager
@@ -9025,6 +14548,7 @@ class $$AssetsTableTableManager
             bool fixedIncomeTermsRefs,
             bool operationsRefs,
             bool manualValuationsRefs,
+            bool hypoHoldingsRefs,
           })
         > {
   $$AssetsTableTableManager(_$AppDatabase db, $AssetsTable table)
@@ -9135,6 +14659,7 @@ class $$AssetsTableTableManager
                 fixedIncomeTermsRefs = false,
                 operationsRefs = false,
                 manualValuationsRefs = false,
+                hypoHoldingsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -9142,6 +14667,7 @@ class $$AssetsTableTableManager
                     if (fixedIncomeTermsRefs) db.fixedIncomeTerms,
                     if (operationsRefs) db.operations,
                     if (manualValuationsRefs) db.manualValuations,
+                    if (hypoHoldingsRefs) db.hypoHoldings,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -9209,6 +14735,27 @@ class $$AssetsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (hypoHoldingsRefs)
+                        await $_getPrefetchedData<
+                          AssetRow,
+                          $AssetsTable,
+                          HypoHoldingRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AssetsTableReferences
+                              ._hypoHoldingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AssetsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).hypoHoldingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.assetId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -9233,6 +14780,7 @@ typedef $$AssetsTableProcessedTableManager =
         bool fixedIncomeTermsRefs,
         bool operationsRefs,
         bool manualValuationsRefs,
+        bool hypoHoldingsRefs,
       })
     >;
 typedef $$FixedIncomeTermsTableCreateCompanionBuilder =
@@ -11294,6 +16842,3352 @@ typedef $$ManualValuationsTableProcessedTableManager =
       ManualValuationRow,
       PrefetchHooks Function({bool assetId, bool accountId})
     >;
+typedef $$AssetAliasesTableCreateCompanionBuilder =
+    AssetAliasesCompanion Function({
+      required String id,
+      required String createdAt,
+      required String updatedAt,
+      required String hlc,
+      required String deviceId,
+      Value<String?> deletedAt,
+      required String entity,
+      required String aliasId,
+      required String canonicalId,
+      Value<int> rowid,
+    });
+typedef $$AssetAliasesTableUpdateCompanionBuilder =
+    AssetAliasesCompanion Function({
+      Value<String> id,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<String> hlc,
+      Value<String> deviceId,
+      Value<String?> deletedAt,
+      Value<String> entity,
+      Value<String> aliasId,
+      Value<String> canonicalId,
+      Value<int> rowid,
+    });
+
+class $$AssetAliasesTableFilterComposer
+    extends Composer<_$AppDatabase, $AssetAliasesTable> {
+  $$AssetAliasesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get aliasId => $composableBuilder(
+    column: $table.aliasId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalId => $composableBuilder(
+    column: $table.canonicalId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AssetAliasesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AssetAliasesTable> {
+  $$AssetAliasesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get aliasId => $composableBuilder(
+    column: $table.aliasId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalId => $composableBuilder(
+    column: $table.canonicalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AssetAliasesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AssetAliasesTable> {
+  $$AssetAliasesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumn<String> get aliasId =>
+      $composableBuilder(column: $table.aliasId, builder: (column) => column);
+
+  GeneratedColumn<String> get canonicalId => $composableBuilder(
+    column: $table.canonicalId,
+    builder: (column) => column,
+  );
+}
+
+class $$AssetAliasesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AssetAliasesTable,
+          AssetAliasRow,
+          $$AssetAliasesTableFilterComposer,
+          $$AssetAliasesTableOrderingComposer,
+          $$AssetAliasesTableAnnotationComposer,
+          $$AssetAliasesTableCreateCompanionBuilder,
+          $$AssetAliasesTableUpdateCompanionBuilder,
+          (
+            AssetAliasRow,
+            BaseReferences<_$AppDatabase, $AssetAliasesTable, AssetAliasRow>,
+          ),
+          AssetAliasRow,
+          PrefetchHooks Function()
+        > {
+  $$AssetAliasesTableTableManager(_$AppDatabase db, $AssetAliasesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AssetAliasesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AssetAliasesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AssetAliasesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String?> deletedAt = const Value.absent(),
+                Value<String> entity = const Value.absent(),
+                Value<String> aliasId = const Value.absent(),
+                Value<String> canonicalId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetAliasesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                entity: entity,
+                aliasId: aliasId,
+                canonicalId: canonicalId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String createdAt,
+                required String updatedAt,
+                required String hlc,
+                required String deviceId,
+                Value<String?> deletedAt = const Value.absent(),
+                required String entity,
+                required String aliasId,
+                required String canonicalId,
+                Value<int> rowid = const Value.absent(),
+              }) => AssetAliasesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                entity: entity,
+                aliasId: aliasId,
+                canonicalId: canonicalId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AssetAliasesTable, AssetAliasRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $AssetAliasesTable,
+                    AssetAliasRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AssetAliasesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AssetAliasesTable,
+      AssetAliasRow,
+      $$AssetAliasesTableFilterComposer,
+      $$AssetAliasesTableOrderingComposer,
+      $$AssetAliasesTableAnnotationComposer,
+      $$AssetAliasesTableCreateCompanionBuilder,
+      $$AssetAliasesTableUpdateCompanionBuilder,
+      (
+        AssetAliasRow,
+        BaseReferences<_$AppDatabase, $AssetAliasesTable, AssetAliasRow>,
+      ),
+      AssetAliasRow,
+      PrefetchHooks Function()
+    >;
+typedef $$HypoPortfoliosTableCreateCompanionBuilder =
+    HypoPortfoliosCompanion Function({
+      required String id,
+      required String createdAt,
+      required String updatedAt,
+      required String hlc,
+      required String deviceId,
+      Value<String?> deletedAt,
+      required String name,
+      Value<String?> description,
+      Value<String?> objective,
+      required String startDate,
+      required String baseCurrency,
+      required Decimal initialCapital,
+      required String compositionMode,
+      Value<String?> benchmarkJson,
+      required String rebalanceJson,
+      required String assumptionsJson,
+      Value<String?> methodology,
+      Value<String?> archivedAt,
+      Value<String?> duplicatedFromId,
+      Value<int> rowid,
+    });
+typedef $$HypoPortfoliosTableUpdateCompanionBuilder =
+    HypoPortfoliosCompanion Function({
+      Value<String> id,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<String> hlc,
+      Value<String> deviceId,
+      Value<String?> deletedAt,
+      Value<String> name,
+      Value<String?> description,
+      Value<String?> objective,
+      Value<String> startDate,
+      Value<String> baseCurrency,
+      Value<Decimal> initialCapital,
+      Value<String> compositionMode,
+      Value<String?> benchmarkJson,
+      Value<String> rebalanceJson,
+      Value<String> assumptionsJson,
+      Value<String?> methodology,
+      Value<String?> archivedAt,
+      Value<String?> duplicatedFromId,
+      Value<int> rowid,
+    });
+
+final class $$HypoPortfoliosTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $HypoPortfoliosTable, HypoPortfolioRow> {
+  $$HypoPortfoliosTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$HypoHoldingsTable, List<HypoHoldingRow>>
+  _hypoHoldingsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.hypoHoldings,
+    aliasName: 'hypo_portfolios__id__hypo_holdings__portfolio_id',
+  );
+
+  $$HypoHoldingsTableProcessedTableManager get hypoHoldingsRefs {
+    final manager = $$HypoHoldingsTableTableManager(
+      $_db,
+      $_db.hypoHoldings,
+    ).filter((f) => f.portfolioId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_hypoHoldingsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$HypoCashflowRulesTable, List<HypoCashflowRuleRow>>
+  _hypoCashflowRulesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.hypoCashflowRules,
+        aliasName: 'hypo_portfolios__id__hypo_cashflow_rules__portfolio_id',
+      );
+
+  $$HypoCashflowRulesTableProcessedTableManager get hypoCashflowRulesRefs {
+    final manager = $$HypoCashflowRulesTableTableManager(
+      $_db,
+      $_db.hypoCashflowRules,
+    ).filter((f) => f.portfolioId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _hypoCashflowRulesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$HypoScenariosTable, List<HypoScenarioRow>>
+  _hypoScenariosRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.hypoScenarios,
+    aliasName: 'hypo_portfolios__id__hypo_scenarios__portfolio_id',
+  );
+
+  $$HypoScenariosTableProcessedTableManager get hypoScenariosRefs {
+    final manager = $$HypoScenariosTableTableManager(
+      $_db,
+      $_db.hypoScenarios,
+    ).filter((f) => f.portfolioId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_hypoScenariosRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$HypoPortfoliosTableFilterComposer
+    extends Composer<_$AppDatabase, $HypoPortfoliosTable> {
+  $$HypoPortfoliosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get objective => $composableBuilder(
+    column: $table.objective,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get baseCurrency => $composableBuilder(
+    column: $table.baseCurrency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String> get initialCapital =>
+      $composableBuilder(
+        column: $table.initialCapital,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get compositionMode => $composableBuilder(
+    column: $table.compositionMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get benchmarkJson => $composableBuilder(
+    column: $table.benchmarkJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rebalanceJson => $composableBuilder(
+    column: $table.rebalanceJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assumptionsJson => $composableBuilder(
+    column: $table.assumptionsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get methodology => $composableBuilder(
+    column: $table.methodology,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get duplicatedFromId => $composableBuilder(
+    column: $table.duplicatedFromId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> hypoHoldingsRefs(
+    Expression<bool> Function($$HypoHoldingsTableFilterComposer f) f,
+  ) {
+    final $$HypoHoldingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.hypoHoldings,
+      getReferencedColumn: (t) => t.portfolioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoHoldingsTableFilterComposer(
+            $db: $db,
+            $table: $db.hypoHoldings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> hypoCashflowRulesRefs(
+    Expression<bool> Function($$HypoCashflowRulesTableFilterComposer f) f,
+  ) {
+    final $$HypoCashflowRulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.hypoCashflowRules,
+      getReferencedColumn: (t) => t.portfolioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoCashflowRulesTableFilterComposer(
+            $db: $db,
+            $table: $db.hypoCashflowRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> hypoScenariosRefs(
+    Expression<bool> Function($$HypoScenariosTableFilterComposer f) f,
+  ) {
+    final $$HypoScenariosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.hypoScenarios,
+      getReferencedColumn: (t) => t.portfolioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoScenariosTableFilterComposer(
+            $db: $db,
+            $table: $db.hypoScenarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$HypoPortfoliosTableOrderingComposer
+    extends Composer<_$AppDatabase, $HypoPortfoliosTable> {
+  $$HypoPortfoliosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get objective => $composableBuilder(
+    column: $table.objective,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get baseCurrency => $composableBuilder(
+    column: $table.baseCurrency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get initialCapital => $composableBuilder(
+    column: $table.initialCapital,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get compositionMode => $composableBuilder(
+    column: $table.compositionMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get benchmarkJson => $composableBuilder(
+    column: $table.benchmarkJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rebalanceJson => $composableBuilder(
+    column: $table.rebalanceJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assumptionsJson => $composableBuilder(
+    column: $table.assumptionsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get methodology => $composableBuilder(
+    column: $table.methodology,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get duplicatedFromId => $composableBuilder(
+    column: $table.duplicatedFromId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HypoPortfoliosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HypoPortfoliosTable> {
+  $$HypoPortfoliosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get objective =>
+      $composableBuilder(column: $table.objective, builder: (column) => column);
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get baseCurrency => $composableBuilder(
+    column: $table.baseCurrency,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get initialCapital =>
+      $composableBuilder(
+        column: $table.initialCapital,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get compositionMode => $composableBuilder(
+    column: $table.compositionMode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get benchmarkJson => $composableBuilder(
+    column: $table.benchmarkJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rebalanceJson => $composableBuilder(
+    column: $table.rebalanceJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get assumptionsJson => $composableBuilder(
+    column: $table.assumptionsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get methodology => $composableBuilder(
+    column: $table.methodology,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get duplicatedFromId => $composableBuilder(
+    column: $table.duplicatedFromId,
+    builder: (column) => column,
+  );
+
+  Expression<T> hypoHoldingsRefs<T extends Object>(
+    Expression<T> Function($$HypoHoldingsTableAnnotationComposer a) f,
+  ) {
+    final $$HypoHoldingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.hypoHoldings,
+      getReferencedColumn: (t) => t.portfolioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoHoldingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hypoHoldings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> hypoCashflowRulesRefs<T extends Object>(
+    Expression<T> Function($$HypoCashflowRulesTableAnnotationComposer a) f,
+  ) {
+    final $$HypoCashflowRulesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.hypoCashflowRules,
+          getReferencedColumn: (t) => t.portfolioId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$HypoCashflowRulesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.hypoCashflowRules,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> hypoScenariosRefs<T extends Object>(
+    Expression<T> Function($$HypoScenariosTableAnnotationComposer a) f,
+  ) {
+    final $$HypoScenariosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.hypoScenarios,
+      getReferencedColumn: (t) => t.portfolioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoScenariosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hypoScenarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$HypoPortfoliosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HypoPortfoliosTable,
+          HypoPortfolioRow,
+          $$HypoPortfoliosTableFilterComposer,
+          $$HypoPortfoliosTableOrderingComposer,
+          $$HypoPortfoliosTableAnnotationComposer,
+          $$HypoPortfoliosTableCreateCompanionBuilder,
+          $$HypoPortfoliosTableUpdateCompanionBuilder,
+          (HypoPortfolioRow, $$HypoPortfoliosTableReferences),
+          HypoPortfolioRow,
+          PrefetchHooks Function({
+            bool hypoHoldingsRefs,
+            bool hypoCashflowRulesRefs,
+            bool hypoScenariosRefs,
+          })
+        > {
+  $$HypoPortfoliosTableTableManager(
+    _$AppDatabase db,
+    $HypoPortfoliosTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HypoPortfoliosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HypoPortfoliosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HypoPortfoliosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String?> deletedAt = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> objective = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<String> baseCurrency = const Value.absent(),
+                Value<Decimal> initialCapital = const Value.absent(),
+                Value<String> compositionMode = const Value.absent(),
+                Value<String?> benchmarkJson = const Value.absent(),
+                Value<String> rebalanceJson = const Value.absent(),
+                Value<String> assumptionsJson = const Value.absent(),
+                Value<String?> methodology = const Value.absent(),
+                Value<String?> archivedAt = const Value.absent(),
+                Value<String?> duplicatedFromId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HypoPortfoliosCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                name: name,
+                description: description,
+                objective: objective,
+                startDate: startDate,
+                baseCurrency: baseCurrency,
+                initialCapital: initialCapital,
+                compositionMode: compositionMode,
+                benchmarkJson: benchmarkJson,
+                rebalanceJson: rebalanceJson,
+                assumptionsJson: assumptionsJson,
+                methodology: methodology,
+                archivedAt: archivedAt,
+                duplicatedFromId: duplicatedFromId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String createdAt,
+                required String updatedAt,
+                required String hlc,
+                required String deviceId,
+                Value<String?> deletedAt = const Value.absent(),
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<String?> objective = const Value.absent(),
+                required String startDate,
+                required String baseCurrency,
+                required Decimal initialCapital,
+                required String compositionMode,
+                Value<String?> benchmarkJson = const Value.absent(),
+                required String rebalanceJson,
+                required String assumptionsJson,
+                Value<String?> methodology = const Value.absent(),
+                Value<String?> archivedAt = const Value.absent(),
+                Value<String?> duplicatedFromId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HypoPortfoliosCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                name: name,
+                description: description,
+                objective: objective,
+                startDate: startDate,
+                baseCurrency: baseCurrency,
+                initialCapital: initialCapital,
+                compositionMode: compositionMode,
+                benchmarkJson: benchmarkJson,
+                rebalanceJson: rebalanceJson,
+                assumptionsJson: assumptionsJson,
+                methodology: methodology,
+                archivedAt: archivedAt,
+                duplicatedFromId: duplicatedFromId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$HypoPortfoliosTable, HypoPortfolioRow>(table),
+                  $$HypoPortfoliosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                hypoHoldingsRefs = false,
+                hypoCashflowRulesRefs = false,
+                hypoScenariosRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (hypoHoldingsRefs) db.hypoHoldings,
+                    if (hypoCashflowRulesRefs) db.hypoCashflowRules,
+                    if (hypoScenariosRefs) db.hypoScenarios,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (hypoHoldingsRefs)
+                        await $_getPrefetchedData<
+                          HypoPortfolioRow,
+                          $HypoPortfoliosTable,
+                          HypoHoldingRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$HypoPortfoliosTableReferences
+                              ._hypoHoldingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$HypoPortfoliosTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).hypoHoldingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.portfolioId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (hypoCashflowRulesRefs)
+                        await $_getPrefetchedData<
+                          HypoPortfolioRow,
+                          $HypoPortfoliosTable,
+                          HypoCashflowRuleRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$HypoPortfoliosTableReferences
+                              ._hypoCashflowRulesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$HypoPortfoliosTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).hypoCashflowRulesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.portfolioId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (hypoScenariosRefs)
+                        await $_getPrefetchedData<
+                          HypoPortfolioRow,
+                          $HypoPortfoliosTable,
+                          HypoScenarioRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$HypoPortfoliosTableReferences
+                              ._hypoScenariosRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$HypoPortfoliosTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).hypoScenariosRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.portfolioId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$HypoPortfoliosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HypoPortfoliosTable,
+      HypoPortfolioRow,
+      $$HypoPortfoliosTableFilterComposer,
+      $$HypoPortfoliosTableOrderingComposer,
+      $$HypoPortfoliosTableAnnotationComposer,
+      $$HypoPortfoliosTableCreateCompanionBuilder,
+      $$HypoPortfoliosTableUpdateCompanionBuilder,
+      (HypoPortfolioRow, $$HypoPortfoliosTableReferences),
+      HypoPortfolioRow,
+      PrefetchHooks Function({
+        bool hypoHoldingsRefs,
+        bool hypoCashflowRulesRefs,
+        bool hypoScenariosRefs,
+      })
+    >;
+typedef $$HypoHoldingsTableCreateCompanionBuilder =
+    HypoHoldingsCompanion Function({
+      required String id,
+      required String createdAt,
+      required String updatedAt,
+      required String hlc,
+      required String deviceId,
+      Value<String?> deletedAt,
+      required String portfolioId,
+      required String assetId,
+      Value<Decimal?> weightPct,
+      Value<Decimal?> quantity,
+      Value<Decimal?> amount,
+      Value<int> rowid,
+    });
+typedef $$HypoHoldingsTableUpdateCompanionBuilder =
+    HypoHoldingsCompanion Function({
+      Value<String> id,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<String> hlc,
+      Value<String> deviceId,
+      Value<String?> deletedAt,
+      Value<String> portfolioId,
+      Value<String> assetId,
+      Value<Decimal?> weightPct,
+      Value<Decimal?> quantity,
+      Value<Decimal?> amount,
+      Value<int> rowid,
+    });
+
+final class $$HypoHoldingsTableReferences
+    extends BaseReferences<_$AppDatabase, $HypoHoldingsTable, HypoHoldingRow> {
+  $$HypoHoldingsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $HypoPortfoliosTable _portfolioIdTable(_$AppDatabase db) => db
+      .hypoPortfolios
+      .createAlias('hypo_holdings__portfolio_id__hypo_portfolios__id');
+
+  $$HypoPortfoliosTableProcessedTableManager get portfolioId {
+    final $_column = $_itemColumn<String>('portfolio_id')!;
+
+    final manager = $$HypoPortfoliosTableTableManager(
+      $_db,
+      $_db.hypoPortfolios,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_portfolioIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AssetsTable _assetIdTable(_$AppDatabase db) =>
+      db.assets.createAlias('hypo_holdings__asset_id__assets__id');
+
+  $$AssetsTableProcessedTableManager get assetId {
+    final $_column = $_itemColumn<String>('asset_id')!;
+
+    final manager = $$AssetsTableTableManager(
+      $_db,
+      $_db.assets,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_assetIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$HypoHoldingsTableFilterComposer
+    extends Composer<_$AppDatabase, $HypoHoldingsTable> {
+  $$HypoHoldingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Decimal?, Decimal, String> get weightPct =>
+      $composableBuilder(
+        column: $table.weightPct,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<Decimal?, Decimal, String> get quantity =>
+      $composableBuilder(
+        column: $table.quantity,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<Decimal?, Decimal, String> get amount =>
+      $composableBuilder(
+        column: $table.amount,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  $$HypoPortfoliosTableFilterComposer get portfolioId {
+    final $$HypoPortfoliosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableFilterComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AssetsTableFilterComposer get assetId {
+    final $$AssetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.assetId,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableFilterComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoHoldingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $HypoHoldingsTable> {
+  $$HypoHoldingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get weightPct => $composableBuilder(
+    column: $table.weightPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$HypoPortfoliosTableOrderingComposer get portfolioId {
+    final $$HypoPortfoliosTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableOrderingComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AssetsTableOrderingComposer get assetId {
+    final $$AssetsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.assetId,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableOrderingComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoHoldingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HypoHoldingsTable> {
+  $$HypoHoldingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal?, String> get weightPct =>
+      $composableBuilder(column: $table.weightPct, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal?, String> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal?, String> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  $$HypoPortfoliosTableAnnotationComposer get portfolioId {
+    final $$HypoPortfoliosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AssetsTableAnnotationComposer get assetId {
+    final $$AssetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.assetId,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoHoldingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HypoHoldingsTable,
+          HypoHoldingRow,
+          $$HypoHoldingsTableFilterComposer,
+          $$HypoHoldingsTableOrderingComposer,
+          $$HypoHoldingsTableAnnotationComposer,
+          $$HypoHoldingsTableCreateCompanionBuilder,
+          $$HypoHoldingsTableUpdateCompanionBuilder,
+          (HypoHoldingRow, $$HypoHoldingsTableReferences),
+          HypoHoldingRow,
+          PrefetchHooks Function({bool portfolioId, bool assetId})
+        > {
+  $$HypoHoldingsTableTableManager(_$AppDatabase db, $HypoHoldingsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HypoHoldingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HypoHoldingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HypoHoldingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String?> deletedAt = const Value.absent(),
+                Value<String> portfolioId = const Value.absent(),
+                Value<String> assetId = const Value.absent(),
+                Value<Decimal?> weightPct = const Value.absent(),
+                Value<Decimal?> quantity = const Value.absent(),
+                Value<Decimal?> amount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HypoHoldingsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                portfolioId: portfolioId,
+                assetId: assetId,
+                weightPct: weightPct,
+                quantity: quantity,
+                amount: amount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String createdAt,
+                required String updatedAt,
+                required String hlc,
+                required String deviceId,
+                Value<String?> deletedAt = const Value.absent(),
+                required String portfolioId,
+                required String assetId,
+                Value<Decimal?> weightPct = const Value.absent(),
+                Value<Decimal?> quantity = const Value.absent(),
+                Value<Decimal?> amount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HypoHoldingsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                portfolioId: portfolioId,
+                assetId: assetId,
+                weightPct: weightPct,
+                quantity: quantity,
+                amount: amount,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$HypoHoldingsTable, HypoHoldingRow>(table),
+                  $$HypoHoldingsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({portfolioId = false, assetId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (portfolioId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.portfolioId,
+                        referencedTable: $$HypoHoldingsTableReferences
+                            ._portfolioIdTable(db),
+                        referencedColumn: $$HypoHoldingsTableReferences
+                            ._portfolioIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (assetId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.assetId,
+                        referencedTable: $$HypoHoldingsTableReferences
+                            ._assetIdTable(db),
+                        referencedColumn: $$HypoHoldingsTableReferences
+                            ._assetIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$HypoHoldingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HypoHoldingsTable,
+      HypoHoldingRow,
+      $$HypoHoldingsTableFilterComposer,
+      $$HypoHoldingsTableOrderingComposer,
+      $$HypoHoldingsTableAnnotationComposer,
+      $$HypoHoldingsTableCreateCompanionBuilder,
+      $$HypoHoldingsTableUpdateCompanionBuilder,
+      (HypoHoldingRow, $$HypoHoldingsTableReferences),
+      HypoHoldingRow,
+      PrefetchHooks Function({bool portfolioId, bool assetId})
+    >;
+typedef $$HypoCashflowRulesTableCreateCompanionBuilder =
+    HypoCashflowRulesCompanion Function({
+      required String id,
+      required String createdAt,
+      required String updatedAt,
+      required String hlc,
+      required String deviceId,
+      Value<String?> deletedAt,
+      required String portfolioId,
+      required String kind,
+      required String frequency,
+      Value<Decimal?> amount,
+      Value<Decimal?> pct,
+      required String adjustment,
+      required String startDate,
+      Value<String?> endDate,
+      Value<int> rowid,
+    });
+typedef $$HypoCashflowRulesTableUpdateCompanionBuilder =
+    HypoCashflowRulesCompanion Function({
+      Value<String> id,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<String> hlc,
+      Value<String> deviceId,
+      Value<String?> deletedAt,
+      Value<String> portfolioId,
+      Value<String> kind,
+      Value<String> frequency,
+      Value<Decimal?> amount,
+      Value<Decimal?> pct,
+      Value<String> adjustment,
+      Value<String> startDate,
+      Value<String?> endDate,
+      Value<int> rowid,
+    });
+
+final class $$HypoCashflowRulesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $HypoCashflowRulesTable,
+          HypoCashflowRuleRow
+        > {
+  $$HypoCashflowRulesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $HypoPortfoliosTable _portfolioIdTable(_$AppDatabase db) => db
+      .hypoPortfolios
+      .createAlias('hypo_cashflow_rules__portfolio_id__hypo_portfolios__id');
+
+  $$HypoPortfoliosTableProcessedTableManager get portfolioId {
+    final $_column = $_itemColumn<String>('portfolio_id')!;
+
+    final manager = $$HypoPortfoliosTableTableManager(
+      $_db,
+      $_db.hypoPortfolios,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_portfolioIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$HypoCashflowRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $HypoCashflowRulesTable> {
+  $$HypoCashflowRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frequency => $composableBuilder(
+    column: $table.frequency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Decimal?, Decimal, String> get amount =>
+      $composableBuilder(
+        column: $table.amount,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<Decimal?, Decimal, String> get pct =>
+      $composableBuilder(
+        column: $table.pct,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get adjustment => $composableBuilder(
+    column: $table.adjustment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$HypoPortfoliosTableFilterComposer get portfolioId {
+    final $$HypoPortfoliosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableFilterComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoCashflowRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $HypoCashflowRulesTable> {
+  $$HypoCashflowRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frequency => $composableBuilder(
+    column: $table.frequency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pct => $composableBuilder(
+    column: $table.pct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get adjustment => $composableBuilder(
+    column: $table.adjustment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$HypoPortfoliosTableOrderingComposer get portfolioId {
+    final $$HypoPortfoliosTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableOrderingComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoCashflowRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HypoCashflowRulesTable> {
+  $$HypoCashflowRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get frequency =>
+      $composableBuilder(column: $table.frequency, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal?, String> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal?, String> get pct =>
+      $composableBuilder(column: $table.pct, builder: (column) => column);
+
+  GeneratedColumn<String> get adjustment => $composableBuilder(
+    column: $table.adjustment,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  $$HypoPortfoliosTableAnnotationComposer get portfolioId {
+    final $$HypoPortfoliosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoCashflowRulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HypoCashflowRulesTable,
+          HypoCashflowRuleRow,
+          $$HypoCashflowRulesTableFilterComposer,
+          $$HypoCashflowRulesTableOrderingComposer,
+          $$HypoCashflowRulesTableAnnotationComposer,
+          $$HypoCashflowRulesTableCreateCompanionBuilder,
+          $$HypoCashflowRulesTableUpdateCompanionBuilder,
+          (HypoCashflowRuleRow, $$HypoCashflowRulesTableReferences),
+          HypoCashflowRuleRow,
+          PrefetchHooks Function({bool portfolioId})
+        > {
+  $$HypoCashflowRulesTableTableManager(
+    _$AppDatabase db,
+    $HypoCashflowRulesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HypoCashflowRulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HypoCashflowRulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HypoCashflowRulesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String?> deletedAt = const Value.absent(),
+                Value<String> portfolioId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> frequency = const Value.absent(),
+                Value<Decimal?> amount = const Value.absent(),
+                Value<Decimal?> pct = const Value.absent(),
+                Value<String> adjustment = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<String?> endDate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HypoCashflowRulesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                portfolioId: portfolioId,
+                kind: kind,
+                frequency: frequency,
+                amount: amount,
+                pct: pct,
+                adjustment: adjustment,
+                startDate: startDate,
+                endDate: endDate,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String createdAt,
+                required String updatedAt,
+                required String hlc,
+                required String deviceId,
+                Value<String?> deletedAt = const Value.absent(),
+                required String portfolioId,
+                required String kind,
+                required String frequency,
+                Value<Decimal?> amount = const Value.absent(),
+                Value<Decimal?> pct = const Value.absent(),
+                required String adjustment,
+                required String startDate,
+                Value<String?> endDate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HypoCashflowRulesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                portfolioId: portfolioId,
+                kind: kind,
+                frequency: frequency,
+                amount: amount,
+                pct: pct,
+                adjustment: adjustment,
+                startDate: startDate,
+                endDate: endDate,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$HypoCashflowRulesTable, HypoCashflowRuleRow>(
+                    table,
+                  ),
+                  $$HypoCashflowRulesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({portfolioId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (portfolioId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.portfolioId,
+                        referencedTable: $$HypoCashflowRulesTableReferences
+                            ._portfolioIdTable(db),
+                        referencedColumn: $$HypoCashflowRulesTableReferences
+                            ._portfolioIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$HypoCashflowRulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HypoCashflowRulesTable,
+      HypoCashflowRuleRow,
+      $$HypoCashflowRulesTableFilterComposer,
+      $$HypoCashflowRulesTableOrderingComposer,
+      $$HypoCashflowRulesTableAnnotationComposer,
+      $$HypoCashflowRulesTableCreateCompanionBuilder,
+      $$HypoCashflowRulesTableUpdateCompanionBuilder,
+      (HypoCashflowRuleRow, $$HypoCashflowRulesTableReferences),
+      HypoCashflowRuleRow,
+      PrefetchHooks Function({bool portfolioId})
+    >;
+typedef $$HypoScenariosTableCreateCompanionBuilder =
+    HypoScenariosCompanion Function({
+      required String id,
+      required String createdAt,
+      required String updatedAt,
+      required String hlc,
+      required String deviceId,
+      Value<String?> deletedAt,
+      Value<String?> portfolioId,
+      required String name,
+      required String kind,
+      required String assumptionsJson,
+      Value<int> rowid,
+    });
+typedef $$HypoScenariosTableUpdateCompanionBuilder =
+    HypoScenariosCompanion Function({
+      Value<String> id,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<String> hlc,
+      Value<String> deviceId,
+      Value<String?> deletedAt,
+      Value<String?> portfolioId,
+      Value<String> name,
+      Value<String> kind,
+      Value<String> assumptionsJson,
+      Value<int> rowid,
+    });
+
+final class $$HypoScenariosTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $HypoScenariosTable, HypoScenarioRow> {
+  $$HypoScenariosTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $HypoPortfoliosTable _portfolioIdTable(_$AppDatabase db) => db
+      .hypoPortfolios
+      .createAlias('hypo_scenarios__portfolio_id__hypo_portfolios__id');
+
+  $$HypoPortfoliosTableProcessedTableManager? get portfolioId {
+    final $_column = $_itemColumn<String>('portfolio_id');
+    if ($_column == null) return null;
+    final manager = $$HypoPortfoliosTableTableManager(
+      $_db,
+      $_db.hypoPortfolios,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_portfolioIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$HypoScenariosTableFilterComposer
+    extends Composer<_$AppDatabase, $HypoScenariosTable> {
+  $$HypoScenariosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assumptionsJson => $composableBuilder(
+    column: $table.assumptionsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$HypoPortfoliosTableFilterComposer get portfolioId {
+    final $$HypoPortfoliosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableFilterComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoScenariosTableOrderingComposer
+    extends Composer<_$AppDatabase, $HypoScenariosTable> {
+  $$HypoScenariosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assumptionsJson => $composableBuilder(
+    column: $table.assumptionsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$HypoPortfoliosTableOrderingComposer get portfolioId {
+    final $$HypoPortfoliosTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableOrderingComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoScenariosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HypoScenariosTable> {
+  $$HypoScenariosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get assumptionsJson => $composableBuilder(
+    column: $table.assumptionsJson,
+    builder: (column) => column,
+  );
+
+  $$HypoPortfoliosTableAnnotationComposer get portfolioId {
+    final $$HypoPortfoliosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.portfolioId,
+      referencedTable: $db.hypoPortfolios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HypoPortfoliosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hypoPortfolios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HypoScenariosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HypoScenariosTable,
+          HypoScenarioRow,
+          $$HypoScenariosTableFilterComposer,
+          $$HypoScenariosTableOrderingComposer,
+          $$HypoScenariosTableAnnotationComposer,
+          $$HypoScenariosTableCreateCompanionBuilder,
+          $$HypoScenariosTableUpdateCompanionBuilder,
+          (HypoScenarioRow, $$HypoScenariosTableReferences),
+          HypoScenarioRow,
+          PrefetchHooks Function({bool portfolioId})
+        > {
+  $$HypoScenariosTableTableManager(_$AppDatabase db, $HypoScenariosTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HypoScenariosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HypoScenariosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HypoScenariosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String?> deletedAt = const Value.absent(),
+                Value<String?> portfolioId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> assumptionsJson = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HypoScenariosCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                portfolioId: portfolioId,
+                name: name,
+                kind: kind,
+                assumptionsJson: assumptionsJson,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String createdAt,
+                required String updatedAt,
+                required String hlc,
+                required String deviceId,
+                Value<String?> deletedAt = const Value.absent(),
+                Value<String?> portfolioId = const Value.absent(),
+                required String name,
+                required String kind,
+                required String assumptionsJson,
+                Value<int> rowid = const Value.absent(),
+              }) => HypoScenariosCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                hlc: hlc,
+                deviceId: deviceId,
+                deletedAt: deletedAt,
+                portfolioId: portfolioId,
+                name: name,
+                kind: kind,
+                assumptionsJson: assumptionsJson,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$HypoScenariosTable, HypoScenarioRow>(table),
+                  $$HypoScenariosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({portfolioId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (portfolioId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.portfolioId,
+                        referencedTable: $$HypoScenariosTableReferences
+                            ._portfolioIdTable(db),
+                        referencedColumn: $$HypoScenariosTableReferences
+                            ._portfolioIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$HypoScenariosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HypoScenariosTable,
+      HypoScenarioRow,
+      $$HypoScenariosTableFilterComposer,
+      $$HypoScenariosTableOrderingComposer,
+      $$HypoScenariosTableAnnotationComposer,
+      $$HypoScenariosTableCreateCompanionBuilder,
+      $$HypoScenariosTableUpdateCompanionBuilder,
+      (HypoScenarioRow, $$HypoScenariosTableReferences),
+      HypoScenarioRow,
+      PrefetchHooks Function({bool portfolioId})
+    >;
+typedef $$DevSyncPeersTableCreateCompanionBuilder =
+    DevSyncPeersCompanion Function({
+      required String peerDeviceId,
+      required String peerName,
+      required String lastHlcReceived,
+      Value<String?> lastHlcSent,
+      required String lastSyncAt,
+      Value<int> rowid,
+    });
+typedef $$DevSyncPeersTableUpdateCompanionBuilder =
+    DevSyncPeersCompanion Function({
+      Value<String> peerDeviceId,
+      Value<String> peerName,
+      Value<String> lastHlcReceived,
+      Value<String?> lastHlcSent,
+      Value<String> lastSyncAt,
+      Value<int> rowid,
+    });
+
+class $$DevSyncPeersTableFilterComposer
+    extends Composer<_$AppDatabase, $DevSyncPeersTable> {
+  $$DevSyncPeersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get peerDeviceId => $composableBuilder(
+    column: $table.peerDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get peerName => $composableBuilder(
+    column: $table.peerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastHlcReceived => $composableBuilder(
+    column: $table.lastHlcReceived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastHlcSent => $composableBuilder(
+    column: $table.lastHlcSent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DevSyncPeersTableOrderingComposer
+    extends Composer<_$AppDatabase, $DevSyncPeersTable> {
+  $$DevSyncPeersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get peerDeviceId => $composableBuilder(
+    column: $table.peerDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get peerName => $composableBuilder(
+    column: $table.peerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastHlcReceived => $composableBuilder(
+    column: $table.lastHlcReceived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastHlcSent => $composableBuilder(
+    column: $table.lastHlcSent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DevSyncPeersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DevSyncPeersTable> {
+  $$DevSyncPeersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get peerDeviceId => $composableBuilder(
+    column: $table.peerDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get peerName =>
+      $composableBuilder(column: $table.peerName, builder: (column) => column);
+
+  GeneratedColumn<String> get lastHlcReceived => $composableBuilder(
+    column: $table.lastHlcReceived,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastHlcSent => $composableBuilder(
+    column: $table.lastHlcSent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => column,
+  );
+}
+
+class $$DevSyncPeersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DevSyncPeersTable,
+          DevSyncPeerRow,
+          $$DevSyncPeersTableFilterComposer,
+          $$DevSyncPeersTableOrderingComposer,
+          $$DevSyncPeersTableAnnotationComposer,
+          $$DevSyncPeersTableCreateCompanionBuilder,
+          $$DevSyncPeersTableUpdateCompanionBuilder,
+          (
+            DevSyncPeerRow,
+            BaseReferences<_$AppDatabase, $DevSyncPeersTable, DevSyncPeerRow>,
+          ),
+          DevSyncPeerRow,
+          PrefetchHooks Function()
+        > {
+  $$DevSyncPeersTableTableManager(_$AppDatabase db, $DevSyncPeersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DevSyncPeersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DevSyncPeersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DevSyncPeersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> peerDeviceId = const Value.absent(),
+                Value<String> peerName = const Value.absent(),
+                Value<String> lastHlcReceived = const Value.absent(),
+                Value<String?> lastHlcSent = const Value.absent(),
+                Value<String> lastSyncAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DevSyncPeersCompanion(
+                peerDeviceId: peerDeviceId,
+                peerName: peerName,
+                lastHlcReceived: lastHlcReceived,
+                lastHlcSent: lastHlcSent,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String peerDeviceId,
+                required String peerName,
+                required String lastHlcReceived,
+                Value<String?> lastHlcSent = const Value.absent(),
+                required String lastSyncAt,
+                Value<int> rowid = const Value.absent(),
+              }) => DevSyncPeersCompanion.insert(
+                peerDeviceId: peerDeviceId,
+                peerName: peerName,
+                lastHlcReceived: lastHlcReceived,
+                lastHlcSent: lastHlcSent,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DevSyncPeersTable, DevSyncPeerRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $DevSyncPeersTable,
+                    DevSyncPeerRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DevSyncPeersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DevSyncPeersTable,
+      DevSyncPeerRow,
+      $$DevSyncPeersTableFilterComposer,
+      $$DevSyncPeersTableOrderingComposer,
+      $$DevSyncPeersTableAnnotationComposer,
+      $$DevSyncPeersTableCreateCompanionBuilder,
+      $$DevSyncPeersTableUpdateCompanionBuilder,
+      (
+        DevSyncPeerRow,
+        BaseReferences<_$AppDatabase, $DevSyncPeersTable, DevSyncPeerRow>,
+      ),
+      DevSyncPeerRow,
+      PrefetchHooks Function()
+    >;
+typedef $$DevSyncHistoryTableCreateCompanionBuilder =
+    DevSyncHistoryCompanion Function({
+      required String id,
+      required String direction,
+      Value<String?> peerDeviceId,
+      Value<String?> peerName,
+      required String fileName,
+      required String at,
+      Value<String?> maxHlc,
+      required String countsJson,
+      required String result,
+      Value<String?> message,
+      Value<int> rowid,
+    });
+typedef $$DevSyncHistoryTableUpdateCompanionBuilder =
+    DevSyncHistoryCompanion Function({
+      Value<String> id,
+      Value<String> direction,
+      Value<String?> peerDeviceId,
+      Value<String?> peerName,
+      Value<String> fileName,
+      Value<String> at,
+      Value<String?> maxHlc,
+      Value<String> countsJson,
+      Value<String> result,
+      Value<String?> message,
+      Value<int> rowid,
+    });
+
+class $$DevSyncHistoryTableFilterComposer
+    extends Composer<_$AppDatabase, $DevSyncHistoryTable> {
+  $$DevSyncHistoryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get peerDeviceId => $composableBuilder(
+    column: $table.peerDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get peerName => $composableBuilder(
+    column: $table.peerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get maxHlc => $composableBuilder(
+    column: $table.maxHlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get countsJson => $composableBuilder(
+    column: $table.countsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DevSyncHistoryTableOrderingComposer
+    extends Composer<_$AppDatabase, $DevSyncHistoryTable> {
+  $$DevSyncHistoryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get peerDeviceId => $composableBuilder(
+    column: $table.peerDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get peerName => $composableBuilder(
+    column: $table.peerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get maxHlc => $composableBuilder(
+    column: $table.maxHlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get countsJson => $composableBuilder(
+    column: $table.countsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DevSyncHistoryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DevSyncHistoryTable> {
+  $$DevSyncHistoryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<String> get peerDeviceId => $composableBuilder(
+    column: $table.peerDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get peerName =>
+      $composableBuilder(column: $table.peerName, builder: (column) => column);
+
+  GeneratedColumn<String> get fileName =>
+      $composableBuilder(column: $table.fileName, builder: (column) => column);
+
+  GeneratedColumn<String> get at =>
+      $composableBuilder(column: $table.at, builder: (column) => column);
+
+  GeneratedColumn<String> get maxHlc =>
+      $composableBuilder(column: $table.maxHlc, builder: (column) => column);
+
+  GeneratedColumn<String> get countsJson => $composableBuilder(
+    column: $table.countsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get result =>
+      $composableBuilder(column: $table.result, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+}
+
+class $$DevSyncHistoryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DevSyncHistoryTable,
+          DevSyncHistoryRow,
+          $$DevSyncHistoryTableFilterComposer,
+          $$DevSyncHistoryTableOrderingComposer,
+          $$DevSyncHistoryTableAnnotationComposer,
+          $$DevSyncHistoryTableCreateCompanionBuilder,
+          $$DevSyncHistoryTableUpdateCompanionBuilder,
+          (
+            DevSyncHistoryRow,
+            BaseReferences<
+              _$AppDatabase,
+              $DevSyncHistoryTable,
+              DevSyncHistoryRow
+            >,
+          ),
+          DevSyncHistoryRow,
+          PrefetchHooks Function()
+        > {
+  $$DevSyncHistoryTableTableManager(
+    _$AppDatabase db,
+    $DevSyncHistoryTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DevSyncHistoryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DevSyncHistoryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DevSyncHistoryTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> direction = const Value.absent(),
+                Value<String?> peerDeviceId = const Value.absent(),
+                Value<String?> peerName = const Value.absent(),
+                Value<String> fileName = const Value.absent(),
+                Value<String> at = const Value.absent(),
+                Value<String?> maxHlc = const Value.absent(),
+                Value<String> countsJson = const Value.absent(),
+                Value<String> result = const Value.absent(),
+                Value<String?> message = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DevSyncHistoryCompanion(
+                id: id,
+                direction: direction,
+                peerDeviceId: peerDeviceId,
+                peerName: peerName,
+                fileName: fileName,
+                at: at,
+                maxHlc: maxHlc,
+                countsJson: countsJson,
+                result: result,
+                message: message,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String direction,
+                Value<String?> peerDeviceId = const Value.absent(),
+                Value<String?> peerName = const Value.absent(),
+                required String fileName,
+                required String at,
+                Value<String?> maxHlc = const Value.absent(),
+                required String countsJson,
+                required String result,
+                Value<String?> message = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DevSyncHistoryCompanion.insert(
+                id: id,
+                direction: direction,
+                peerDeviceId: peerDeviceId,
+                peerName: peerName,
+                fileName: fileName,
+                at: at,
+                maxHlc: maxHlc,
+                countsJson: countsJson,
+                result: result,
+                message: message,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DevSyncHistoryTable, DevSyncHistoryRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $DevSyncHistoryTable,
+                    DevSyncHistoryRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DevSyncHistoryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DevSyncHistoryTable,
+      DevSyncHistoryRow,
+      $$DevSyncHistoryTableFilterComposer,
+      $$DevSyncHistoryTableOrderingComposer,
+      $$DevSyncHistoryTableAnnotationComposer,
+      $$DevSyncHistoryTableCreateCompanionBuilder,
+      $$DevSyncHistoryTableUpdateCompanionBuilder,
+      (
+        DevSyncHistoryRow,
+        BaseReferences<_$AppDatabase, $DevSyncHistoryTable, DevSyncHistoryRow>,
+      ),
+      DevSyncHistoryRow,
+      PrefetchHooks Function()
+    >;
+typedef $$DevBackupsTableCreateCompanionBuilder = DevBackupsCompanion Function({
+  required String id,
+  required String path,
+  required String at,
+  required String reason,
+  required int schemaVersion,
+  required String appVersion,
+  required int size,
+  required String sha256,
+  Value<String> encryption,
+  Value<int> rowid,
+});
+typedef $$DevBackupsTableUpdateCompanionBuilder = DevBackupsCompanion Function({
+  Value<String> id,
+  Value<String> path,
+  Value<String> at,
+  Value<String> reason,
+  Value<int> schemaVersion,
+  Value<String> appVersion,
+  Value<int> size,
+  Value<String> sha256,
+  Value<String> encryption,
+  Value<int> rowid,
+});
+
+class $$DevBackupsTableFilterComposer
+    extends Composer<_$AppDatabase, $DevBackupsTable> {
+  $$DevBackupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get size => $composableBuilder(
+    column: $table.size,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sha256 => $composableBuilder(
+    column: $table.sha256,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get encryption => $composableBuilder(
+    column: $table.encryption,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DevBackupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DevBackupsTable> {
+  $$DevBackupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get size => $composableBuilder(
+    column: $table.size,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sha256 => $composableBuilder(
+    column: $table.sha256,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get encryption => $composableBuilder(
+    column: $table.encryption,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DevBackupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DevBackupsTable> {
+  $$DevBackupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<String> get at =>
+      $composableBuilder(column: $table.at, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get size =>
+      $composableBuilder(column: $table.size, builder: (column) => column);
+
+  GeneratedColumn<String> get sha256 =>
+      $composableBuilder(column: $table.sha256, builder: (column) => column);
+
+  GeneratedColumn<String> get encryption => $composableBuilder(
+    column: $table.encryption,
+    builder: (column) => column,
+  );
+}
+
+class $$DevBackupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DevBackupsTable,
+          DevBackupRow,
+          $$DevBackupsTableFilterComposer,
+          $$DevBackupsTableOrderingComposer,
+          $$DevBackupsTableAnnotationComposer,
+          $$DevBackupsTableCreateCompanionBuilder,
+          $$DevBackupsTableUpdateCompanionBuilder,
+          (
+            DevBackupRow,
+            BaseReferences<_$AppDatabase, $DevBackupsTable, DevBackupRow>,
+          ),
+          DevBackupRow,
+          PrefetchHooks Function()
+        > {
+  $$DevBackupsTableTableManager(_$AppDatabase db, $DevBackupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DevBackupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DevBackupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DevBackupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> path = const Value.absent(),
+                Value<String> at = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<String> appVersion = const Value.absent(),
+                Value<int> size = const Value.absent(),
+                Value<String> sha256 = const Value.absent(),
+                Value<String> encryption = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DevBackupsCompanion(
+                id: id,
+                path: path,
+                at: at,
+                reason: reason,
+                schemaVersion: schemaVersion,
+                appVersion: appVersion,
+                size: size,
+                sha256: sha256,
+                encryption: encryption,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String path,
+                required String at,
+                required String reason,
+                required int schemaVersion,
+                required String appVersion,
+                required int size,
+                required String sha256,
+                Value<String> encryption = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DevBackupsCompanion.insert(
+                id: id,
+                path: path,
+                at: at,
+                reason: reason,
+                schemaVersion: schemaVersion,
+                appVersion: appVersion,
+                size: size,
+                sha256: sha256,
+                encryption: encryption,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DevBackupsTable, DevBackupRow>(table),
+                  BaseReferences<_$AppDatabase, $DevBackupsTable, DevBackupRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DevBackupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DevBackupsTable,
+      DevBackupRow,
+      $$DevBackupsTableFilterComposer,
+      $$DevBackupsTableOrderingComposer,
+      $$DevBackupsTableAnnotationComposer,
+      $$DevBackupsTableCreateCompanionBuilder,
+      $$DevBackupsTableUpdateCompanionBuilder,
+      (
+        DevBackupRow,
+        BaseReferences<_$AppDatabase, $DevBackupsTable, DevBackupRow>,
+      ),
+      DevBackupRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11316,4 +20210,20 @@ class $AppDatabaseManager {
       $$OperationsTableTableManager(_db, _db.operations);
   $$ManualValuationsTableTableManager get manualValuations =>
       $$ManualValuationsTableTableManager(_db, _db.manualValuations);
+  $$AssetAliasesTableTableManager get assetAliases =>
+      $$AssetAliasesTableTableManager(_db, _db.assetAliases);
+  $$HypoPortfoliosTableTableManager get hypoPortfolios =>
+      $$HypoPortfoliosTableTableManager(_db, _db.hypoPortfolios);
+  $$HypoHoldingsTableTableManager get hypoHoldings =>
+      $$HypoHoldingsTableTableManager(_db, _db.hypoHoldings);
+  $$HypoCashflowRulesTableTableManager get hypoCashflowRules =>
+      $$HypoCashflowRulesTableTableManager(_db, _db.hypoCashflowRules);
+  $$HypoScenariosTableTableManager get hypoScenarios =>
+      $$HypoScenariosTableTableManager(_db, _db.hypoScenarios);
+  $$DevSyncPeersTableTableManager get devSyncPeers =>
+      $$DevSyncPeersTableTableManager(_db, _db.devSyncPeers);
+  $$DevSyncHistoryTableTableManager get devSyncHistory =>
+      $$DevSyncHistoryTableTableManager(_db, _db.devSyncHistory);
+  $$DevBackupsTableTableManager get devBackups =>
+      $$DevBackupsTableTableManager(_db, _db.devBackups);
 }
