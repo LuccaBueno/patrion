@@ -44,6 +44,7 @@ class ImportPreview {
     required this.fileName,
     required this.manifest,
     required this.tables,
+    required this.schemas,
     required this.plan,
     required this.fromThisDevice,
   });
@@ -53,6 +54,9 @@ class ImportPreview {
 
   /// Registros já convertidos para o schema atual.
   final Map<String, List<SyncRow>> tables;
+
+  /// Tabelas sincronizáveis do banco (para mostrar as diferenças).
+  final Map<String, SyncTableSchema> schemas;
   final MergePlan plan;
 
   /// O save foi gerado por este mesmo PC.
@@ -190,6 +194,7 @@ class SaveService {
       fileName: fileName,
       manifest: manifest,
       tables: tables,
+      schemas: schemas,
       plan: plan,
       fromThisDevice: manifest.deviceId == _sync.deviceId,
     );

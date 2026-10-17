@@ -13,6 +13,7 @@ import '../../format/performance_format.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
+import '../sync/sync_screen.dart';
 
 /// Dashboard da carteira real (SPEC §8).
 ///
@@ -143,6 +144,7 @@ class _DashboardState extends State<_Dashboard> {
                 style: muted,
               ),
             ),
+          const SyncReminder(),
           ..._warnings(context, summary),
           Wrap(
             spacing: 16,

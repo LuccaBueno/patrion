@@ -17,10 +17,12 @@ import 'sync_context.dart';
 /// mesclagem grava linhas recebidas exatamente como vieram (com o HLC do
 /// autor) e carimba com o HLC local só o que ela mesma altera.
 class SyncTablesGateway {
-  SyncTablesGateway(this._db, this._sync);
+  SyncTablesGateway(this._db, SyncContext this._sync);
+
+  SyncTablesGateway._(this._db) : _sync = null;
 
   final AppDatabase _db;
-  final SyncContext _sync;
+  final SyncContext? _sync;
 
   Future<T> transaction<T>(Future<T> Function() action) =>
       _db.transaction(action);
@@ -66,6 +68,11 @@ class SyncTablesGateway {
     return result;
   }
 
+  /// Maior HLC entre todos os registros sincronizáveis de [db] (usado ao
+  /// restaurar um backup, antes de existir o contexto de sincronização).
+  static Future<String?> maxHlcOf(AppDatabase db) async =>
+      SyncTablesGateway._(db).maxHlc(await SyncTablesGateway._(db).schemas());
+
   /// Maior HLC entre todos os registros sincronizáveis.
   Future<String?> maxHlc(Map<String, SyncTableSchema> schemas) async {
     String? max;
@@ -97,7 +104,7 @@ class SyncTablesGateway {
       final schema = schemas[write.table]!;
       final row = Map.of(write.row);
       if (write.localStamp) {
-        final stamp = await _sync.nextStamp();
+        final stamp = await _sync!.nextStamp();
         row
           ..['updated_at'] = stamp.at
           ..['hlc'] = stamp.hlc.toString()
