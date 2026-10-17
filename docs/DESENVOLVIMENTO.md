@@ -27,6 +27,12 @@ flutter run -d windows --dart-entrypoint-args="--data-dir=D:\PatrionB,--cache-di
 build\windows\x64\runner\Release\patrion.exe --data-dir D:\PatrionB
 ```
 
+## Testar a sincronização entre duas pastas de dados
+
+Duas instâncias do app podem rodar ao mesmo tempo, cada uma com a sua pasta (`--data-dir`), simulando dois PCs. O roteiro passo a passo está em `PROGRESS.md` (Fase 5). Os dois "PCs" aparecem com o mesmo nome do computador; o identificador do dispositivo (Configurações) é diferente.
+
+Nos testes, `test/helpers/sync_pc.dart` monta dois "PCs" em memória com relógios próprios, e `syncBoth` faz A→B e B→A.
+
 ## Mudanças no banco
 
 1. Altere as tabelas em `lib/data/db/tables.dart` e suba `schemaVersion` em `app_database.dart`.
@@ -65,7 +71,7 @@ O build de release reduz a fonte de ícones aos ícones usados no código. Na F3
 | O quê | Onde |
 |---|---|
 | Banco | `%APPDATA%\Patrion\patrion.db` |
-| Backups | `%APPDATA%\Patrion\backups\` (antes de migrações desde a F3; manuais na F5) |
+| Backups | `%APPDATA%\Patrion\backups\` (antes de migrações, de importar um save e de restaurar; manuais). Ver `BACKUP.md` |
 | Logs | `%APPDATA%\Patrion\logs\patrion.log` (rotativos, D-16) |
 | Cache | `%LOCALAPPDATA%\Patrion\cache\` |
 

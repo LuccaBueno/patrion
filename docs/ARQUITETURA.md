@@ -1,6 +1,6 @@
 # Arquitetura
 
-Estado em 17/10/2026 (Fase 4). Este documento descreve o código que existe; o que ainda não foi feito aparece como "a partir da F*n*".
+Estado em 17/10/2026 (Fase 5). Este documento descreve o código que existe; o que ainda não foi feito aparece como "a partir da F*n*".
 
 ## Camadas
 
@@ -22,27 +22,30 @@ Regras de dependência (verificadas por `test/architecture_test.dart`):
 | Camada | Pode importar | Não pode importar |
 |---|---|---|
 | `core/` | só pacotes Dart puros (`uuid`, `path`, `decimal`) | qualquer outra camada; Flutter, Drift, Dio |
-| `domain/` | `core/` | `data/`, `application/`, `infrastructure/`, `presentation/`; Flutter, Drift, Dio |
+| `domain/` | `core/`; pacotes Dart puros (`archive` e `crypto` no formato do save) | `data/`, `application/`, `infrastructure/`, `presentation/`; Flutter, Drift, Dio |
 | `application/` | `core/`, `domain/`, `data/` (repositórios) | `presentation/` |
 | `data/` | `core/`, `domain/`, Drift | `presentation/` |
-| `infrastructure/` | `core/`, pacotes de sistema | `presentation/` |
+| `infrastructure/` | `core/`, `domain/` (modelos), `application/` (interfaces que implementa, ex.: `BackupFileSystem`), pacotes de sistema | `presentation/` |
 | `presentation/` | todas | — |
 
-Outra verificação automática: fora de `presentation/`, nenhum arquivo usa `double` (regra 6, DECISIONS D-03).
+Outras verificações automáticas: fora de `presentation/`, nenhum arquivo usa `double` (regra 6, DECISIONS D-03); a carteira real (`application/portfolio`, `domain/portfolio`, dashboard e carteira na interface) não menciona as tabelas hipotéticas (`BANCO.md` §8).
 
 ## Inicialização (`lib/main.dart`)
 
 1. Abre a janela (`window_manager`, tamanho mínimo 960 × 640).
 2. Lê `--data-dir` e `--cache-dir` (`LaunchOptions`) e resolve as pastas (`AppPathsResolver`, DECISIONS D-05), criando-as se preciso.
 3. Liga os logs rotativos (`setupLogging`, D-16) e os capturadores de erros não tratados.
-4. Se o banco existente estiver num schema antigo, faz o backup anterior à migração (`PreMigrationBackup`, DECISIONS D-19); sem backup válido, para aqui.
-5. Abre o banco (`AppDatabase.open`, em um isolate de fundo; o Drift migra se preciso) e carrega ou cria a identidade do dispositivo (`DeviceIdentityStore`).
-6. Cria o `SyncContext` (HLC + `device_id`) e entrega banco, contexto e pastas à interface como provedores do Riverpod.
-7. Se algo falhar, mostra a tela "O Patrion não conseguiu iniciar" com a mensagem e a pasta dos logs.
+4. Abre a **sessão** do banco (`openSession`, `presentation/session/app_session.dart`), sempre na ordem:
+   - se o banco existente estiver num schema antigo, backup anterior à migração (`PreMigrationBackup`, D-19); sem backup válido, para aqui;
+   - abre o banco (`AppDatabase.open`, em um isolate de fundo; o Drift migra se preciso);
+   - carrega ou cria a identidade do dispositivo (`DeviceIdentityStore`) e cria o `SyncContext` (HLC + `device_id`);
+   - registra em `dev_backups` o backup da migração, se houve.
+5. `SessionHost` monta a interface sobre a sessão, com banco, contexto e pastas como provedores do Riverpod. Quando a sessão troca (restauração de backup; bloqueio na F5B), a árvore inteira é remontada do zero.
+6. Se algo falhar, mostra a tela "O Patrion não conseguiu iniciar" com a mensagem e a pasta dos logs.
 
 ## Dados e sincronização
 
-- Banco: `data/db/app_database.dart` (Drift, `schemaVersion` 2, passos de migração em `app_database.steps.dart`). Tabelas em `data/db/tables.dart`; detalhes em `BANCO.md`.
+- Banco: `data/db/app_database.dart` (Drift, `schemaVersion` 3, passos de migração em `app_database.steps.dart`). Tabelas em `data/db/tables.dart`; detalhes em `BANCO.md`.
 - Backup antes de migrar: `infrastructure/backup/pre_migration_backup.dart` (D-19).
 - Campos de sincronização: mixin `SyncColumns`, presente em toda tabela sincronizável.
 - Escritas sincronizáveis: só por subclasses de `SyncRepository` (`data/repositories/sync_repository.dart`), que preenchem `id`, `created_at`, `updated_at`, `hlc`, `device_id` e `deleted_at`. Não existe exclusão física.
@@ -85,12 +88,33 @@ Funções puras em `domain/finance/` (Dart puro, sem `double`), com fórmulas em
 
 Na interface, o dashboard mostra o resultado total e a TIR (MWR) da moeda, e o detalhe do ativo mostra resultado e TIR com e sem proventos e antes de custos, sempre com a metodologia num tooltip. TWR, retornos por período, retorno real, efeito cambial e benchmarks estão prontos no domínio e aparecem quando houver histórico de cotações, IPCA e câmbio (F6).
 
+## Backup e save (Fase 5)
+
+Detalhes em `SINCRONIZACAO.md` e `BACKUP.md`; decisões em D-28 a D-31.
+
+| Camada | Arquivos | Papel |
+|---|---|---|
+| `domain/sync/` | `sync_rows.dart` | Linha sincronizável (coluna → texto), estrutura das tabelas e ordem de dependência |
+| | `save_manifest.dart`, `invsave_codec.dart` | Manifesto e arquivo `.invsave` (ZIP, JSONL, SHA-256), com toda a validação |
+| | `save_contents.dart` | Conversão de saves de schema antigo e validação das linhas |
+| | `natural_keys.dart`, `merge_planner.dart` | Chaves naturais e plano da mesclagem (por id e HLC, conflitos, aliases, unificação, duplicatas), puro |
+| `domain/backup/` | `backup_metadata.dart` | Motivos e metadados dos backups (com o campo de criptografia) |
+| `data/sync/` | `sync_tables_gateway.dart` | Leitura genérica das tabelas sincronizáveis e gravação do plano numa transação |
+| `data/repositories/` | `sync_peers_repository.dart`, `backup_registry_repository.dart` | `dev_sync_peers`, `dev_sync_history` e `dev_backups`; `VACUUM INTO` pela conexão do app |
+| `application/sync/` | `save_service.dart` | Exportar, prévia, aplicar (backup antes, transação única, histórico) |
+| `application/backup/` | `backup_service.dart`, `backup_ports.dart` | Backup manual e automático, retenção, registro e conferência antes de restaurar |
+| `infrastructure/backup/` | `database_file_inspector.dart` | Único ponto que abre um arquivo de banco fechado (D-24) |
+| | `local_backup_file_system.dart`, `pre_migration_backup.dart` | Arquivos de backup, metadados, retenção e troca do banco na restauração |
+| `presentation/session/` | `app_session.dart`, `session_host.dart` | Sessão do banco que pode ser fechada e reaberta (restauração; F5B) |
+| `presentation/screens/` | `sync/`, `backup/` | Telas Sincronização (com a prévia da importação) e Backup |
+| `presentation/services/` | `file_dialogs.dart` | Diálogos de arquivo do Windows atrás de uma interface (D-31) |
+
 ## Interface
 
 - `presentation/app.dart`: `MaterialApp.router`, pt-BR, temas claro e escuro (D-18).
 - `presentation/router/app_router.dart`: rotas e itens da navegação lateral. Uma tela nova entra na lista `navDestinations` e ganha uma rota.
-- `presentation/providers.dart`: provedores do Riverpod. Banco, contexto de sincronização e ambiente são sobrescritos em `main.dart` (e nos testes, com banco em memória).
-- Telas atuais (`presentation/screens/`): Início (dashboard), Carteira, Detalhe do ativo (`/carteira/ativo/:id`), Operações, Cadastros (instituições, contas e ativos) e Configurações.
+- `presentation/providers.dart`: provedores do Riverpod. Banco, contexto de sincronização, ambiente e controlador da sessão são sobrescritos pelo `SessionHost` (e nos testes, com banco em memória e diálogos de arquivo simulados).
+- Telas atuais (`presentation/screens/`): Início (dashboard, com o aviso de sincronização antiga), Carteira, Detalhe do ativo (`/carteira/ativo/:id`), Operações, Cadastros (instituições, contas e ativos), Sincronização, Backup e Configurações.
 - `presentation/format/`: formatação e leitura de números e datas em pt-BR direto do `Decimal` (D-23) e rótulos em português das enumerações.
 - `presentation/widgets/common.dart`: estrutura de página, estados de carregamento e erro, "indisponível", ganho/perda com cor, sinal e ícone, campos de número e data, diálogos de formulário.
 

@@ -6,6 +6,7 @@
 
 - Schema versão 1 (Fase 2, 17/10/2026): `dev_identity`, `dev_settings` e `shared_settings`.
 - Schema versão 2 (Fase 3, 17/10/2026): `institutions`, `accounts`, `assets`, `fixed_income_terms`, `operations` e `manual_valuations`, com os campos e índices descritos em §3, mais índice em `hlc` em todas. As colunas que referenciam outras tabelas são chaves estrangeiras (`PRAGMA foreign_keys = ON`). Migração 1 → 2 só cria tabelas e índices; o backup automático antes dela está em §9.
+- Schema versão 3 (Fase 5, 17/10/2026): `asset_aliases`, `hypo_portfolios`, `hypo_holdings`, `hypo_cashflow_rules`, `hypo_scenarios` (só as tabelas, para o save já levá-las; telas e cálculos na F9, DECISIONS D-29), `dev_sync_peers`, `dev_sync_history` e `dev_backups`. Migração 2 → 3 só cria tabelas e índices. `hypo_runs` continua planejada (F9).
 
 As demais tabelas descritas abaixo ainda são planejadas, cada uma com nova versão de schema e migração. Posições e totais ainda não usam as tabelas `drv_` (§7): são recalculados em memória (DECISIONS D-20).
 
@@ -193,7 +194,7 @@ Registro da unificação de entidades duplicadas pela mesclagem (SPEC §10.4).
 | Campo | Tipo | Observação |
 |---|---|---|
 | [sync] | | |
-| `entity` | TEXT | `asset`, `institution`, `account` |
+| `entity` | TEXT | `institution`, `account`, `asset`, `fixed_income_terms`, `shared_setting` |
 | `alias_id` | TEXT | UUID absorvido |
 | `canonical_id` | TEXT | UUID que permaneceu |
 
@@ -257,7 +258,7 @@ Ficam em tabelas próprias com prefixo `hypo_`. **Nenhuma consulta da carteira r
 | `amount` | TEXT NULL | Decimal (valor fixo) |
 | `pct` | TEXT NULL | Decimal (percentual do patrimônio) |
 | `adjustment` | TEXT | `none`, `ipca`, `fixed_rate` |
-| `start_date` / `end_date` | TEXT | |
+| `start_date` / `end_date` | TEXT | `end_date` nulo = sem fim |
 
 ### `hypo_scenarios`
 
@@ -316,9 +317,9 @@ Valores ajustados por proventos e eventos são **calculados** pelo app a partir 
 |---|---|---|
 | `dev_identity` | `device_id`, `device_name`, `created_at`, `last_hlc` | Uma linha só. Identidade deste PC e último HLC emitido. |
 | `dev_settings` | `key`, `value_json`, `updated_at` | Configurações do dispositivo: intervalo de atualização, tamanho da janela, tema, última pasta usada, provedores ligados |
-| `dev_sync_peers` | `peer_device_id`, `peer_name`, `last_hlc_received`, `last_hlc_sent`, `last_sync_at` | Base para detectar conflitos (SPEC §10.4) e avisar sincronização antiga |
-| `dev_sync_history` | `id`, `direction` (`export`/`import`), `peer_device_id`, `file_name`, `at`, `max_hlc`, `counts_json`, `result` | Histórico de sincronizações |
-| `dev_backups` | `id`, `path`, `at`, `reason`, `schema_version`, `app_version`, `size`, `sha256` | Backups e retenção |
+| `dev_sync_peers` | `peer_device_id`, `peer_name`, `last_hlc_received` (maior HLC do último save importado do parceiro), `last_hlc_sent` (maior HLC deste PC que o parceiro confirmou ter recebido, vindo do manifesto dele), `last_sync_at` | Base para detectar conflitos (SPEC §10.4, D-29) e avisar sincronização antiga |
+| `dev_sync_history` | `id`, `direction` (`export`/`import`), `peer_device_id`, `peer_name`, `file_name`, `at`, `max_hlc`, `counts_json` (só contagens), `result` (`ok`/`failed`), `message` | Histórico de sincronizações |
+| `dev_backups` | `id`, `path`, `at`, `reason`, `schema_version`, `app_version`, `size`, `sha256`, `encryption` (`none` na v1.0, D-24) | Backups e retenção (`BACKUP.md`) |
 | `dev_provider_state` | `provider`, `last_success_at`, `last_error_at`, `last_error`, `quota_used`, `quota_period` | Controle de limites e estado dos provedores |
 
 Chaves de API **não ficam no banco**: ficam no Gerenciador de Credenciais do Windows (DECISIONS D-11).

@@ -4,9 +4,165 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 4 concluída** em 17/10/2026. Próxima: Fase 5 (Backup e save).
+**Fase 5 concluída** em 17/10/2026. Próxima: Fase 6 (Dados de mercado).
 
 ## Concluído
+
+### Fase 5 — Backup e save
+
+Critério de pronto: os testes de SPEC §10.7 passam (com os casos S1 a S10 de `CASOS_DE_TESTE.md` §9) e a sincronização manual entre duas pastas de dados funciona. As duas coisas foram verificadas: pelos testes automáticos e no executável real, com duas pastas de dados, clicando na interface e nos diálogos do Windows (detalhes no item 3). CI: ver o fim desta seção.
+
+**1. O que foi implementado**
+
+- **Arquivo de save `.invsave`** (SPEC §10.1 e §10.2): ZIP com `manifest.json`, `manifest.sha256` e `data/<tabela>.jsonl`, com todas as tabelas sincronizáveis, inclusive tombstones. O manifesto tem as versões do formato, do app e do schema, o PC de origem, a data UTC, o HLC máximo, as contagens, o SHA-256 de cada arquivo, o que o autor já recebeu de cada PC (`knownPeers`) e o **campo de criptografia** (`encryption: none`), reservado para a senha do arquivo da F5B (D-24). Nome padrão `Patrion_<PC>_<AAAA-MM-DD_HHmm>.invsave`; ao salvar, um resumo.
+- **Importação com mesclagem** (§10.3 e §10.4):
+  - validação completa antes de tocar no banco: ZIP, checksums, contagens, HLC máximo, formato, schema (mais novo é recusado; mais antigo é convertido), colunas e referências;
+  - prévia com alterações por tabela, conflitos (com a escolha da versão), unificações e possíveis duplicatas;
+  - backup automático antes de aplicar e aplicação numa única transação;
+  - telas recalculadas na hora e registro no histórico.
+- **Regras da mesclagem** (D-29), planejadas em Dart puro: por `id` e HLC; conflito quando o registro mudou dos dois lados desde a última troca (usando o que cada PC sabe do outro); aliases e unificação por chave natural (instituição, conta, ativo, características de renda fixa, configuração compartilhada), com o registro de menor `id` permanecendo; duplicatas só sinalizadas. Toda alteração feita pela mesclagem é carimbada com o HLC local, então A→B e B→A deixam os bancos idênticos.
+- **"Importar e gerar novo save"** e aviso, sem bloquear, quando a última sincronização com algum PC tem 7 dias ou mais (§10.5).
+- **Backup** (§11): manual na pasta de backups ou em outra pasta; cópia com `VACUUM INTO`, conferida (integridade e versão); data, motivo, schema e versão do app no nome; metadados num `.json` ao lado e em `dev_backups`, com SHA-256 e **campo de criptografia** (D-24, D-30). Backups automáticos antes de migrar (D-19, agora também registrados), de importar e de restaurar, com retenção dos 10 mais recentes de cada tipo.
+- **Restauração**: conferência do arquivo antes da confirmação (integridade, schema, SHA-256, sem criptografia), confirmação explícita, backup do estado atual, troca do arquivo e reabertura do banco sem fechar o app. A identidade deste PC e o relógio HLC nunca voltam (D-28).
+- **Sessão do banco que pode ser fechada e reaberta** (`presentation/session/`): a interface é remontada do zero quando a sessão troca. É a base do bloqueio da F5B (D-24, itens 5 e 6). Toda leitura de arquivo de banco fechado passa por `DatabaseFileInspector` (D-24, item 1).
+- **Schema 3**: `asset_aliases`; tabelas hipotéticas de configuração (só as tabelas, para o save já levá-las e o S10 ser real); `dev_sync_peers`, `dev_sync_history` e `dev_backups`.
+- Telas **Sincronização** e **Backup** na navegação. `docs/BACKUP.md` (novo, com o procedimento de recuperação), `SINCRONIZACAO.md` reescrito, decisões D-28 a D-31.
+
+**2. Arquivos criados ou alterados**
+
+- `lib/domain/sync/` (novo): `sync_rows.dart`, `save_manifest.dart`, `invsave_codec.dart`, `save_contents.dart`, `natural_keys.dart`, `merge_planner.dart`. `lib/domain/backup/backup_metadata.dart` (novo).
+- `lib/data/`: `db/tables.dart` e `db/app_database.dart` (schema 3, + `.g.dart` e `app_database.steps.dart` gerados); `sync/sync_tables_gateway.dart` (novo); `sync/device_identity_store.dart` (`adopt`); `repositories/sync_peers_repository.dart` e `backup_registry_repository.dart` (novos).
+- `lib/application/`: `sync/save_service.dart`, `backup/backup_service.dart`, `backup/backup_ports.dart` (novos).
+- `lib/infrastructure/backup/`: `database_file_inspector.dart`, `local_backup_file_system.dart` (novos); `pre_migration_backup.dart` (metadados e inspetor único).
+- `lib/presentation/`: `session/app_session.dart`, `session/session_host.dart`, `screens/sync/` (tela e prévia), `screens/backup/backup_screen.dart`, `services/file_dialogs.dart`, `format/sync_labels.dart` (novos); `providers.dart`, `router/app_router.dart`, `screens/dashboard/dashboard_screen.dart` (aviso). `lib/main.dart` passa a abrir a sessão.
+- `drift_schemas/patrion/drift_schema_v3.json`; `test/data/db/migrations/patrion/` (`generated/schema_v3.dart`, teste da migração 2 → 3).
+- `test/`: `application/sync/save_sync_test.dart`, `application/backup/backup_service_test.dart`, `domain/sync/merge_planner_test.dart`, `domain/sync/invsave_codec_test.dart`, `presentation/sync_backup_screens_test.dart`, `helpers/sync_pc.dart` (novos); `helpers/app_harness.dart` (pastas, provedores extras, `pumpUntil`), `architecture_test.dart` (real × hipotético), `infrastructure/backup/pre_migration_backup_test.dart`.
+- `pubspec.yaml`/`.lock`: `archive` 4.5.2, `crypto` 3.0.7 e `file_picker` 13.1.0, já aprovados em D-02.
+- Docs: `BACKUP.md` (novo); `SINCRONIZACAO.md`, `DECISIONS.md`, `BANCO.md`, `ARQUITETURA.md`, `DESENVOLVIMENTO.md`, `PROGRESS.md`, `README.md`, `CHANGELOG.md`.
+
+**3. Testes executados (17/10/2026)**
+
+- `dart run build_runner build`: sem diferenças no código versionado.
+- `dart format --set-exit-if-changed .`: 130 arquivos, 0 alterados.
+- `flutter analyze`: "No issues found!".
+- `flutter test`: **285 testes, todos passaram** (232 na F4). Entre os novos:
+  - **S1 a S10**, cada um com teste próprio, entre eles:
+    - S3: conflito na prévia, padrão = qtd 30, os dois PCs iguais; e escolhendo a versão 20;
+    - S6: com o relógio de B 2 dias adiantado, a edição posterior de A vence; sem troca entre as edições, o conflito aparece e a edição de A pode ser escolhida;
+    - S7: PETR4 cadastrado nos dois PCs vira um ativo só, com as operações dos dois e 150 ações; um save antigo não ressuscita o absorvido;
+    - S8: um byte alterado no conteúdo é recusado e o banco fica intacto; além disso, alterei cada byte do arquivo, um de cada vez, e nenhum produziu importação diferente da original;
+    - S9: falha simulada na 4ª escrita, banco e `dev_sync_peers` iguais aos de antes, histórico com a falha;
+    - S10: hipotéticas chegam nas tabelas `hypo_`, totais reais de B iguais.
+  - Itens de §10.7 que não são S1 a S10: schema mais novo recusado, schema mais antigo convertido, save com senha recusado, arquivo que não é ZIP, manifesto com criptografia, contagens e SHA-256, backup antes de importar.
+  - Comparação dos dois PCs depois de A→B e B→A: os bancos ficam idênticos, registro a registro, inclusive nos HLCs.
+  - Telas recalculadas depois de importar. Esse teste falha sem a correção do bug descrito no item 4.
+  - Backup e restauração com banco em arquivo:
+    - nome, metadados, SHA-256 e integridade;
+    - retenção;
+    - recusas antes de restaurar (inexistente, não é banco, schema mais novo, SHA-256 alterado, criptografado);
+    - restauração com backup do estado anterior, identidade e HLC mantidos, e backup de outro PC.
+  - Migração 2 → 3 com dados; telas de sincronização e backup (exportar, prévia com conflito, arquivo recusado, confirmação explícita, aviso no Início).
+- `flutter build windows --release`: compilou `patrion.exe`.
+- **Execução real do `.exe` com duas pastas de dados** (`--data-dir`), cada uma semeada pelos serviços do app com a mesma corretora, conta e PETR4 cadastrados separadamente (A: 100 × R$ 30; B: 50 × R$ 35). Na interface e nos diálogos nativos do Windows, conferido por captura de tela:
+  1. A: "Salvar arquivo de save": diálogo do Windows com o nome padrão; resumo com 4 registros (3 KB).
+  2. B: "Importar e gerar novo save": prévia com 3 unificações (Corretora Exemplo, Principal, PETR4 (B3)), aplicada, novo save com 11 registros.
+  3. A: "Importar save" com o arquivo de B. A Carteira de A mostrou PETR4, 150 ações, preço médio R$ 31,67, custo R$ 4.750,00, atualizada na hora.
+  4. A: o mesmo arquivo de novo: "Nenhuma alteração".
+  5. A: "Fazer backup agora" e restauração do backup "Antes de importar um save", com a confirmação. O app reabriu o banco sozinho, mostrou o aviso e a Carteira voltou a 100 ações. Reimportei o save de B e voltou a 150.
+  6. Fechados os dois apps, comparei os bancos: **as 12 tabelas sincronizáveis estão idênticas** nas duas pastas (11 registros, inclusive HLCs), os `device_id` são diferentes, todos os backups têm o `.json`, e os logs não têm avisos nem erros (só contagens, nenhum valor).
+
+**4. Problemas e limitações**
+
+- **Bug encontrado na execução real e corrigido:** depois de importar, a Carteira de B continuava com os dados antigos até reabrir o app. As escritas da mesclagem não avisavam as consultas observadas do Drift. Corrigido, com teste que falhava antes da correção.
+- Também na execução real: a prévia em A mostrava "Excluídos 1" em Instituições, Contas e Ativos. Eram os cadastros absorvidos em B chegando já excluídos; nada de A seria excluído. Agora eles não contam como exclusões, e a prévia explica numa nota. Conferido por teste; não repeti esse passo no `.exe`.
+- O arquivo de save **não é criptografado** (a senha do arquivo é da F5B/F11). A tela avisa.
+- No diálogo de **salvar**, o filtro mostra "All Files (*.*)": o `file_picker` 13.1.0 não repassa o filtro no Windows (D-31). O nome sugerido já termina em `.invsave`; o diálogo de abrir filtra `*.invsave`.
+- Com as duas pastas no mesmo PC, os dois "computadores" aparecem com o mesmo nome (o nome do Windows). O identificador do dispositivo, em Configurações, é diferente.
+- `market/` (dados de mercado) não vai no save: ainda não há dados de mercado no banco (F6). Chaves de API também não existem ainda.
+- A importação não confere a consistência da carteira resultante: edições concorrentes podem gerar, por exemplo, uma venda maior que a posição. O Início já avisa sobre operações inconsistentes.
+- Não simulei uma falha ao reabrir o banco no meio da restauração (o caminho que volta o arquivo anterior). Ele está implementado e documentado, mas sem teste automático.
+- A conversão de saves de schema antigo foi testada com um save de schema 2 montado no teste: não existem saves reais anteriores à F5.
+
+**5. Pendências**
+
+- F5B: senha do arquivo de save (o campo `encryption` do manifesto já existe), backups criptografados (o campo `encryption` dos metadados já existe), bloqueio por inatividade sobre a sessão reabrível.
+- F6: incluir `market/` no save, opção de exportar chaves de API (desmarcada, com aviso).
+- F7: associar `.invsave` no instalador (abrir com duplo clique leva à importação, §10.6).
+- F9: `hypo_runs` e a opção de levar a série no save; telas das carteiras hipotéticas.
+- F11: pasta de sincronização (§10.6).
+- Da F1: confirmar Finnhub e Twelve Data (F6); licenças do CKAN do Tesouro e do portal da CVM (F6); toolchain Android (futuro).
+
+**6. Como executar e o que testar manualmente**
+
+```powershell
+flutter build windows --release
+```
+
+**Roteiro: sincronização entre duas pastas de dados no seu PC**
+
+Preparação:
+
+1. Crie duas pastas, por exemplo `C:\PatrionTeste\A` e `C:\PatrionTeste\B`, e uma pasta para os arquivos de save, `C:\PatrionTeste\saves`.
+2. Abra dois terminais do PowerShell na raiz do repositório e inicie um "PC" em cada:
+
+   ```powershell
+   build\windows\x64\runner\Release\patrion.exe --data-dir C:\PatrionTeste\A
+   ```
+
+   ```powershell
+   build\windows\x64\runner\Release\patrion.exe --data-dir C:\PatrionTeste\B
+   ```
+
+   As duas janelas podem ficar abertas ao mesmo tempo. Em Configurações, confira que cada uma mostra a sua pasta de dados e um identificador de dispositivo diferente (o nome do computador é o mesmo).
+
+Primeira sincronização, com cadastros repetidos:
+
+3. **Em A**:
+   - em Cadastros, crie a instituição "Corretora Exemplo", a conta "Principal" e o ativo PETR4 (Ações BR, B3);
+   - em Operações, registre uma compra de 100 × R$ 30,00.
+4. **Em B**: crie os mesmos cadastros (mesmos nomes, separadamente) e uma compra de 50 × R$ 35,00.
+5. **Em A**: Sincronização → "Salvar arquivo de save". Salve em `C:\PatrionTeste\saves`. Confira o resumo (contagens por tabela).
+6. **Em B**: Sincronização → "Importar e gerar novo save…" → escolha o arquivo de A. Na prévia, devem aparecer 3 cadastros repetidos que serão unificados (instituição, conta e PETR4). Clique em "Aplicar e gerar novo save" e salve o novo arquivo na mesma pasta.
+7. **Em B**: a Carteira mostra um único PETR4 com 150 ações, preço médio R$ 31,67.
+8. **Em A**: Sincronização → "Importar save…" → arquivo gerado por B → Aplicar. A Carteira de A também mostra 150 ações. Em Cadastros, há uma instituição, uma conta e um PETR4.
+
+Idempotência e arquivo antigo:
+
+9. **Em A**: importe de novo o mesmo arquivo de B. A prévia deve dizer "Nenhuma alteração".
+10. **Em B**: importe o primeiro save de A (o do passo 5, que é antigo). Nada deve mudar, e nenhum PETR4 repetido volta.
+
+Conflito:
+
+11. **Em A**: edite a compra de 100 para 120 ações. **Depois, em B**, edite a mesma compra para 130.
+12. **Em A**: salve um save. **Em B**: "Importar e gerar novo save" com ele. A prévia mostra "Conflitos (1)", com as duas versões lado a lado; a de B (mais recente) vem marcada.
+    - para testar o padrão, aplique como está;
+    - para testar a escolha, marque "Usar a recebida".
+13. **Em A**: importe o save gerado por B. Não deve aparecer conflito, e os dois PCs ficam com o mesmo valor (130 no padrão, 120 se você escolheu a recebida).
+
+Exclusão:
+
+14. **Em A**: exclua uma operação, salve um save e importe em B. A prévia mostra 1 excluído em Operações, e a operação some em B.
+
+Arquivo alterado:
+
+15. Copie um `.invsave`, abra a cópia num editor hexadecimal (ou mude a extensão para `.zip` e edite um `data\*.jsonl` dentro dele) e tente importar. Deve aparecer "O arquivo de save está corrompido ou foi alterado… Nada foi importado".
+
+Backup e restauração:
+
+16. **Em A**: Backup → "Fazer backup agora". O backup aparece na lista e em `C:\PatrionTeste\A\backups\`, com um `.json` ao lado.
+17. Registre uma operação nova. Depois clique em "Restaurar" no backup do passo 16:
+    - o botão só libera depois de marcar "Entendo que os dados atuais serão substituídos";
+    - depois de restaurar, o app reabre sozinho, mostra o aviso com o arquivo do estado anterior, e a operação nova não está mais lá;
+    - a lista ganhou um backup "Antes de restaurar um backup".
+18. Importe de novo o último save de B em A: o que veio de B volta.
+
+Aviso de sincronização antiga:
+
+19. (Opcional, só com as pastas de teste.) Feche as janelas. Para ver o aviso no Início sem esperar 7 dias, adiante o relógio do Windows em 8 dias e abra A. O Início deve avisar "A última sincronização com <PC> foi há 8 dias". Volte o relógio depois.
+
+O que conferir também: os logs (`C:\PatrionTeste\A\logs\patrion.log`) registram exportações, importações, backups e restaurações só com contagens, sem valores.
+
+Para recuperação manual sem o app, veja `docs/BACKUP.md`.
 
 ### Fase 4 — Motor financeiro
 
@@ -300,11 +456,11 @@ ou abra `build\windows\x64\runner\Release\patrion.exe`. Conferir: a janela abre 
 
 ## Pendências e problemas conhecidos
 
-Ver as seções 4 e 5 das Fases 4, 3, 2 e 1 acima.
+Ver as seções 4 e 5 das Fases 5, 4, 3, 2 e 1 acima.
 
 ## Próximo passo
 
-Fase 5 (Backup e save), conforme `docs/SPEC.md` §21: §11 e §10 (exceto §10.6), até os testes de §10.7 passarem e a sincronização manual entre duas pastas de dados funcionar, seguindo a preparação para o bloqueio do app (DECISIONS D-24).
+Fase 6 (Dados de mercado), conforme `docs/SPEC.md` §21: adaptadores escolhidos na F1, cache e atualização automática e manual, câmbio, CDI, Selic e IPCA e a tela "Fontes de dados", até as cotações reais aparecerem com fonte e data e o app funcionar sem internet. Na F6, incluir a pasta `market/` no save (SINCRONIZACAO.md).
 
 ## Histórico de sessões
 
@@ -314,3 +470,4 @@ Fase 5 (Backup e save), conforme `docs/SPEC.md` §21: §11 e §10 (exceto §10.6
 | 2026-10-17 | F2 | Fundação: camadas, Drift, HLC e repositórios base, navegação, tema, logs, ícone e CI verde |
 | 2026-10-17 | F3 | Carteira real: schema 2 com backup automático antes de migrar, cadastros, todos os tipos de operação, preço manual, posições, dashboard inicial e telas de carteira, operações e cadastros |
 | 2026-10-17 | F4 | Motor financeiro: ln/exp/pow em Decimal, juros e bases, calendário de dias úteis, CDI, XIRR, TWR, retornos e câmbio; resultado total e TIR por ativo e por moeda na interface; cards do dashboard sem quebra de linha |
+| 2026-10-17 | F5 | Backup e save: arquivo .invsave com mesclagem por HLC, conflitos, unificação de cadastros repetidos e prévia; backup manual e automático com metadados e restauração com reabertura do banco; schema 3; S1 a S10 e sincronização real entre duas pastas de dados |

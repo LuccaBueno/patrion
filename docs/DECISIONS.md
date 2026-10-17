@@ -371,3 +371,42 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Retorno real, efeito cambial e benchmarks: funções prontas e testadas; aparecem na tela quando houver IPCA, câmbio e índices (F6/F8).
 - Alternativas: Modified Dietz como aproximação do TWR com preços esparsos (continua precisando do valor nas datas dos fluxos); mostrar a TIR anualizada sempre (números absurdos em prazos de dias).
 - Motivo: SPEC §9 ("informe a metodologia"; "nunca divida uma taxa anual por 365") e regra 1.
+
+### 2026-10-17 — D-28: Identidade e HLC depois de restaurar um backup (Fase 5)
+
+- Decisão: ao restaurar, o `dev_identity` do banco restaurado é substituído pela identidade deste PC (mesmo `device_id` e nome), e o último HLC fica no **maior** entre o HLC atual deste PC, o do banco restaurado e o maior HLC dos registros restaurados. A lista de backups conhecidos (`dev_backups`) também é preservada.
+- Alternativas: manter a identidade do backup (um backup de outro PC faria dois PCs terem o mesmo `device_id`, e os HLCs empatariam no desempate); manter o último HLC do backup (as alterações feitas depois da restauração poderiam ter HLC menor que alterações que este PC já exportou, e perderiam para elas no outro PC).
+- Motivo: o HLC de um dispositivo nunca pode voltar (SINCRONIZACAO.md). Depois de restaurar, o usuário pode importar saves dos outros PCs para recuperar o que foi feito lá.
+
+### 2026-10-17 — D-29: Arquivo de save e regras da mesclagem (Fase 5)
+
+- Decisão:
+  - **Formato**: ZIP `.invsave` com `manifest.json`, `manifest.sha256` e `data/<tabela>.jsonl` (um objeto JSON por linha, colunas com os nomes do banco, todos os valores em texto ou nulo). SHA-256 de cada tabela no manifesto e do manifesto em arquivo próprio: o pacote `archive` 4.5.2 não confere o CRC32 do ZIP na leitura, então o app não depende dele. `formatVersion` (formato do arquivo) é separado de `schemaVersion` (banco).
+  - **Tabelas**: todas as que têm os campos de sincronização, descobertas no banco; chaves estrangeiras lidas do SQLite (`PRAGMA foreign_key_list`). As `dev_` nunca entram.
+  - **Conflito** = mesmo registro alterado dos dois lados desde a última troca e versões diferentes. Cada save leva `knownPeers` (o maior HLC que o autor recebeu de cada PC); o destino compara o HLC local com o que o autor já conhecia dele e o HLC recebido com o último importado do autor (`dev_sync_peers`). Assim, a versão que o outro PC escolheu já sabendo da sua não aparece como conflito de novo na volta.
+  - **Unificação por chave natural**: fica o registro de **menor `id`**, regra que os dois PCs aplicam igual; o outro vira tombstone e alias. Também unifica características de renda fixa do mesmo ativo e configurações compartilhadas da mesma chave (`asset_aliases.entity` aceita `fixed_income_terms` e `shared_setting`, além de `institution`, `account` e `asset`). Um registro absorvido que chegue vivo de um save antigo é dobrado no canônico e volta a ser tombstone.
+  - **Toda alteração feita pela mesclagem é alteração local** (HLC deste PC): remapear referências, unificar, regravar a versão escolhida num conflito. Linhas recebidas sem mudança são gravadas como vieram. Com isso, A→B e B→A deixam os bancos idênticos, inclusive nos HLCs.
+  - `operations.origin` é preservado como veio do PC que criou a operação (o valor `save_merge` não é usado nas linhas recebidas: mudar a origem faria os dois PCs terem conteúdos diferentes para o mesmo HLC).
+  - **Duplicatas**: mesma data, ativo, tipo, quantidade e preço (SPEC §10.4); para movimentos só de caixa, também conta e valor, para não acusar todos os depósitos do mesmo dia. Só sinalizadas.
+  - **Backup antes de importar** é feito ao confirmar a importação (antes de qualquer alteração), não ao abrir a prévia, para não criar backups de importações canceladas.
+  - **Tabelas hipotéticas criadas já no schema 3** (`hypo_portfolios`, `hypo_holdings`, `hypo_cashflow_rules`, `hypo_scenarios`, com as colunas de `BANCO.md` §5), sem telas nem serviços, para o formato do save levá-las desde a v1.0 e o teste S10 ser real. `hypo_runs` fica para a F9, junto com a opção de exportar a série (desmarcada por padrão).
+  - **Dados de mercado (`market/`)**: o manifesto marca `included: false` até existirem tabelas `mkt_` (F6). Chaves de API não existem ainda (F6) e não vão no save.
+- Alternativas: detectar conflito só por "mudou dos dois lados desde o último HLC recebido" (mostraria de novo, na volta, o conflito que o outro PC já resolveu); escolher o canônico pelo registro mais antigo por `created_at` (depende de relógios); manter `origin = save_merge` nas linhas recebidas (quebra a convergência).
+- Motivo: SPEC §10 (idempotência, nada se desfaz, convergência, relógios) com regras determinísticas e testáveis.
+
+### 2026-10-17 — D-30: Backups, metadados e restauração (Fase 5)
+
+- Decisão:
+  - Nome `patrion_<AAAA-MM-DD_hh-mm-ss-mmmZ>_<motivo>_schema-v<N>_app-<versão>.db`, com os metadados num `<nome>.db.json` ao lado (formato `patrion-backup`, versão 1: data, motivo, schema, versão do app, PC, tamanho, SHA-256 e `encryption`) e em `dev_backups` (coluna `encryption`, padrão `none`). O backup anterior à migração (D-19) mantém o nome dele e passa a gravar o `.json` e a ser registrado em `dev_backups` quando o banco abre.
+  - Retenção: 10 mais recentes de cada motivo automático (`pre-migracao`, `pre-importacao`, `pre-restauracao`); manuais nunca são apagados.
+  - Toda leitura de um arquivo de banco fechado (versão, integridade, identidade) passa por `DatabaseFileInspector` (D-24, item 1). Backups pelo app usam `VACUUM INTO` na conexão aberta.
+  - Restauração: confere o arquivo antes de pedir confirmação; confirmação com caixa "Entendo que os dados atuais serão substituídos"; backup `pre-restauracao`; troca do arquivo com o banco fechado (cópia temporária conferida e depois a troca) e reabertura da **sessão** do banco sem reiniciar o app (`presentation/session/app_session.dart`). Se a abertura falhar, volta o arquivo anterior.
+  - A sessão (banco, identidade e `SyncContext`) é um objeto que pode ser fechado e recriado, e a interface é remontada do zero a cada sessão. É a base do bloqueio da F5B (D-24, itens 5 e 6).
+- Alternativas: pedir para reiniciar o app depois de restaurar (pior para o usuário e não prepara a F5B); empacotar banco e metadados num ZIP (a restauração manual ficaria mais difícil e exigiria arquivos temporários com a carteira).
+- Motivo: SPEC §11 e D-24.
+
+### 2026-10-17 — D-31: Diálogos de arquivo (Fase 5)
+
+- Decisão: `file_picker` 13.1.0 (aprovado em D-02) atrás da interface `FileDialogs` (`presentation/services/file_dialogs.dart`), trocada por caminhos fixos nos testes de widget. O save é gerado em memória e gravado pelo diálogo de salvar (`FilePicker.saveFile` com os bytes); o backup em outra pasta usa o seletor de pasta; importar e restaurar usam o seletor de arquivo com filtro (`*.invsave`, `*.db`).
+- Limitação conhecida: no Windows, o `saveFile` do `file_picker` 13.1.0 não repassa o filtro de extensões, então o diálogo de salvar mostra "All Files (*.*)". O nome sugerido já termina em `.invsave`.
+- Motivo: usar o pacote já aprovado e manter os testes de interface sem diálogos nativos.

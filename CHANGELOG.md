@@ -13,6 +13,18 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ### Adicionado
 
+- Fase 5 (backup e save):
+  - Arquivo de save `.invsave` para sincronizar computadores sem servidor: "Salvar arquivo de save", "Importar save" e "Importar e gerar novo save", com nome padrão `Patrion_<PC>_<data>.invsave`.
+  - Importação com prévia: registros novos, alterados e excluídos por tabela, conflitos (com a escolha da versão de cada lado), cadastros repetidos que serão unificados e possíveis operações duplicadas (só sinalizadas).
+  - Mesclagem por registro com relógio lógico (HLC): importar o mesmo arquivo de novo não muda nada, um arquivo antigo não desfaz alterações, os dois PCs terminam iguais e relógios desacertados não fazem perder edições.
+  - Ativos, instituições e contas cadastrados separadamente nos dois PCs viram um só, com as operações dos dois ligadas a ele.
+  - Arquivo conferido por SHA-256 antes de importar; corrompido, alterado, de versão mais nova ou protegido por senha é recusado sem tocar no banco. Importação numa única transação: se algo falhar, nada muda.
+  - Saves de versões anteriores do banco são convertidos na importação.
+  - Tela Sincronização com os computadores sincronizados e o histórico; aviso no Início quando a última sincronização tem 7 dias ou mais.
+  - Tela Backup: backup manual (na pasta de backups ou em outra pasta), lista dos backups e restauração com confirmação explícita e backup automático do estado atual antes. A restauração reabre o banco sem fechar o app.
+  - Backups automáticos antes de importar um save e de restaurar, com retenção dos 10 mais recentes de cada tipo; backups manuais nunca são apagados. Todo backup é conferido e tem metadados (data, versão, SHA-256) num arquivo `.json` ao lado.
+  - Banco no schema versão 3, com migração automática.
+  - `docs/BACKUP.md` com o procedimento de recuperação; `docs/SINCRONIZACAO.md` com o formato do arquivo e as regras da mesclagem.
 - Fase 4 (motor financeiro):
   - Juros simples e compostos, equivalência de taxas, taxa nominal e efetiva, bases de 252 dias úteis, /365, /360 e 30/360.
   - Calendário de dias úteis com os feriados nacionais (Carnaval, Sexta-feira Santa e Corpus Christi calculados pela Páscoa).
