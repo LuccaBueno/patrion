@@ -238,6 +238,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Senha incorreta.'), findsOneWidget);
     expect(manager.phase, SessionPhase.locked);
+    // O cursor volta ao campo da senha.
+    final field = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('unlock-password')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(field.focusNode.hasFocus, isTrue);
 
     await tester.tap(find.text('Esqueci a senha'));
     await tester.pumpAndSettle();

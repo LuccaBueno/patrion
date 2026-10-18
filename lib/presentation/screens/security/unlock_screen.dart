@@ -36,6 +36,7 @@ class UnlockScreen extends StatefulWidget {
 
 class _UnlockScreenState extends State<UnlockScreen> {
   final _password = TextEditingController();
+  final _focus = FocusNode();
   bool _busy = false;
   bool _obscure = true;
   String? _error;
@@ -43,6 +44,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
   @override
   void dispose() {
     _password.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -59,7 +61,13 @@ class _UnlockScreenState extends State<UnlockScreen> {
         setState(() => _error = e is AppError ? e.message : 'Erro: $e');
       }
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        // O campo fica desativado durante a tentativa; volta o cursor a ele.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _focus.requestFocus();
+        });
+      }
     }
   }
 
@@ -117,6 +125,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
                 TextField(
                   key: const Key('unlock-password'),
                   controller: _password,
+                  focusNode: _focus,
                   obscureText: _obscure,
                   autofocus: true,
                   enabled: !_busy,
