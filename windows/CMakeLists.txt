@@ -57,6 +57,14 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# O local_auth_windows 2.0.2 compila com /await (corrotinas experimentais),
+# que o MSVC 14.5x (Visual Studio 18) recusa sem esta definição. Só para o
+# plugin; remover quando o plugin passar a usar <coroutine> (DECISIONS D-32).
+if(TARGET local_auth_windows_plugin)
+  target_compile_definitions(local_auth_windows_plugin PRIVATE
+    _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+endif()
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
