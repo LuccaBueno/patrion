@@ -15,7 +15,7 @@ Critério de pronto (SPEC §21): os testes obrigatórios de §3 passam, e um ban
 - **Com a senha: verificado no app real.**
 - **Com o Windows Hello: não foi possível verificar neste PC**, que não tem o Windows Hello configurado (o Windows responde `DeviceNotPresent`). A parte do Hello está implementada e coberta por teste com dublê, mas precisa do seu teste manual num PC com Hello (roteiro abaixo, passo 9).
 
-Antes da F5B, as duas pendências da F5 foram resolvidas (commits `745585a` e `be6f8cc`). CI: ver o item 3.
+Antes da F5B, as duas pendências da F5 foram resolvidas (commits `745585a` e `be6f8cc`). CI verde ([run 39156647820](https://github.com/LuccaBueno/patrion/actions/runs/39156647820), commit `ae96edf`, 329 testes).
 
 **1. O que foi implementado**
 
@@ -61,7 +61,7 @@ Antes da F5B, as duas pendências da F5 foram resolvidas (commits `745585a` e `b
   - `screens/sync/save_password_dialog.dart` (novo), `sync_screen.dart`, `import_preview_dialog.dart`;
   - `screens/backup/backup_screen.dart`, `settings_screen.dart`, `providers.dart`, `format/sync_labels.dart`;
   - `lib/main.dart`.
-- `pubspec.yaml`/`.lock`: SQLCipher pelo hook do `sqlite3`; `pointycastle` 4.0.0, `local_auth` 3.0.2, `ffi` 2.2.0 (D-32). `windows/flutter/` (registro do plugin do `local_auth`).
+- `pubspec.yaml`/`.lock`: SQLCipher pelo hook do `sqlite3`; `pointycastle` 4.0.0, `local_auth` 3.0.2, `ffi` 2.2.0 (D-32). `windows/flutter/` (registro do plugin do `local_auth`) e `windows/CMakeLists.txt` (compilação do plugin no Visual Studio 18).
 - `test/`:
   - novos: `presentation/session/app_lock_test.dart`, `presentation/security_screens_test.dart`, `domain/security/key_file_test.dart`, `infrastructure/security/hello_vault_test.dart`, `helpers/fake_security.dart`;
   - ampliados: `application/sync/save_sync_test.dart`, `application/backup/backup_service_test.dart`, `presentation/sync_backup_screens_test.dart`, `helpers/sync_pc.dart`.
@@ -98,7 +98,7 @@ Antes da F5B, as duas pendências da F5 foram resolvidas (commits `745585a` e `b
   7. Backup → "Restaurar" no backup manual (criptografado na ativação) → confirmação → "Backup restaurado". O banco continua criptografado e a Carteira mostra PETR4 com 100 ações.
   8. Log: registra ativação, senha incorreta, bloqueio, redefinição e aberturas, **sem senha, sem chave de recuperação e sem valores**.
   - **Não verificado no app real:** Windows Hello (este PC não tem o Hello configurado; a opção aparece desativada com "não está configurado neste computador", que é o comportamento esperado). Desativar o bloqueio e o save com senha foram verificados só pelos testes automáticos.
-- CI: PENDENTE_CI
+- CI: o primeiro run (commit `04d2816`) falhou no build: o runner `windows-latest` passou a usar o Visual Studio 18 (MSVC 14.51), que recusa as corrotinas experimentais usadas pelo plugin `local_auth_windows`. Corrigido em `windows/CMakeLists.txt` (D-32). **CI verde** ([run 39156647820](https://github.com/LuccaBueno/patrion/actions/runs/39156647820), commit `ae96edf`, 329 testes; analyze, format, código gerado e build release passaram).
 
 **4. Problemas e limitações**
 
