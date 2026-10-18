@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:clock/clock.dart';
 import 'package:logging/logging.dart';
 
+import '../../core/crypto/crypto_box.dart';
 import '../../core/errors/app_error.dart';
 import '../../core/sync/hlc.dart';
 import '../../core/time/instant_format.dart';
@@ -51,6 +52,7 @@ class SaveExport {
     required this.bytes,
     required this.manifest,
     required this.suggestedFileName,
+    this.protected = false,
   });
 
   final Uint8List bytes;
@@ -58,6 +60,9 @@ class SaveExport {
 
   /// `Patrion_<NomeDoPC>_<AAAA-MM-DD_HHmm>.invsave` (SPEC §10.2).
   final String suggestedFileName;
+
+  /// O arquivo está protegido por senha.
+  final bool protected;
 
   int get totalRecords => manifest.counts.values.fold(0, (a, b) => a + b);
 }
@@ -122,6 +127,7 @@ class SaveService {
     Clock wallClock = const Clock(),
     this.beforeWrite,
     this._portfolio,
+    this.kdfPolicy = KdfPolicy.standard,
   }) : _clock = wallClock;
 
   final SyncTablesGateway _tables;
@@ -129,6 +135,9 @@ class SaveService {
   /// Carteira real do mesmo banco, para conferir a consistência do resultado
   /// na prévia. Sem ela, a prévia não confere.
   final PortfolioQuery? _portfolio;
+
+  /// Derivação da chave da senha do arquivo (testes usam uma rápida).
+  final KdfPolicy kdfPolicy;
   final SyncPeersRepository _peers;
   final SyncContext _sync;
   final BackupService _backups;
@@ -142,7 +151,9 @@ class SaveService {
 
   // -- Exportar ---------------------------------------------------------------
 
-  Future<SaveExport> buildExport() async {
+  /// Gera o save. Com [password], o arquivo sai protegido por senha (SPEC
+  /// §10.6, DECISIONS D-32).
+  Future<SaveExport> buildExport({String? password}) async {
     final schemas = await _tables.schemas();
     final data = await _tables.readAll(schemas);
     String? maxHlc;
@@ -169,10 +180,14 @@ class SaveService {
             ),
       ],
     );
-    final bytes = InvsaveCodec.encode(manifest, data);
+    final plain = InvsaveCodec.encode(manifest, data);
+    final bytes = password == null
+        ? plain
+        : await InvsaveCodec.protect(plain, password, policy: kdfPolicy);
     return SaveExport(
       bytes: bytes,
-      manifest: InvsaveCodec.decode(bytes).manifest,
+      manifest: InvsaveCodec.decode(plain).manifest,
+      protected: password != null,
       suggestedFileName: suggestedFileName(deviceName, now.toLocal()),
     );
   }
@@ -187,7 +202,10 @@ class SaveService {
       result: 'ok',
       maxHlc: export.manifest.maxHlc,
     );
-    _log.info('Save exportado (${export.totalRecords} registros)');
+    _log.info(
+      'Save exportado (${export.totalRecords} registros'
+      '${export.protected ? ', com senha' : ''})',
+    );
   }
 
   static String suggestedFileName(String deviceName, DateTime local) {
@@ -202,11 +220,17 @@ class SaveService {
 
   /// Valida o arquivo (ZIP, manifesto, checksums, formato e schema) e
   /// calcula a prévia. Não altera nada. Lança [DataError] se o arquivo for
-  /// recusado.
+  /// recusado. Um save protegido por senha precisa de [password]; sem ela,
+  /// lança [SavePasswordRequired].
   Future<ImportPreview> preview(
     Uint8List bytes, {
     required String fileName,
+    String? password,
   }) async {
+    if (InvsaveCodec.isProtected(bytes)) {
+      if (password == null) throw const SavePasswordRequired();
+      bytes = await InvsaveCodec.unprotect(bytes, password);
+    }
     final package = InvsaveCodec.decode(bytes);
     final manifest = package.manifest;
     if (manifest.schemaVersion > AppDatabase.latestSchemaVersion) {
@@ -414,4 +438,13 @@ class SaveService {
 /// Desfaz a transação da prévia (nunca sai de [SaveService]).
 class _DryRunRollback implements Exception {
   const _DryRunRollback();
+}
+
+/// O save é protegido por senha e ela não foi informada: a tela pede a
+/// senha e chama a prévia de novo.
+class SavePasswordRequired implements Exception {
+  const SavePasswordRequired();
+
+  @override
+  String toString() => 'SavePasswordRequired';
 }

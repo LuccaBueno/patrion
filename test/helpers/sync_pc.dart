@@ -6,6 +6,7 @@ import 'package:patrion/application/portfolio/operation_service.dart';
 import 'package:patrion/application/portfolio/portfolio_query.dart';
 import 'package:patrion/application/portfolio/registry_service.dart';
 import 'package:patrion/application/sync/save_service.dart';
+import 'package:patrion/core/crypto/crypto_box.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/backup_registry_repository.dart';
 import 'package:patrion/data/repositories/portfolio_repositories.dart';
@@ -50,6 +51,7 @@ class SyncPc {
       deviceName: name,
       wallClock: t.wall.clock,
       portfolio: query,
+      kdfPolicy: KdfPolicy.fastForTests,
       beforeWrite: (i) {
         if (failAtWrite != null && i == failAtWrite) {
           throw StateError('falha simulada na escrita $i');
@@ -87,16 +89,16 @@ class SyncPc {
   /// Avança o relógio deste PC (cada ação acontece "depois").
   void tick([Duration d = const Duration(minutes: 1)]) => t.wall.advance(d);
 
-  Future<Uint8List> export() async {
+  Future<Uint8List> export({String? password}) async {
     tick();
-    final e = await save.buildExport();
+    final e = await save.buildExport(password: password);
     await save.recordExport(e, e.suggestedFileName);
     return e.bytes;
   }
 
-  Future<ImportPreview> preview(Uint8List bytes) async {
+  Future<ImportPreview> preview(Uint8List bytes, {String? password}) async {
     tick();
-    return save.preview(bytes, fileName: 'teste.invsave');
+    return save.preview(bytes, fileName: 'teste.invsave', password: password);
   }
 
   Future<MergePlan> import(

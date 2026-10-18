@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:patrion/core/config/app_paths.dart';
 import 'package:patrion/core/time/instant_format.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
+import 'package:patrion/domain/sync/invsave_codec.dart';
 import 'package:patrion/presentation/providers.dart';
 import 'package:patrion/presentation/services/file_dialogs.dart';
 
@@ -95,7 +96,10 @@ void main() {
     await h.run(
       () async {
         await h.press(find.text('Salvar arquivo de save'));
+        await h.pumpUntil(find.text('Proteger o arquivo com senha'));
+        await h.press(find.text('Continuar'));
         await h.pumpUntil(find.text('Arquivo de save salvo'));
+        expect(find.textContaining('sem senha'), findsOneWidget);
 
         expect(find.text('Arquivo de save salvo'), findsOneWidget);
         expect(dialogs.saved.single, endsWith('.invsave'));
@@ -109,6 +113,76 @@ void main() {
       overrides: [fileDialogsProvider.overrideWithValue(dialogs)],
     );
     await tester.runAsync(pc.close);
+  });
+
+  testWidgets('salvar com senha e importar em outro PC pedindo a senha', (
+    tester,
+  ) async {
+    final a = (await tester.runAsync(() => SyncPc.open('PC-A', tmp)))!;
+    final b = (await tester.runAsync(() => SyncPc.open('PC-B', tmp)))!;
+    await tester.runAsync(() async {
+      await a.institution('Corretora Protegida');
+    });
+    final dialogs = _FakeDialogs(tmp.path);
+
+    final ha = AppHarness(tester, a.t);
+    await ha.run(
+      () async {
+        await ha.press(find.text('Salvar arquivo de save'));
+        await ha.pumpUntil(find.text('Proteger o arquivo com senha'));
+        await ha.press(find.byKey(const Key('save-protect')));
+        await ha.type(find.byKey(const Key('save-password')), 'senha-arq-1');
+        await ha.type(
+          find.byKey(const Key('save-password-confirm')),
+          'senha-arq-1',
+        );
+        await ha.press(find.text('Continuar'));
+        await ha.pumpUntil(find.text('Arquivo de save salvo'));
+        expect(find.textContaining('protegido por senha'), findsOneWidget);
+        await ha.tap(find.text('OK'));
+      },
+      location: '/sincronizacao',
+      paths: pathsIn('a'),
+      overrides: [fileDialogsProvider.overrideWithValue(dialogs)],
+    );
+    final saved = dialogs.saved.single;
+    expect(InvsaveCodec.isProtected(File(saved).readAsBytesSync()), isTrue);
+
+    dialogs.fileToPick = saved;
+    final hb = AppHarness(tester, b.t);
+    await hb.run(
+      () async {
+        await hb.press(find.text('Importar save…'));
+        await hb.pumpUntil(find.text('Arquivo protegido por senha'));
+        await hb.type(find.byKey(const Key('prompt-password')), 'errada-12');
+        await hb.press(find.text('Abrir'));
+        await hb.pumpUntil(find.text('Não foi possível concluir'));
+        expect(
+          find.textContaining('Senha do arquivo incorreta'),
+          findsOneWidget,
+        );
+        await hb.tap(find.text('Fechar'));
+
+        await hb.press(find.text('Importar save…'));
+        await hb.pumpUntil(find.text('Arquivo protegido por senha'));
+        await hb.type(find.byKey(const Key('prompt-password')), 'senha-arq-1');
+        await hb.press(find.text('Abrir'));
+        await hb.pumpUntil(find.text('Prévia da importação'));
+        await hb.press(find.text('Aplicar'));
+        await hb.pumpUntil(find.textContaining('Importação concluída'));
+      },
+      location: '/sincronizacao',
+      paths: pathsIn('b'),
+      overrides: [fileDialogsProvider.overrideWithValue(dialogs)],
+    );
+    final names = await tester.runAsync(
+      () async => [for (final i in await b.repos.institutions.all()) i.name],
+    );
+    expect(names, contains('Corretora Protegida'));
+    await tester.runAsync(() async {
+      await a.close();
+      await b.close();
+    });
   });
 
   testWidgets('importar mostra a prévia com o conflito; escolher a versão '

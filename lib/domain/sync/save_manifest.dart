@@ -26,6 +26,7 @@ class SaveManifest {
     this.files = const {},
     this.knownPeers = const [],
     this.encryption = encryptionNone,
+    this.encryptionParams = const {},
     this.marketIncluded = false,
     this.formatVersion = currentFormatVersion,
   });
@@ -36,9 +37,11 @@ class SaveManifest {
   /// Versão do formato do arquivo (independente do schema do banco).
   static const currentFormatVersion = 1;
 
-  /// Sem criptografia. A F5B acrescenta a senha do arquivo neste campo sem
-  /// quebrar o formato (DECISIONS D-24).
+  /// Sem criptografia.
   static const encryptionNone = 'none';
+
+  /// Protegido por senha (F5B, DECISIONS D-32).
+  static const encryptionAesGcm = 'aes-256-gcm';
 
   final int formatVersion;
   final String appVersion;
@@ -59,8 +62,11 @@ class SaveManifest {
   final Map<String, String> files;
   final List<KnownPeer> knownPeers;
 
-  /// Esquema de criptografia do conteúdo: `none` na v1.0.
+  /// Esquema de criptografia do conteúdo: `none` ou `aes-256-gcm`.
   final String encryption;
+
+  /// Parâmetros da criptografia (KDF e nonce), ao lado de `scheme`.
+  final Map<String, Object?> encryptionParams;
 
   /// Se a pasta `market/` (dados de mercado) foi incluída. Sempre `false` até
   /// a F6, quando passam a existir dados de mercado no banco.
@@ -77,6 +83,7 @@ class SaveManifest {
     files: files ?? this.files,
     knownPeers: knownPeers,
     encryption: encryption,
+    encryptionParams: encryptionParams,
     marketIncluded: marketIncluded,
     formatVersion: formatVersion,
   );
@@ -103,7 +110,7 @@ class SaveManifest {
       for (final p in knownPeers)
         {'deviceId': p.deviceId, 'lastHlcReceived': p.lastHlcReceived},
     ],
-    'encryption': {'scheme': encryption},
+    'encryption': {...encryptionParams, 'scheme': encryption},
     'market': {'included': marketIncluded},
   };
 
@@ -169,10 +176,8 @@ class SaveManifest {
       }
       peers.add(KnownPeer(deviceId: id, lastHlcReceived: hlc));
     }
-    final encryption = field<String>(
-      field<Map<String, Object?>>(json, 'encryption'),
-      'scheme',
-    );
+    final encryptionJson = field<Map<String, Object?>>(json, 'encryption');
+    final encryption = field<String>(encryptionJson, 'scheme');
     final market = json['market'];
     final marketIncluded = market is Map<String, Object?>
         ? market['included'] == true
@@ -190,6 +195,10 @@ class SaveManifest {
       files: files,
       knownPeers: peers,
       encryption: encryption,
+      encryptionParams: {
+        for (final e in encryptionJson.entries)
+          if (e.key != 'scheme') e.key: e.value,
+      },
       marketIncluded: marketIncluded,
     );
   }

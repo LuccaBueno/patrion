@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/application/sync/save_service.dart';
 import 'package:patrion/core/errors/app_error.dart';
 import 'package:patrion/core/sync/hlc.dart';
 import 'package:patrion/data/db/app_database.dart';
@@ -536,6 +538,103 @@ void main() {
     );
   });
 
+  group('senha do arquivo de save (F5B, SPEC §10.6)', () {
+    const password = 'senha-do-arquivo';
+
+    test('ida e volta com senha: B importa O1 só com a senha certa', () async {
+      final o1 = await a.buy(account, asset, '10');
+      final bytes = await a.export(password: password);
+
+      // Sem a senha, nada é lido: pede a senha.
+      await expectLater(b.preview(bytes), throwsA(isA<SavePasswordRequired>()));
+      // Senha errada: recusado, nada muda.
+      final before = await b.dump();
+      await expectLater(
+        b.preview(bytes, password: 'senha-errada'),
+        throwsA(
+          isA<DataError>().having((e) => e.message, 'm', contains('Senha')),
+        ),
+      );
+      expect(await b.dump(), before);
+
+      final preview = await b.preview(bytes, password: password);
+      expect(preview.manifest.deviceId, a.deviceId);
+      await b.save.apply(preview);
+      expect(await qtyOf(b, o1), '10');
+    });
+
+    test('o arquivo protegido não tem dados legíveis: só versão, PC, data e '
+        'os parâmetros da criptografia', () async {
+      await a.institution('Banco Muito Secreto');
+      final bytes = await a.export(password: password);
+      final archive = ZipDecoder().decodeBytes(bytes);
+      expect(archive.files.map((f) => f.name).toSet(), {
+        'manifest.json',
+        'manifest.sha256',
+        'payload.bin',
+      });
+      final manifest = InvsaveCodec.readManifest(bytes);
+      expect(manifest.encryption, 'aes-256-gcm');
+      expect(manifest.counts, isEmpty);
+      expect(manifest.maxHlc, isNull);
+      expect(manifest.deviceName, 'PC-A');
+      final kdf = manifest.encryptionParams['kdf']! as Map<String, Object?>;
+      expect(kdf['algorithm'], 'argon2id');
+      for (final f in archive.files) {
+        expect(
+          utf8.decode(f.readBytes()!, allowMalformed: true),
+          isNot(contains('Muito Secreto')),
+        );
+      }
+      // A leitura da versão da F5 (sem senha) recusa com mensagem clara.
+      expect(
+        () => InvsaveCodec.decode(bytes),
+        throwsA(
+          isA<DataError>().having((e) => e.message, 'm', contains('senha')),
+        ),
+      );
+    });
+
+    test('um byte alterado no conteúdo cifrado é recusado', () async {
+      final bytes = await a.export(password: password);
+      final archive = ZipDecoder().decodeBytes(bytes);
+      final payload = archive.findFile('payload.bin')!.readBytes()!;
+      payload[payload.length ~/ 2] ^= 1;
+      final manifestBytes = archive.findFile('manifest.json')!.readBytes()!;
+      final json =
+          jsonDecode(utf8.decode(manifestBytes)) as Map<String, Object?>;
+      // Mesmo com o SHA-256 do manifesto refeito, o AES-GCM recusa.
+      json['files'] = {'payload.bin': InvsaveCodec.sha256Hex(payload)};
+      final newManifest = utf8.encode(jsonEncode(json));
+      final tampered = ZipEncoder().encodeBytes(
+        Archive()
+          ..addFile(ArchiveFile.bytes('manifest.json', newManifest))
+          ..addFile(
+            ArchiveFile.string(
+              'manifest.sha256',
+              InvsaveCodec.sha256Hex(newManifest),
+            ),
+          )
+          ..addFile(ArchiveFile.bytes('payload.bin', payload)),
+      );
+      await expectLater(
+        b.preview(tampered, password: password),
+        throwsA(isA<DataError>()),
+      );
+    });
+
+    test('com os parâmetros de produção (Argon2id 64 MiB)', () async {
+      final plain = await a.export();
+      final protected = await InvsaveCodec.protect(plain, password);
+      final kdf =
+          InvsaveCodec.readManifest(protected).encryptionParams['kdf']!
+              as Map<String, Object?>;
+      expect(kdf['memoryKiB'], 65536);
+      expect(kdf['iterations'], 3);
+      expect(await InvsaveCodec.unprotect(protected, password), plain);
+    });
+  });
+
   group('SPEC §10.7: schema e formato', () {
     Future<Uint8List> reencode(
       Uint8List save,
@@ -611,21 +710,18 @@ void main() {
       expect(await b.row('operations', o1), await a.row('operations', o1));
     });
 
-    test(
-      'save protegido por senha (F5B) é recusado com mensagem clara',
-      () async {
-        final save = await reencode(
-          await a.export(),
-          (m) => withSchema(m, m.schemaVersion, encryption: 'aes-256-gcm'),
-        );
-        await expectLater(
-          b.preview(save),
-          throwsA(
-            isA<DataError>().having((e) => e.message, 'm', contains('senha')),
-          ),
-        );
-      },
-    );
+    test('manifesto com criptografia mas sem os parâmetros: pede a senha e, '
+        'com ela, é recusado como corrompido', () async {
+      final save = await reencode(
+        await a.export(),
+        (m) => withSchema(m, m.schemaVersion, encryption: 'aes-256-gcm'),
+      );
+      await expectLater(b.preview(save), throwsA(isA<SavePasswordRequired>()));
+      await expectLater(
+        b.preview(save, password: 'qualquer-1'),
+        throwsA(isA<DataError>()),
+      );
+    });
 
     test('arquivo que não é ZIP é recusado', () async {
       await expectLater(

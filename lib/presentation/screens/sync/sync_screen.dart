@@ -15,7 +15,9 @@ import '../../../domain/sync/merge_planner.dart';
 import '../../format/sync_labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import '../security/security_dialogs.dart';
 import 'import_preview_dialog.dart';
+import 'save_password_dialog.dart';
 
 /// Dias sem sincronizar a partir dos quais o app avisa (sem bloquear,
 /// SPEC §10.5).
@@ -58,9 +60,18 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     }
   }
 
-  Future<void> _export() async {
+  Future<void> _export({String? importedPassword}) async {
+    final choice = await showDialog<({String? password})>(
+      context: context,
+      builder: (context) => SavePasswordDialog(
+        protectByDefault:
+            ref.read(sessionControllerProvider)?.lockEnabled ?? false,
+        importedPassword: importedPassword,
+      ),
+    );
+    if (choice == null) return;
     final service = ref.read(saveServiceProvider);
-    final export = await service.buildExport();
+    final export = await service.buildExport(password: choice.password);
     final path = await ref
         .read(fileDialogsProvider)
         .saveBytes(
@@ -87,9 +98,27 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
         );
     if (path == null) return;
     final service = ref.read(saveServiceProvider);
+    final bytes = await File(path).readAsBytes();
+    String? password;
+    if (InvsaveCodec.isProtected(bytes)) {
+      if (!mounted) return;
+      password = await showDialog<String>(
+        context: context,
+        builder: (context) => PasswordPromptDialog(
+          title: 'Arquivo protegido por senha',
+          message:
+              'O save ${p.basename(path)} foi protegido com uma senha no '
+              'outro computador. Digite a senha do arquivo.',
+          label: 'Senha do arquivo',
+          action: 'Abrir',
+        ),
+      );
+      if (password == null) return;
+    }
     final preview = await service.preview(
-      await File(path).readAsBytes(),
+      bytes,
       fileName: p.basename(path),
+      password: password,
     );
     if (!mounted) return;
     final choices = await showDialog<Map<RowRef, MergeSide>>(
@@ -117,7 +146,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
         ),
       ),
     );
-    if (thenExport) await _export();
+    if (thenExport) await _export(importedPassword: password);
   }
 
   @override
@@ -208,8 +237,9 @@ class _HowTo extends StatelessWidget {
         'O save leva todos os registros (inclusive exclusões) e é mesclado '
         'registro a registro: nada é apagado sem aparecer na prévia, e '
         'importar o mesmo arquivo de novo não muda nada. Configurações deste '
-        'computador, logs e chaves de API não vão no arquivo. O arquivo não é '
-        'criptografado: guarde-o em local seguro.',
+        'computador, logs e chaves de API não vão no arquivo. Ao salvar, você '
+        'pode proteger o arquivo com senha (criptografado; já vem marcado com '
+        'o bloqueio do app ativo).',
         style: theme.textTheme.bodyMedium,
       ),
     );
@@ -345,7 +375,8 @@ class _ExportSummary extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               '${export.totalRecords} registros '
-              '(${SyncLabels.bytes(export.bytes.length)}).',
+              '(${SyncLabels.bytes(export.bytes.length)})'
+              '${export.protected ? ', protegido por senha' : ', sem senha'}.',
             ),
             const SizedBox(height: 8),
             for (final e in counts)
