@@ -430,6 +430,9 @@ class SessionManager extends ChangeNotifier implements SessionController {
       _keyStore.write(created.file);
       DatabaseEncryption.convert(databaseFile: db, to: created.key);
       _keys = created.file;
+      // Antes de publicar a sessão nova: a tela remontada procura a chave
+      // pendente assim que aparece.
+      _pendingRecoveryKey = created.recoveryKey;
       await _openAndPublish(
         key: created.key,
         notice: 'Bloqueio ativado. O banco de dados agora é criptografado.',
@@ -441,6 +444,7 @@ class SessionManager extends ChangeNotifier implements SessionController {
       _keyStore.delete();
       _keys = null;
       created.key.destroy();
+      _pendingRecoveryKey = null;
       await _openAndPublish(
         notice:
             'Não foi possível ativar o bloqueio. Os dados continuam como '
@@ -464,7 +468,6 @@ class SessionManager extends ChangeNotifier implements SessionController {
         notifyListeners();
       }
     }
-    _pendingRecoveryKey = created.recoveryKey;
     return created.recoveryKey;
   }
 

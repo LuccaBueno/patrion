@@ -149,6 +149,18 @@ void main() {
       expect(fileContains(pre.path, 'Corretora Secreta'), isFalse);
     });
 
+    test('a chave de recuperação já está pendente quando a sessão nova é '
+        'publicada (a tela remontada a mostra ao aparecer)', () async {
+      String? seenWhenReady;
+      manager.addListener(() {
+        if (manager.phase == SessionPhase.ready && manager.lockEnabled) {
+          seenWhenReady ??= manager.takePendingRecoveryKey();
+        }
+      });
+      final code = await enable();
+      expect(seenWhenReady, code);
+    });
+
     test('senha fraca é recusada e nada muda', () async {
       await expectLater(manager.enableLock('curta'), throwsA(isA<DataError>()));
       expect(manager.lockEnabled, isFalse);
