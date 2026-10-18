@@ -35,6 +35,15 @@ part 'app_database.g.dart';
     DevSyncPeers,
     DevSyncHistory,
     DevBackups,
+    MktPrices,
+    MktQuotes,
+    MktCorporateEvents,
+    MktIndicators,
+    MktFxRates,
+    MktTreasuryPrices,
+    MktFundQuotas,
+    MktInstruments,
+    DevProviderState,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -59,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Versão atual do schema. Também é lida antes de abrir o banco, para
   /// decidir se é preciso o backup anterior à migração (SPEC §11).
-  static const latestSchemaVersion = 3;
+  static const latestSchemaVersion = 4;
 
   @override
   int get schemaVersion => latestSchemaVersion;
@@ -126,6 +135,22 @@ class AppDatabase extends _$AppDatabase {
           schema.hypoScenariosHlc,
         ]) {
           await m.createIndex(index);
+        }
+      },
+      // F6: dados de mercado (`mkt_`) e estado dos provedores. Só cria.
+      from3To4: (m, schema) async {
+        for (final table in [
+          schema.mktPrices,
+          schema.mktQuotes,
+          schema.mktCorporateEvents,
+          schema.mktIndicators,
+          schema.mktFxRates,
+          schema.mktTreasuryPrices,
+          schema.mktFundQuotas,
+          schema.mktInstruments,
+          schema.devProviderState,
+        ]) {
+          await m.createTable(table);
         }
       },
     ),

@@ -12096,6 +12096,5362 @@ class DevBackupsCompanion extends UpdateCompanion<DevBackupRow> {
   }
 }
 
+class $MktPricesTable extends MktPrices
+    with TableInfo<$MktPricesTable, MktPriceRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktPricesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  @override
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+    'symbol',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _marketMeta = const VerificationMeta('market');
+  @override
+  late final GeneratedColumn<String> market = GeneratedColumn<String>(
+    'market',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refDateMeta = const VerificationMeta(
+    'refDate',
+  );
+  @override
+  late final GeneratedColumn<String> refDate = GeneratedColumn<String>(
+    'ref_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataTypeMeta = const VerificationMeta(
+    'dataType',
+  );
+  @override
+  late final GeneratedColumn<String> dataType = GeneratedColumn<String>(
+    'data_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _openMeta = const VerificationMeta('open');
+  @override
+  late final GeneratedColumn<String> open = GeneratedColumn<String>(
+    'open',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _highMeta = const VerificationMeta('high');
+  @override
+  late final GeneratedColumn<String> high = GeneratedColumn<String>(
+    'high',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lowMeta = const VerificationMeta('low');
+  @override
+  late final GeneratedColumn<String> low = GeneratedColumn<String>(
+    'low',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _closeMeta = const VerificationMeta('close');
+  @override
+  late final GeneratedColumn<String> close = GeneratedColumn<String>(
+    'close',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _volumeMeta = const VerificationMeta('volume');
+  @override
+  late final GeneratedColumn<String> volume = GeneratedColumn<String>(
+    'volume',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quoteFactorMeta = const VerificationMeta(
+    'quoteFactor',
+  );
+  @override
+  late final GeneratedColumn<String> quoteFactor = GeneratedColumn<String>(
+    'quote_factor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    symbol,
+    market,
+    refDate,
+    source,
+    dataType,
+    open,
+    high,
+    low,
+    close,
+    volume,
+    currency,
+    quoteFactor,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_prices';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktPriceRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('symbol')) {
+      context.handle(
+        _symbolMeta,
+        symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('market')) {
+      context.handle(
+        _marketMeta,
+        market.isAcceptableOrUnknown(data['market']!, _marketMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_marketMeta);
+    }
+    if (data.containsKey('ref_date')) {
+      context.handle(
+        _refDateMeta,
+        refDate.isAcceptableOrUnknown(data['ref_date']!, _refDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refDateMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('data_type')) {
+      context.handle(
+        _dataTypeMeta,
+        dataType.isAcceptableOrUnknown(data['data_type']!, _dataTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataTypeMeta);
+    }
+    if (data.containsKey('open')) {
+      context.handle(
+        _openMeta,
+        open.isAcceptableOrUnknown(data['open']!, _openMeta),
+      );
+    }
+    if (data.containsKey('high')) {
+      context.handle(
+        _highMeta,
+        high.isAcceptableOrUnknown(data['high']!, _highMeta),
+      );
+    }
+    if (data.containsKey('low')) {
+      context.handle(
+        _lowMeta,
+        low.isAcceptableOrUnknown(data['low']!, _lowMeta),
+      );
+    }
+    if (data.containsKey('close')) {
+      context.handle(
+        _closeMeta,
+        close.isAcceptableOrUnknown(data['close']!, _closeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_closeMeta);
+    }
+    if (data.containsKey('volume')) {
+      context.handle(
+        _volumeMeta,
+        volume.isAcceptableOrUnknown(data['volume']!, _volumeMeta),
+      );
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('quote_factor')) {
+      context.handle(
+        _quoteFactorMeta,
+        quoteFactor.isAcceptableOrUnknown(
+          data['quote_factor']!,
+          _quoteFactorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {
+    symbol,
+    market,
+    refDate,
+    source,
+    dataType,
+  };
+  @override
+  MktPriceRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktPriceRow(
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      market: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}market'],
+      )!,
+      refDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_date'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      dataType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data_type'],
+      )!,
+      open: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}open'],
+      ),
+      high: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}high'],
+      ),
+      low: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}low'],
+      ),
+      close: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}close'],
+      )!,
+      volume: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}volume'],
+      ),
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
+      quoteFactor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_factor'],
+      ),
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktPricesTable createAlias(String alias) {
+    return $MktPricesTable(attachedDatabase, alias);
+  }
+}
+
+class MktPriceRow extends DataClass implements Insertable<MktPriceRow> {
+  final String symbol;
+  final String market;
+  final String refDate;
+  final String source;
+
+  /// `close`, `adjusted` ou `calculated`.
+  final String dataType;
+  final String? open;
+  final String? high;
+  final String? low;
+  final String close;
+  final String? volume;
+  final String currency;
+  final String? quoteFactor;
+  final String collectedAt;
+  const MktPriceRow({
+    required this.symbol,
+    required this.market,
+    required this.refDate,
+    required this.source,
+    required this.dataType,
+    this.open,
+    this.high,
+    this.low,
+    required this.close,
+    this.volume,
+    required this.currency,
+    this.quoteFactor,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['symbol'] = Variable<String>(symbol);
+    map['market'] = Variable<String>(market);
+    map['ref_date'] = Variable<String>(refDate);
+    map['source'] = Variable<String>(source);
+    map['data_type'] = Variable<String>(dataType);
+    if (!nullToAbsent || open != null) {
+      map['open'] = Variable<String>(open);
+    }
+    if (!nullToAbsent || high != null) {
+      map['high'] = Variable<String>(high);
+    }
+    if (!nullToAbsent || low != null) {
+      map['low'] = Variable<String>(low);
+    }
+    map['close'] = Variable<String>(close);
+    if (!nullToAbsent || volume != null) {
+      map['volume'] = Variable<String>(volume);
+    }
+    map['currency'] = Variable<String>(currency);
+    if (!nullToAbsent || quoteFactor != null) {
+      map['quote_factor'] = Variable<String>(quoteFactor);
+    }
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktPricesCompanion toCompanion(bool nullToAbsent) {
+    return MktPricesCompanion(
+      symbol: Value(symbol),
+      market: Value(market),
+      refDate: Value(refDate),
+      source: Value(source),
+      dataType: Value(dataType),
+      open: open == null && nullToAbsent ? const Value.absent() : Value(open),
+      high: high == null && nullToAbsent ? const Value.absent() : Value(high),
+      low: low == null && nullToAbsent ? const Value.absent() : Value(low),
+      close: Value(close),
+      volume: volume == null && nullToAbsent
+          ? const Value.absent()
+          : Value(volume),
+      currency: Value(currency),
+      quoteFactor: quoteFactor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteFactor),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktPriceRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktPriceRow(
+      symbol: serializer.fromJson<String>(json['symbol']),
+      market: serializer.fromJson<String>(json['market']),
+      refDate: serializer.fromJson<String>(json['refDate']),
+      source: serializer.fromJson<String>(json['source']),
+      dataType: serializer.fromJson<String>(json['dataType']),
+      open: serializer.fromJson<String?>(json['open']),
+      high: serializer.fromJson<String?>(json['high']),
+      low: serializer.fromJson<String?>(json['low']),
+      close: serializer.fromJson<String>(json['close']),
+      volume: serializer.fromJson<String?>(json['volume']),
+      currency: serializer.fromJson<String>(json['currency']),
+      quoteFactor: serializer.fromJson<String?>(json['quoteFactor']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'symbol': serializer.toJson<String>(symbol),
+      'market': serializer.toJson<String>(market),
+      'refDate': serializer.toJson<String>(refDate),
+      'source': serializer.toJson<String>(source),
+      'dataType': serializer.toJson<String>(dataType),
+      'open': serializer.toJson<String?>(open),
+      'high': serializer.toJson<String?>(high),
+      'low': serializer.toJson<String?>(low),
+      'close': serializer.toJson<String>(close),
+      'volume': serializer.toJson<String?>(volume),
+      'currency': serializer.toJson<String>(currency),
+      'quoteFactor': serializer.toJson<String?>(quoteFactor),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktPriceRow copyWith({
+    String? symbol,
+    String? market,
+    String? refDate,
+    String? source,
+    String? dataType,
+    Value<String?> open = const Value.absent(),
+    Value<String?> high = const Value.absent(),
+    Value<String?> low = const Value.absent(),
+    String? close,
+    Value<String?> volume = const Value.absent(),
+    String? currency,
+    Value<String?> quoteFactor = const Value.absent(),
+    String? collectedAt,
+  }) => MktPriceRow(
+    symbol: symbol ?? this.symbol,
+    market: market ?? this.market,
+    refDate: refDate ?? this.refDate,
+    source: source ?? this.source,
+    dataType: dataType ?? this.dataType,
+    open: open.present ? open.value : this.open,
+    high: high.present ? high.value : this.high,
+    low: low.present ? low.value : this.low,
+    close: close ?? this.close,
+    volume: volume.present ? volume.value : this.volume,
+    currency: currency ?? this.currency,
+    quoteFactor: quoteFactor.present ? quoteFactor.value : this.quoteFactor,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktPriceRow copyWithCompanion(MktPricesCompanion data) {
+    return MktPriceRow(
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      market: data.market.present ? data.market.value : this.market,
+      refDate: data.refDate.present ? data.refDate.value : this.refDate,
+      source: data.source.present ? data.source.value : this.source,
+      dataType: data.dataType.present ? data.dataType.value : this.dataType,
+      open: data.open.present ? data.open.value : this.open,
+      high: data.high.present ? data.high.value : this.high,
+      low: data.low.present ? data.low.value : this.low,
+      close: data.close.present ? data.close.value : this.close,
+      volume: data.volume.present ? data.volume.value : this.volume,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      quoteFactor: data.quoteFactor.present
+          ? data.quoteFactor.value
+          : this.quoteFactor,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktPriceRow(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('refDate: $refDate, ')
+          ..write('source: $source, ')
+          ..write('dataType: $dataType, ')
+          ..write('open: $open, ')
+          ..write('high: $high, ')
+          ..write('low: $low, ')
+          ..write('close: $close, ')
+          ..write('volume: $volume, ')
+          ..write('currency: $currency, ')
+          ..write('quoteFactor: $quoteFactor, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    symbol,
+    market,
+    refDate,
+    source,
+    dataType,
+    open,
+    high,
+    low,
+    close,
+    volume,
+    currency,
+    quoteFactor,
+    collectedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktPriceRow &&
+          other.symbol == this.symbol &&
+          other.market == this.market &&
+          other.refDate == this.refDate &&
+          other.source == this.source &&
+          other.dataType == this.dataType &&
+          other.open == this.open &&
+          other.high == this.high &&
+          other.low == this.low &&
+          other.close == this.close &&
+          other.volume == this.volume &&
+          other.currency == this.currency &&
+          other.quoteFactor == this.quoteFactor &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktPricesCompanion extends UpdateCompanion<MktPriceRow> {
+  final Value<String> symbol;
+  final Value<String> market;
+  final Value<String> refDate;
+  final Value<String> source;
+  final Value<String> dataType;
+  final Value<String?> open;
+  final Value<String?> high;
+  final Value<String?> low;
+  final Value<String> close;
+  final Value<String?> volume;
+  final Value<String> currency;
+  final Value<String?> quoteFactor;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktPricesCompanion({
+    this.symbol = const Value.absent(),
+    this.market = const Value.absent(),
+    this.refDate = const Value.absent(),
+    this.source = const Value.absent(),
+    this.dataType = const Value.absent(),
+    this.open = const Value.absent(),
+    this.high = const Value.absent(),
+    this.low = const Value.absent(),
+    this.close = const Value.absent(),
+    this.volume = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.quoteFactor = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktPricesCompanion.insert({
+    required String symbol,
+    required String market,
+    required String refDate,
+    required String source,
+    required String dataType,
+    this.open = const Value.absent(),
+    this.high = const Value.absent(),
+    this.low = const Value.absent(),
+    required String close,
+    this.volume = const Value.absent(),
+    required String currency,
+    this.quoteFactor = const Value.absent(),
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : symbol = Value(symbol),
+       market = Value(market),
+       refDate = Value(refDate),
+       source = Value(source),
+       dataType = Value(dataType),
+       close = Value(close),
+       currency = Value(currency),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktPriceRow> custom({
+    Expression<String>? symbol,
+    Expression<String>? market,
+    Expression<String>? refDate,
+    Expression<String>? source,
+    Expression<String>? dataType,
+    Expression<String>? open,
+    Expression<String>? high,
+    Expression<String>? low,
+    Expression<String>? close,
+    Expression<String>? volume,
+    Expression<String>? currency,
+    Expression<String>? quoteFactor,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (symbol != null) 'symbol': symbol,
+      if (market != null) 'market': market,
+      if (refDate != null) 'ref_date': refDate,
+      if (source != null) 'source': source,
+      if (dataType != null) 'data_type': dataType,
+      if (open != null) 'open': open,
+      if (high != null) 'high': high,
+      if (low != null) 'low': low,
+      if (close != null) 'close': close,
+      if (volume != null) 'volume': volume,
+      if (currency != null) 'currency': currency,
+      if (quoteFactor != null) 'quote_factor': quoteFactor,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktPricesCompanion copyWith({
+    Value<String>? symbol,
+    Value<String>? market,
+    Value<String>? refDate,
+    Value<String>? source,
+    Value<String>? dataType,
+    Value<String?>? open,
+    Value<String?>? high,
+    Value<String?>? low,
+    Value<String>? close,
+    Value<String?>? volume,
+    Value<String>? currency,
+    Value<String?>? quoteFactor,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktPricesCompanion(
+      symbol: symbol ?? this.symbol,
+      market: market ?? this.market,
+      refDate: refDate ?? this.refDate,
+      source: source ?? this.source,
+      dataType: dataType ?? this.dataType,
+      open: open ?? this.open,
+      high: high ?? this.high,
+      low: low ?? this.low,
+      close: close ?? this.close,
+      volume: volume ?? this.volume,
+      currency: currency ?? this.currency,
+      quoteFactor: quoteFactor ?? this.quoteFactor,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (market.present) {
+      map['market'] = Variable<String>(market.value);
+    }
+    if (refDate.present) {
+      map['ref_date'] = Variable<String>(refDate.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (dataType.present) {
+      map['data_type'] = Variable<String>(dataType.value);
+    }
+    if (open.present) {
+      map['open'] = Variable<String>(open.value);
+    }
+    if (high.present) {
+      map['high'] = Variable<String>(high.value);
+    }
+    if (low.present) {
+      map['low'] = Variable<String>(low.value);
+    }
+    if (close.present) {
+      map['close'] = Variable<String>(close.value);
+    }
+    if (volume.present) {
+      map['volume'] = Variable<String>(volume.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (quoteFactor.present) {
+      map['quote_factor'] = Variable<String>(quoteFactor.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktPricesCompanion(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('refDate: $refDate, ')
+          ..write('source: $source, ')
+          ..write('dataType: $dataType, ')
+          ..write('open: $open, ')
+          ..write('high: $high, ')
+          ..write('low: $low, ')
+          ..write('close: $close, ')
+          ..write('volume: $volume, ')
+          ..write('currency: $currency, ')
+          ..write('quoteFactor: $quoteFactor, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MktQuotesTable extends MktQuotes
+    with TableInfo<$MktQuotesTable, MktQuoteRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktQuotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  @override
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+    'symbol',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _marketMeta = const VerificationMeta('market');
+  @override
+  late final GeneratedColumn<String> market = GeneratedColumn<String>(
+    'market',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _priceMeta = const VerificationMeta('price');
+  @override
+  late final GeneratedColumn<String> price = GeneratedColumn<String>(
+    'price',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refAtMeta = const VerificationMeta('refAt');
+  @override
+  late final GeneratedColumn<String> refAt = GeneratedColumn<String>(
+    'ref_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _delayNoteMeta = const VerificationMeta(
+    'delayNote',
+  );
+  @override
+  late final GeneratedColumn<String> delayNote = GeneratedColumn<String>(
+    'delay_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dataTypeMeta = const VerificationMeta(
+    'dataType',
+  );
+  @override
+  late final GeneratedColumn<String> dataType = GeneratedColumn<String>(
+    'data_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    symbol,
+    market,
+    source,
+    price,
+    currency,
+    refAt,
+    delayNote,
+    dataType,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_quotes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktQuoteRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('symbol')) {
+      context.handle(
+        _symbolMeta,
+        symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('market')) {
+      context.handle(
+        _marketMeta,
+        market.isAcceptableOrUnknown(data['market']!, _marketMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_marketMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('price')) {
+      context.handle(
+        _priceMeta,
+        price.isAcceptableOrUnknown(data['price']!, _priceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_priceMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('ref_at')) {
+      context.handle(
+        _refAtMeta,
+        refAt.isAcceptableOrUnknown(data['ref_at']!, _refAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refAtMeta);
+    }
+    if (data.containsKey('delay_note')) {
+      context.handle(
+        _delayNoteMeta,
+        delayNote.isAcceptableOrUnknown(data['delay_note']!, _delayNoteMeta),
+      );
+    }
+    if (data.containsKey('data_type')) {
+      context.handle(
+        _dataTypeMeta,
+        dataType.isAcceptableOrUnknown(data['data_type']!, _dataTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataTypeMeta);
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {symbol, market, source};
+  @override
+  MktQuoteRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktQuoteRow(
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      market: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}market'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      price: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}price'],
+      )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
+      refAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_at'],
+      )!,
+      delayNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}delay_note'],
+      ),
+      dataType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data_type'],
+      )!,
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktQuotesTable createAlias(String alias) {
+    return $MktQuotesTable(attachedDatabase, alias);
+  }
+}
+
+class MktQuoteRow extends DataClass implements Insertable<MktQuoteRow> {
+  final String symbol;
+  final String market;
+  final String source;
+  final String price;
+  final String currency;
+
+  /// Instante UTC a que o preço se refere (do provedor).
+  final String refAt;
+
+  /// Atraso informado pelo provedor (por exemplo, "até 30 min").
+  final String? delayNote;
+
+  /// `intraday` ou `close`.
+  final String dataType;
+  final String collectedAt;
+  const MktQuoteRow({
+    required this.symbol,
+    required this.market,
+    required this.source,
+    required this.price,
+    required this.currency,
+    required this.refAt,
+    this.delayNote,
+    required this.dataType,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['symbol'] = Variable<String>(symbol);
+    map['market'] = Variable<String>(market);
+    map['source'] = Variable<String>(source);
+    map['price'] = Variable<String>(price);
+    map['currency'] = Variable<String>(currency);
+    map['ref_at'] = Variable<String>(refAt);
+    if (!nullToAbsent || delayNote != null) {
+      map['delay_note'] = Variable<String>(delayNote);
+    }
+    map['data_type'] = Variable<String>(dataType);
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktQuotesCompanion toCompanion(bool nullToAbsent) {
+    return MktQuotesCompanion(
+      symbol: Value(symbol),
+      market: Value(market),
+      source: Value(source),
+      price: Value(price),
+      currency: Value(currency),
+      refAt: Value(refAt),
+      delayNote: delayNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(delayNote),
+      dataType: Value(dataType),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktQuoteRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktQuoteRow(
+      symbol: serializer.fromJson<String>(json['symbol']),
+      market: serializer.fromJson<String>(json['market']),
+      source: serializer.fromJson<String>(json['source']),
+      price: serializer.fromJson<String>(json['price']),
+      currency: serializer.fromJson<String>(json['currency']),
+      refAt: serializer.fromJson<String>(json['refAt']),
+      delayNote: serializer.fromJson<String?>(json['delayNote']),
+      dataType: serializer.fromJson<String>(json['dataType']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'symbol': serializer.toJson<String>(symbol),
+      'market': serializer.toJson<String>(market),
+      'source': serializer.toJson<String>(source),
+      'price': serializer.toJson<String>(price),
+      'currency': serializer.toJson<String>(currency),
+      'refAt': serializer.toJson<String>(refAt),
+      'delayNote': serializer.toJson<String?>(delayNote),
+      'dataType': serializer.toJson<String>(dataType),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktQuoteRow copyWith({
+    String? symbol,
+    String? market,
+    String? source,
+    String? price,
+    String? currency,
+    String? refAt,
+    Value<String?> delayNote = const Value.absent(),
+    String? dataType,
+    String? collectedAt,
+  }) => MktQuoteRow(
+    symbol: symbol ?? this.symbol,
+    market: market ?? this.market,
+    source: source ?? this.source,
+    price: price ?? this.price,
+    currency: currency ?? this.currency,
+    refAt: refAt ?? this.refAt,
+    delayNote: delayNote.present ? delayNote.value : this.delayNote,
+    dataType: dataType ?? this.dataType,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktQuoteRow copyWithCompanion(MktQuotesCompanion data) {
+    return MktQuoteRow(
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      market: data.market.present ? data.market.value : this.market,
+      source: data.source.present ? data.source.value : this.source,
+      price: data.price.present ? data.price.value : this.price,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      refAt: data.refAt.present ? data.refAt.value : this.refAt,
+      delayNote: data.delayNote.present ? data.delayNote.value : this.delayNote,
+      dataType: data.dataType.present ? data.dataType.value : this.dataType,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktQuoteRow(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('source: $source, ')
+          ..write('price: $price, ')
+          ..write('currency: $currency, ')
+          ..write('refAt: $refAt, ')
+          ..write('delayNote: $delayNote, ')
+          ..write('dataType: $dataType, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    symbol,
+    market,
+    source,
+    price,
+    currency,
+    refAt,
+    delayNote,
+    dataType,
+    collectedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktQuoteRow &&
+          other.symbol == this.symbol &&
+          other.market == this.market &&
+          other.source == this.source &&
+          other.price == this.price &&
+          other.currency == this.currency &&
+          other.refAt == this.refAt &&
+          other.delayNote == this.delayNote &&
+          other.dataType == this.dataType &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktQuotesCompanion extends UpdateCompanion<MktQuoteRow> {
+  final Value<String> symbol;
+  final Value<String> market;
+  final Value<String> source;
+  final Value<String> price;
+  final Value<String> currency;
+  final Value<String> refAt;
+  final Value<String?> delayNote;
+  final Value<String> dataType;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktQuotesCompanion({
+    this.symbol = const Value.absent(),
+    this.market = const Value.absent(),
+    this.source = const Value.absent(),
+    this.price = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.refAt = const Value.absent(),
+    this.delayNote = const Value.absent(),
+    this.dataType = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktQuotesCompanion.insert({
+    required String symbol,
+    required String market,
+    required String source,
+    required String price,
+    required String currency,
+    required String refAt,
+    this.delayNote = const Value.absent(),
+    required String dataType,
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : symbol = Value(symbol),
+       market = Value(market),
+       source = Value(source),
+       price = Value(price),
+       currency = Value(currency),
+       refAt = Value(refAt),
+       dataType = Value(dataType),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktQuoteRow> custom({
+    Expression<String>? symbol,
+    Expression<String>? market,
+    Expression<String>? source,
+    Expression<String>? price,
+    Expression<String>? currency,
+    Expression<String>? refAt,
+    Expression<String>? delayNote,
+    Expression<String>? dataType,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (symbol != null) 'symbol': symbol,
+      if (market != null) 'market': market,
+      if (source != null) 'source': source,
+      if (price != null) 'price': price,
+      if (currency != null) 'currency': currency,
+      if (refAt != null) 'ref_at': refAt,
+      if (delayNote != null) 'delay_note': delayNote,
+      if (dataType != null) 'data_type': dataType,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktQuotesCompanion copyWith({
+    Value<String>? symbol,
+    Value<String>? market,
+    Value<String>? source,
+    Value<String>? price,
+    Value<String>? currency,
+    Value<String>? refAt,
+    Value<String?>? delayNote,
+    Value<String>? dataType,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktQuotesCompanion(
+      symbol: symbol ?? this.symbol,
+      market: market ?? this.market,
+      source: source ?? this.source,
+      price: price ?? this.price,
+      currency: currency ?? this.currency,
+      refAt: refAt ?? this.refAt,
+      delayNote: delayNote ?? this.delayNote,
+      dataType: dataType ?? this.dataType,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (market.present) {
+      map['market'] = Variable<String>(market.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (price.present) {
+      map['price'] = Variable<String>(price.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (refAt.present) {
+      map['ref_at'] = Variable<String>(refAt.value);
+    }
+    if (delayNote.present) {
+      map['delay_note'] = Variable<String>(delayNote.value);
+    }
+    if (dataType.present) {
+      map['data_type'] = Variable<String>(dataType.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktQuotesCompanion(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('source: $source, ')
+          ..write('price: $price, ')
+          ..write('currency: $currency, ')
+          ..write('refAt: $refAt, ')
+          ..write('delayNote: $delayNote, ')
+          ..write('dataType: $dataType, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MktCorporateEventsTable extends MktCorporateEvents
+    with TableInfo<$MktCorporateEventsTable, MktCorporateEventRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktCorporateEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  @override
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+    'symbol',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _marketMeta = const VerificationMeta('market');
+  @override
+  late final GeneratedColumn<String> market = GeneratedColumn<String>(
+    'market',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventKindMeta = const VerificationMeta(
+    'eventKind',
+  );
+  @override
+  late final GeneratedColumn<String> eventKind = GeneratedColumn<String>(
+    'event_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _exDateMeta = const VerificationMeta('exDate');
+  @override
+  late final GeneratedColumn<String> exDate = GeneratedColumn<String>(
+    'ex_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _seqMeta = const VerificationMeta('seq');
+  @override
+  late final GeneratedColumn<String> seq = GeneratedColumn<String>(
+    'seq',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _comDateMeta = const VerificationMeta(
+    'comDate',
+  );
+  @override
+  late final GeneratedColumn<String> comDate = GeneratedColumn<String>(
+    'com_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _paymentDateMeta = const VerificationMeta(
+    'paymentDate',
+  );
+  @override
+  late final GeneratedColumn<String> paymentDate = GeneratedColumn<String>(
+    'payment_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _factorMeta = const VerificationMeta('factor');
+  @override
+  late final GeneratedColumn<String> factor = GeneratedColumn<String>(
+    'factor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<String> amount = GeneratedColumn<String>(
+    'amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rawLabelMeta = const VerificationMeta(
+    'rawLabel',
+  );
+  @override
+  late final GeneratedColumn<String> rawLabel = GeneratedColumn<String>(
+    'raw_label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isinMeta = const VerificationMeta('isin');
+  @override
+  late final GeneratedColumn<String> isin = GeneratedColumn<String>(
+    'isin',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    symbol,
+    market,
+    eventKind,
+    exDate,
+    source,
+    seq,
+    comDate,
+    paymentDate,
+    factor,
+    amount,
+    currency,
+    status,
+    rawLabel,
+    isin,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_corporate_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktCorporateEventRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('symbol')) {
+      context.handle(
+        _symbolMeta,
+        symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('market')) {
+      context.handle(
+        _marketMeta,
+        market.isAcceptableOrUnknown(data['market']!, _marketMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_marketMeta);
+    }
+    if (data.containsKey('event_kind')) {
+      context.handle(
+        _eventKindMeta,
+        eventKind.isAcceptableOrUnknown(data['event_kind']!, _eventKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventKindMeta);
+    }
+    if (data.containsKey('ex_date')) {
+      context.handle(
+        _exDateMeta,
+        exDate.isAcceptableOrUnknown(data['ex_date']!, _exDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_exDateMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('seq')) {
+      context.handle(
+        _seqMeta,
+        seq.isAcceptableOrUnknown(data['seq']!, _seqMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_seqMeta);
+    }
+    if (data.containsKey('com_date')) {
+      context.handle(
+        _comDateMeta,
+        comDate.isAcceptableOrUnknown(data['com_date']!, _comDateMeta),
+      );
+    }
+    if (data.containsKey('payment_date')) {
+      context.handle(
+        _paymentDateMeta,
+        paymentDate.isAcceptableOrUnknown(
+          data['payment_date']!,
+          _paymentDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('factor')) {
+      context.handle(
+        _factorMeta,
+        factor.isAcceptableOrUnknown(data['factor']!, _factorMeta),
+      );
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('raw_label')) {
+      context.handle(
+        _rawLabelMeta,
+        rawLabel.isAcceptableOrUnknown(data['raw_label']!, _rawLabelMeta),
+      );
+    }
+    if (data.containsKey('isin')) {
+      context.handle(
+        _isinMeta,
+        isin.isAcceptableOrUnknown(data['isin']!, _isinMeta),
+      );
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {
+    symbol,
+    market,
+    eventKind,
+    exDate,
+    source,
+    seq,
+  };
+  @override
+  MktCorporateEventRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktCorporateEventRow(
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      market: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}market'],
+      )!,
+      eventKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_kind'],
+      )!,
+      exDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ex_date'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      seq: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seq'],
+      )!,
+      comDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}com_date'],
+      ),
+      paymentDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_date'],
+      ),
+      factor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}factor'],
+      ),
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}amount'],
+      ),
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      rawLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raw_label'],
+      ),
+      isin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}isin'],
+      ),
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktCorporateEventsTable createAlias(String alias) {
+    return $MktCorporateEventsTable(attachedDatabase, alias);
+  }
+}
+
+class MktCorporateEventRow extends DataClass
+    implements Insertable<MktCorporateEventRow> {
+  final String symbol;
+  final String market;
+
+  /// `split`, `reverse_split`, `bonus_shares`, `cash_dividend`, `jcp`,
+  /// `fii_income`, `amortization`, `other_cash`.
+  final String eventKind;
+  final String exDate;
+  final String source;
+
+  /// Desempate de eventos iguais na mesma data (por exemplo, dois JCP).
+  final String seq;
+  final String? comDate;
+  final String? paymentDate;
+
+  /// Multiplicador da quantidade (2 = desdobramento 1:2).
+  final String? factor;
+
+  /// Valor por ação ou cota.
+  final String? amount;
+  final String? currency;
+
+  /// `paid`, `announced` ou `suspect`.
+  final String status;
+  final String? rawLabel;
+  final String? isin;
+  final String collectedAt;
+  const MktCorporateEventRow({
+    required this.symbol,
+    required this.market,
+    required this.eventKind,
+    required this.exDate,
+    required this.source,
+    required this.seq,
+    this.comDate,
+    this.paymentDate,
+    this.factor,
+    this.amount,
+    this.currency,
+    required this.status,
+    this.rawLabel,
+    this.isin,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['symbol'] = Variable<String>(symbol);
+    map['market'] = Variable<String>(market);
+    map['event_kind'] = Variable<String>(eventKind);
+    map['ex_date'] = Variable<String>(exDate);
+    map['source'] = Variable<String>(source);
+    map['seq'] = Variable<String>(seq);
+    if (!nullToAbsent || comDate != null) {
+      map['com_date'] = Variable<String>(comDate);
+    }
+    if (!nullToAbsent || paymentDate != null) {
+      map['payment_date'] = Variable<String>(paymentDate);
+    }
+    if (!nullToAbsent || factor != null) {
+      map['factor'] = Variable<String>(factor);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<String>(amount);
+    }
+    if (!nullToAbsent || currency != null) {
+      map['currency'] = Variable<String>(currency);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || rawLabel != null) {
+      map['raw_label'] = Variable<String>(rawLabel);
+    }
+    if (!nullToAbsent || isin != null) {
+      map['isin'] = Variable<String>(isin);
+    }
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktCorporateEventsCompanion toCompanion(bool nullToAbsent) {
+    return MktCorporateEventsCompanion(
+      symbol: Value(symbol),
+      market: Value(market),
+      eventKind: Value(eventKind),
+      exDate: Value(exDate),
+      source: Value(source),
+      seq: Value(seq),
+      comDate: comDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(comDate),
+      paymentDate: paymentDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentDate),
+      factor: factor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(factor),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+      currency: currency == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currency),
+      status: Value(status),
+      rawLabel: rawLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rawLabel),
+      isin: isin == null && nullToAbsent ? const Value.absent() : Value(isin),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktCorporateEventRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktCorporateEventRow(
+      symbol: serializer.fromJson<String>(json['symbol']),
+      market: serializer.fromJson<String>(json['market']),
+      eventKind: serializer.fromJson<String>(json['eventKind']),
+      exDate: serializer.fromJson<String>(json['exDate']),
+      source: serializer.fromJson<String>(json['source']),
+      seq: serializer.fromJson<String>(json['seq']),
+      comDate: serializer.fromJson<String?>(json['comDate']),
+      paymentDate: serializer.fromJson<String?>(json['paymentDate']),
+      factor: serializer.fromJson<String?>(json['factor']),
+      amount: serializer.fromJson<String?>(json['amount']),
+      currency: serializer.fromJson<String?>(json['currency']),
+      status: serializer.fromJson<String>(json['status']),
+      rawLabel: serializer.fromJson<String?>(json['rawLabel']),
+      isin: serializer.fromJson<String?>(json['isin']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'symbol': serializer.toJson<String>(symbol),
+      'market': serializer.toJson<String>(market),
+      'eventKind': serializer.toJson<String>(eventKind),
+      'exDate': serializer.toJson<String>(exDate),
+      'source': serializer.toJson<String>(source),
+      'seq': serializer.toJson<String>(seq),
+      'comDate': serializer.toJson<String?>(comDate),
+      'paymentDate': serializer.toJson<String?>(paymentDate),
+      'factor': serializer.toJson<String?>(factor),
+      'amount': serializer.toJson<String?>(amount),
+      'currency': serializer.toJson<String?>(currency),
+      'status': serializer.toJson<String>(status),
+      'rawLabel': serializer.toJson<String?>(rawLabel),
+      'isin': serializer.toJson<String?>(isin),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktCorporateEventRow copyWith({
+    String? symbol,
+    String? market,
+    String? eventKind,
+    String? exDate,
+    String? source,
+    String? seq,
+    Value<String?> comDate = const Value.absent(),
+    Value<String?> paymentDate = const Value.absent(),
+    Value<String?> factor = const Value.absent(),
+    Value<String?> amount = const Value.absent(),
+    Value<String?> currency = const Value.absent(),
+    String? status,
+    Value<String?> rawLabel = const Value.absent(),
+    Value<String?> isin = const Value.absent(),
+    String? collectedAt,
+  }) => MktCorporateEventRow(
+    symbol: symbol ?? this.symbol,
+    market: market ?? this.market,
+    eventKind: eventKind ?? this.eventKind,
+    exDate: exDate ?? this.exDate,
+    source: source ?? this.source,
+    seq: seq ?? this.seq,
+    comDate: comDate.present ? comDate.value : this.comDate,
+    paymentDate: paymentDate.present ? paymentDate.value : this.paymentDate,
+    factor: factor.present ? factor.value : this.factor,
+    amount: amount.present ? amount.value : this.amount,
+    currency: currency.present ? currency.value : this.currency,
+    status: status ?? this.status,
+    rawLabel: rawLabel.present ? rawLabel.value : this.rawLabel,
+    isin: isin.present ? isin.value : this.isin,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktCorporateEventRow copyWithCompanion(MktCorporateEventsCompanion data) {
+    return MktCorporateEventRow(
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      market: data.market.present ? data.market.value : this.market,
+      eventKind: data.eventKind.present ? data.eventKind.value : this.eventKind,
+      exDate: data.exDate.present ? data.exDate.value : this.exDate,
+      source: data.source.present ? data.source.value : this.source,
+      seq: data.seq.present ? data.seq.value : this.seq,
+      comDate: data.comDate.present ? data.comDate.value : this.comDate,
+      paymentDate: data.paymentDate.present
+          ? data.paymentDate.value
+          : this.paymentDate,
+      factor: data.factor.present ? data.factor.value : this.factor,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      status: data.status.present ? data.status.value : this.status,
+      rawLabel: data.rawLabel.present ? data.rawLabel.value : this.rawLabel,
+      isin: data.isin.present ? data.isin.value : this.isin,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktCorporateEventRow(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('eventKind: $eventKind, ')
+          ..write('exDate: $exDate, ')
+          ..write('source: $source, ')
+          ..write('seq: $seq, ')
+          ..write('comDate: $comDate, ')
+          ..write('paymentDate: $paymentDate, ')
+          ..write('factor: $factor, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('status: $status, ')
+          ..write('rawLabel: $rawLabel, ')
+          ..write('isin: $isin, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    symbol,
+    market,
+    eventKind,
+    exDate,
+    source,
+    seq,
+    comDate,
+    paymentDate,
+    factor,
+    amount,
+    currency,
+    status,
+    rawLabel,
+    isin,
+    collectedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktCorporateEventRow &&
+          other.symbol == this.symbol &&
+          other.market == this.market &&
+          other.eventKind == this.eventKind &&
+          other.exDate == this.exDate &&
+          other.source == this.source &&
+          other.seq == this.seq &&
+          other.comDate == this.comDate &&
+          other.paymentDate == this.paymentDate &&
+          other.factor == this.factor &&
+          other.amount == this.amount &&
+          other.currency == this.currency &&
+          other.status == this.status &&
+          other.rawLabel == this.rawLabel &&
+          other.isin == this.isin &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktCorporateEventsCompanion
+    extends UpdateCompanion<MktCorporateEventRow> {
+  final Value<String> symbol;
+  final Value<String> market;
+  final Value<String> eventKind;
+  final Value<String> exDate;
+  final Value<String> source;
+  final Value<String> seq;
+  final Value<String?> comDate;
+  final Value<String?> paymentDate;
+  final Value<String?> factor;
+  final Value<String?> amount;
+  final Value<String?> currency;
+  final Value<String> status;
+  final Value<String?> rawLabel;
+  final Value<String?> isin;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktCorporateEventsCompanion({
+    this.symbol = const Value.absent(),
+    this.market = const Value.absent(),
+    this.eventKind = const Value.absent(),
+    this.exDate = const Value.absent(),
+    this.source = const Value.absent(),
+    this.seq = const Value.absent(),
+    this.comDate = const Value.absent(),
+    this.paymentDate = const Value.absent(),
+    this.factor = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.status = const Value.absent(),
+    this.rawLabel = const Value.absent(),
+    this.isin = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktCorporateEventsCompanion.insert({
+    required String symbol,
+    required String market,
+    required String eventKind,
+    required String exDate,
+    required String source,
+    required String seq,
+    this.comDate = const Value.absent(),
+    this.paymentDate = const Value.absent(),
+    this.factor = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
+    required String status,
+    this.rawLabel = const Value.absent(),
+    this.isin = const Value.absent(),
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : symbol = Value(symbol),
+       market = Value(market),
+       eventKind = Value(eventKind),
+       exDate = Value(exDate),
+       source = Value(source),
+       seq = Value(seq),
+       status = Value(status),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktCorporateEventRow> custom({
+    Expression<String>? symbol,
+    Expression<String>? market,
+    Expression<String>? eventKind,
+    Expression<String>? exDate,
+    Expression<String>? source,
+    Expression<String>? seq,
+    Expression<String>? comDate,
+    Expression<String>? paymentDate,
+    Expression<String>? factor,
+    Expression<String>? amount,
+    Expression<String>? currency,
+    Expression<String>? status,
+    Expression<String>? rawLabel,
+    Expression<String>? isin,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (symbol != null) 'symbol': symbol,
+      if (market != null) 'market': market,
+      if (eventKind != null) 'event_kind': eventKind,
+      if (exDate != null) 'ex_date': exDate,
+      if (source != null) 'source': source,
+      if (seq != null) 'seq': seq,
+      if (comDate != null) 'com_date': comDate,
+      if (paymentDate != null) 'payment_date': paymentDate,
+      if (factor != null) 'factor': factor,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (status != null) 'status': status,
+      if (rawLabel != null) 'raw_label': rawLabel,
+      if (isin != null) 'isin': isin,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktCorporateEventsCompanion copyWith({
+    Value<String>? symbol,
+    Value<String>? market,
+    Value<String>? eventKind,
+    Value<String>? exDate,
+    Value<String>? source,
+    Value<String>? seq,
+    Value<String?>? comDate,
+    Value<String?>? paymentDate,
+    Value<String?>? factor,
+    Value<String?>? amount,
+    Value<String?>? currency,
+    Value<String>? status,
+    Value<String?>? rawLabel,
+    Value<String?>? isin,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktCorporateEventsCompanion(
+      symbol: symbol ?? this.symbol,
+      market: market ?? this.market,
+      eventKind: eventKind ?? this.eventKind,
+      exDate: exDate ?? this.exDate,
+      source: source ?? this.source,
+      seq: seq ?? this.seq,
+      comDate: comDate ?? this.comDate,
+      paymentDate: paymentDate ?? this.paymentDate,
+      factor: factor ?? this.factor,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      status: status ?? this.status,
+      rawLabel: rawLabel ?? this.rawLabel,
+      isin: isin ?? this.isin,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (market.present) {
+      map['market'] = Variable<String>(market.value);
+    }
+    if (eventKind.present) {
+      map['event_kind'] = Variable<String>(eventKind.value);
+    }
+    if (exDate.present) {
+      map['ex_date'] = Variable<String>(exDate.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (seq.present) {
+      map['seq'] = Variable<String>(seq.value);
+    }
+    if (comDate.present) {
+      map['com_date'] = Variable<String>(comDate.value);
+    }
+    if (paymentDate.present) {
+      map['payment_date'] = Variable<String>(paymentDate.value);
+    }
+    if (factor.present) {
+      map['factor'] = Variable<String>(factor.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<String>(amount.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (rawLabel.present) {
+      map['raw_label'] = Variable<String>(rawLabel.value);
+    }
+    if (isin.present) {
+      map['isin'] = Variable<String>(isin.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktCorporateEventsCompanion(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('eventKind: $eventKind, ')
+          ..write('exDate: $exDate, ')
+          ..write('source: $source, ')
+          ..write('seq: $seq, ')
+          ..write('comDate: $comDate, ')
+          ..write('paymentDate: $paymentDate, ')
+          ..write('factor: $factor, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('status: $status, ')
+          ..write('rawLabel: $rawLabel, ')
+          ..write('isin: $isin, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MktIndicatorsTable extends MktIndicators
+    with TableInfo<$MktIndicatorsTable, MktIndicatorRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktIndicatorsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _seriesCodeMeta = const VerificationMeta(
+    'seriesCode',
+  );
+  @override
+  late final GeneratedColumn<String> seriesCode = GeneratedColumn<String>(
+    'series_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refDateMeta = const VerificationMeta(
+    'refDate',
+  );
+  @override
+  late final GeneratedColumn<String> refDate = GeneratedColumn<String>(
+    'ref_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    seriesCode,
+    refDate,
+    source,
+    value,
+    unit,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_indicators';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktIndicatorRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('series_code')) {
+      context.handle(
+        _seriesCodeMeta,
+        seriesCode.isAcceptableOrUnknown(data['series_code']!, _seriesCodeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_seriesCodeMeta);
+    }
+    if (data.containsKey('ref_date')) {
+      context.handle(
+        _refDateMeta,
+        refDate.isAcceptableOrUnknown(data['ref_date']!, _refDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refDateMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {seriesCode, refDate, source};
+  @override
+  MktIndicatorRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktIndicatorRow(
+      seriesCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}series_code'],
+      )!,
+      refDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_date'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktIndicatorsTable createAlias(String alias) {
+    return $MktIndicatorsTable(attachedDatabase, alias);
+  }
+}
+
+class MktIndicatorRow extends DataClass implements Insertable<MktIndicatorRow> {
+  final String seriesCode;
+  final String refDate;
+  final String source;
+  final String value;
+
+  /// `pct_day`, `pct_month`, `pct_year` ou `index`.
+  final String unit;
+  final String collectedAt;
+  const MktIndicatorRow({
+    required this.seriesCode,
+    required this.refDate,
+    required this.source,
+    required this.value,
+    required this.unit,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['series_code'] = Variable<String>(seriesCode);
+    map['ref_date'] = Variable<String>(refDate);
+    map['source'] = Variable<String>(source);
+    map['value'] = Variable<String>(value);
+    map['unit'] = Variable<String>(unit);
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktIndicatorsCompanion toCompanion(bool nullToAbsent) {
+    return MktIndicatorsCompanion(
+      seriesCode: Value(seriesCode),
+      refDate: Value(refDate),
+      source: Value(source),
+      value: Value(value),
+      unit: Value(unit),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktIndicatorRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktIndicatorRow(
+      seriesCode: serializer.fromJson<String>(json['seriesCode']),
+      refDate: serializer.fromJson<String>(json['refDate']),
+      source: serializer.fromJson<String>(json['source']),
+      value: serializer.fromJson<String>(json['value']),
+      unit: serializer.fromJson<String>(json['unit']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'seriesCode': serializer.toJson<String>(seriesCode),
+      'refDate': serializer.toJson<String>(refDate),
+      'source': serializer.toJson<String>(source),
+      'value': serializer.toJson<String>(value),
+      'unit': serializer.toJson<String>(unit),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktIndicatorRow copyWith({
+    String? seriesCode,
+    String? refDate,
+    String? source,
+    String? value,
+    String? unit,
+    String? collectedAt,
+  }) => MktIndicatorRow(
+    seriesCode: seriesCode ?? this.seriesCode,
+    refDate: refDate ?? this.refDate,
+    source: source ?? this.source,
+    value: value ?? this.value,
+    unit: unit ?? this.unit,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktIndicatorRow copyWithCompanion(MktIndicatorsCompanion data) {
+    return MktIndicatorRow(
+      seriesCode: data.seriesCode.present
+          ? data.seriesCode.value
+          : this.seriesCode,
+      refDate: data.refDate.present ? data.refDate.value : this.refDate,
+      source: data.source.present ? data.source.value : this.source,
+      value: data.value.present ? data.value.value : this.value,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktIndicatorRow(')
+          ..write('seriesCode: $seriesCode, ')
+          ..write('refDate: $refDate, ')
+          ..write('source: $source, ')
+          ..write('value: $value, ')
+          ..write('unit: $unit, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(seriesCode, refDate, source, value, unit, collectedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktIndicatorRow &&
+          other.seriesCode == this.seriesCode &&
+          other.refDate == this.refDate &&
+          other.source == this.source &&
+          other.value == this.value &&
+          other.unit == this.unit &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktIndicatorsCompanion extends UpdateCompanion<MktIndicatorRow> {
+  final Value<String> seriesCode;
+  final Value<String> refDate;
+  final Value<String> source;
+  final Value<String> value;
+  final Value<String> unit;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktIndicatorsCompanion({
+    this.seriesCode = const Value.absent(),
+    this.refDate = const Value.absent(),
+    this.source = const Value.absent(),
+    this.value = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktIndicatorsCompanion.insert({
+    required String seriesCode,
+    required String refDate,
+    required String source,
+    required String value,
+    required String unit,
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : seriesCode = Value(seriesCode),
+       refDate = Value(refDate),
+       source = Value(source),
+       value = Value(value),
+       unit = Value(unit),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktIndicatorRow> custom({
+    Expression<String>? seriesCode,
+    Expression<String>? refDate,
+    Expression<String>? source,
+    Expression<String>? value,
+    Expression<String>? unit,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (seriesCode != null) 'series_code': seriesCode,
+      if (refDate != null) 'ref_date': refDate,
+      if (source != null) 'source': source,
+      if (value != null) 'value': value,
+      if (unit != null) 'unit': unit,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktIndicatorsCompanion copyWith({
+    Value<String>? seriesCode,
+    Value<String>? refDate,
+    Value<String>? source,
+    Value<String>? value,
+    Value<String>? unit,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktIndicatorsCompanion(
+      seriesCode: seriesCode ?? this.seriesCode,
+      refDate: refDate ?? this.refDate,
+      source: source ?? this.source,
+      value: value ?? this.value,
+      unit: unit ?? this.unit,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (seriesCode.present) {
+      map['series_code'] = Variable<String>(seriesCode.value);
+    }
+    if (refDate.present) {
+      map['ref_date'] = Variable<String>(refDate.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktIndicatorsCompanion(')
+          ..write('seriesCode: $seriesCode, ')
+          ..write('refDate: $refDate, ')
+          ..write('source: $source, ')
+          ..write('value: $value, ')
+          ..write('unit: $unit, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MktFxRatesTable extends MktFxRates
+    with TableInfo<$MktFxRatesTable, MktFxRateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktFxRatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _baseMeta = const VerificationMeta('base');
+  @override
+  late final GeneratedColumn<String> base = GeneratedColumn<String>(
+    'base',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quoteMeta = const VerificationMeta('quote');
+  @override
+  late final GeneratedColumn<String> quote = GeneratedColumn<String>(
+    'quote',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refDateMeta = const VerificationMeta(
+    'refDate',
+  );
+  @override
+  late final GeneratedColumn<String> refDate = GeneratedColumn<String>(
+    'ref_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bidMeta = const VerificationMeta('bid');
+  @override
+  late final GeneratedColumn<String> bid = GeneratedColumn<String>(
+    'bid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _askMeta = const VerificationMeta('ask');
+  @override
+  late final GeneratedColumn<String> ask = GeneratedColumn<String>(
+    'ask',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _refAtMeta = const VerificationMeta('refAt');
+  @override
+  late final GeneratedColumn<String> refAt = GeneratedColumn<String>(
+    'ref_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    base,
+    quote,
+    refDate,
+    kind,
+    source,
+    bid,
+    ask,
+    refAt,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_fx_rates';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktFxRateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('base')) {
+      context.handle(
+        _baseMeta,
+        base.isAcceptableOrUnknown(data['base']!, _baseMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_baseMeta);
+    }
+    if (data.containsKey('quote')) {
+      context.handle(
+        _quoteMeta,
+        quote.isAcceptableOrUnknown(data['quote']!, _quoteMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quoteMeta);
+    }
+    if (data.containsKey('ref_date')) {
+      context.handle(
+        _refDateMeta,
+        refDate.isAcceptableOrUnknown(data['ref_date']!, _refDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refDateMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('bid')) {
+      context.handle(
+        _bidMeta,
+        bid.isAcceptableOrUnknown(data['bid']!, _bidMeta),
+      );
+    }
+    if (data.containsKey('ask')) {
+      context.handle(
+        _askMeta,
+        ask.isAcceptableOrUnknown(data['ask']!, _askMeta),
+      );
+    }
+    if (data.containsKey('ref_at')) {
+      context.handle(
+        _refAtMeta,
+        refAt.isAcceptableOrUnknown(data['ref_at']!, _refAtMeta),
+      );
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {base, quote, refDate, kind, source};
+  @override
+  MktFxRateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktFxRateRow(
+      base: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}base'],
+      )!,
+      quote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote'],
+      )!,
+      refDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_date'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      bid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bid'],
+      ),
+      ask: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ask'],
+      ),
+      refAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_at'],
+      ),
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktFxRatesTable createAlias(String alias) {
+    return $MktFxRatesTable(attachedDatabase, alias);
+  }
+}
+
+class MktFxRateRow extends DataClass implements Insertable<MktFxRateRow> {
+  final String base;
+  final String quote;
+  final String refDate;
+
+  /// `ptax_close` ou `reference`.
+  final String kind;
+  final String source;
+  final String? bid;
+  final String? ask;
+  final String? refAt;
+  final String collectedAt;
+  const MktFxRateRow({
+    required this.base,
+    required this.quote,
+    required this.refDate,
+    required this.kind,
+    required this.source,
+    this.bid,
+    this.ask,
+    this.refAt,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['base'] = Variable<String>(base);
+    map['quote'] = Variable<String>(quote);
+    map['ref_date'] = Variable<String>(refDate);
+    map['kind'] = Variable<String>(kind);
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || bid != null) {
+      map['bid'] = Variable<String>(bid);
+    }
+    if (!nullToAbsent || ask != null) {
+      map['ask'] = Variable<String>(ask);
+    }
+    if (!nullToAbsent || refAt != null) {
+      map['ref_at'] = Variable<String>(refAt);
+    }
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktFxRatesCompanion toCompanion(bool nullToAbsent) {
+    return MktFxRatesCompanion(
+      base: Value(base),
+      quote: Value(quote),
+      refDate: Value(refDate),
+      kind: Value(kind),
+      source: Value(source),
+      bid: bid == null && nullToAbsent ? const Value.absent() : Value(bid),
+      ask: ask == null && nullToAbsent ? const Value.absent() : Value(ask),
+      refAt: refAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(refAt),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktFxRateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktFxRateRow(
+      base: serializer.fromJson<String>(json['base']),
+      quote: serializer.fromJson<String>(json['quote']),
+      refDate: serializer.fromJson<String>(json['refDate']),
+      kind: serializer.fromJson<String>(json['kind']),
+      source: serializer.fromJson<String>(json['source']),
+      bid: serializer.fromJson<String?>(json['bid']),
+      ask: serializer.fromJson<String?>(json['ask']),
+      refAt: serializer.fromJson<String?>(json['refAt']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'base': serializer.toJson<String>(base),
+      'quote': serializer.toJson<String>(quote),
+      'refDate': serializer.toJson<String>(refDate),
+      'kind': serializer.toJson<String>(kind),
+      'source': serializer.toJson<String>(source),
+      'bid': serializer.toJson<String?>(bid),
+      'ask': serializer.toJson<String?>(ask),
+      'refAt': serializer.toJson<String?>(refAt),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktFxRateRow copyWith({
+    String? base,
+    String? quote,
+    String? refDate,
+    String? kind,
+    String? source,
+    Value<String?> bid = const Value.absent(),
+    Value<String?> ask = const Value.absent(),
+    Value<String?> refAt = const Value.absent(),
+    String? collectedAt,
+  }) => MktFxRateRow(
+    base: base ?? this.base,
+    quote: quote ?? this.quote,
+    refDate: refDate ?? this.refDate,
+    kind: kind ?? this.kind,
+    source: source ?? this.source,
+    bid: bid.present ? bid.value : this.bid,
+    ask: ask.present ? ask.value : this.ask,
+    refAt: refAt.present ? refAt.value : this.refAt,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktFxRateRow copyWithCompanion(MktFxRatesCompanion data) {
+    return MktFxRateRow(
+      base: data.base.present ? data.base.value : this.base,
+      quote: data.quote.present ? data.quote.value : this.quote,
+      refDate: data.refDate.present ? data.refDate.value : this.refDate,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      source: data.source.present ? data.source.value : this.source,
+      bid: data.bid.present ? data.bid.value : this.bid,
+      ask: data.ask.present ? data.ask.value : this.ask,
+      refAt: data.refAt.present ? data.refAt.value : this.refAt,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktFxRateRow(')
+          ..write('base: $base, ')
+          ..write('quote: $quote, ')
+          ..write('refDate: $refDate, ')
+          ..write('kind: $kind, ')
+          ..write('source: $source, ')
+          ..write('bid: $bid, ')
+          ..write('ask: $ask, ')
+          ..write('refAt: $refAt, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    base,
+    quote,
+    refDate,
+    kind,
+    source,
+    bid,
+    ask,
+    refAt,
+    collectedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktFxRateRow &&
+          other.base == this.base &&
+          other.quote == this.quote &&
+          other.refDate == this.refDate &&
+          other.kind == this.kind &&
+          other.source == this.source &&
+          other.bid == this.bid &&
+          other.ask == this.ask &&
+          other.refAt == this.refAt &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktFxRatesCompanion extends UpdateCompanion<MktFxRateRow> {
+  final Value<String> base;
+  final Value<String> quote;
+  final Value<String> refDate;
+  final Value<String> kind;
+  final Value<String> source;
+  final Value<String?> bid;
+  final Value<String?> ask;
+  final Value<String?> refAt;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktFxRatesCompanion({
+    this.base = const Value.absent(),
+    this.quote = const Value.absent(),
+    this.refDate = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.source = const Value.absent(),
+    this.bid = const Value.absent(),
+    this.ask = const Value.absent(),
+    this.refAt = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktFxRatesCompanion.insert({
+    required String base,
+    required String quote,
+    required String refDate,
+    required String kind,
+    required String source,
+    this.bid = const Value.absent(),
+    this.ask = const Value.absent(),
+    this.refAt = const Value.absent(),
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : base = Value(base),
+       quote = Value(quote),
+       refDate = Value(refDate),
+       kind = Value(kind),
+       source = Value(source),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktFxRateRow> custom({
+    Expression<String>? base,
+    Expression<String>? quote,
+    Expression<String>? refDate,
+    Expression<String>? kind,
+    Expression<String>? source,
+    Expression<String>? bid,
+    Expression<String>? ask,
+    Expression<String>? refAt,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (base != null) 'base': base,
+      if (quote != null) 'quote': quote,
+      if (refDate != null) 'ref_date': refDate,
+      if (kind != null) 'kind': kind,
+      if (source != null) 'source': source,
+      if (bid != null) 'bid': bid,
+      if (ask != null) 'ask': ask,
+      if (refAt != null) 'ref_at': refAt,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktFxRatesCompanion copyWith({
+    Value<String>? base,
+    Value<String>? quote,
+    Value<String>? refDate,
+    Value<String>? kind,
+    Value<String>? source,
+    Value<String?>? bid,
+    Value<String?>? ask,
+    Value<String?>? refAt,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktFxRatesCompanion(
+      base: base ?? this.base,
+      quote: quote ?? this.quote,
+      refDate: refDate ?? this.refDate,
+      kind: kind ?? this.kind,
+      source: source ?? this.source,
+      bid: bid ?? this.bid,
+      ask: ask ?? this.ask,
+      refAt: refAt ?? this.refAt,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (base.present) {
+      map['base'] = Variable<String>(base.value);
+    }
+    if (quote.present) {
+      map['quote'] = Variable<String>(quote.value);
+    }
+    if (refDate.present) {
+      map['ref_date'] = Variable<String>(refDate.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (bid.present) {
+      map['bid'] = Variable<String>(bid.value);
+    }
+    if (ask.present) {
+      map['ask'] = Variable<String>(ask.value);
+    }
+    if (refAt.present) {
+      map['ref_at'] = Variable<String>(refAt.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktFxRatesCompanion(')
+          ..write('base: $base, ')
+          ..write('quote: $quote, ')
+          ..write('refDate: $refDate, ')
+          ..write('kind: $kind, ')
+          ..write('source: $source, ')
+          ..write('bid: $bid, ')
+          ..write('ask: $ask, ')
+          ..write('refAt: $refAt, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MktTreasuryPricesTable extends MktTreasuryPrices
+    with TableInfo<$MktTreasuryPricesTable, MktTreasuryPriceRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktTreasuryPricesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _maturityDateMeta = const VerificationMeta(
+    'maturityDate',
+  );
+  @override
+  late final GeneratedColumn<String> maturityDate = GeneratedColumn<String>(
+    'maturity_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refDateMeta = const VerificationMeta(
+    'refDate',
+  );
+  @override
+  late final GeneratedColumn<String> refDate = GeneratedColumn<String>(
+    'ref_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _buyRateMeta = const VerificationMeta(
+    'buyRate',
+  );
+  @override
+  late final GeneratedColumn<String> buyRate = GeneratedColumn<String>(
+    'buy_rate',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sellRateMeta = const VerificationMeta(
+    'sellRate',
+  );
+  @override
+  late final GeneratedColumn<String> sellRate = GeneratedColumn<String>(
+    'sell_rate',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _buyPuMeta = const VerificationMeta('buyPu');
+  @override
+  late final GeneratedColumn<String> buyPu = GeneratedColumn<String>(
+    'buy_pu',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sellPuMeta = const VerificationMeta('sellPu');
+  @override
+  late final GeneratedColumn<String> sellPu = GeneratedColumn<String>(
+    'sell_pu',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _basePuMeta = const VerificationMeta('basePu');
+  @override
+  late final GeneratedColumn<String> basePu = GeneratedColumn<String>(
+    'base_pu',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    title,
+    maturityDate,
+    refDate,
+    source,
+    buyRate,
+    sellRate,
+    buyPu,
+    sellPu,
+    basePu,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_treasury_prices';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktTreasuryPriceRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('maturity_date')) {
+      context.handle(
+        _maturityDateMeta,
+        maturityDate.isAcceptableOrUnknown(
+          data['maturity_date']!,
+          _maturityDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_maturityDateMeta);
+    }
+    if (data.containsKey('ref_date')) {
+      context.handle(
+        _refDateMeta,
+        refDate.isAcceptableOrUnknown(data['ref_date']!, _refDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refDateMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('buy_rate')) {
+      context.handle(
+        _buyRateMeta,
+        buyRate.isAcceptableOrUnknown(data['buy_rate']!, _buyRateMeta),
+      );
+    }
+    if (data.containsKey('sell_rate')) {
+      context.handle(
+        _sellRateMeta,
+        sellRate.isAcceptableOrUnknown(data['sell_rate']!, _sellRateMeta),
+      );
+    }
+    if (data.containsKey('buy_pu')) {
+      context.handle(
+        _buyPuMeta,
+        buyPu.isAcceptableOrUnknown(data['buy_pu']!, _buyPuMeta),
+      );
+    }
+    if (data.containsKey('sell_pu')) {
+      context.handle(
+        _sellPuMeta,
+        sellPu.isAcceptableOrUnknown(data['sell_pu']!, _sellPuMeta),
+      );
+    }
+    if (data.containsKey('base_pu')) {
+      context.handle(
+        _basePuMeta,
+        basePu.isAcceptableOrUnknown(data['base_pu']!, _basePuMeta),
+      );
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {
+    title,
+    maturityDate,
+    refDate,
+    source,
+  };
+  @override
+  MktTreasuryPriceRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktTreasuryPriceRow(
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      maturityDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}maturity_date'],
+      )!,
+      refDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_date'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      buyRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}buy_rate'],
+      ),
+      sellRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sell_rate'],
+      ),
+      buyPu: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}buy_pu'],
+      ),
+      sellPu: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sell_pu'],
+      ),
+      basePu: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}base_pu'],
+      ),
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktTreasuryPricesTable createAlias(String alias) {
+    return $MktTreasuryPricesTable(attachedDatabase, alias);
+  }
+}
+
+class MktTreasuryPriceRow extends DataClass
+    implements Insertable<MktTreasuryPriceRow> {
+  final String title;
+  final String maturityDate;
+  final String refDate;
+  final String source;
+  final String? buyRate;
+  final String? sellRate;
+  final String? buyPu;
+  final String? sellPu;
+  final String? basePu;
+  final String collectedAt;
+  const MktTreasuryPriceRow({
+    required this.title,
+    required this.maturityDate,
+    required this.refDate,
+    required this.source,
+    this.buyRate,
+    this.sellRate,
+    this.buyPu,
+    this.sellPu,
+    this.basePu,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['title'] = Variable<String>(title);
+    map['maturity_date'] = Variable<String>(maturityDate);
+    map['ref_date'] = Variable<String>(refDate);
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || buyRate != null) {
+      map['buy_rate'] = Variable<String>(buyRate);
+    }
+    if (!nullToAbsent || sellRate != null) {
+      map['sell_rate'] = Variable<String>(sellRate);
+    }
+    if (!nullToAbsent || buyPu != null) {
+      map['buy_pu'] = Variable<String>(buyPu);
+    }
+    if (!nullToAbsent || sellPu != null) {
+      map['sell_pu'] = Variable<String>(sellPu);
+    }
+    if (!nullToAbsent || basePu != null) {
+      map['base_pu'] = Variable<String>(basePu);
+    }
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktTreasuryPricesCompanion toCompanion(bool nullToAbsent) {
+    return MktTreasuryPricesCompanion(
+      title: Value(title),
+      maturityDate: Value(maturityDate),
+      refDate: Value(refDate),
+      source: Value(source),
+      buyRate: buyRate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(buyRate),
+      sellRate: sellRate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sellRate),
+      buyPu: buyPu == null && nullToAbsent
+          ? const Value.absent()
+          : Value(buyPu),
+      sellPu: sellPu == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sellPu),
+      basePu: basePu == null && nullToAbsent
+          ? const Value.absent()
+          : Value(basePu),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktTreasuryPriceRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktTreasuryPriceRow(
+      title: serializer.fromJson<String>(json['title']),
+      maturityDate: serializer.fromJson<String>(json['maturityDate']),
+      refDate: serializer.fromJson<String>(json['refDate']),
+      source: serializer.fromJson<String>(json['source']),
+      buyRate: serializer.fromJson<String?>(json['buyRate']),
+      sellRate: serializer.fromJson<String?>(json['sellRate']),
+      buyPu: serializer.fromJson<String?>(json['buyPu']),
+      sellPu: serializer.fromJson<String?>(json['sellPu']),
+      basePu: serializer.fromJson<String?>(json['basePu']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'title': serializer.toJson<String>(title),
+      'maturityDate': serializer.toJson<String>(maturityDate),
+      'refDate': serializer.toJson<String>(refDate),
+      'source': serializer.toJson<String>(source),
+      'buyRate': serializer.toJson<String?>(buyRate),
+      'sellRate': serializer.toJson<String?>(sellRate),
+      'buyPu': serializer.toJson<String?>(buyPu),
+      'sellPu': serializer.toJson<String?>(sellPu),
+      'basePu': serializer.toJson<String?>(basePu),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktTreasuryPriceRow copyWith({
+    String? title,
+    String? maturityDate,
+    String? refDate,
+    String? source,
+    Value<String?> buyRate = const Value.absent(),
+    Value<String?> sellRate = const Value.absent(),
+    Value<String?> buyPu = const Value.absent(),
+    Value<String?> sellPu = const Value.absent(),
+    Value<String?> basePu = const Value.absent(),
+    String? collectedAt,
+  }) => MktTreasuryPriceRow(
+    title: title ?? this.title,
+    maturityDate: maturityDate ?? this.maturityDate,
+    refDate: refDate ?? this.refDate,
+    source: source ?? this.source,
+    buyRate: buyRate.present ? buyRate.value : this.buyRate,
+    sellRate: sellRate.present ? sellRate.value : this.sellRate,
+    buyPu: buyPu.present ? buyPu.value : this.buyPu,
+    sellPu: sellPu.present ? sellPu.value : this.sellPu,
+    basePu: basePu.present ? basePu.value : this.basePu,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktTreasuryPriceRow copyWithCompanion(MktTreasuryPricesCompanion data) {
+    return MktTreasuryPriceRow(
+      title: data.title.present ? data.title.value : this.title,
+      maturityDate: data.maturityDate.present
+          ? data.maturityDate.value
+          : this.maturityDate,
+      refDate: data.refDate.present ? data.refDate.value : this.refDate,
+      source: data.source.present ? data.source.value : this.source,
+      buyRate: data.buyRate.present ? data.buyRate.value : this.buyRate,
+      sellRate: data.sellRate.present ? data.sellRate.value : this.sellRate,
+      buyPu: data.buyPu.present ? data.buyPu.value : this.buyPu,
+      sellPu: data.sellPu.present ? data.sellPu.value : this.sellPu,
+      basePu: data.basePu.present ? data.basePu.value : this.basePu,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktTreasuryPriceRow(')
+          ..write('title: $title, ')
+          ..write('maturityDate: $maturityDate, ')
+          ..write('refDate: $refDate, ')
+          ..write('source: $source, ')
+          ..write('buyRate: $buyRate, ')
+          ..write('sellRate: $sellRate, ')
+          ..write('buyPu: $buyPu, ')
+          ..write('sellPu: $sellPu, ')
+          ..write('basePu: $basePu, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    title,
+    maturityDate,
+    refDate,
+    source,
+    buyRate,
+    sellRate,
+    buyPu,
+    sellPu,
+    basePu,
+    collectedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktTreasuryPriceRow &&
+          other.title == this.title &&
+          other.maturityDate == this.maturityDate &&
+          other.refDate == this.refDate &&
+          other.source == this.source &&
+          other.buyRate == this.buyRate &&
+          other.sellRate == this.sellRate &&
+          other.buyPu == this.buyPu &&
+          other.sellPu == this.sellPu &&
+          other.basePu == this.basePu &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktTreasuryPricesCompanion extends UpdateCompanion<MktTreasuryPriceRow> {
+  final Value<String> title;
+  final Value<String> maturityDate;
+  final Value<String> refDate;
+  final Value<String> source;
+  final Value<String?> buyRate;
+  final Value<String?> sellRate;
+  final Value<String?> buyPu;
+  final Value<String?> sellPu;
+  final Value<String?> basePu;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktTreasuryPricesCompanion({
+    this.title = const Value.absent(),
+    this.maturityDate = const Value.absent(),
+    this.refDate = const Value.absent(),
+    this.source = const Value.absent(),
+    this.buyRate = const Value.absent(),
+    this.sellRate = const Value.absent(),
+    this.buyPu = const Value.absent(),
+    this.sellPu = const Value.absent(),
+    this.basePu = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktTreasuryPricesCompanion.insert({
+    required String title,
+    required String maturityDate,
+    required String refDate,
+    required String source,
+    this.buyRate = const Value.absent(),
+    this.sellRate = const Value.absent(),
+    this.buyPu = const Value.absent(),
+    this.sellPu = const Value.absent(),
+    this.basePu = const Value.absent(),
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : title = Value(title),
+       maturityDate = Value(maturityDate),
+       refDate = Value(refDate),
+       source = Value(source),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktTreasuryPriceRow> custom({
+    Expression<String>? title,
+    Expression<String>? maturityDate,
+    Expression<String>? refDate,
+    Expression<String>? source,
+    Expression<String>? buyRate,
+    Expression<String>? sellRate,
+    Expression<String>? buyPu,
+    Expression<String>? sellPu,
+    Expression<String>? basePu,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (title != null) 'title': title,
+      if (maturityDate != null) 'maturity_date': maturityDate,
+      if (refDate != null) 'ref_date': refDate,
+      if (source != null) 'source': source,
+      if (buyRate != null) 'buy_rate': buyRate,
+      if (sellRate != null) 'sell_rate': sellRate,
+      if (buyPu != null) 'buy_pu': buyPu,
+      if (sellPu != null) 'sell_pu': sellPu,
+      if (basePu != null) 'base_pu': basePu,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktTreasuryPricesCompanion copyWith({
+    Value<String>? title,
+    Value<String>? maturityDate,
+    Value<String>? refDate,
+    Value<String>? source,
+    Value<String?>? buyRate,
+    Value<String?>? sellRate,
+    Value<String?>? buyPu,
+    Value<String?>? sellPu,
+    Value<String?>? basePu,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktTreasuryPricesCompanion(
+      title: title ?? this.title,
+      maturityDate: maturityDate ?? this.maturityDate,
+      refDate: refDate ?? this.refDate,
+      source: source ?? this.source,
+      buyRate: buyRate ?? this.buyRate,
+      sellRate: sellRate ?? this.sellRate,
+      buyPu: buyPu ?? this.buyPu,
+      sellPu: sellPu ?? this.sellPu,
+      basePu: basePu ?? this.basePu,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (maturityDate.present) {
+      map['maturity_date'] = Variable<String>(maturityDate.value);
+    }
+    if (refDate.present) {
+      map['ref_date'] = Variable<String>(refDate.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (buyRate.present) {
+      map['buy_rate'] = Variable<String>(buyRate.value);
+    }
+    if (sellRate.present) {
+      map['sell_rate'] = Variable<String>(sellRate.value);
+    }
+    if (buyPu.present) {
+      map['buy_pu'] = Variable<String>(buyPu.value);
+    }
+    if (sellPu.present) {
+      map['sell_pu'] = Variable<String>(sellPu.value);
+    }
+    if (basePu.present) {
+      map['base_pu'] = Variable<String>(basePu.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktTreasuryPricesCompanion(')
+          ..write('title: $title, ')
+          ..write('maturityDate: $maturityDate, ')
+          ..write('refDate: $refDate, ')
+          ..write('source: $source, ')
+          ..write('buyRate: $buyRate, ')
+          ..write('sellRate: $sellRate, ')
+          ..write('buyPu: $buyPu, ')
+          ..write('sellPu: $sellPu, ')
+          ..write('basePu: $basePu, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MktFundQuotasTable extends MktFundQuotas
+    with TableInfo<$MktFundQuotasTable, MktFundQuotaRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktFundQuotasTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _cnpjMeta = const VerificationMeta('cnpj');
+  @override
+  late final GeneratedColumn<String> cnpj = GeneratedColumn<String>(
+    'cnpj',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refDateMeta = const VerificationMeta(
+    'refDate',
+  );
+  @override
+  late final GeneratedColumn<String> refDate = GeneratedColumn<String>(
+    'ref_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quotaMeta = const VerificationMeta('quota');
+  @override
+  late final GeneratedColumn<String> quota = GeneratedColumn<String>(
+    'quota',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _navMeta = const VerificationMeta('nav');
+  @override
+  late final GeneratedColumn<String> nav = GeneratedColumn<String>(
+    'nav',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _holdersMeta = const VerificationMeta(
+    'holders',
+  );
+  @override
+  late final GeneratedColumn<String> holders = GeneratedColumn<String>(
+    'holders',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isinMeta = const VerificationMeta('isin');
+  @override
+  late final GeneratedColumn<String> isin = GeneratedColumn<String>(
+    'isin',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    cnpj,
+    refDate,
+    kind,
+    source,
+    quota,
+    nav,
+    holders,
+    isin,
+    name,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_fund_quotas';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktFundQuotaRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('cnpj')) {
+      context.handle(
+        _cnpjMeta,
+        cnpj.isAcceptableOrUnknown(data['cnpj']!, _cnpjMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cnpjMeta);
+    }
+    if (data.containsKey('ref_date')) {
+      context.handle(
+        _refDateMeta,
+        refDate.isAcceptableOrUnknown(data['ref_date']!, _refDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refDateMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('quota')) {
+      context.handle(
+        _quotaMeta,
+        quota.isAcceptableOrUnknown(data['quota']!, _quotaMeta),
+      );
+    }
+    if (data.containsKey('nav')) {
+      context.handle(
+        _navMeta,
+        nav.isAcceptableOrUnknown(data['nav']!, _navMeta),
+      );
+    }
+    if (data.containsKey('holders')) {
+      context.handle(
+        _holdersMeta,
+        holders.isAcceptableOrUnknown(data['holders']!, _holdersMeta),
+      );
+    }
+    if (data.containsKey('isin')) {
+      context.handle(
+        _isinMeta,
+        isin.isAcceptableOrUnknown(data['isin']!, _isinMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {cnpj, refDate, kind, source};
+  @override
+  MktFundQuotaRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktFundQuotaRow(
+      cnpj: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cnpj'],
+      )!,
+      refDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_date'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      quota: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quota'],
+      ),
+      nav: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nav'],
+      ),
+      holders: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}holders'],
+      ),
+      isin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}isin'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktFundQuotasTable createAlias(String alias) {
+    return $MktFundQuotasTable(attachedDatabase, alias);
+  }
+}
+
+class MktFundQuotaRow extends DataClass implements Insertable<MktFundQuotaRow> {
+  final String cnpj;
+  final String refDate;
+
+  /// `daily` (cota diária) ou `fii_monthly` (informe mensal de FII).
+  final String kind;
+  final String source;
+
+  /// Cota diária ou valor patrimonial por cota.
+  final String? quota;
+
+  /// Patrimônio líquido.
+  final String? nav;
+  final String? holders;
+  final String? isin;
+  final String? name;
+  final String collectedAt;
+  const MktFundQuotaRow({
+    required this.cnpj,
+    required this.refDate,
+    required this.kind,
+    required this.source,
+    this.quota,
+    this.nav,
+    this.holders,
+    this.isin,
+    this.name,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['cnpj'] = Variable<String>(cnpj);
+    map['ref_date'] = Variable<String>(refDate);
+    map['kind'] = Variable<String>(kind);
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || quota != null) {
+      map['quota'] = Variable<String>(quota);
+    }
+    if (!nullToAbsent || nav != null) {
+      map['nav'] = Variable<String>(nav);
+    }
+    if (!nullToAbsent || holders != null) {
+      map['holders'] = Variable<String>(holders);
+    }
+    if (!nullToAbsent || isin != null) {
+      map['isin'] = Variable<String>(isin);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktFundQuotasCompanion toCompanion(bool nullToAbsent) {
+    return MktFundQuotasCompanion(
+      cnpj: Value(cnpj),
+      refDate: Value(refDate),
+      kind: Value(kind),
+      source: Value(source),
+      quota: quota == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quota),
+      nav: nav == null && nullToAbsent ? const Value.absent() : Value(nav),
+      holders: holders == null && nullToAbsent
+          ? const Value.absent()
+          : Value(holders),
+      isin: isin == null && nullToAbsent ? const Value.absent() : Value(isin),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktFundQuotaRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktFundQuotaRow(
+      cnpj: serializer.fromJson<String>(json['cnpj']),
+      refDate: serializer.fromJson<String>(json['refDate']),
+      kind: serializer.fromJson<String>(json['kind']),
+      source: serializer.fromJson<String>(json['source']),
+      quota: serializer.fromJson<String?>(json['quota']),
+      nav: serializer.fromJson<String?>(json['nav']),
+      holders: serializer.fromJson<String?>(json['holders']),
+      isin: serializer.fromJson<String?>(json['isin']),
+      name: serializer.fromJson<String?>(json['name']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'cnpj': serializer.toJson<String>(cnpj),
+      'refDate': serializer.toJson<String>(refDate),
+      'kind': serializer.toJson<String>(kind),
+      'source': serializer.toJson<String>(source),
+      'quota': serializer.toJson<String?>(quota),
+      'nav': serializer.toJson<String?>(nav),
+      'holders': serializer.toJson<String?>(holders),
+      'isin': serializer.toJson<String?>(isin),
+      'name': serializer.toJson<String?>(name),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktFundQuotaRow copyWith({
+    String? cnpj,
+    String? refDate,
+    String? kind,
+    String? source,
+    Value<String?> quota = const Value.absent(),
+    Value<String?> nav = const Value.absent(),
+    Value<String?> holders = const Value.absent(),
+    Value<String?> isin = const Value.absent(),
+    Value<String?> name = const Value.absent(),
+    String? collectedAt,
+  }) => MktFundQuotaRow(
+    cnpj: cnpj ?? this.cnpj,
+    refDate: refDate ?? this.refDate,
+    kind: kind ?? this.kind,
+    source: source ?? this.source,
+    quota: quota.present ? quota.value : this.quota,
+    nav: nav.present ? nav.value : this.nav,
+    holders: holders.present ? holders.value : this.holders,
+    isin: isin.present ? isin.value : this.isin,
+    name: name.present ? name.value : this.name,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktFundQuotaRow copyWithCompanion(MktFundQuotasCompanion data) {
+    return MktFundQuotaRow(
+      cnpj: data.cnpj.present ? data.cnpj.value : this.cnpj,
+      refDate: data.refDate.present ? data.refDate.value : this.refDate,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      source: data.source.present ? data.source.value : this.source,
+      quota: data.quota.present ? data.quota.value : this.quota,
+      nav: data.nav.present ? data.nav.value : this.nav,
+      holders: data.holders.present ? data.holders.value : this.holders,
+      isin: data.isin.present ? data.isin.value : this.isin,
+      name: data.name.present ? data.name.value : this.name,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktFundQuotaRow(')
+          ..write('cnpj: $cnpj, ')
+          ..write('refDate: $refDate, ')
+          ..write('kind: $kind, ')
+          ..write('source: $source, ')
+          ..write('quota: $quota, ')
+          ..write('nav: $nav, ')
+          ..write('holders: $holders, ')
+          ..write('isin: $isin, ')
+          ..write('name: $name, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    cnpj,
+    refDate,
+    kind,
+    source,
+    quota,
+    nav,
+    holders,
+    isin,
+    name,
+    collectedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktFundQuotaRow &&
+          other.cnpj == this.cnpj &&
+          other.refDate == this.refDate &&
+          other.kind == this.kind &&
+          other.source == this.source &&
+          other.quota == this.quota &&
+          other.nav == this.nav &&
+          other.holders == this.holders &&
+          other.isin == this.isin &&
+          other.name == this.name &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktFundQuotasCompanion extends UpdateCompanion<MktFundQuotaRow> {
+  final Value<String> cnpj;
+  final Value<String> refDate;
+  final Value<String> kind;
+  final Value<String> source;
+  final Value<String?> quota;
+  final Value<String?> nav;
+  final Value<String?> holders;
+  final Value<String?> isin;
+  final Value<String?> name;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktFundQuotasCompanion({
+    this.cnpj = const Value.absent(),
+    this.refDate = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.source = const Value.absent(),
+    this.quota = const Value.absent(),
+    this.nav = const Value.absent(),
+    this.holders = const Value.absent(),
+    this.isin = const Value.absent(),
+    this.name = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktFundQuotasCompanion.insert({
+    required String cnpj,
+    required String refDate,
+    required String kind,
+    required String source,
+    this.quota = const Value.absent(),
+    this.nav = const Value.absent(),
+    this.holders = const Value.absent(),
+    this.isin = const Value.absent(),
+    this.name = const Value.absent(),
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : cnpj = Value(cnpj),
+       refDate = Value(refDate),
+       kind = Value(kind),
+       source = Value(source),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktFundQuotaRow> custom({
+    Expression<String>? cnpj,
+    Expression<String>? refDate,
+    Expression<String>? kind,
+    Expression<String>? source,
+    Expression<String>? quota,
+    Expression<String>? nav,
+    Expression<String>? holders,
+    Expression<String>? isin,
+    Expression<String>? name,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (cnpj != null) 'cnpj': cnpj,
+      if (refDate != null) 'ref_date': refDate,
+      if (kind != null) 'kind': kind,
+      if (source != null) 'source': source,
+      if (quota != null) 'quota': quota,
+      if (nav != null) 'nav': nav,
+      if (holders != null) 'holders': holders,
+      if (isin != null) 'isin': isin,
+      if (name != null) 'name': name,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktFundQuotasCompanion copyWith({
+    Value<String>? cnpj,
+    Value<String>? refDate,
+    Value<String>? kind,
+    Value<String>? source,
+    Value<String?>? quota,
+    Value<String?>? nav,
+    Value<String?>? holders,
+    Value<String?>? isin,
+    Value<String?>? name,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktFundQuotasCompanion(
+      cnpj: cnpj ?? this.cnpj,
+      refDate: refDate ?? this.refDate,
+      kind: kind ?? this.kind,
+      source: source ?? this.source,
+      quota: quota ?? this.quota,
+      nav: nav ?? this.nav,
+      holders: holders ?? this.holders,
+      isin: isin ?? this.isin,
+      name: name ?? this.name,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (cnpj.present) {
+      map['cnpj'] = Variable<String>(cnpj.value);
+    }
+    if (refDate.present) {
+      map['ref_date'] = Variable<String>(refDate.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (quota.present) {
+      map['quota'] = Variable<String>(quota.value);
+    }
+    if (nav.present) {
+      map['nav'] = Variable<String>(nav.value);
+    }
+    if (holders.present) {
+      map['holders'] = Variable<String>(holders.value);
+    }
+    if (isin.present) {
+      map['isin'] = Variable<String>(isin.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktFundQuotasCompanion(')
+          ..write('cnpj: $cnpj, ')
+          ..write('refDate: $refDate, ')
+          ..write('kind: $kind, ')
+          ..write('source: $source, ')
+          ..write('quota: $quota, ')
+          ..write('nav: $nav, ')
+          ..write('holders: $holders, ')
+          ..write('isin: $isin, ')
+          ..write('name: $name, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MktInstrumentsTable extends MktInstruments
+    with TableInfo<$MktInstrumentsTable, MktInstrumentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MktInstrumentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  @override
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+    'symbol',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _marketMeta = const VerificationMeta('market');
+  @override
+  late final GeneratedColumn<String> market = GeneratedColumn<String>(
+    'market',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isinMeta = const VerificationMeta('isin');
+  @override
+  late final GeneratedColumn<String> isin = GeneratedColumn<String>(
+    'isin',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectedAtMeta = const VerificationMeta(
+    'collectedAt',
+  );
+  @override
+  late final GeneratedColumn<String> collectedAt = GeneratedColumn<String>(
+    'collected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    symbol,
+    market,
+    source,
+    isin,
+    name,
+    sourceId,
+    collectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mkt_instruments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MktInstrumentRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('symbol')) {
+      context.handle(
+        _symbolMeta,
+        symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('market')) {
+      context.handle(
+        _marketMeta,
+        market.isAcceptableOrUnknown(data['market']!, _marketMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_marketMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('isin')) {
+      context.handle(
+        _isinMeta,
+        isin.isAcceptableOrUnknown(data['isin']!, _isinMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    }
+    if (data.containsKey('collected_at')) {
+      context.handle(
+        _collectedAtMeta,
+        collectedAt.isAcceptableOrUnknown(
+          data['collected_at']!,
+          _collectedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {symbol, market, source};
+  @override
+  MktInstrumentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MktInstrumentRow(
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      market: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}market'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      isin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}isin'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      ),
+      collectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MktInstrumentsTable createAlias(String alias) {
+    return $MktInstrumentsTable(attachedDatabase, alias);
+  }
+}
+
+class MktInstrumentRow extends DataClass
+    implements Insertable<MktInstrumentRow> {
+  final String symbol;
+  final String market;
+  final String source;
+  final String? isin;
+  final String? name;
+
+  /// Identificador do instrumento na fonte (por exemplo, id da CoinGecko).
+  final String? sourceId;
+  final String collectedAt;
+  const MktInstrumentRow({
+    required this.symbol,
+    required this.market,
+    required this.source,
+    this.isin,
+    this.name,
+    this.sourceId,
+    required this.collectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['symbol'] = Variable<String>(symbol);
+    map['market'] = Variable<String>(market);
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || isin != null) {
+      map['isin'] = Variable<String>(isin);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || sourceId != null) {
+      map['source_id'] = Variable<String>(sourceId);
+    }
+    map['collected_at'] = Variable<String>(collectedAt);
+    return map;
+  }
+
+  MktInstrumentsCompanion toCompanion(bool nullToAbsent) {
+    return MktInstrumentsCompanion(
+      symbol: Value(symbol),
+      market: Value(market),
+      source: Value(source),
+      isin: isin == null && nullToAbsent ? const Value.absent() : Value(isin),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      sourceId: sourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceId),
+      collectedAt: Value(collectedAt),
+    );
+  }
+
+  factory MktInstrumentRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MktInstrumentRow(
+      symbol: serializer.fromJson<String>(json['symbol']),
+      market: serializer.fromJson<String>(json['market']),
+      source: serializer.fromJson<String>(json['source']),
+      isin: serializer.fromJson<String?>(json['isin']),
+      name: serializer.fromJson<String?>(json['name']),
+      sourceId: serializer.fromJson<String?>(json['sourceId']),
+      collectedAt: serializer.fromJson<String>(json['collectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'symbol': serializer.toJson<String>(symbol),
+      'market': serializer.toJson<String>(market),
+      'source': serializer.toJson<String>(source),
+      'isin': serializer.toJson<String?>(isin),
+      'name': serializer.toJson<String?>(name),
+      'sourceId': serializer.toJson<String?>(sourceId),
+      'collectedAt': serializer.toJson<String>(collectedAt),
+    };
+  }
+
+  MktInstrumentRow copyWith({
+    String? symbol,
+    String? market,
+    String? source,
+    Value<String?> isin = const Value.absent(),
+    Value<String?> name = const Value.absent(),
+    Value<String?> sourceId = const Value.absent(),
+    String? collectedAt,
+  }) => MktInstrumentRow(
+    symbol: symbol ?? this.symbol,
+    market: market ?? this.market,
+    source: source ?? this.source,
+    isin: isin.present ? isin.value : this.isin,
+    name: name.present ? name.value : this.name,
+    sourceId: sourceId.present ? sourceId.value : this.sourceId,
+    collectedAt: collectedAt ?? this.collectedAt,
+  );
+  MktInstrumentRow copyWithCompanion(MktInstrumentsCompanion data) {
+    return MktInstrumentRow(
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      market: data.market.present ? data.market.value : this.market,
+      source: data.source.present ? data.source.value : this.source,
+      isin: data.isin.present ? data.isin.value : this.isin,
+      name: data.name.present ? data.name.value : this.name,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      collectedAt: data.collectedAt.present
+          ? data.collectedAt.value
+          : this.collectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktInstrumentRow(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('source: $source, ')
+          ..write('isin: $isin, ')
+          ..write('name: $name, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('collectedAt: $collectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(symbol, market, source, isin, name, sourceId, collectedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MktInstrumentRow &&
+          other.symbol == this.symbol &&
+          other.market == this.market &&
+          other.source == this.source &&
+          other.isin == this.isin &&
+          other.name == this.name &&
+          other.sourceId == this.sourceId &&
+          other.collectedAt == this.collectedAt);
+}
+
+class MktInstrumentsCompanion extends UpdateCompanion<MktInstrumentRow> {
+  final Value<String> symbol;
+  final Value<String> market;
+  final Value<String> source;
+  final Value<String?> isin;
+  final Value<String?> name;
+  final Value<String?> sourceId;
+  final Value<String> collectedAt;
+  final Value<int> rowid;
+  const MktInstrumentsCompanion({
+    this.symbol = const Value.absent(),
+    this.market = const Value.absent(),
+    this.source = const Value.absent(),
+    this.isin = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.collectedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MktInstrumentsCompanion.insert({
+    required String symbol,
+    required String market,
+    required String source,
+    this.isin = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    required String collectedAt,
+    this.rowid = const Value.absent(),
+  }) : symbol = Value(symbol),
+       market = Value(market),
+       source = Value(source),
+       collectedAt = Value(collectedAt);
+  static Insertable<MktInstrumentRow> custom({
+    Expression<String>? symbol,
+    Expression<String>? market,
+    Expression<String>? source,
+    Expression<String>? isin,
+    Expression<String>? name,
+    Expression<String>? sourceId,
+    Expression<String>? collectedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (symbol != null) 'symbol': symbol,
+      if (market != null) 'market': market,
+      if (source != null) 'source': source,
+      if (isin != null) 'isin': isin,
+      if (name != null) 'name': name,
+      if (sourceId != null) 'source_id': sourceId,
+      if (collectedAt != null) 'collected_at': collectedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MktInstrumentsCompanion copyWith({
+    Value<String>? symbol,
+    Value<String>? market,
+    Value<String>? source,
+    Value<String?>? isin,
+    Value<String?>? name,
+    Value<String?>? sourceId,
+    Value<String>? collectedAt,
+    Value<int>? rowid,
+  }) {
+    return MktInstrumentsCompanion(
+      symbol: symbol ?? this.symbol,
+      market: market ?? this.market,
+      source: source ?? this.source,
+      isin: isin ?? this.isin,
+      name: name ?? this.name,
+      sourceId: sourceId ?? this.sourceId,
+      collectedAt: collectedAt ?? this.collectedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (market.present) {
+      map['market'] = Variable<String>(market.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (isin.present) {
+      map['isin'] = Variable<String>(isin.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (collectedAt.present) {
+      map['collected_at'] = Variable<String>(collectedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MktInstrumentsCompanion(')
+          ..write('symbol: $symbol, ')
+          ..write('market: $market, ')
+          ..write('source: $source, ')
+          ..write('isin: $isin, ')
+          ..write('name: $name, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('collectedAt: $collectedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DevProviderStateTable extends DevProviderState
+    with TableInfo<$DevProviderStateTable, DevProviderStateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DevProviderStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _providerMeta = const VerificationMeta(
+    'provider',
+  );
+  @override
+  late final GeneratedColumn<String> provider = GeneratedColumn<String>(
+    'provider',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _lastSuccessAtMeta = const VerificationMeta(
+    'lastSuccessAt',
+  );
+  @override
+  late final GeneratedColumn<String> lastSuccessAt = GeneratedColumn<String>(
+    'last_success_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastErrorAtMeta = const VerificationMeta(
+    'lastErrorAt',
+  );
+  @override
+  late final GeneratedColumn<String> lastErrorAt = GeneratedColumn<String>(
+    'last_error_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
+    'lastError',
+  );
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+    'last_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _quotaUsedMeta = const VerificationMeta(
+    'quotaUsed',
+  );
+  @override
+  late final GeneratedColumn<int> quotaUsed = GeneratedColumn<int>(
+    'quota_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _quotaPeriodMeta = const VerificationMeta(
+    'quotaPeriod',
+  );
+  @override
+  late final GeneratedColumn<String> quotaPeriod = GeneratedColumn<String>(
+    'quota_period',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    provider,
+    enabled,
+    lastSuccessAt,
+    lastErrorAt,
+    lastError,
+    quotaUsed,
+    quotaPeriod,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dev_provider_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DevProviderStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('provider')) {
+      context.handle(
+        _providerMeta,
+        provider.isAcceptableOrUnknown(data['provider']!, _providerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_providerMeta);
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_enabledMeta);
+    }
+    if (data.containsKey('last_success_at')) {
+      context.handle(
+        _lastSuccessAtMeta,
+        lastSuccessAt.isAcceptableOrUnknown(
+          data['last_success_at']!,
+          _lastSuccessAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_error_at')) {
+      context.handle(
+        _lastErrorAtMeta,
+        lastErrorAt.isAcceptableOrUnknown(
+          data['last_error_at']!,
+          _lastErrorAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(
+        _lastErrorMeta,
+        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
+      );
+    }
+    if (data.containsKey('quota_used')) {
+      context.handle(
+        _quotaUsedMeta,
+        quotaUsed.isAcceptableOrUnknown(data['quota_used']!, _quotaUsedMeta),
+      );
+    }
+    if (data.containsKey('quota_period')) {
+      context.handle(
+        _quotaPeriodMeta,
+        quotaPeriod.isAcceptableOrUnknown(
+          data['quota_period']!,
+          _quotaPeriodMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {provider};
+  @override
+  DevProviderStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DevProviderStateRow(
+      provider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provider'],
+      )!,
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      lastSuccessAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_success_at'],
+      ),
+      lastErrorAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error_at'],
+      ),
+      lastError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error'],
+      ),
+      quotaUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quota_used'],
+      )!,
+      quotaPeriod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quota_period'],
+      ),
+    );
+  }
+
+  @override
+  $DevProviderStateTable createAlias(String alias) {
+    return $DevProviderStateTable(attachedDatabase, alias);
+  }
+}
+
+class DevProviderStateRow extends DataClass
+    implements Insertable<DevProviderStateRow> {
+  final String provider;
+  final bool enabled;
+  final String? lastSuccessAt;
+  final String? lastErrorAt;
+  final String? lastError;
+  final int quotaUsed;
+
+  /// Período da cota (`2026-10` para cotas mensais).
+  final String? quotaPeriod;
+  const DevProviderStateRow({
+    required this.provider,
+    required this.enabled,
+    this.lastSuccessAt,
+    this.lastErrorAt,
+    this.lastError,
+    required this.quotaUsed,
+    this.quotaPeriod,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['provider'] = Variable<String>(provider);
+    map['enabled'] = Variable<bool>(enabled);
+    if (!nullToAbsent || lastSuccessAt != null) {
+      map['last_success_at'] = Variable<String>(lastSuccessAt);
+    }
+    if (!nullToAbsent || lastErrorAt != null) {
+      map['last_error_at'] = Variable<String>(lastErrorAt);
+    }
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
+    map['quota_used'] = Variable<int>(quotaUsed);
+    if (!nullToAbsent || quotaPeriod != null) {
+      map['quota_period'] = Variable<String>(quotaPeriod);
+    }
+    return map;
+  }
+
+  DevProviderStateCompanion toCompanion(bool nullToAbsent) {
+    return DevProviderStateCompanion(
+      provider: Value(provider),
+      enabled: Value(enabled),
+      lastSuccessAt: lastSuccessAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSuccessAt),
+      lastErrorAt: lastErrorAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastErrorAt),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
+      quotaUsed: Value(quotaUsed),
+      quotaPeriod: quotaPeriod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quotaPeriod),
+    );
+  }
+
+  factory DevProviderStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DevProviderStateRow(
+      provider: serializer.fromJson<String>(json['provider']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      lastSuccessAt: serializer.fromJson<String?>(json['lastSuccessAt']),
+      lastErrorAt: serializer.fromJson<String?>(json['lastErrorAt']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
+      quotaUsed: serializer.fromJson<int>(json['quotaUsed']),
+      quotaPeriod: serializer.fromJson<String?>(json['quotaPeriod']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'provider': serializer.toJson<String>(provider),
+      'enabled': serializer.toJson<bool>(enabled),
+      'lastSuccessAt': serializer.toJson<String?>(lastSuccessAt),
+      'lastErrorAt': serializer.toJson<String?>(lastErrorAt),
+      'lastError': serializer.toJson<String?>(lastError),
+      'quotaUsed': serializer.toJson<int>(quotaUsed),
+      'quotaPeriod': serializer.toJson<String?>(quotaPeriod),
+    };
+  }
+
+  DevProviderStateRow copyWith({
+    String? provider,
+    bool? enabled,
+    Value<String?> lastSuccessAt = const Value.absent(),
+    Value<String?> lastErrorAt = const Value.absent(),
+    Value<String?> lastError = const Value.absent(),
+    int? quotaUsed,
+    Value<String?> quotaPeriod = const Value.absent(),
+  }) => DevProviderStateRow(
+    provider: provider ?? this.provider,
+    enabled: enabled ?? this.enabled,
+    lastSuccessAt: lastSuccessAt.present
+        ? lastSuccessAt.value
+        : this.lastSuccessAt,
+    lastErrorAt: lastErrorAt.present ? lastErrorAt.value : this.lastErrorAt,
+    lastError: lastError.present ? lastError.value : this.lastError,
+    quotaUsed: quotaUsed ?? this.quotaUsed,
+    quotaPeriod: quotaPeriod.present ? quotaPeriod.value : this.quotaPeriod,
+  );
+  DevProviderStateRow copyWithCompanion(DevProviderStateCompanion data) {
+    return DevProviderStateRow(
+      provider: data.provider.present ? data.provider.value : this.provider,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      lastSuccessAt: data.lastSuccessAt.present
+          ? data.lastSuccessAt.value
+          : this.lastSuccessAt,
+      lastErrorAt: data.lastErrorAt.present
+          ? data.lastErrorAt.value
+          : this.lastErrorAt,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+      quotaUsed: data.quotaUsed.present ? data.quotaUsed.value : this.quotaUsed,
+      quotaPeriod: data.quotaPeriod.present
+          ? data.quotaPeriod.value
+          : this.quotaPeriod,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevProviderStateRow(')
+          ..write('provider: $provider, ')
+          ..write('enabled: $enabled, ')
+          ..write('lastSuccessAt: $lastSuccessAt, ')
+          ..write('lastErrorAt: $lastErrorAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('quotaUsed: $quotaUsed, ')
+          ..write('quotaPeriod: $quotaPeriod')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    provider,
+    enabled,
+    lastSuccessAt,
+    lastErrorAt,
+    lastError,
+    quotaUsed,
+    quotaPeriod,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DevProviderStateRow &&
+          other.provider == this.provider &&
+          other.enabled == this.enabled &&
+          other.lastSuccessAt == this.lastSuccessAt &&
+          other.lastErrorAt == this.lastErrorAt &&
+          other.lastError == this.lastError &&
+          other.quotaUsed == this.quotaUsed &&
+          other.quotaPeriod == this.quotaPeriod);
+}
+
+class DevProviderStateCompanion extends UpdateCompanion<DevProviderStateRow> {
+  final Value<String> provider;
+  final Value<bool> enabled;
+  final Value<String?> lastSuccessAt;
+  final Value<String?> lastErrorAt;
+  final Value<String?> lastError;
+  final Value<int> quotaUsed;
+  final Value<String?> quotaPeriod;
+  final Value<int> rowid;
+  const DevProviderStateCompanion({
+    this.provider = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.lastSuccessAt = const Value.absent(),
+    this.lastErrorAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.quotaUsed = const Value.absent(),
+    this.quotaPeriod = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DevProviderStateCompanion.insert({
+    required String provider,
+    required bool enabled,
+    this.lastSuccessAt = const Value.absent(),
+    this.lastErrorAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.quotaUsed = const Value.absent(),
+    this.quotaPeriod = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : provider = Value(provider),
+       enabled = Value(enabled);
+  static Insertable<DevProviderStateRow> custom({
+    Expression<String>? provider,
+    Expression<bool>? enabled,
+    Expression<String>? lastSuccessAt,
+    Expression<String>? lastErrorAt,
+    Expression<String>? lastError,
+    Expression<int>? quotaUsed,
+    Expression<String>? quotaPeriod,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (provider != null) 'provider': provider,
+      if (enabled != null) 'enabled': enabled,
+      if (lastSuccessAt != null) 'last_success_at': lastSuccessAt,
+      if (lastErrorAt != null) 'last_error_at': lastErrorAt,
+      if (lastError != null) 'last_error': lastError,
+      if (quotaUsed != null) 'quota_used': quotaUsed,
+      if (quotaPeriod != null) 'quota_period': quotaPeriod,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DevProviderStateCompanion copyWith({
+    Value<String>? provider,
+    Value<bool>? enabled,
+    Value<String?>? lastSuccessAt,
+    Value<String?>? lastErrorAt,
+    Value<String?>? lastError,
+    Value<int>? quotaUsed,
+    Value<String?>? quotaPeriod,
+    Value<int>? rowid,
+  }) {
+    return DevProviderStateCompanion(
+      provider: provider ?? this.provider,
+      enabled: enabled ?? this.enabled,
+      lastSuccessAt: lastSuccessAt ?? this.lastSuccessAt,
+      lastErrorAt: lastErrorAt ?? this.lastErrorAt,
+      lastError: lastError ?? this.lastError,
+      quotaUsed: quotaUsed ?? this.quotaUsed,
+      quotaPeriod: quotaPeriod ?? this.quotaPeriod,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (provider.present) {
+      map['provider'] = Variable<String>(provider.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (lastSuccessAt.present) {
+      map['last_success_at'] = Variable<String>(lastSuccessAt.value);
+    }
+    if (lastErrorAt.present) {
+      map['last_error_at'] = Variable<String>(lastErrorAt.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
+    if (quotaUsed.present) {
+      map['quota_used'] = Variable<int>(quotaUsed.value);
+    }
+    if (quotaPeriod.present) {
+      map['quota_period'] = Variable<String>(quotaPeriod.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DevProviderStateCompanion(')
+          ..write('provider: $provider, ')
+          ..write('enabled: $enabled, ')
+          ..write('lastSuccessAt: $lastSuccessAt, ')
+          ..write('lastErrorAt: $lastErrorAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('quotaUsed: $quotaUsed, ')
+          ..write('quotaPeriod: $quotaPeriod, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -12121,6 +17477,19 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DevSyncPeersTable devSyncPeers = $DevSyncPeersTable(this);
   late final $DevSyncHistoryTable devSyncHistory = $DevSyncHistoryTable(this);
   late final $DevBackupsTable devBackups = $DevBackupsTable(this);
+  late final $MktPricesTable mktPrices = $MktPricesTable(this);
+  late final $MktQuotesTable mktQuotes = $MktQuotesTable(this);
+  late final $MktCorporateEventsTable mktCorporateEvents =
+      $MktCorporateEventsTable(this);
+  late final $MktIndicatorsTable mktIndicators = $MktIndicatorsTable(this);
+  late final $MktFxRatesTable mktFxRates = $MktFxRatesTable(this);
+  late final $MktTreasuryPricesTable mktTreasuryPrices =
+      $MktTreasuryPricesTable(this);
+  late final $MktFundQuotasTable mktFundQuotas = $MktFundQuotasTable(this);
+  late final $MktInstrumentsTable mktInstruments = $MktInstrumentsTable(this);
+  late final $DevProviderStateTable devProviderState = $DevProviderStateTable(
+    this,
+  );
   late final Index sharedSettingsHlc = Index(
     'shared_settings_hlc',
     'CREATE INDEX shared_settings_hlc ON shared_settings (hlc)',
@@ -12235,6 +17604,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     devSyncPeers,
     devSyncHistory,
     devBackups,
+    mktPrices,
+    mktQuotes,
+    mktCorporateEvents,
+    mktIndicators,
+    mktFxRates,
+    mktTreasuryPrices,
+    mktFundQuotas,
+    mktInstruments,
+    devProviderState,
     sharedSettingsHlc,
     sharedSettingsKey,
     institutionsHlc,
@@ -20188,6 +25566,2738 @@ typedef $$DevBackupsTableProcessedTableManager =
       DevBackupRow,
       PrefetchHooks Function()
     >;
+typedef $$MktPricesTableCreateCompanionBuilder = MktPricesCompanion Function({
+  required String symbol,
+  required String market,
+  required String refDate,
+  required String source,
+  required String dataType,
+  Value<String?> open,
+  Value<String?> high,
+  Value<String?> low,
+  required String close,
+  Value<String?> volume,
+  required String currency,
+  Value<String?> quoteFactor,
+  required String collectedAt,
+  Value<int> rowid,
+});
+typedef $$MktPricesTableUpdateCompanionBuilder = MktPricesCompanion Function({
+  Value<String> symbol,
+  Value<String> market,
+  Value<String> refDate,
+  Value<String> source,
+  Value<String> dataType,
+  Value<String?> open,
+  Value<String?> high,
+  Value<String?> low,
+  Value<String> close,
+  Value<String?> volume,
+  Value<String> currency,
+  Value<String?> quoteFactor,
+  Value<String> collectedAt,
+  Value<int> rowid,
+});
+
+class $$MktPricesTableFilterComposer
+    extends Composer<_$AppDatabase, $MktPricesTable> {
+  $$MktPricesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dataType => $composableBuilder(
+    column: $table.dataType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get open => $composableBuilder(
+    column: $table.open,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get high => $composableBuilder(
+    column: $table.high,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get low => $composableBuilder(
+    column: $table.low,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get close => $composableBuilder(
+    column: $table.close,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get volume => $composableBuilder(
+    column: $table.volume,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteFactor => $composableBuilder(
+    column: $table.quoteFactor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktPricesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktPricesTable> {
+  $$MktPricesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dataType => $composableBuilder(
+    column: $table.dataType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get open => $composableBuilder(
+    column: $table.open,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get high => $composableBuilder(
+    column: $table.high,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get low => $composableBuilder(
+    column: $table.low,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get close => $composableBuilder(
+    column: $table.close,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get volume => $composableBuilder(
+    column: $table.volume,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteFactor => $composableBuilder(
+    column: $table.quoteFactor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktPricesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktPricesTable> {
+  $$MktPricesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get symbol =>
+      $composableBuilder(column: $table.symbol, builder: (column) => column);
+
+  GeneratedColumn<String> get market =>
+      $composableBuilder(column: $table.market, builder: (column) => column);
+
+  GeneratedColumn<String> get refDate =>
+      $composableBuilder(column: $table.refDate, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get dataType =>
+      $composableBuilder(column: $table.dataType, builder: (column) => column);
+
+  GeneratedColumn<String> get open =>
+      $composableBuilder(column: $table.open, builder: (column) => column);
+
+  GeneratedColumn<String> get high =>
+      $composableBuilder(column: $table.high, builder: (column) => column);
+
+  GeneratedColumn<String> get low =>
+      $composableBuilder(column: $table.low, builder: (column) => column);
+
+  GeneratedColumn<String> get close =>
+      $composableBuilder(column: $table.close, builder: (column) => column);
+
+  GeneratedColumn<String> get volume =>
+      $composableBuilder(column: $table.volume, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get quoteFactor => $composableBuilder(
+    column: $table.quoteFactor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktPricesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktPricesTable,
+          MktPriceRow,
+          $$MktPricesTableFilterComposer,
+          $$MktPricesTableOrderingComposer,
+          $$MktPricesTableAnnotationComposer,
+          $$MktPricesTableCreateCompanionBuilder,
+          $$MktPricesTableUpdateCompanionBuilder,
+          (
+            MktPriceRow,
+            BaseReferences<_$AppDatabase, $MktPricesTable, MktPriceRow>,
+          ),
+          MktPriceRow,
+          PrefetchHooks Function()
+        > {
+  $$MktPricesTableTableManager(_$AppDatabase db, $MktPricesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktPricesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktPricesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktPricesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> symbol = const Value.absent(),
+                Value<String> market = const Value.absent(),
+                Value<String> refDate = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String> dataType = const Value.absent(),
+                Value<String?> open = const Value.absent(),
+                Value<String?> high = const Value.absent(),
+                Value<String?> low = const Value.absent(),
+                Value<String> close = const Value.absent(),
+                Value<String?> volume = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<String?> quoteFactor = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktPricesCompanion(
+                symbol: symbol,
+                market: market,
+                refDate: refDate,
+                source: source,
+                dataType: dataType,
+                open: open,
+                high: high,
+                low: low,
+                close: close,
+                volume: volume,
+                currency: currency,
+                quoteFactor: quoteFactor,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String symbol,
+                required String market,
+                required String refDate,
+                required String source,
+                required String dataType,
+                Value<String?> open = const Value.absent(),
+                Value<String?> high = const Value.absent(),
+                Value<String?> low = const Value.absent(),
+                required String close,
+                Value<String?> volume = const Value.absent(),
+                required String currency,
+                Value<String?> quoteFactor = const Value.absent(),
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktPricesCompanion.insert(
+                symbol: symbol,
+                market: market,
+                refDate: refDate,
+                source: source,
+                dataType: dataType,
+                open: open,
+                high: high,
+                low: low,
+                close: close,
+                volume: volume,
+                currency: currency,
+                quoteFactor: quoteFactor,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktPricesTable, MktPriceRow>(table),
+                  BaseReferences<_$AppDatabase, $MktPricesTable, MktPriceRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktPricesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktPricesTable,
+      MktPriceRow,
+      $$MktPricesTableFilterComposer,
+      $$MktPricesTableOrderingComposer,
+      $$MktPricesTableAnnotationComposer,
+      $$MktPricesTableCreateCompanionBuilder,
+      $$MktPricesTableUpdateCompanionBuilder,
+      (
+        MktPriceRow,
+        BaseReferences<_$AppDatabase, $MktPricesTable, MktPriceRow>,
+      ),
+      MktPriceRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MktQuotesTableCreateCompanionBuilder = MktQuotesCompanion Function({
+  required String symbol,
+  required String market,
+  required String source,
+  required String price,
+  required String currency,
+  required String refAt,
+  Value<String?> delayNote,
+  required String dataType,
+  required String collectedAt,
+  Value<int> rowid,
+});
+typedef $$MktQuotesTableUpdateCompanionBuilder = MktQuotesCompanion Function({
+  Value<String> symbol,
+  Value<String> market,
+  Value<String> source,
+  Value<String> price,
+  Value<String> currency,
+  Value<String> refAt,
+  Value<String?> delayNote,
+  Value<String> dataType,
+  Value<String> collectedAt,
+  Value<int> rowid,
+});
+
+class $$MktQuotesTableFilterComposer
+    extends Composer<_$AppDatabase, $MktQuotesTable> {
+  $$MktQuotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get price => $composableBuilder(
+    column: $table.price,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refAt => $composableBuilder(
+    column: $table.refAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get delayNote => $composableBuilder(
+    column: $table.delayNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dataType => $composableBuilder(
+    column: $table.dataType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktQuotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktQuotesTable> {
+  $$MktQuotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get price => $composableBuilder(
+    column: $table.price,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refAt => $composableBuilder(
+    column: $table.refAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get delayNote => $composableBuilder(
+    column: $table.delayNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dataType => $composableBuilder(
+    column: $table.dataType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktQuotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktQuotesTable> {
+  $$MktQuotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get symbol =>
+      $composableBuilder(column: $table.symbol, builder: (column) => column);
+
+  GeneratedColumn<String> get market =>
+      $composableBuilder(column: $table.market, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get price =>
+      $composableBuilder(column: $table.price, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get refAt =>
+      $composableBuilder(column: $table.refAt, builder: (column) => column);
+
+  GeneratedColumn<String> get delayNote =>
+      $composableBuilder(column: $table.delayNote, builder: (column) => column);
+
+  GeneratedColumn<String> get dataType =>
+      $composableBuilder(column: $table.dataType, builder: (column) => column);
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktQuotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktQuotesTable,
+          MktQuoteRow,
+          $$MktQuotesTableFilterComposer,
+          $$MktQuotesTableOrderingComposer,
+          $$MktQuotesTableAnnotationComposer,
+          $$MktQuotesTableCreateCompanionBuilder,
+          $$MktQuotesTableUpdateCompanionBuilder,
+          (
+            MktQuoteRow,
+            BaseReferences<_$AppDatabase, $MktQuotesTable, MktQuoteRow>,
+          ),
+          MktQuoteRow,
+          PrefetchHooks Function()
+        > {
+  $$MktQuotesTableTableManager(_$AppDatabase db, $MktQuotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktQuotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktQuotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktQuotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> symbol = const Value.absent(),
+                Value<String> market = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String> price = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<String> refAt = const Value.absent(),
+                Value<String?> delayNote = const Value.absent(),
+                Value<String> dataType = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktQuotesCompanion(
+                symbol: symbol,
+                market: market,
+                source: source,
+                price: price,
+                currency: currency,
+                refAt: refAt,
+                delayNote: delayNote,
+                dataType: dataType,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String symbol,
+                required String market,
+                required String source,
+                required String price,
+                required String currency,
+                required String refAt,
+                Value<String?> delayNote = const Value.absent(),
+                required String dataType,
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktQuotesCompanion.insert(
+                symbol: symbol,
+                market: market,
+                source: source,
+                price: price,
+                currency: currency,
+                refAt: refAt,
+                delayNote: delayNote,
+                dataType: dataType,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktQuotesTable, MktQuoteRow>(table),
+                  BaseReferences<_$AppDatabase, $MktQuotesTable, MktQuoteRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktQuotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktQuotesTable,
+      MktQuoteRow,
+      $$MktQuotesTableFilterComposer,
+      $$MktQuotesTableOrderingComposer,
+      $$MktQuotesTableAnnotationComposer,
+      $$MktQuotesTableCreateCompanionBuilder,
+      $$MktQuotesTableUpdateCompanionBuilder,
+      (
+        MktQuoteRow,
+        BaseReferences<_$AppDatabase, $MktQuotesTable, MktQuoteRow>,
+      ),
+      MktQuoteRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MktCorporateEventsTableCreateCompanionBuilder =
+    MktCorporateEventsCompanion Function({
+      required String symbol,
+      required String market,
+      required String eventKind,
+      required String exDate,
+      required String source,
+      required String seq,
+      Value<String?> comDate,
+      Value<String?> paymentDate,
+      Value<String?> factor,
+      Value<String?> amount,
+      Value<String?> currency,
+      required String status,
+      Value<String?> rawLabel,
+      Value<String?> isin,
+      required String collectedAt,
+      Value<int> rowid,
+    });
+typedef $$MktCorporateEventsTableUpdateCompanionBuilder =
+    MktCorporateEventsCompanion Function({
+      Value<String> symbol,
+      Value<String> market,
+      Value<String> eventKind,
+      Value<String> exDate,
+      Value<String> source,
+      Value<String> seq,
+      Value<String?> comDate,
+      Value<String?> paymentDate,
+      Value<String?> factor,
+      Value<String?> amount,
+      Value<String?> currency,
+      Value<String> status,
+      Value<String?> rawLabel,
+      Value<String?> isin,
+      Value<String> collectedAt,
+      Value<int> rowid,
+    });
+
+class $$MktCorporateEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $MktCorporateEventsTable> {
+  $$MktCorporateEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventKind => $composableBuilder(
+    column: $table.eventKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get exDate => $composableBuilder(
+    column: $table.exDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get comDate => $composableBuilder(
+    column: $table.comDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentDate => $composableBuilder(
+    column: $table.paymentDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get factor => $composableBuilder(
+    column: $table.factor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rawLabel => $composableBuilder(
+    column: $table.rawLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get isin => $composableBuilder(
+    column: $table.isin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktCorporateEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktCorporateEventsTable> {
+  $$MktCorporateEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventKind => $composableBuilder(
+    column: $table.eventKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get exDate => $composableBuilder(
+    column: $table.exDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get comDate => $composableBuilder(
+    column: $table.comDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentDate => $composableBuilder(
+    column: $table.paymentDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get factor => $composableBuilder(
+    column: $table.factor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rawLabel => $composableBuilder(
+    column: $table.rawLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get isin => $composableBuilder(
+    column: $table.isin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktCorporateEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktCorporateEventsTable> {
+  $$MktCorporateEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get symbol =>
+      $composableBuilder(column: $table.symbol, builder: (column) => column);
+
+  GeneratedColumn<String> get market =>
+      $composableBuilder(column: $table.market, builder: (column) => column);
+
+  GeneratedColumn<String> get eventKind =>
+      $composableBuilder(column: $table.eventKind, builder: (column) => column);
+
+  GeneratedColumn<String> get exDate =>
+      $composableBuilder(column: $table.exDate, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get seq =>
+      $composableBuilder(column: $table.seq, builder: (column) => column);
+
+  GeneratedColumn<String> get comDate =>
+      $composableBuilder(column: $table.comDate, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentDate => $composableBuilder(
+    column: $table.paymentDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get factor =>
+      $composableBuilder(column: $table.factor, builder: (column) => column);
+
+  GeneratedColumn<String> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get rawLabel =>
+      $composableBuilder(column: $table.rawLabel, builder: (column) => column);
+
+  GeneratedColumn<String> get isin =>
+      $composableBuilder(column: $table.isin, builder: (column) => column);
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktCorporateEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktCorporateEventsTable,
+          MktCorporateEventRow,
+          $$MktCorporateEventsTableFilterComposer,
+          $$MktCorporateEventsTableOrderingComposer,
+          $$MktCorporateEventsTableAnnotationComposer,
+          $$MktCorporateEventsTableCreateCompanionBuilder,
+          $$MktCorporateEventsTableUpdateCompanionBuilder,
+          (
+            MktCorporateEventRow,
+            BaseReferences<
+              _$AppDatabase,
+              $MktCorporateEventsTable,
+              MktCorporateEventRow
+            >,
+          ),
+          MktCorporateEventRow,
+          PrefetchHooks Function()
+        > {
+  $$MktCorporateEventsTableTableManager(
+    _$AppDatabase db,
+    $MktCorporateEventsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktCorporateEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktCorporateEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktCorporateEventsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> symbol = const Value.absent(),
+                Value<String> market = const Value.absent(),
+                Value<String> eventKind = const Value.absent(),
+                Value<String> exDate = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String> seq = const Value.absent(),
+                Value<String?> comDate = const Value.absent(),
+                Value<String?> paymentDate = const Value.absent(),
+                Value<String?> factor = const Value.absent(),
+                Value<String?> amount = const Value.absent(),
+                Value<String?> currency = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> rawLabel = const Value.absent(),
+                Value<String?> isin = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktCorporateEventsCompanion(
+                symbol: symbol,
+                market: market,
+                eventKind: eventKind,
+                exDate: exDate,
+                source: source,
+                seq: seq,
+                comDate: comDate,
+                paymentDate: paymentDate,
+                factor: factor,
+                amount: amount,
+                currency: currency,
+                status: status,
+                rawLabel: rawLabel,
+                isin: isin,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String symbol,
+                required String market,
+                required String eventKind,
+                required String exDate,
+                required String source,
+                required String seq,
+                Value<String?> comDate = const Value.absent(),
+                Value<String?> paymentDate = const Value.absent(),
+                Value<String?> factor = const Value.absent(),
+                Value<String?> amount = const Value.absent(),
+                Value<String?> currency = const Value.absent(),
+                required String status,
+                Value<String?> rawLabel = const Value.absent(),
+                Value<String?> isin = const Value.absent(),
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktCorporateEventsCompanion.insert(
+                symbol: symbol,
+                market: market,
+                eventKind: eventKind,
+                exDate: exDate,
+                source: source,
+                seq: seq,
+                comDate: comDate,
+                paymentDate: paymentDate,
+                factor: factor,
+                amount: amount,
+                currency: currency,
+                status: status,
+                rawLabel: rawLabel,
+                isin: isin,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktCorporateEventsTable, MktCorporateEventRow>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MktCorporateEventsTable,
+                    MktCorporateEventRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktCorporateEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktCorporateEventsTable,
+      MktCorporateEventRow,
+      $$MktCorporateEventsTableFilterComposer,
+      $$MktCorporateEventsTableOrderingComposer,
+      $$MktCorporateEventsTableAnnotationComposer,
+      $$MktCorporateEventsTableCreateCompanionBuilder,
+      $$MktCorporateEventsTableUpdateCompanionBuilder,
+      (
+        MktCorporateEventRow,
+        BaseReferences<
+          _$AppDatabase,
+          $MktCorporateEventsTable,
+          MktCorporateEventRow
+        >,
+      ),
+      MktCorporateEventRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MktIndicatorsTableCreateCompanionBuilder =
+    MktIndicatorsCompanion Function({
+      required String seriesCode,
+      required String refDate,
+      required String source,
+      required String value,
+      required String unit,
+      required String collectedAt,
+      Value<int> rowid,
+    });
+typedef $$MktIndicatorsTableUpdateCompanionBuilder =
+    MktIndicatorsCompanion Function({
+      Value<String> seriesCode,
+      Value<String> refDate,
+      Value<String> source,
+      Value<String> value,
+      Value<String> unit,
+      Value<String> collectedAt,
+      Value<int> rowid,
+    });
+
+class $$MktIndicatorsTableFilterComposer
+    extends Composer<_$AppDatabase, $MktIndicatorsTable> {
+  $$MktIndicatorsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get seriesCode => $composableBuilder(
+    column: $table.seriesCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktIndicatorsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktIndicatorsTable> {
+  $$MktIndicatorsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get seriesCode => $composableBuilder(
+    column: $table.seriesCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktIndicatorsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktIndicatorsTable> {
+  $$MktIndicatorsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get seriesCode => $composableBuilder(
+    column: $table.seriesCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get refDate =>
+      $composableBuilder(column: $table.refDate, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktIndicatorsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktIndicatorsTable,
+          MktIndicatorRow,
+          $$MktIndicatorsTableFilterComposer,
+          $$MktIndicatorsTableOrderingComposer,
+          $$MktIndicatorsTableAnnotationComposer,
+          $$MktIndicatorsTableCreateCompanionBuilder,
+          $$MktIndicatorsTableUpdateCompanionBuilder,
+          (
+            MktIndicatorRow,
+            BaseReferences<_$AppDatabase, $MktIndicatorsTable, MktIndicatorRow>,
+          ),
+          MktIndicatorRow,
+          PrefetchHooks Function()
+        > {
+  $$MktIndicatorsTableTableManager(_$AppDatabase db, $MktIndicatorsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktIndicatorsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktIndicatorsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktIndicatorsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> seriesCode = const Value.absent(),
+                Value<String> refDate = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktIndicatorsCompanion(
+                seriesCode: seriesCode,
+                refDate: refDate,
+                source: source,
+                value: value,
+                unit: unit,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String seriesCode,
+                required String refDate,
+                required String source,
+                required String value,
+                required String unit,
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktIndicatorsCompanion.insert(
+                seriesCode: seriesCode,
+                refDate: refDate,
+                source: source,
+                value: value,
+                unit: unit,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktIndicatorsTable, MktIndicatorRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MktIndicatorsTable,
+                    MktIndicatorRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktIndicatorsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktIndicatorsTable,
+      MktIndicatorRow,
+      $$MktIndicatorsTableFilterComposer,
+      $$MktIndicatorsTableOrderingComposer,
+      $$MktIndicatorsTableAnnotationComposer,
+      $$MktIndicatorsTableCreateCompanionBuilder,
+      $$MktIndicatorsTableUpdateCompanionBuilder,
+      (
+        MktIndicatorRow,
+        BaseReferences<_$AppDatabase, $MktIndicatorsTable, MktIndicatorRow>,
+      ),
+      MktIndicatorRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MktFxRatesTableCreateCompanionBuilder = MktFxRatesCompanion Function({
+  required String base,
+  required String quote,
+  required String refDate,
+  required String kind,
+  required String source,
+  Value<String?> bid,
+  Value<String?> ask,
+  Value<String?> refAt,
+  required String collectedAt,
+  Value<int> rowid,
+});
+typedef $$MktFxRatesTableUpdateCompanionBuilder = MktFxRatesCompanion Function({
+  Value<String> base,
+  Value<String> quote,
+  Value<String> refDate,
+  Value<String> kind,
+  Value<String> source,
+  Value<String?> bid,
+  Value<String?> ask,
+  Value<String?> refAt,
+  Value<String> collectedAt,
+  Value<int> rowid,
+});
+
+class $$MktFxRatesTableFilterComposer
+    extends Composer<_$AppDatabase, $MktFxRatesTable> {
+  $$MktFxRatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get base => $composableBuilder(
+    column: $table.base,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quote => $composableBuilder(
+    column: $table.quote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bid => $composableBuilder(
+    column: $table.bid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ask => $composableBuilder(
+    column: $table.ask,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refAt => $composableBuilder(
+    column: $table.refAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktFxRatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktFxRatesTable> {
+  $$MktFxRatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get base => $composableBuilder(
+    column: $table.base,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quote => $composableBuilder(
+    column: $table.quote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bid => $composableBuilder(
+    column: $table.bid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ask => $composableBuilder(
+    column: $table.ask,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refAt => $composableBuilder(
+    column: $table.refAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktFxRatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktFxRatesTable> {
+  $$MktFxRatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get base =>
+      $composableBuilder(column: $table.base, builder: (column) => column);
+
+  GeneratedColumn<String> get quote =>
+      $composableBuilder(column: $table.quote, builder: (column) => column);
+
+  GeneratedColumn<String> get refDate =>
+      $composableBuilder(column: $table.refDate, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get bid =>
+      $composableBuilder(column: $table.bid, builder: (column) => column);
+
+  GeneratedColumn<String> get ask =>
+      $composableBuilder(column: $table.ask, builder: (column) => column);
+
+  GeneratedColumn<String> get refAt =>
+      $composableBuilder(column: $table.refAt, builder: (column) => column);
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktFxRatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktFxRatesTable,
+          MktFxRateRow,
+          $$MktFxRatesTableFilterComposer,
+          $$MktFxRatesTableOrderingComposer,
+          $$MktFxRatesTableAnnotationComposer,
+          $$MktFxRatesTableCreateCompanionBuilder,
+          $$MktFxRatesTableUpdateCompanionBuilder,
+          (
+            MktFxRateRow,
+            BaseReferences<_$AppDatabase, $MktFxRatesTable, MktFxRateRow>,
+          ),
+          MktFxRateRow,
+          PrefetchHooks Function()
+        > {
+  $$MktFxRatesTableTableManager(_$AppDatabase db, $MktFxRatesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktFxRatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktFxRatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktFxRatesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> base = const Value.absent(),
+                Value<String> quote = const Value.absent(),
+                Value<String> refDate = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> bid = const Value.absent(),
+                Value<String?> ask = const Value.absent(),
+                Value<String?> refAt = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktFxRatesCompanion(
+                base: base,
+                quote: quote,
+                refDate: refDate,
+                kind: kind,
+                source: source,
+                bid: bid,
+                ask: ask,
+                refAt: refAt,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String base,
+                required String quote,
+                required String refDate,
+                required String kind,
+                required String source,
+                Value<String?> bid = const Value.absent(),
+                Value<String?> ask = const Value.absent(),
+                Value<String?> refAt = const Value.absent(),
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktFxRatesCompanion.insert(
+                base: base,
+                quote: quote,
+                refDate: refDate,
+                kind: kind,
+                source: source,
+                bid: bid,
+                ask: ask,
+                refAt: refAt,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktFxRatesTable, MktFxRateRow>(table),
+                  BaseReferences<_$AppDatabase, $MktFxRatesTable, MktFxRateRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktFxRatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktFxRatesTable,
+      MktFxRateRow,
+      $$MktFxRatesTableFilterComposer,
+      $$MktFxRatesTableOrderingComposer,
+      $$MktFxRatesTableAnnotationComposer,
+      $$MktFxRatesTableCreateCompanionBuilder,
+      $$MktFxRatesTableUpdateCompanionBuilder,
+      (
+        MktFxRateRow,
+        BaseReferences<_$AppDatabase, $MktFxRatesTable, MktFxRateRow>,
+      ),
+      MktFxRateRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MktTreasuryPricesTableCreateCompanionBuilder =
+    MktTreasuryPricesCompanion Function({
+      required String title,
+      required String maturityDate,
+      required String refDate,
+      required String source,
+      Value<String?> buyRate,
+      Value<String?> sellRate,
+      Value<String?> buyPu,
+      Value<String?> sellPu,
+      Value<String?> basePu,
+      required String collectedAt,
+      Value<int> rowid,
+    });
+typedef $$MktTreasuryPricesTableUpdateCompanionBuilder =
+    MktTreasuryPricesCompanion Function({
+      Value<String> title,
+      Value<String> maturityDate,
+      Value<String> refDate,
+      Value<String> source,
+      Value<String?> buyRate,
+      Value<String?> sellRate,
+      Value<String?> buyPu,
+      Value<String?> sellPu,
+      Value<String?> basePu,
+      Value<String> collectedAt,
+      Value<int> rowid,
+    });
+
+class $$MktTreasuryPricesTableFilterComposer
+    extends Composer<_$AppDatabase, $MktTreasuryPricesTable> {
+  $$MktTreasuryPricesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get maturityDate => $composableBuilder(
+    column: $table.maturityDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get buyRate => $composableBuilder(
+    column: $table.buyRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sellRate => $composableBuilder(
+    column: $table.sellRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get buyPu => $composableBuilder(
+    column: $table.buyPu,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sellPu => $composableBuilder(
+    column: $table.sellPu,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get basePu => $composableBuilder(
+    column: $table.basePu,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktTreasuryPricesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktTreasuryPricesTable> {
+  $$MktTreasuryPricesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get maturityDate => $composableBuilder(
+    column: $table.maturityDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get buyRate => $composableBuilder(
+    column: $table.buyRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sellRate => $composableBuilder(
+    column: $table.sellRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get buyPu => $composableBuilder(
+    column: $table.buyPu,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sellPu => $composableBuilder(
+    column: $table.sellPu,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get basePu => $composableBuilder(
+    column: $table.basePu,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktTreasuryPricesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktTreasuryPricesTable> {
+  $$MktTreasuryPricesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get maturityDate => $composableBuilder(
+    column: $table.maturityDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get refDate =>
+      $composableBuilder(column: $table.refDate, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get buyRate =>
+      $composableBuilder(column: $table.buyRate, builder: (column) => column);
+
+  GeneratedColumn<String> get sellRate =>
+      $composableBuilder(column: $table.sellRate, builder: (column) => column);
+
+  GeneratedColumn<String> get buyPu =>
+      $composableBuilder(column: $table.buyPu, builder: (column) => column);
+
+  GeneratedColumn<String> get sellPu =>
+      $composableBuilder(column: $table.sellPu, builder: (column) => column);
+
+  GeneratedColumn<String> get basePu =>
+      $composableBuilder(column: $table.basePu, builder: (column) => column);
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktTreasuryPricesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktTreasuryPricesTable,
+          MktTreasuryPriceRow,
+          $$MktTreasuryPricesTableFilterComposer,
+          $$MktTreasuryPricesTableOrderingComposer,
+          $$MktTreasuryPricesTableAnnotationComposer,
+          $$MktTreasuryPricesTableCreateCompanionBuilder,
+          $$MktTreasuryPricesTableUpdateCompanionBuilder,
+          (
+            MktTreasuryPriceRow,
+            BaseReferences<
+              _$AppDatabase,
+              $MktTreasuryPricesTable,
+              MktTreasuryPriceRow
+            >,
+          ),
+          MktTreasuryPriceRow,
+          PrefetchHooks Function()
+        > {
+  $$MktTreasuryPricesTableTableManager(
+    _$AppDatabase db,
+    $MktTreasuryPricesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktTreasuryPricesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktTreasuryPricesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktTreasuryPricesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> title = const Value.absent(),
+                Value<String> maturityDate = const Value.absent(),
+                Value<String> refDate = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> buyRate = const Value.absent(),
+                Value<String?> sellRate = const Value.absent(),
+                Value<String?> buyPu = const Value.absent(),
+                Value<String?> sellPu = const Value.absent(),
+                Value<String?> basePu = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktTreasuryPricesCompanion(
+                title: title,
+                maturityDate: maturityDate,
+                refDate: refDate,
+                source: source,
+                buyRate: buyRate,
+                sellRate: sellRate,
+                buyPu: buyPu,
+                sellPu: sellPu,
+                basePu: basePu,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String title,
+                required String maturityDate,
+                required String refDate,
+                required String source,
+                Value<String?> buyRate = const Value.absent(),
+                Value<String?> sellRate = const Value.absent(),
+                Value<String?> buyPu = const Value.absent(),
+                Value<String?> sellPu = const Value.absent(),
+                Value<String?> basePu = const Value.absent(),
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktTreasuryPricesCompanion.insert(
+                title: title,
+                maturityDate: maturityDate,
+                refDate: refDate,
+                source: source,
+                buyRate: buyRate,
+                sellRate: sellRate,
+                buyPu: buyPu,
+                sellPu: sellPu,
+                basePu: basePu,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktTreasuryPricesTable, MktTreasuryPriceRow>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MktTreasuryPricesTable,
+                    MktTreasuryPriceRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktTreasuryPricesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktTreasuryPricesTable,
+      MktTreasuryPriceRow,
+      $$MktTreasuryPricesTableFilterComposer,
+      $$MktTreasuryPricesTableOrderingComposer,
+      $$MktTreasuryPricesTableAnnotationComposer,
+      $$MktTreasuryPricesTableCreateCompanionBuilder,
+      $$MktTreasuryPricesTableUpdateCompanionBuilder,
+      (
+        MktTreasuryPriceRow,
+        BaseReferences<
+          _$AppDatabase,
+          $MktTreasuryPricesTable,
+          MktTreasuryPriceRow
+        >,
+      ),
+      MktTreasuryPriceRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MktFundQuotasTableCreateCompanionBuilder =
+    MktFundQuotasCompanion Function({
+      required String cnpj,
+      required String refDate,
+      required String kind,
+      required String source,
+      Value<String?> quota,
+      Value<String?> nav,
+      Value<String?> holders,
+      Value<String?> isin,
+      Value<String?> name,
+      required String collectedAt,
+      Value<int> rowid,
+    });
+typedef $$MktFundQuotasTableUpdateCompanionBuilder =
+    MktFundQuotasCompanion Function({
+      Value<String> cnpj,
+      Value<String> refDate,
+      Value<String> kind,
+      Value<String> source,
+      Value<String?> quota,
+      Value<String?> nav,
+      Value<String?> holders,
+      Value<String?> isin,
+      Value<String?> name,
+      Value<String> collectedAt,
+      Value<int> rowid,
+    });
+
+class $$MktFundQuotasTableFilterComposer
+    extends Composer<_$AppDatabase, $MktFundQuotasTable> {
+  $$MktFundQuotasTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get cnpj => $composableBuilder(
+    column: $table.cnpj,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quota => $composableBuilder(
+    column: $table.quota,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nav => $composableBuilder(
+    column: $table.nav,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get holders => $composableBuilder(
+    column: $table.holders,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get isin => $composableBuilder(
+    column: $table.isin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktFundQuotasTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktFundQuotasTable> {
+  $$MktFundQuotasTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get cnpj => $composableBuilder(
+    column: $table.cnpj,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refDate => $composableBuilder(
+    column: $table.refDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quota => $composableBuilder(
+    column: $table.quota,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nav => $composableBuilder(
+    column: $table.nav,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get holders => $composableBuilder(
+    column: $table.holders,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get isin => $composableBuilder(
+    column: $table.isin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktFundQuotasTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktFundQuotasTable> {
+  $$MktFundQuotasTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get cnpj =>
+      $composableBuilder(column: $table.cnpj, builder: (column) => column);
+
+  GeneratedColumn<String> get refDate =>
+      $composableBuilder(column: $table.refDate, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get quota =>
+      $composableBuilder(column: $table.quota, builder: (column) => column);
+
+  GeneratedColumn<String> get nav =>
+      $composableBuilder(column: $table.nav, builder: (column) => column);
+
+  GeneratedColumn<String> get holders =>
+      $composableBuilder(column: $table.holders, builder: (column) => column);
+
+  GeneratedColumn<String> get isin =>
+      $composableBuilder(column: $table.isin, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktFundQuotasTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktFundQuotasTable,
+          MktFundQuotaRow,
+          $$MktFundQuotasTableFilterComposer,
+          $$MktFundQuotasTableOrderingComposer,
+          $$MktFundQuotasTableAnnotationComposer,
+          $$MktFundQuotasTableCreateCompanionBuilder,
+          $$MktFundQuotasTableUpdateCompanionBuilder,
+          (
+            MktFundQuotaRow,
+            BaseReferences<_$AppDatabase, $MktFundQuotasTable, MktFundQuotaRow>,
+          ),
+          MktFundQuotaRow,
+          PrefetchHooks Function()
+        > {
+  $$MktFundQuotasTableTableManager(_$AppDatabase db, $MktFundQuotasTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktFundQuotasTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktFundQuotasTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktFundQuotasTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> cnpj = const Value.absent(),
+                Value<String> refDate = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> quota = const Value.absent(),
+                Value<String?> nav = const Value.absent(),
+                Value<String?> holders = const Value.absent(),
+                Value<String?> isin = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktFundQuotasCompanion(
+                cnpj: cnpj,
+                refDate: refDate,
+                kind: kind,
+                source: source,
+                quota: quota,
+                nav: nav,
+                holders: holders,
+                isin: isin,
+                name: name,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String cnpj,
+                required String refDate,
+                required String kind,
+                required String source,
+                Value<String?> quota = const Value.absent(),
+                Value<String?> nav = const Value.absent(),
+                Value<String?> holders = const Value.absent(),
+                Value<String?> isin = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktFundQuotasCompanion.insert(
+                cnpj: cnpj,
+                refDate: refDate,
+                kind: kind,
+                source: source,
+                quota: quota,
+                nav: nav,
+                holders: holders,
+                isin: isin,
+                name: name,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktFundQuotasTable, MktFundQuotaRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MktFundQuotasTable,
+                    MktFundQuotaRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktFundQuotasTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktFundQuotasTable,
+      MktFundQuotaRow,
+      $$MktFundQuotasTableFilterComposer,
+      $$MktFundQuotasTableOrderingComposer,
+      $$MktFundQuotasTableAnnotationComposer,
+      $$MktFundQuotasTableCreateCompanionBuilder,
+      $$MktFundQuotasTableUpdateCompanionBuilder,
+      (
+        MktFundQuotaRow,
+        BaseReferences<_$AppDatabase, $MktFundQuotasTable, MktFundQuotaRow>,
+      ),
+      MktFundQuotaRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MktInstrumentsTableCreateCompanionBuilder =
+    MktInstrumentsCompanion Function({
+      required String symbol,
+      required String market,
+      required String source,
+      Value<String?> isin,
+      Value<String?> name,
+      Value<String?> sourceId,
+      required String collectedAt,
+      Value<int> rowid,
+    });
+typedef $$MktInstrumentsTableUpdateCompanionBuilder =
+    MktInstrumentsCompanion Function({
+      Value<String> symbol,
+      Value<String> market,
+      Value<String> source,
+      Value<String?> isin,
+      Value<String?> name,
+      Value<String?> sourceId,
+      Value<String> collectedAt,
+      Value<int> rowid,
+    });
+
+class $$MktInstrumentsTableFilterComposer
+    extends Composer<_$AppDatabase, $MktInstrumentsTable> {
+  $$MktInstrumentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get isin => $composableBuilder(
+    column: $table.isin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MktInstrumentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MktInstrumentsTable> {
+  $$MktInstrumentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get market => $composableBuilder(
+    column: $table.market,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get isin => $composableBuilder(
+    column: $table.isin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MktInstrumentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MktInstrumentsTable> {
+  $$MktInstrumentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get symbol =>
+      $composableBuilder(column: $table.symbol, builder: (column) => column);
+
+  GeneratedColumn<String> get market =>
+      $composableBuilder(column: $table.market, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get isin =>
+      $composableBuilder(column: $table.isin, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get collectedAt => $composableBuilder(
+    column: $table.collectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MktInstrumentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MktInstrumentsTable,
+          MktInstrumentRow,
+          $$MktInstrumentsTableFilterComposer,
+          $$MktInstrumentsTableOrderingComposer,
+          $$MktInstrumentsTableAnnotationComposer,
+          $$MktInstrumentsTableCreateCompanionBuilder,
+          $$MktInstrumentsTableUpdateCompanionBuilder,
+          (
+            MktInstrumentRow,
+            BaseReferences<
+              _$AppDatabase,
+              $MktInstrumentsTable,
+              MktInstrumentRow
+            >,
+          ),
+          MktInstrumentRow,
+          PrefetchHooks Function()
+        > {
+  $$MktInstrumentsTableTableManager(
+    _$AppDatabase db,
+    $MktInstrumentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MktInstrumentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MktInstrumentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MktInstrumentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> symbol = const Value.absent(),
+                Value<String> market = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> isin = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<String?> sourceId = const Value.absent(),
+                Value<String> collectedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MktInstrumentsCompanion(
+                symbol: symbol,
+                market: market,
+                source: source,
+                isin: isin,
+                name: name,
+                sourceId: sourceId,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String symbol,
+                required String market,
+                required String source,
+                Value<String?> isin = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<String?> sourceId = const Value.absent(),
+                required String collectedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MktInstrumentsCompanion.insert(
+                symbol: symbol,
+                market: market,
+                source: source,
+                isin: isin,
+                name: name,
+                sourceId: sourceId,
+                collectedAt: collectedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MktInstrumentsTable, MktInstrumentRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MktInstrumentsTable,
+                    MktInstrumentRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MktInstrumentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MktInstrumentsTable,
+      MktInstrumentRow,
+      $$MktInstrumentsTableFilterComposer,
+      $$MktInstrumentsTableOrderingComposer,
+      $$MktInstrumentsTableAnnotationComposer,
+      $$MktInstrumentsTableCreateCompanionBuilder,
+      $$MktInstrumentsTableUpdateCompanionBuilder,
+      (
+        MktInstrumentRow,
+        BaseReferences<_$AppDatabase, $MktInstrumentsTable, MktInstrumentRow>,
+      ),
+      MktInstrumentRow,
+      PrefetchHooks Function()
+    >;
+typedef $$DevProviderStateTableCreateCompanionBuilder =
+    DevProviderStateCompanion Function({
+      required String provider,
+      required bool enabled,
+      Value<String?> lastSuccessAt,
+      Value<String?> lastErrorAt,
+      Value<String?> lastError,
+      Value<int> quotaUsed,
+      Value<String?> quotaPeriod,
+      Value<int> rowid,
+    });
+typedef $$DevProviderStateTableUpdateCompanionBuilder =
+    DevProviderStateCompanion Function({
+      Value<String> provider,
+      Value<bool> enabled,
+      Value<String?> lastSuccessAt,
+      Value<String?> lastErrorAt,
+      Value<String?> lastError,
+      Value<int> quotaUsed,
+      Value<String?> quotaPeriod,
+      Value<int> rowid,
+    });
+
+class $$DevProviderStateTableFilterComposer
+    extends Composer<_$AppDatabase, $DevProviderStateTable> {
+  $$DevProviderStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get provider => $composableBuilder(
+    column: $table.provider,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSuccessAt => $composableBuilder(
+    column: $table.lastSuccessAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastErrorAt => $composableBuilder(
+    column: $table.lastErrorAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quotaUsed => $composableBuilder(
+    column: $table.quotaUsed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quotaPeriod => $composableBuilder(
+    column: $table.quotaPeriod,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DevProviderStateTableOrderingComposer
+    extends Composer<_$AppDatabase, $DevProviderStateTable> {
+  $$DevProviderStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get provider => $composableBuilder(
+    column: $table.provider,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSuccessAt => $composableBuilder(
+    column: $table.lastSuccessAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastErrorAt => $composableBuilder(
+    column: $table.lastErrorAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quotaUsed => $composableBuilder(
+    column: $table.quotaUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quotaPeriod => $composableBuilder(
+    column: $table.quotaPeriod,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DevProviderStateTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DevProviderStateTable> {
+  $$DevProviderStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get provider =>
+      $composableBuilder(column: $table.provider, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<String> get lastSuccessAt => $composableBuilder(
+    column: $table.lastSuccessAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastErrorAt => $composableBuilder(
+    column: $table.lastErrorAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
+
+  GeneratedColumn<int> get quotaUsed =>
+      $composableBuilder(column: $table.quotaUsed, builder: (column) => column);
+
+  GeneratedColumn<String> get quotaPeriod => $composableBuilder(
+    column: $table.quotaPeriod,
+    builder: (column) => column,
+  );
+}
+
+class $$DevProviderStateTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DevProviderStateTable,
+          DevProviderStateRow,
+          $$DevProviderStateTableFilterComposer,
+          $$DevProviderStateTableOrderingComposer,
+          $$DevProviderStateTableAnnotationComposer,
+          $$DevProviderStateTableCreateCompanionBuilder,
+          $$DevProviderStateTableUpdateCompanionBuilder,
+          (
+            DevProviderStateRow,
+            BaseReferences<
+              _$AppDatabase,
+              $DevProviderStateTable,
+              DevProviderStateRow
+            >,
+          ),
+          DevProviderStateRow,
+          PrefetchHooks Function()
+        > {
+  $$DevProviderStateTableTableManager(
+    _$AppDatabase db,
+    $DevProviderStateTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DevProviderStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DevProviderStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DevProviderStateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> provider = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<String?> lastSuccessAt = const Value.absent(),
+                Value<String?> lastErrorAt = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<int> quotaUsed = const Value.absent(),
+                Value<String?> quotaPeriod = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DevProviderStateCompanion(
+                provider: provider,
+                enabled: enabled,
+                lastSuccessAt: lastSuccessAt,
+                lastErrorAt: lastErrorAt,
+                lastError: lastError,
+                quotaUsed: quotaUsed,
+                quotaPeriod: quotaPeriod,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String provider,
+                required bool enabled,
+                Value<String?> lastSuccessAt = const Value.absent(),
+                Value<String?> lastErrorAt = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<int> quotaUsed = const Value.absent(),
+                Value<String?> quotaPeriod = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DevProviderStateCompanion.insert(
+                provider: provider,
+                enabled: enabled,
+                lastSuccessAt: lastSuccessAt,
+                lastErrorAt: lastErrorAt,
+                lastError: lastError,
+                quotaUsed: quotaUsed,
+                quotaPeriod: quotaPeriod,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DevProviderStateTable, DevProviderStateRow>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $DevProviderStateTable,
+                    DevProviderStateRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DevProviderStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DevProviderStateTable,
+      DevProviderStateRow,
+      $$DevProviderStateTableFilterComposer,
+      $$DevProviderStateTableOrderingComposer,
+      $$DevProviderStateTableAnnotationComposer,
+      $$DevProviderStateTableCreateCompanionBuilder,
+      $$DevProviderStateTableUpdateCompanionBuilder,
+      (
+        DevProviderStateRow,
+        BaseReferences<
+          _$AppDatabase,
+          $DevProviderStateTable,
+          DevProviderStateRow
+        >,
+      ),
+      DevProviderStateRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -20226,4 +28336,22 @@ class $AppDatabaseManager {
       $$DevSyncHistoryTableTableManager(_db, _db.devSyncHistory);
   $$DevBackupsTableTableManager get devBackups =>
       $$DevBackupsTableTableManager(_db, _db.devBackups);
+  $$MktPricesTableTableManager get mktPrices =>
+      $$MktPricesTableTableManager(_db, _db.mktPrices);
+  $$MktQuotesTableTableManager get mktQuotes =>
+      $$MktQuotesTableTableManager(_db, _db.mktQuotes);
+  $$MktCorporateEventsTableTableManager get mktCorporateEvents =>
+      $$MktCorporateEventsTableTableManager(_db, _db.mktCorporateEvents);
+  $$MktIndicatorsTableTableManager get mktIndicators =>
+      $$MktIndicatorsTableTableManager(_db, _db.mktIndicators);
+  $$MktFxRatesTableTableManager get mktFxRates =>
+      $$MktFxRatesTableTableManager(_db, _db.mktFxRates);
+  $$MktTreasuryPricesTableTableManager get mktTreasuryPrices =>
+      $$MktTreasuryPricesTableTableManager(_db, _db.mktTreasuryPrices);
+  $$MktFundQuotasTableTableManager get mktFundQuotas =>
+      $$MktFundQuotasTableTableManager(_db, _db.mktFundQuotas);
+  $$MktInstrumentsTableTableManager get mktInstruments =>
+      $$MktInstrumentsTableTableManager(_db, _db.mktInstruments);
+  $$DevProviderStateTableTableManager get devProviderState =>
+      $$DevProviderStateTableTableManager(_db, _db.devProviderState);
 }

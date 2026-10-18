@@ -6,8 +6,8 @@ import 'sync_rows.dart';
 /// conteúdo contra o schema atual.
 ///
 /// Cada passo converte as tabelas da versão `n` para `n + 1`. Tabelas que
-/// não existiam ficam vazias. Hoje nenhum passo muda colunas: as versões 2 e
-/// 3 só criaram tabelas (`docs/BANCO.md`). Uma futura mudança de coluna ganha
+/// não existiam ficam vazias. Hoje nenhum passo muda colunas: as versões 2, 3
+/// e 4 só criaram tabelas (`docs/BANCO.md`). Uma futura mudança de coluna ganha
 /// aqui o passo que preenche ou transforma o campo.
 abstract final class SaveContents {
   static final Map<
@@ -19,6 +19,8 @@ abstract final class SaveContents {
     1: (tables) => tables,
     // v2 → v3: só tabelas novas (aliases e carteiras hipotéticas).
     2: (tables) => tables,
+    // v3 → v4: só tabelas de mercado (`mkt_`), que não são sincronizáveis.
+    3: (tables) => tables,
   };
 
   /// Converte [tables] do schema [from] para o [to].

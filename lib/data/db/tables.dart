@@ -356,3 +356,216 @@ class DevBackups extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+// -- Dados de mercado (F6, `docs/BANCO.md` §6) --------------------------------
+//
+// Não são dados do usuário: vêm dos provedores. Chave natural em vez de UUID,
+// sem HLC; vão no save opcionalmente (pasta `market/`), mesclados por união
+// com o `collected_at` mais recente vencendo. Todas as colunas são texto
+// (decimais exatos, regra 6) e todo registro guarda fonte, data de
+// referência, data de coleta e tipo do dado (regra 2).
+
+/// Preços diários (barras) por ativo.
+@DataClassName('MktPriceRow')
+class MktPrices extends Table {
+  TextColumn get symbol => text()();
+  TextColumn get market => text()();
+  TextColumn get refDate => text()();
+  TextColumn get source => text()();
+
+  /// `close`, `adjusted` ou `calculated`.
+  TextColumn get dataType => text()();
+  TextColumn get open => text().nullable()();
+  TextColumn get high => text().nullable()();
+  TextColumn get low => text().nullable()();
+  TextColumn get close => text()();
+  TextColumn get volume => text().nullable()();
+  TextColumn get currency => text()();
+  TextColumn get quoteFactor => text().nullable()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {
+    symbol,
+    market,
+    refDate,
+    source,
+    dataType,
+  };
+}
+
+/// Última cotação por ativo e fonte.
+@DataClassName('MktQuoteRow')
+class MktQuotes extends Table {
+  TextColumn get symbol => text()();
+  TextColumn get market => text()();
+  TextColumn get source => text()();
+  TextColumn get price => text()();
+  TextColumn get currency => text()();
+
+  /// Instante UTC a que o preço se refere (do provedor).
+  TextColumn get refAt => text()();
+
+  /// Atraso informado pelo provedor (por exemplo, "até 30 min").
+  TextColumn get delayNote => text().nullable()();
+
+  /// `intraday` ou `close`.
+  TextColumn get dataType => text()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {symbol, market, source};
+}
+
+/// Proventos e eventos corporativos.
+@DataClassName('MktCorporateEventRow')
+class MktCorporateEvents extends Table {
+  TextColumn get symbol => text()();
+  TextColumn get market => text()();
+
+  /// `split`, `reverse_split`, `bonus_shares`, `cash_dividend`, `jcp`,
+  /// `fii_income`, `amortization`, `other_cash`.
+  TextColumn get eventKind => text()();
+  TextColumn get exDate => text()();
+  TextColumn get source => text()();
+
+  /// Desempate de eventos iguais na mesma data (por exemplo, dois JCP).
+  TextColumn get seq => text()();
+  TextColumn get comDate => text().nullable()();
+  TextColumn get paymentDate => text().nullable()();
+
+  /// Multiplicador da quantidade (2 = desdobramento 1:2).
+  TextColumn get factor => text().nullable()();
+
+  /// Valor por ação ou cota.
+  TextColumn get amount => text().nullable()();
+  TextColumn get currency => text().nullable()();
+
+  /// `paid`, `announced` ou `suspect`.
+  TextColumn get status => text()();
+  TextColumn get rawLabel => text().nullable()();
+  TextColumn get isin => text().nullable()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {
+    symbol,
+    market,
+    eventKind,
+    exDate,
+    source,
+    seq,
+  };
+}
+
+/// Indicadores econômicos (CDI, Selic, IPCA, IGP-M).
+@DataClassName('MktIndicatorRow')
+class MktIndicators extends Table {
+  TextColumn get seriesCode => text()();
+  TextColumn get refDate => text()();
+  TextColumn get source => text()();
+  TextColumn get value => text()();
+
+  /// `pct_day`, `pct_month`, `pct_year` ou `index`.
+  TextColumn get unit => text()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {seriesCode, refDate, source};
+}
+
+/// Câmbio.
+@DataClassName('MktFxRateRow')
+class MktFxRates extends Table {
+  TextColumn get base => text()();
+  TextColumn get quote => text()();
+  TextColumn get refDate => text()();
+
+  /// `ptax_close` ou `reference`.
+  TextColumn get kind => text()();
+  TextColumn get source => text()();
+  TextColumn get bid => text().nullable()();
+  TextColumn get ask => text().nullable()();
+  TextColumn get refAt => text().nullable()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {base, quote, refDate, kind, source};
+}
+
+/// Preços e taxas do Tesouro Direto.
+@DataClassName('MktTreasuryPriceRow')
+class MktTreasuryPrices extends Table {
+  TextColumn get title => text()();
+  TextColumn get maturityDate => text()();
+  TextColumn get refDate => text()();
+  TextColumn get source => text()();
+  TextColumn get buyRate => text().nullable()();
+  TextColumn get sellRate => text().nullable()();
+  TextColumn get buyPu => text().nullable()();
+  TextColumn get sellPu => text().nullable()();
+  TextColumn get basePu => text().nullable()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {title, maturityDate, refDate, source};
+}
+
+/// Dados de fundos da CVM: cota diária e informe mensal de FII.
+@DataClassName('MktFundQuotaRow')
+class MktFundQuotas extends Table {
+  TextColumn get cnpj => text()();
+  TextColumn get refDate => text()();
+
+  /// `daily` (cota diária) ou `fii_monthly` (informe mensal de FII).
+  TextColumn get kind => text()();
+  TextColumn get source => text()();
+
+  /// Cota diária ou valor patrimonial por cota.
+  TextColumn get quota => text().nullable()();
+
+  /// Patrimônio líquido.
+  TextColumn get nav => text().nullable()();
+  TextColumn get holders => text().nullable()();
+  TextColumn get isin => text().nullable()();
+  TextColumn get name => text().nullable()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {cnpj, refDate, kind, source};
+}
+
+/// Identificação de instrumentos nas fontes (ISIN, nome).
+@DataClassName('MktInstrumentRow')
+class MktInstruments extends Table {
+  TextColumn get symbol => text()();
+  TextColumn get market => text()();
+  TextColumn get source => text()();
+  TextColumn get isin => text().nullable()();
+  TextColumn get name => text().nullable()();
+
+  /// Identificador do instrumento na fonte (por exemplo, id da CoinGecko).
+  TextColumn get sourceId => text().nullable()();
+  TextColumn get collectedAt => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {symbol, market, source};
+}
+
+/// Estado de cada provedor neste PC: ligado, último sucesso e erro, cota.
+/// Nunca vai no save.
+@DataClassName('DevProviderStateRow')
+class DevProviderState extends Table {
+  TextColumn get provider => text()();
+  BoolColumn get enabled => boolean()();
+  TextColumn get lastSuccessAt => text().nullable()();
+  TextColumn get lastErrorAt => text().nullable()();
+  TextColumn get lastError => text().nullable()();
+  IntColumn get quotaUsed => integer().withDefault(const Constant(0))();
+
+  /// Período da cota (`2026-10` para cotas mensais).
+  TextColumn get quotaPeriod => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {provider};
+}
