@@ -316,10 +316,10 @@ Valores ajustados por proventos e eventos são **calculados** pelo app a partir 
 | Tabela | Campos | Para quê |
 |---|---|---|
 | `dev_identity` | `device_id`, `device_name`, `created_at`, `last_hlc` | Uma linha só. Identidade deste PC e último HLC emitido. |
-| `dev_settings` | `key`, `value_json`, `updated_at` | Configurações do dispositivo: intervalo de atualização, tamanho da janela, tema, última pasta usada, provedores ligados |
+| `dev_settings` | `key`, `value_json`, `updated_at` | Configurações do dispositivo: intervalo de atualização, tamanho da janela, tema, tempo de inatividade do bloqueio (`lock.idle_minutes`), última pasta usada, provedores ligados |
 | `dev_sync_peers` | `peer_device_id`, `peer_name`, `last_hlc_received` (maior HLC do último save importado do parceiro), `last_hlc_sent` (maior HLC deste PC que o parceiro confirmou ter recebido, vindo do manifesto dele), `last_sync_at` | Base para detectar conflitos (SPEC §10.4, D-29) e avisar sincronização antiga |
 | `dev_sync_history` | `id`, `direction` (`export`/`import`), `peer_device_id`, `peer_name`, `file_name`, `at`, `max_hlc`, `counts_json` (só contagens), `result` (`ok`/`failed`), `message` | Histórico de sincronizações |
-| `dev_backups` | `id`, `path`, `at`, `reason`, `schema_version`, `app_version`, `size`, `sha256`, `encryption` (`none` na v1.0, D-24) | Backups e retenção (`BACKUP.md`) |
+| `dev_backups` | `id`, `path`, `at`, `reason`, `schema_version`, `app_version`, `size`, `sha256`, `encryption` (`none` ou `sqlcipher-4`, D-24 e D-32; o `keyId` fica no `.json` do backup) | Backups e retenção (`BACKUP.md`) |
 | `dev_provider_state` | `provider`, `last_success_at`, `last_error_at`, `last_error`, `quota_used`, `quota_period` | Controle de limites e estado dos provedores |
 
 Chaves de API **não ficam no banco**: ficam no Gerenciador de Credenciais do Windows (DECISIONS D-11).
@@ -349,3 +349,7 @@ Podem ser apagadas a qualquer momento. São recalculadas a partir da operação 
 - Antes de migrar, o app faz um backup automático (SPEC §11, DECISIONS D-19): antes de abrir o banco, lê o `user_version`; se for antigo, grava uma cópia com `VACUUM INTO` em `backups\`, confere a integridade e só então deixa o Drift migrar. Sem backup válido, o banco não é aberto. Banco de versão mais nova que a do app é recusado. Ficam os 10 backups de migração mais recentes.
 - O save registra `schema_version`. Saves mais antigos são convertidos na importação; mais novos são recusados.
 - Mudanças incompatíveis no schema só com aprovação do usuário (CLAUDE.md).
+
+## Banco criptografado (F5B)
+
+Com o bloqueio do app ativo, o mesmo schema fica num arquivo criptografado pelo SQLCipher 4 (chave bruta de 256 bits, `PRAGMA key`). As chaves ficam fora do banco, em `patrion.keys.json` ao lado dele (e, com o Windows Hello, em `patrion.hello.bin`). Nada no schema muda: migrações, backups e o save funcionam igual. Detalhes em `BLOQUEIO.md`.

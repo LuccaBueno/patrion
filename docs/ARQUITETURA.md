@@ -35,12 +35,13 @@ Outras verificações automáticas: fora de `presentation/`, nenhum arquivo usa 
 1. Abre a janela (`window_manager`, tamanho mínimo 960 × 640).
 2. Lê `--data-dir` e `--cache-dir` (`LaunchOptions`) e resolve as pastas (`AppPathsResolver`, DECISIONS D-05), criando-as se preciso.
 3. Liga os logs rotativos (`setupLogging`, D-16) e os capturadores de erros não tratados.
-4. Abre a **sessão** do banco (`openSession`, `presentation/session/app_session.dart`), sempre na ordem:
-   - se o banco existente estiver num schema antigo, backup anterior à migração (`PreMigrationBackup`, D-19); sem backup válido, para aqui;
-   - abre o banco (`AppDatabase.open`, em um isolate de fundo; o Drift migra se preciso);
+4. Cria o `SessionManager` (`presentation/session/app_session.dart`) e chama `start()`. Sem o bloqueio, abre a sessão na hora; com o bloqueio (banco criptografado e `patrion.keys.json`), mostra a tela de desbloqueio e só abre a sessão depois da senha, da chave de recuperação ou do Windows Hello (`BLOQUEIO.md`). A **sessão** (`openSession`) abre sempre na ordem:
+   - (com o bloqueio) a chave do banco já liberada;
+   - se o banco existente estiver num schema antigo, backup anterior à migração (`PreMigrationBackup`, D-19), criptografado com a mesma chave quando há bloqueio; sem backup válido, para aqui;
+   - abre o banco (`AppDatabase.open`, em um isolate de fundo, com `PRAGMA key` quando há chave; o Drift migra se preciso);
    - carrega ou cria a identidade do dispositivo (`DeviceIdentityStore`) e cria o `SyncContext` (HLC + `device_id`);
    - registra em `dev_backups` o backup da migração, se houve.
-5. `SessionHost` monta a interface sobre a sessão, com banco, contexto e pastas como provedores do Riverpod. Quando a sessão troca (restauração de backup; bloqueio na F5B), a árvore inteira é remontada do zero.
+5. `SessionHost` monta a interface sobre a sessão, com banco, contexto, pastas e chave como provedores do Riverpod, dentro do `InactivityGuard` (bloqueio por inatividade). Quando a sessão troca (restauração de backup, bloqueio, desbloqueio, ativação ou desativação do bloqueio), a árvore inteira é remontada do zero; bloqueado, só existe a tela de desbloqueio.
 6. Se algo falhar, mostra a tela "O Patrion não conseguiu iniciar" com a mensagem e a pasta dos logs.
 
 ## Dados e sincronização
@@ -108,6 +109,23 @@ Detalhes em `SINCRONIZACAO.md` e `BACKUP.md`; decisões em D-28 a D-31.
 | `presentation/session/` | `app_session.dart`, `session_host.dart` | Sessão do banco que pode ser fechada e reaberta (restauração; F5B) |
 | `presentation/screens/` | `sync/`, `backup/` | Telas Sincronização (com a prévia da importação) e Backup |
 | `presentation/services/` | `file_dialogs.dart` | Diálogos de arquivo do Windows atrás de uma interface (D-31) |
+
+## Bloqueio do app (Fase 5B)
+
+Detalhes em `BLOQUEIO.md`; decisões em D-24, D-32 e D-33.
+
+| Camada | Arquivos | Papel |
+|---|---|---|
+| `core/crypto/` | `crypto_box.dart`, `database_key.dart` | Argon2id, AES-256-GCM e números aleatórios (`pointycastle`); chave do banco que pode ser zerada |
+| `domain/security/` | `key_file.dart`, `recovery_key.dart` | Arquivo de chaves (chave do banco embrulhada pela senha e pela chave de recuperação), chave de recuperação e regras da senha |
+| `domain/sync/` | `invsave_codec.dart` (`protect`, `unprotect`) | Senha do arquivo de save |
+| `application/security/` | `security_ports.dart` | Interfaces do Windows Hello e do cofre da chave para o Hello |
+| `application/settings/` | `lock_preferences.dart` | Tempo de inatividade (configuração deste PC) |
+| `infrastructure/security/` | `key_file_store.dart`, `database_encryption.dart` | Arquivo de chaves no disco; conversão do banco fechado entre aberto e criptografado, em dois tempos |
+| | `windows_hello.dart`, `dpapi.dart` | Windows Hello (`local_auth`) e cópia da chave protegida pelo DPAPI (FFI) |
+| `infrastructure/backup/` | `database_file_inspector.dart` | Abre arquivos de banco com chave e faz o `sqlcipher_export` (copiando o `user_version`) |
+| `presentation/session/` | `app_session.dart`, `inactivity_guard.dart` | Fases da sessão (aberta, bloqueada, ocupada, falha), desbloqueio, ativar/desativar, inatividade |
+| `presentation/screens/security/` | `unlock_screen.dart`, `lock_settings_section.dart`, `security_dialogs.dart` | Tela de desbloqueio, seção nas Configurações e diálogos (senha, chave de recuperação) |
 
 ## Interface
 

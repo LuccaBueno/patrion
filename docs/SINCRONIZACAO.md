@@ -1,6 +1,6 @@
 # Sincronização
 
-Estado em 17/10/2026 (Fase 5). A sincronização entre computadores funciona pelo **arquivo de save** (`.invsave`, SPEC §10), sem servidor: um PC exporta, o outro importa e mescla. A criptografia do save com senha (§10.6) fica para a F5B/F11.
+Estado em 18/10/2026 (Fase 5B). A sincronização entre computadores funciona pelo **arquivo de save** (`.invsave`, SPEC §10), sem servidor: um PC exporta, o outro importa e mescla. O arquivo pode ser protegido por senha (§10.6, desde a F5B; detalhes em `BLOQUEIO.md`).
 
 ## Identidade dos registros
 
@@ -65,14 +65,14 @@ data/<tabela>.jsonl    um registro por linha, inclusive tombstones
 | `counts` | registros por tabela |
 | `files` | SHA-256 de cada `data/<tabela>.jsonl` |
 | `knownPeers` | para cada PC do qual o autor já importou saves, o maior HLC recebido dele (base da detecção de conflitos) |
-| `encryption` | `{"scheme": "none"}` na v1.0. Reservado para a senha do arquivo da F5B (DECISIONS D-24): um save com outro esquema é recusado com mensagem clara |
+| `encryption` | `{"scheme": "none"}` no save sem senha. No save protegido, `{"scheme": "aes-256-gcm", "kdf": {...}, "nonce": ..., "payload": "payload.bin"}` (DECISIONS D-32, abaixo) |
 | `market` | `{"included": false}`. A pasta `market/` com dados de mercado entra quando existirem dados de mercado no banco (F6) |
 
 **O que vai:** todas as tabelas sincronizáveis (as que têm os campos de sincronização), descobertas pelo próprio banco: cadastros, operações, preços informados, configurações compartilhadas, `asset_aliases` e as tabelas hipotéticas. Uma tabela nova entra no save sem código extra.
 
 **O que não vai:** tabelas `dev_` (identidade, configurações do dispositivo, histórico, backups), dados derivados, logs e chaves de API.
 
-**O arquivo não é criptografado** na v1.0: quem tiver o arquivo lê a carteira. A tela avisa isso.
+**Senha do arquivo (F5B).** Ao salvar, o app pergunta se o arquivo deve ser protegido por senha (marcado por padrão com o bloqueio do app ativo). O save protegido é um ZIP com `manifest.json` (só versões, PC de origem, data e os parâmetros da criptografia; sem contagens nem dados), `manifest.sha256` e `payload.bin`: o save comum inteiro, cifrado com AES-256-GCM e chave Argon2id (64 MiB, 3 passadas) derivada da senha. Ao importar, o app pede a senha, decifra e valida o save de dentro como sempre; o manifesto de dentro precisa bater com o de fora. Sem senha, quem tiver o arquivo lê a carteira; a tela avisa.
 
 ### Validação na importação
 
@@ -81,7 +81,8 @@ Antes de qualquer alteração, o arquivo inteiro é recusado se:
 - não for um ZIP legível ou não tiver manifesto;
 - o SHA-256 do manifesto ou de qualquer tabela não bater;
 - houver arquivo não declarado, tabela ausente, contagem diferente da do manifesto ou HLC máximo diferente;
-- o formato for mais novo que o conhecido, o schema for mais novo que o do app ou o save for protegido por senha;
+- o formato for mais novo que o conhecido ou o schema for mais novo que o do app;
+- o save for protegido por senha e a senha estiver errada (ou o conteúdo cifrado tiver sido alterado: o AES-GCM recusa os dois);
 - uma linha tiver colunas diferentes das da tabela, id repetido ou HLC inválido;
 - um registro referenciar outro que não existe nem no banco nem no arquivo.
 
@@ -115,7 +116,7 @@ Toda alteração feita pela própria mesclagem (remapear, unificar, escolher a v
 
 ### Aplicação
 
-1. Validação e prévia (nada é alterado).
+1. Validação e prévia (nada é alterado). A prévia também confere a **carteira resultante**: aplica o plano numa transação que é sempre desfeita, recalcula a carteira e compara as inconsistências com as de antes. As novas (por exemplo, uma venda maior que a posição depois de vendas feitas nos dois PCs) aparecem num aviso antes de aplicar, com ativo, conta e data. O aviso não bloqueia, e é recalculado quando o usuário troca a versão de um conflito. Essa conferência não avança o relógio HLC.
 2. Ao confirmar: backup automático do banco (`pre-importacao`, SPEC §11).
 3. Numa única transação: o relógio avança para depois do maior HLC recebido, o plano é recalculado com o banco de agora e as escolhas dos conflitos, as linhas são gravadas (chaves estrangeiras conferidas só no fim, `defer_foreign_keys`) e `dev_sync_peers` é atualizado. Se algo falhar, nada é alterado (S9).
 4. As telas recalculam posições e totais na hora (as escritas avisam as consultas observadas).
@@ -133,5 +134,6 @@ A tela Sincronização lista os computadores com quem este PC já trocou saves e
 
 - `test/application/sync/save_sync_test.dart`: casos S1 a S10 de `CASOS_DE_TESTE.md` §9 e os itens de SPEC §10.7 (ida e volta, idempotência, convergência, conflito, exclusão, arquivo antigo, arquivo corrompido, schema mais novo e mais antigo, mesmo ativo com UUIDs diferentes, rollback, relógio adiantado, real × hipotético), com dois "PCs" em memória (`test/helpers/sync_pc.dart`).
 - `test/domain/sync/merge_planner_test.dart` e `invsave_codec_test.dart`: regras da mesclagem e formato do arquivo.
-- `test/presentation/sync_backup_screens_test.dart`: exportar, prévia com conflito, arquivo recusado e aviso no Início.
+- `test/application/sync/save_sync_test.dart` também cobre a conferência da carteira resultante na prévia e a senha do arquivo.
+- `test/presentation/sync_backup_screens_test.dart`: exportar, prévia com conflito, aviso de carteira inconsistente, save com senha, arquivo recusado e aviso no Início.
 - `test/core/sync/hlc_test.dart`, `test/data/repositories/sync_repository_test.dart`, `test/data/sync/device_identity_test.dart`: HLC, repositório base e identidade.

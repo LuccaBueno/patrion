@@ -6,13 +6,23 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ### Alterado
 
+- A prévia da importação de um save avisa, antes de aplicar, quando a carteira resultante fica inconsistente (por exemplo, uma venda maior que a posição depois de vendas feitas nos dois computadores), e recalcula o aviso quando a versão de um conflito muda.
+- O SQLite do app passou a ser o build do SQLCipher (sem chave, ele funciona como o SQLite comum).
 - Dashboard: os valores dos cards ficam sempre numa linha (a fonte diminui se não couber); o percentual do resultado não realizado passou para a nota do card.
 - CI: `actions/checkout` atualizado para a v7 (Node.js 24), eliminando o aviso de descontinuação do Node.js 20.
-- Especificação: bloqueio do app (banco criptografado com SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação) planejado para a fase F5B da v1.x, com o impacto na arquitetura registrado em DECISIONS D-24. Ainda não implementado.
+- Especificação: bloqueio do app (banco criptografado com SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação) planejado para a fase F5B da v1.x, com o impacto na arquitetura registrado em DECISIONS D-24 (implementado, ver Adicionado).
 - Temas claro e escuro refeitos: fundo e superfícies neutros (grafite no escuro, branco e cinza-claro no claro), verde-esmeralda só em destaques e dourado só no símbolo e no nome (DECISIONS D-18).
 
 ### Adicionado
 
+- Fase 5B (bloqueio do app):
+  - Bloqueio opcional, por computador, em Configurações: o banco de dados passa a ser criptografado (SQLCipher) e só abre com a senha. A conversão de um banco existente faz um backup antes, é conferida e pode ser desfeita ("Desativar o bloqueio", com a senha).
+  - Tela de desbloqueio na abertura; "Bloquear agora"; bloqueio por inatividade (padrão 15 minutos; 1, 5, 30, 60 minutos ou nunca), que fecha o banco e descarta os dados da memória.
+  - Chave de recuperação mostrada uma única vez ao ativar; "Esqueci a senha" libera os dados com ela e define uma nova senha. Também é possível trocar a senha e gerar nova chave de recuperação.
+  - Desbloqueio opcional pelo Windows Hello (rosto, digital ou PIN), com a chave protegida pela conta do Windows.
+  - Backups criptografados com o bloqueio ativo, cada um com uma cópia do arquivo de chaves; ao ativar, os backups antigos da pasta de backups também são criptografados. Backups de uma chave anterior são restaurados com a senha da época.
+  - Senha do arquivo de save: ao salvar, o arquivo pode ser protegido (AES-256-GCM, chave Argon2id); ao importar, o app pede a senha.
+  - `docs/BLOQUEIO.md`.
 - Fase 5 (backup e save):
   - Arquivo de save `.invsave` para sincronizar computadores sem servidor: "Salvar arquivo de save", "Importar save" e "Importar e gerar novo save", com nome padrão `Patrion_<PC>_<data>.invsave`.
   - Importação com prévia: registros novos, alterados e excluídos por tabela, conflitos (com a escolha da versão de cada lado), cadastros repetidos que serão unificados e possíveis operações duplicadas (só sinalizadas).

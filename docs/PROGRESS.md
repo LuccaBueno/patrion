@@ -4,9 +4,190 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 5 concluída** em 17/10/2026. Próxima: Fase 6 (Dados de mercado).
+**Fase 5B concluída** em 18/10/2026 (bloqueio do app; o teste do Windows Hello no app real fica com você, ver o relatório). Próxima: Fase 6 (Dados de mercado).
 
 ## Concluído
+
+### Fase 5B — Bloqueio do app
+
+Critério de pronto (SPEC §21): os testes obrigatórios de §3 passam, e um banco já existente é convertido para criptografado e volta a abrir no app real, com Windows Hello e com a senha.
+
+- **Com a senha: verificado no app real.**
+- **Com o Windows Hello: não foi possível verificar neste PC**, que não tem o Windows Hello configurado (o Windows responde `DeviceNotPresent`). A parte do Hello está implementada e coberta por teste com dublê, mas precisa do seu teste manual num PC com Hello (roteiro abaixo, passo 9).
+
+Antes da F5B, as duas pendências da F5 foram resolvidas (commits `745585a` e `be6f8cc`). CI: ver o item 3.
+
+**1. O que foi implementado**
+
+- **Pendências da F5:**
+  - A prévia da importação **avisa, antes de aplicar, quando a carteira resultante fica inconsistente** (venda maior que a posição, transferência sem a ponta de saída, ativo inexistente, moeda diferente). O app aplica o plano numa transação que é sempre desfeita, recalcula a carteira e mostra só as inconsistências novas, com ativo, conta e data. O aviso não bloqueia e é recalculado quando o usuário troca a versão de um conflito. Essa conferência não grava nada nem avança o relógio HLC.
+  - **Teste da falha ao reabrir no meio de uma restauração**: o arquivo do backup já está no lugar do banco quando a reabertura falha. O teste confere que o app volta o banco anterior **intacto, registro a registro (inclusive HLCs)**, íntegro, com a mesma identidade e o mesmo HLC, e sem arquivo temporário sobrando.
+- **Banco criptografado com SQLCipher** (D-32): o `sqlite3` passou a usar o build do SQLCipher 4.19 (SQLite 3.53.4), sem pacote novo. A chave é aleatória, de 256 bits, passada como chave bruta.
+- **Arquivo de chaves** `patrion.keys.json`: a chave do banco embrulhada (AES-256-GCM) pela senha e pela chave de recuperação, com Argon2id (64 MiB, 3 passadas). A senha nunca é guardada.
+- **Ativar e desativar** em Configurações → "Bloqueio do app":
+  - backup antes (`pre-bloqueio`, `pre-desbloqueio`);
+  - conversão conferida (integridade, versão, contagens) e troca em dois tempos, com volta ao estado anterior se algo falhar;
+  - ao ativar, os backups antigos da pasta de backups também são criptografados (opção marcada por padrão).
+- **Tela de desbloqueio** na abertura; **"Bloquear agora"**; **bloqueio por inatividade** (padrão 15 min; 1, 5, 30, 60 min ou nunca), que fecha o banco, descarta as telas e os provedores e zera a chave.
+- **Chave de recuperação** mostrada uma única vez (o diálogo só fecha depois de "Guardei a chave de recuperação"). "Esqueci a senha" pede a chave e uma nova senha. Também dá para trocar a senha e gerar nova chave de recuperação.
+- **Windows Hello** opcional: a chave do banco é guardada protegida pelo DPAPI da conta do Windows (`patrion.hello.bin`) e só é lida depois da confirmação do Hello. A limitação (não protege contra quem está logado na mesma conta) aparece nas Configurações.
+- **Backups criptografados**: cada um leva o `keyId` nos metadados e uma cópia do arquivo de chaves ao lado. Restaurar converte para a criptografia atual; um backup de uma chave anterior pede a senha da época.
+- **Interrupções**: ao abrir, o app reconhece uma ativação ou desativação interrompida pelo estado dos arquivos e segue sem perder dados. Banco criptografado sem o arquivo de chaves mostra como recuperar.
+- **Senha do arquivo de save**:
+  - ao salvar, "Proteger o arquivo com senha" (marcado por padrão com o bloqueio ativo);
+  - o arquivo vira `manifest.json` (sem dados) + `payload.bin` cifrado (AES-256-GCM, Argon2id);
+  - ao importar, o app pede a senha; "Importar e gerar novo save" oferece a mesma senha;
+  - a versão da F5 recusa esse arquivo dizendo que ele é protegido por senha.
+- Documentos: `BLOQUEIO.md` (novo); decisões D-32 e D-33.
+
+**2. Arquivos criados ou alterados**
+
+- `lib/core/crypto/` (novo): `crypto_box.dart` (Argon2id, AES-GCM, aleatórios), `database_key.dart`.
+- `lib/domain/`:
+  - `security/` (novo): `key_file.dart`, `recovery_key.dart`;
+  - `sync/invsave_codec.dart` (`protect`, `unprotect`, `readManifest`) e `sync/save_manifest.dart` (parâmetros da criptografia);
+  - `backup/backup_metadata.dart` (`keyId`, motivos novos).
+- `lib/application/`:
+  - `security/security_ports.dart` e `settings/lock_preferences.dart` (novos);
+  - `backup/backup_service.dart` e `backup_ports.dart` (chave, cópia do arquivo de chaves, backups de outra chave, criptografar os antigos);
+  - `sync/save_service.dart` (conferência da carteira resultante, senha do arquivo).
+- `lib/data/`: `db/app_database.dart` (`open` com chave), `sync/sync_tables_gateway.dart` (aplicação sem avançar o HLC, para a prévia).
+- `lib/infrastructure/`:
+  - `security/` (novo): `key_file_store.dart`, `database_encryption.dart`, `windows_hello.dart`, `dpapi.dart`;
+  - `backup/database_file_inspector.dart` (chave, conversão), `local_backup_file_system.dart`, `pre_migration_backup.dart`.
+- `lib/presentation/`:
+  - `session/app_session.dart` (fases, desbloqueio, ativar/desativar, restauração com chaves), `session_host.dart`, `inactivity_guard.dart` (novo);
+  - `screens/security/` (novo: tela de desbloqueio, seção das Configurações, diálogos);
+  - `screens/sync/save_password_dialog.dart` (novo), `sync_screen.dart`, `import_preview_dialog.dart`;
+  - `screens/backup/backup_screen.dart`, `settings_screen.dart`, `providers.dart`, `format/sync_labels.dart`;
+  - `lib/main.dart`.
+- `pubspec.yaml`/`.lock`: SQLCipher pelo hook do `sqlite3`; `pointycastle` 4.0.0, `local_auth` 3.0.2, `ffi` 2.2.0 (D-32). `windows/flutter/` (registro do plugin do `local_auth`).
+- `test/`:
+  - novos: `presentation/session/app_lock_test.dart`, `presentation/security_screens_test.dart`, `domain/security/key_file_test.dart`, `infrastructure/security/hello_vault_test.dart`, `helpers/fake_security.dart`;
+  - ampliados: `application/sync/save_sync_test.dart`, `application/backup/backup_service_test.dart`, `presentation/sync_backup_screens_test.dart`, `helpers/sync_pc.dart`.
+- Docs: `BLOQUEIO.md` (novo); `DECISIONS.md`, `BACKUP.md`, `SINCRONIZACAO.md`, `ARQUITETURA.md`, `BANCO.md`, `DESENVOLVIMENTO.md`, `PROGRESS.md`, `README.md`, `CHANGELOG.md`.
+
+**3. Testes executados (18/10/2026)**
+
+- `dart run build_runner build`: sem diferenças no código versionado.
+- `dart format --set-exit-if-changed .`: 150 arquivos, 0 alterados.
+- `flutter analyze`: "No issues found!".
+- `flutter test`: **329 testes, todos passaram** (285 na F5). Entre os novos:
+  - **Testes obrigatórios de SPEC §3**, com banco em arquivo e o SQLCipher de verdade (`app_lock_test.dart`, 19 testes):
+    - banco ilegível sem a chave: o SQLite não abre ("file is not a database"), o texto não aparece no arquivo, o arquivo de chaves não tem a senha nem a chave;
+    - senha errada recusada, o app continua bloqueado;
+    - troca de senha sem perda de dados (a antiga deixa de valer);
+    - recuperação pela chave (digitada em minúsculas, sem hífens, com O no lugar de 0) com nova senha;
+    - bloqueio fecha o banco (consultas falham) e zera a chave; outro início do app pede a senha;
+    - backup criptografado restaurável; backup sem criptografia restaurado com o bloqueio ativo fica criptografado; backup de uma chave anterior só restaura com a senha da época; backups antigos criptografados ao ativar continuam restauráveis;
+    - migração de schema 2 → 3 com o banco criptografado: backup anterior à migração criptografado, com o arquivo de chaves ao lado, e dados preservados;
+    - desativar com a senha (senha errada recusada); Windows Hello com dublê (ativa, desbloqueia, recusa sem confirmação, indisponível não ativa); ativação interrompida; banco criptografado sem arquivo de chaves.
+  - Chave de recuperação já pendente quando a sessão nova aparece: o teste falhava antes da correção do bug do item 4.
+  - Arquivo de chaves com os **parâmetros de produção** (Argon2id 64 MiB), AAD (uma cópia não serve no lugar da outra), arquivo alterado, formato da chave de recuperação; AES-GCM recusa chave, nonce e AAD errados; DPAPI real.
+  - Inatividade com relógio falso (1 min sem uso bloqueia; o uso adia; "nunca" e bloqueio desativado não bloqueiam); tela de desbloqueio; seção das Configurações; diálogo da chave de recuperação.
+  - Save com senha: ida e volta, pede a senha, senha errada não muda nada, conteúdo ilegível no arquivo, byte alterado no conteúdo cifrado recusado (mesmo com o SHA-256 refeito), parâmetros de produção, e pela interface (salvar com senha num PC e importar no outro).
+  - Pendências da F5: conferência da carteira resultante (3 testes de serviço e 1 de tela) e falha ao reabrir no meio da restauração.
+- `flutter build windows --release`: compilou `patrion.exe` (com `sqlcipher.dll`).
+- **Execução real do `.exe`** com uma pasta de dados de teste (`--data-dir`), semeada pelos serviços do app com um banco **sem criptografia** já existente (Corretora Exemplo, conta Principal, PETR4: compra de 100 × R$ 30,00) e um backup manual. Comandado por cliques e teclado, conferido por captura da janela do app:
+  1. Configurações → "Ativar o bloqueio…" → senha duas vezes → "Ativar". Aviso "Bloqueio ativado. O banco de dados agora é criptografado." e a **chave de recuperação** no diálogo (copiada pelo botão do app).
+  2. App fechado. No disco: `patrion.db` criptografado e sem o texto "Corretora Exemplo"; `patrion.keys.json` sem a senha; o backup manual antigo e o `pre-bloqueio` criptografados, cada um com o `.keys.json` ao lado.
+  3. App aberto de novo: **tela de desbloqueio**. Senha errada → "Senha incorreta." e continua bloqueado. **Senha certa → Carteira com PETR4, 100 ações, R$ 30,00, custo R$ 3.000,00.**
+  4. "Bloquear depois de" = 1 minuto, sem mexer: aos 50 s o app continuava aberto; aos 75 s estava na tela de desbloqueio (**inatividade**).
+  5. "Esqueci a senha" → chave de recuperação digitada em minúsculas + nova senha → app aberto com "Senha redefinida.".
+  6. "Bloquear agora" → senha antiga recusada → nova aceita.
+  7. Backup → "Restaurar" no backup manual (criptografado na ativação) → confirmação → "Backup restaurado". O banco continua criptografado e a Carteira mostra PETR4 com 100 ações.
+  8. Log: registra ativação, senha incorreta, bloqueio, redefinição e aberturas, **sem senha, sem chave de recuperação e sem valores**.
+  - **Não verificado no app real:** Windows Hello (este PC não tem o Hello configurado; a opção aparece desativada com "não está configurado neste computador", que é o comportamento esperado). Desativar o bloqueio e o save com senha foram verificados só pelos testes automáticos.
+- CI: PENDENTE_CI
+
+**4. Problemas e limitações**
+
+- **Bug encontrado na execução real e corrigido:** depois de ativar, a chave de recuperação não aparecia (a tela nova procurava a chave antes de o gerenciador guardá-la). Corrigido (`a398682`), com teste que falhava antes da correção. Também ajustado: depois de uma senha errada, o cursor volta ao campo da senha.
+- O Windows Hello não pôde ser testado neste PC (ver acima).
+- A chave fica na memória enquanto o app está desbloqueado (é preciso, para o banco funcionar). Ao bloquear, os bytes da chave são zerados, mas o texto do `PRAGMA key` é uma `String` do Dart, que não pode ser zerada: some quando o coletor de lixo a recolhe (D-33).
+- Com o Windows Hello ativo, quem está logado na sua conta do Windows consegue ler a cópia da chave sem o Hello (limitação do DPAPI, mostrada nas Configurações; D-24).
+- O botão "Copiar" do diálogo da chave de recuperação põe a chave na área de transferência do Windows (que pode ter histórico ativado). Prefira anotar ou imprimir.
+- Sem limite de tentativas de senha: o Argon2id (~1 s por tentativa) é o freio (D-33).
+- Ao ativar, backups sem criptografia **fora** da pasta de backups (feitos com "Backup em outra pasta") ficam como estão; a tela avisa quantos.
+- Trocar a senha não muda as cópias `.keys.json` dos backups já feitos. Eles continuam abrindo com a chave atual do banco (mesmo `keyId`); se o bloqueio for desativado e ativado de novo, um backup antigo pede a senha que valia quando ele foi feito.
+- A pasta `build\windows\x64\runner\Release\` tinha uma `sqlite3.dll` de builds antigos (sobra; o app usa a `sqlcipher.dll`). O CI sempre parte do zero. Na distribuição (F7), incluir os avisos de licença do SQLCipher (BSD-3) e do OpenSSL (Apache-2.0).
+- Durante uma ação demorada da tela Backup, a barra de progresso aparece atrás do diálogo de confirmação (comportamento da F5, só visual).
+
+**5. Pendências**
+
+- Você: testar o Windows Hello num PC com o Hello configurado (roteiro, passo 9).
+- F6: incluir `market/` no save; chaves de API (o `flutter_secure_storage` da D-02 será revisto, D-32).
+- F7: associar `.invsave` no instalador; avisos de licença do SQLCipher e do OpenSSL.
+- F9: `hypo_runs` e a opção de levar a série no save; telas das carteiras hipotéticas.
+- F11: pasta de sincronização (§10.6).
+- Da F1: confirmar Finnhub e Twelve Data (F6); licenças do CKAN do Tesouro e do portal da CVM (F6); toolchain Android (futuro).
+
+**6. Como executar e o que testar manualmente**
+
+```powershell
+flutter build windows --release
+```
+
+**Roteiro: senha, bloqueio por inatividade e chave de recuperação.** Use uma pasta de teste, para não mexer nos seus dados.
+
+Preparação:
+
+1. Abra o app com uma pasta de teste e crie alguns dados (uma instituição, uma conta, um ativo e uma compra):
+
+   ```powershell
+   build\windows\x64\runner\Release\patrion.exe --data-dir C:\PatrionTeste\Bloqueio
+   ```
+
+   Faça também um backup (Backup → "Fazer backup agora").
+
+Ativar e senha:
+
+2. Configurações → "Bloqueio do app" → "Ativar o bloqueio…":
+   - tente uma senha curta ou duas senhas diferentes: o app recusa e explica;
+   - use uma senha com 8 caracteres ou mais, deixe marcado "Criptografar também os backups…" e clique em "Ativar".
+3. Aparece a **chave de recuperação** (32 caracteres em 8 grupos). Anote-a. O botão "Concluir" só libera depois de marcar "Guardei a chave de recuperação". O aviso "Bloqueio ativado…" aparece nas Configurações.
+4. Feche o app. Em `C:\PatrionTeste\Bloqueio\` confira que existe `patrion.keys.json`. Se quiser, abra o `patrion.db` num editor de texto: não aparece nenhum nome que você cadastrou (com o bloqueio desativado, aparecem).
+5. Abra o app de novo: aparece **"Patrion bloqueado"**.
+   - digite uma senha errada: "Senha incorreta." e nada abre;
+   - digite a senha certa: o app abre com os seus dados.
+6. Configurações → "Trocar a senha…" (senha atual + nova duas vezes). Depois "Bloquear agora": a senha antiga é recusada e a nova abre.
+
+Bloqueio por inatividade:
+
+7. Configurações → "Bloquear depois de" → "1 minuto". Não mexa no mouse nem no teclado sobre o app por pouco mais de 1 minuto: o app volta à tela de bloqueio. Repita mexendo no app a cada 30 segundos: ele não bloqueia. Depois, volte a 15 minutos (ou escolha "Nunca" para conferir que ele não bloqueia).
+
+Chave de recuperação:
+
+8. Na tela de bloqueio, "Esqueci a senha":
+   - digite uma chave errada: o app recusa;
+   - digite a chave do passo 3 (pode ser em minúsculas e sem os hífens) e uma nova senha duas vezes: o app abre com "Senha redefinida.";
+   - "Bloquear agora": a senha antiga não abre mais; a nova abre;
+   - (opcional) "Gerar nova chave de recuperação…": pede a senha e mostra outra chave; a anterior deixa de valer.
+
+Windows Hello (num PC com o Hello configurado: rosto, digital ou PIN):
+
+9. Configurações → ligue "Desbloquear com o Windows Hello": o Windows pede a confirmação.
+   - "Bloquear agora" → na tela de bloqueio, "Usar o Windows Hello" → confirme → o app abre;
+   - cancele uma vez para ver que nada abre;
+   - feche e abra o app e repita;
+   - desligue a opção e confira que o botão some da tela de bloqueio.
+
+Backups e save com senha:
+
+10. Backup: os backups aparecem como "criptografado". Restaure o backup do passo 1 (criptografado na ativação): os dados voltam e o app continua com o bloqueio.
+11. Sincronização → "Salvar arquivo de save": "Proteger o arquivo com senha" vem marcado; defina uma senha. Em outra pasta de dados (outro "PC", `--data-dir C:\PatrionTeste\B`), "Importar save…": o app pede a senha do arquivo. Com a senha errada, "Senha do arquivo incorreta…"; com a certa, a prévia aparece.
+
+Desativar:
+
+12. Configurações → "Desativar o bloqueio…" → senha. O app reabre sem pedir senha, `patrion.keys.json` some da pasta e os dados continuam. Os backups criptografados continuam pedindo a senha da época para serem restaurados.
+
+Aviso de carteira inconsistente na importação (pendência da F5):
+
+13. Com duas pastas sincronizadas (roteiro da Fase 5) e um ativo com 100 ações nos dois: venda 80 em A e 50 em B (datas diferentes). Salve um save em A e importe em B: a prévia mostra "Depois de aplicar, a carteira fica com 1 operação inconsistente", com o ativo, a conta e a data da venda que fica sem posição.
+
+O que conferir também: o log (`C:\PatrionTeste\Bloqueio\logs\patrion.log`) registra ativação, bloqueios e senhas incorretas sem a senha, sem a chave de recuperação e sem valores.
+
+**Importante:** sem a senha e sem a chave de recuperação, os dados criptografados não podem ser recuperados. Procedimentos de recuperação em `docs/BLOQUEIO.md`.
 
 ### Fase 5 — Backup e save
 
@@ -456,7 +637,7 @@ ou abra `build\windows\x64\runner\Release\patrion.exe`. Conferir: a janela abre 
 
 ## Pendências e problemas conhecidos
 
-Ver as seções 4 e 5 das Fases 5, 4, 3, 2 e 1 acima.
+Ver as seções 4 e 5 das Fases 5B, 5, 4, 3, 2 e 1 acima.
 
 ## Próximo passo
 
@@ -471,3 +652,4 @@ Fase 6 (Dados de mercado), conforme `docs/SPEC.md` §21: adaptadores escolhidos 
 | 2026-10-17 | F3 | Carteira real: schema 2 com backup automático antes de migrar, cadastros, todos os tipos de operação, preço manual, posições, dashboard inicial e telas de carteira, operações e cadastros |
 | 2026-10-17 | F4 | Motor financeiro: ln/exp/pow em Decimal, juros e bases, calendário de dias úteis, CDI, XIRR, TWR, retornos e câmbio; resultado total e TIR por ativo e por moeda na interface; cards do dashboard sem quebra de linha |
 | 2026-10-17 | F5 | Backup e save: arquivo .invsave com mesclagem por HLC, conflitos, unificação de cadastros repetidos e prévia; backup manual e automático com metadados e restauração com reabertura do banco; schema 3; S1 a S10 e sincronização real entre duas pastas de dados |
+| 2026-10-18 | F5B | Pendências da F5 (aviso de carteira inconsistente na prévia; teste da falha ao reabrir na restauração) e bloqueio do app: SQLCipher, senha, chave de recuperação, Windows Hello, inatividade, backups criptografados e senha do arquivo de save; conversão de um banco existente verificada no app real |

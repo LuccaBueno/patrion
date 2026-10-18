@@ -44,6 +44,14 @@ Não é preciso mexer no backup: ao abrir um banco com `user_version` menor que 
 
 Mudanças incompatíveis no schema só com aprovação do usuário (CLAUDE.md). O código gerado e os snapshots são versionados (DECISIONS D-15); o CI falha se estiverem desatualizados.
 
+## SQLCipher e testes do bloqueio
+
+O `sqlite3` usa o build do **SQLCipher** (`hooks: user_defines: sqlite3: source: sqlcipher` no `pubspec.yaml`, DECISIONS D-32). Ele vale para o app e para todos os testes; sem chave, o banco se comporta como o SQLite comum. O build gera `sqlcipher.dll` ao lado do `patrion.exe`. Se a pasta `build\windows\x64\runner\Release\` tiver uma `sqlite3.dll` de builds antigos, ela é sobra e pode ser apagada (ou rode `flutter clean`).
+
+- Os testes que derivam chaves usam `KdfPolicy.fastForTests` (Argon2id com 64 KiB), para rodar rápido; um teste de cada (arquivo de chaves e save com senha) roda com os parâmetros de produção.
+- O Windows Hello e o cofre da chave têm dublês em `test/helpers/fake_security.dart`; o DPAPI real é testado em `test/infrastructure/security/hello_vault_test.dart` (só no Windows).
+- Para testar o bloqueio à mão sem mexer nos seus dados, use `--data-dir` com uma pasta de teste (roteiro em `PROGRESS.md`, Fase 5B). Apagar a pasta de teste apaga tudo, inclusive as chaves.
+
 ## Ícone do app
 
 O `.ico` e o PNG do símbolo são gerados a partir do SVG (DECISIONS D-17):
@@ -70,7 +78,7 @@ O build de release reduz a fonte de ícones aos ícones usados no código. Na F3
 
 | O quê | Onde |
 |---|---|
-| Banco | `%APPDATA%\Patrion\patrion.db` |
+| Banco | `%APPDATA%\Patrion\patrion.db` (criptografado com o bloqueio ativo; chaves em `patrion.keys.json` e, com o Windows Hello, `patrion.hello.bin`. Ver `BLOQUEIO.md`) |
 | Backups | `%APPDATA%\Patrion\backups\` (antes de migrações, de importar um save e de restaurar; manuais). Ver `BACKUP.md` |
 | Logs | `%APPDATA%\Patrion\logs\patrion.log` (rotativos, D-16) |
 | Cache | `%LOCALAPPDATA%\Patrion\cache\` |

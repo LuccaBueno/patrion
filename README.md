@@ -4,7 +4,7 @@ Aplicativo desktop pessoal para Windows 10 e 11 que registra, acompanha, analisa
 
 O app não é corretora, não executa ordens e não faz recomendações de investimento. Simulações e projeções são sempre hipotéticas.
 
-**Situação:** em desenvolvimento. Fase 5 concluída: carteira real (cadastros, todos os tipos de operação, preço informado, posições e dashboard), motor financeiro (juros, CDI, XIRR, TWR) e backup, restauração e sincronização entre computadores pelo arquivo de save. Cotações automáticas chegam na Fase 6. Veja `docs/PROGRESS.md`.
+**Situação:** em desenvolvimento. Fases 5 e 5B concluídas: carteira real (cadastros, todos os tipos de operação, preço informado, posições e dashboard), motor financeiro (juros, CDI, XIRR, TWR), backup, restauração e sincronização entre computadores pelo arquivo de save, e bloqueio opcional do app (banco criptografado, senha, Windows Hello, inatividade e chave de recuperação). Cotações automáticas chegam na Fase 6. Veja `docs/PROGRESS.md`.
 
 ## Documentação
 
@@ -17,6 +17,7 @@ O app não é corretora, não executa ordens e não faz recomendações de inves
 | `docs/FORMULAS.md` | Fórmulas financeiras |
 | `docs/SINCRONIZACAO.md` | Arquivo de save, HLC e regras da mesclagem |
 | `docs/BACKUP.md` | Backup, restauração e procedimento de recuperação |
+| `docs/BLOQUEIO.md` | Bloqueio do app, chaves, chave de recuperação e senha do arquivo de save |
 | `docs/FONTES_DE_DADOS.md` | Provedores de dados avaliados |
 | `docs/DESENVOLVIMENTO.md` | Ambiente, comandos, migrações e CI |
 | `docs/PROGRESS.md` | Estado atual |
@@ -40,7 +41,8 @@ flutter build windows --release
 
 - Banco, backups e logs: `%APPDATA%\Patrion\` (logs em `logs\patrion.log`)
 - Backups em `%APPDATA%\Patrion\backups\`: automáticos antes de atualizar o formato do banco, de importar um save e de restaurar, e manuais pela tela Backup (`docs/BACKUP.md`)
-- Sincronização entre computadores pelo arquivo de save `.invsave`, sem servidor (`docs/SINCRONIZACAO.md`)
+- Sincronização entre computadores pelo arquivo de save `.invsave`, sem servidor, com senha opcional (`docs/SINCRONIZACAO.md`)
+- Bloqueio opcional (Configurações): banco criptografado com SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação (`docs/BLOQUEIO.md`)
 - Cache descartável (arquivos baixados): `%LOCALAPPDATA%\Patrion\cache\`
 
 Esses dados ficam fora da pasta de instalação e sobrevivem a atualização e desinstalação. Para usar outra pasta: `patrion.exe --data-dir <pasta> --cache-dir <pasta>`.
