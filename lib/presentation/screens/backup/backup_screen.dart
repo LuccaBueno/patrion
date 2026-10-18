@@ -7,6 +7,7 @@ import '../../../domain/backup/backup_metadata.dart';
 import '../../format/sync_labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import '../security/security_dialogs.dart';
 
 /// Backups do banco deste computador e restauração (SPEC §11).
 class BackupScreen extends ConsumerStatefulWidget {
@@ -80,14 +81,42 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     }
     // Confere antes de pedir a confirmação: um arquivo recusado nem chega a
     // ser oferecido.
-    final candidate = ref.read(backupServiceProvider).checkRestore(path);
+    final backups = ref.read(backupServiceProvider);
+    String? secret;
+    RestoreCandidate candidate;
+    try {
+      candidate = backups.checkRestore(path);
+    } on BackupLockedError {
+      // Criptografado com a chave de antes de o bloqueio ser desativado e
+      // ativado de novo: pede a senha daquela época.
+      if (!mounted) return;
+      secret = await showDialog<String>(
+        context: context,
+        builder: (context) => const PasswordPromptDialog(
+          title: 'Backup protegido por outra senha',
+          message:
+              'Este backup foi criptografado com uma chave anterior do '
+              'bloqueio. Digite a senha (ou a chave de recuperação) que '
+              'valia quando ele foi feito.',
+          label: 'Senha ou chave de recuperação',
+          action: 'Abrir',
+        ),
+      );
+      if (secret == null) return;
+      final key = await backups.unlockBackup(path, secret);
+      try {
+        candidate = backups.checkRestore(path, backupKey: key);
+      } finally {
+        key.destroy();
+      }
+    }
     if (!mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => _ConfirmRestoreDialog(candidate: candidate),
     );
     if (confirmed != true) return;
-    await controller.restore(path);
+    await controller.restore(path, backupSecret: secret);
   }
 
   @override
@@ -159,7 +188,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     'faz backups automáticos antes de atualizar o banco, de '
                     'importar um save e de restaurar um backup, e guarda os '
                     '10 mais recentes de cada tipo; os manuais nunca são '
-                    'apagados pelo app.\n\n'
+                    'apagados pelo app. Com o bloqueio ativo '
+                    '(Configurações), os backups saem criptografados com a '
+                    'chave do banco e levam ao lado um arquivo .keys.json, '
+                    'que permite abri-los com a senha.\n\n'
                     'Para levar dados a outro computador, use a '
                     'Sincronização (save): o backup substitui tudo, o save '
                     'mescla.\n\nPasta dos backups: ${env.paths.backupsDir}',
@@ -214,6 +246,7 @@ class _BackupTile extends StatelessWidget {
       title: Text('${SyncLabels.instant(row.at)} · $reason'),
       subtitle: Text(
         '${entry.fileExists ? '' : 'Arquivo não encontrado · '}'
+        '${entry.encrypted ? 'criptografado · ' : ''}'
         'schema ${row.schemaVersion} · app ${row.appVersion} · '
         '${SyncLabels.bytes(row.size)}\n${row.path}',
       ),

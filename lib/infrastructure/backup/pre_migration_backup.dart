@@ -4,11 +4,12 @@ import 'package:clock/clock.dart';
 import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
-import 'package:sqlite3/sqlite3.dart';
 
+import '../../core/crypto/database_key.dart';
 import '../../core/errors/app_error.dart';
 import '../../core/time/instant_format.dart';
 import '../../domain/backup/backup_metadata.dart';
+import '../../domain/security/key_file.dart';
 import 'database_file_inspector.dart';
 import 'local_backup_file_system.dart';
 
@@ -48,10 +49,22 @@ class PreMigrationBackup {
   /// Devolve o caminho do backup criado, ou `null` quando não há migração
   /// (banco novo ou já na versão atual). Lança [DataError] se o banco for de
   /// uma versão mais nova do app ou se o backup falhar.
-  String? run({required String databaseFile, required int targetVersion}) {
+  ///
+  /// Com o banco criptografado, [key] abre o arquivo; a cópia sai
+  /// criptografada com a mesma chave (`VACUUM INTO` do SQLCipher) e leva ao
+  /// lado uma cópia de [keys].
+  String? run({
+    required String databaseFile,
+    required int targetVersion,
+    DatabaseKey? key,
+    KeyFile? keys,
+  }) {
     if (!File(databaseFile).existsSync()) return null;
 
-    final fromVersion = DatabaseFileInspector.userVersion(databaseFile);
+    final fromVersion = DatabaseFileInspector.userVersion(
+      databaseFile,
+      key: key,
+    );
     if (fromVersion == 0 || fromVersion == targetVersion) return null;
     if (fromVersion > targetVersion) {
       throw DataError(
@@ -73,13 +86,12 @@ class PreMigrationBackup {
     );
     try {
       Directory(backupsDir).createSync(recursive: true);
-      final source = sqlite3.open(databaseFile, mode: OpenMode.readOnly);
-      try {
-        source.execute('VACUUM INTO ?', [target]);
-      } finally {
-        source.close();
-      }
-      final check = DatabaseFileInspector.inspect(target);
+      DatabaseFileInspector.withDatabase(
+        databaseFile,
+        key: key,
+        (source) => source.execute('VACUUM INTO ?', [target]),
+      );
+      final check = DatabaseFileInspector.inspect(target, key: key);
       if (!check.integrityOk) {
         throw StateError('integrity_check: ${check.integrity}');
       }
@@ -100,8 +112,15 @@ class PreMigrationBackup {
           deviceName: check.deviceName,
           size: bytes.length,
           sha256: sha256.convert(bytes).toString(),
+          encryption: key == null
+              ? BackupMetadata.encryptionNone
+              : BackupMetadata.encryptionSqlcipher,
+          keyId: keys?.keyId,
         ),
       );
+      if (key != null && keys != null) {
+        const LocalBackupFileSystem().writeKeyFile(target, keys);
+      }
     } catch (error) {
       _deleteQuietly(target);
       _log.severe('Backup anterior à migração falhou', error);

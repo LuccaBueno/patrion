@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/settings/appearance_service.dart';
 import '../../core/config/app_info.dart';
 import '../providers.dart';
+import 'security/lock_settings_section.dart';
 
-/// Configurações deste PC: aparência, pastas e versão.
+/// Configurações deste PC: aparência, bloqueio, pastas e versão.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -40,6 +41,10 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+        const _Section(
+          title: 'Bloqueio do app',
+          children: [LockSettingsSection()],
         ),
         _Section(
           title: 'Dados deste computador',

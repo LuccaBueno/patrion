@@ -45,11 +45,28 @@ class _FakeDialogs implements FileDialogs {
   Future<String?> pickDirectory({required String dialogTitle}) async => dir;
 }
 
-class _FakeSession implements SessionController {
+class _FakeSession extends ChangeNotifier implements SessionController {
   final restored = <String>[];
 
   @override
-  Future<void> restore(String path) async => restored.add(path);
+  Future<void> restore(String path, {String? backupSecret}) async =>
+      restored.add(path);
+
+  @override
+  bool get lockEnabled => false;
+
+  @override
+  bool get helloEnabled => false;
+
+  @override
+  Future<bool> helloAvailable() async => false;
+
+  @override
+  String? takePendingRecoveryKey() => null;
+
+  // O resto do bloqueio não é usado nestes testes.
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {

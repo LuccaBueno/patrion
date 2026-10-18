@@ -7,7 +7,10 @@ import 'package:path/path.dart' as p;
 
 import '../../application/backup/backup_ports.dart';
 import '../../core/errors/app_error.dart';
+import '../../core/crypto/database_key.dart';
 import '../../domain/backup/backup_metadata.dart';
+import '../../domain/security/key_file.dart';
+import '../security/key_file_store.dart';
 import 'database_file_inspector.dart';
 
 final _log = Logger('backup');
@@ -20,6 +23,9 @@ class LocalBackupFileSystem implements BackupFileSystem {
   const LocalBackupFileSystem();
 
   static String metadataPathOf(String backupPath) => '$backupPath.json';
+
+  static String keyFilePathOf(String backupPath) =>
+      '${p.withoutExtension(backupPath)}.keys.json';
 
   /// Data e hora UTC para o nome do arquivo: ordenável e sem `:` (proibido
   /// em nomes de arquivo no Windows).
@@ -51,12 +57,12 @@ class LocalBackupFileSystem implements BackupFileSystem {
   }
 
   @override
-  BackupFileInfo inspect(String path) {
+  BackupFileInfo inspect(String path, {DatabaseKey? key}) {
     final file = File(path);
     if (!file.existsSync()) {
       throw const DataError('O arquivo de backup não existe.');
     }
-    final inspection = DatabaseFileInspector.inspect(path);
+    final inspection = DatabaseFileInspector.inspect(path, key: key);
     return BackupFileInfo(
       schemaVersion: inspection.userVersion,
       integrity: inspection.integrity,
@@ -94,7 +100,7 @@ class LocalBackupFileSystem implements BackupFileSystem {
   }) => retain(directory: directory, reasonCode: reason.code, keep: keep);
 
   /// Retenção por motivo: o nome começa pela data UTC, então ordem de nome é
-  /// ordem cronológica. Apaga também o `.json` ao lado.
+  /// ordem cronológica. Apaga também o `.json` e o `.keys.json` ao lado.
   static List<String> retain({
     required String directory,
     required String reasonCode,
@@ -114,8 +120,12 @@ class LocalBackupFileSystem implements BackupFileSystem {
     for (final old in files.skip(keep)) {
       try {
         old.deleteSync();
-        final meta = File(metadataPathOf(old.path));
-        if (meta.existsSync()) meta.deleteSync();
+        for (final side in [
+          File(metadataPathOf(old.path)),
+          File(keyFilePathOf(old.path)),
+        ]) {
+          if (side.existsSync()) side.deleteSync();
+        }
         removed.add(old.path);
       } on FileSystemException catch (error) {
         _log.warning('Não consegui apagar um backup antigo', error);
@@ -129,23 +139,57 @@ class LocalBackupFileSystem implements BackupFileSystem {
 
   @override
   void delete(String path) {
-    for (final f in [File(path), File(metadataPathOf(path))]) {
+    for (final f in [
+      File(path),
+      File(metadataPathOf(path)),
+      File(keyFilePathOf(path)),
+    ]) {
       if (f.existsSync()) f.deleteSync();
     }
   }
 
   @override
-  void replaceDatabase({required String backup, required String databaseFile}) {
+  bool isPlaintext(String path) => DatabaseFileInspector.isPlaintext(path);
+
+  @override
+  void writeKeyFile(String backupPath, KeyFile keys) =>
+      KeyFileStore.writeAt(keyFilePathOf(backupPath), keys);
+
+  @override
+  KeyFile? readKeyFile(String backupPath) =>
+      KeyFileStore.readAt(keyFilePathOf(backupPath));
+
+  @override
+  void replaceDatabase({
+    required String backup,
+    required String databaseFile,
+    DatabaseKey? backupKey,
+    DatabaseKey? databaseKey,
+  }) {
     final temp = '$databaseFile.restaurando';
-    File(backup).copySync(temp);
-    try {
-      final check = DatabaseFileInspector.inspect(temp);
-      if (!check.integrityOk) {
-        throw DataError('integrity_check: ${check.integrity}');
+    final sameKey =
+        (backupKey == null && databaseKey == null) ||
+        (backupKey != null && backupKey.sameAs(databaseKey));
+    if (sameKey) {
+      File(backup).copySync(temp);
+      try {
+        final check = DatabaseFileInspector.inspect(temp, key: databaseKey);
+        if (!check.integrityOk) {
+          throw DataError('integrity_check: ${check.integrity}');
+        }
+      } catch (_) {
+        File(temp).deleteSync();
+        rethrow;
       }
-    } catch (_) {
-      File(temp).deleteSync();
-      rethrow;
+    } else {
+      // Backup com outra chave (ou sem criptografia): convertido para a
+      // criptografia atual do banco e conferido.
+      DatabaseFileInspector.convert(
+        source: backup,
+        sourceKey: backupKey,
+        target: temp,
+        targetKey: databaseKey,
+      );
     }
     // Arquivos auxiliares do SQLite do banco antigo não podem sobrar.
     for (final suffix in ['', '-journal', '-wal', '-shm']) {
@@ -153,5 +197,13 @@ class LocalBackupFileSystem implements BackupFileSystem {
       if (f.existsSync()) f.deleteSync();
     }
     File(temp).renameSync(databaseFile);
+  }
+
+  @override
+  void encryptInPlace(String path, DatabaseKey key) {
+    final temp = '$path.criptografando';
+    DatabaseFileInspector.convert(source: path, target: temp, targetKey: key);
+    File(path).deleteSync();
+    File(temp).renameSync(path);
   }
 }

@@ -1,4 +1,6 @@
+import '../../core/crypto/database_key.dart';
 import '../../domain/backup/backup_metadata.dart';
+import '../../domain/security/key_file.dart';
 
 /// Dados de um arquivo de backup, lidos do próprio arquivo.
 class BackupFileInfo {
@@ -38,14 +40,23 @@ abstract interface class BackupFileSystem {
     required String appVersion,
   });
 
-  /// Lê versão, integridade, tamanho e SHA-256. Lança `DataError` se o
-  /// arquivo não for um banco legível.
-  BackupFileInfo inspect(String path);
+  /// Lê versão, integridade, tamanho e SHA-256, abrindo com [key] se o
+  /// arquivo for criptografado. Lança `DataError` se o arquivo não for um
+  /// banco legível com essa chave.
+  BackupFileInfo inspect(String path, {DatabaseKey? key});
+
+  /// O arquivo é um banco sem criptografia.
+  bool isPlaintext(String path);
 
   void writeMetadata(String backupPath, BackupMetadata metadata);
 
   /// Metadados gravados ao lado do backup, se existirem.
   BackupMetadata? readMetadata(String backupPath);
+
+  /// Cópia do arquivo de chaves ao lado de um backup criptografado.
+  void writeKeyFile(String backupPath, KeyFile keys);
+
+  KeyFile? readKeyFile(String backupPath);
 
   /// Apaga os backups de [reason] em [directory] além dos [keep] mais
   /// recentes e devolve os caminhos apagados.
@@ -59,8 +70,17 @@ abstract interface class BackupFileSystem {
 
   void delete(String path);
 
-  /// Substitui [databaseFile] pelo conteúdo de [backup]: copia para um
-  /// arquivo temporário na mesma pasta e só então troca. O banco precisa
-  /// estar fechado.
-  void replaceDatabase({required String backup, required String databaseFile});
+  /// Substitui [databaseFile] pelo conteúdo de [backup] (aberto com
+  /// [backupKey]), deixando-o criptografado com [databaseKey] (ou sem
+  /// criptografia): prepara um arquivo temporário conferido na mesma pasta e
+  /// só então troca. O banco precisa estar fechado.
+  void replaceDatabase({
+    required String backup,
+    required String databaseFile,
+    DatabaseKey? backupKey,
+    DatabaseKey? databaseKey,
+  });
+
+  /// Recriptografa o backup [path] (sem criptografia) com [key], no lugar.
+  void encryptInPlace(String path, DatabaseKey key);
 }

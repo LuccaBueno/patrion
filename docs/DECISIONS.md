@@ -410,3 +410,22 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - Decisão: `file_picker` 13.1.0 (aprovado em D-02) atrás da interface `FileDialogs` (`presentation/services/file_dialogs.dart`), trocada por caminhos fixos nos testes de widget. O save é gerado em memória e gravado pelo diálogo de salvar (`FilePicker.saveFile` com os bytes); o backup em outra pasta usa o seletor de pasta; importar e restaurar usam o seletor de arquivo com filtro (`*.invsave`, `*.db`).
 - Limitação conhecida: no Windows, o `saveFile` do `file_picker` 13.1.0 não repassa o filtro de extensões, então o diálogo de salvar mostra "All Files (*.*)". O nome sugerido já termina em `.invsave`.
 - Motivo: usar o pacote já aprovado e manter os testes de interface sem diálogos nativos.
+
+### 2026-10-17 — D-32: Bloqueio do app — bibliotecas e criptografia (F5B)
+
+- Decisão (conclui as escolhas deixadas em aberto na D-24):
+  - **SQLCipher Community Edition** pelo próprio `sqlite3` 3.7.1, com `hooks: user_defines: sqlite3: source: sqlcipher` no `pubspec.yaml` (sem pacote novo). Conferido em 17/10/2026: SQLCipher 4.19.0 sobre SQLite 3.53.4; sem a chave, "file is not a database"; `VACUUM INTO` num banco criptografado gera cópia criptografada com a mesma chave; `sqlcipher_export` converte aberto ↔ criptografado nos dois sentidos, mas **não copia o `PRAGMA user_version`** (o app copia). Todos os testes passam a usar esse build; sem chave ele se comporta como o SQLite comum. Licenças: SQLCipher CE (BSD-3) e OpenSSL (Apache-2.0), a incluir nos avisos da distribuição (F7). O SQLite3MultipleCiphers (MIT) fica como alternativa.
+  - **`pointycastle` 4.0.0** (MIT, Bouncy Castle, Dart puro, Windows/Android/iOS): Argon2id e AES-256-GCM. Medido: Argon2id com 64 MiB e 3 passadas leva ~1,1 s (teste em JIT); PBKDF2-SHA256 com 600 mil iterações leva ~2,9 s. A derivação roda num isolate, para a tela não travar. Alternativa: `cryptography` 2.9.0 (Apache-2.0), com menos uso e o Argon2 também em Dart puro.
+  - **`local_auth` 3.0.2** (BSD-3, time do Flutter; `local_auth_windows` 2.0.2 usa o `UserConsentVerifier` do Windows Hello, e o mesmo pacote atende Android e iOS no futuro).
+  - **`ffi` 2.2.0** (BSD-3, time do Dart) para chamar o DPAPI do Windows (`CryptProtectData`).
+  - **`flutter_secure_storage` não é usado** (aprovado na D-02 para chaves de API): no Windows ele grava num arquivo da pasta do app (`%APPDATA%\<empresa>\<app>`), fora da pasta de dados escolhida (não acompanharia `--data-dir`), e o plugin C++ exige as bibliotecas ATL no build. Para as chaves de API (F6) a escolha será revista.
+- **Chaves** (desenho da D-24, confirmado):
+  - chave do banco aleatória de 256 bits, passada ao SQLCipher como chave bruta (`PRAGMA key = "x'…'"`), sem a KDF interna;
+  - guardada "embrulhada" com AES-256-GCM em `patrion.keys.json`, ao lado do banco: uma cópia com a chave derivada da senha e outra com a chave derivada da chave de recuperação, cada uma com sal próprio;
+  - KDF: **Argon2id, 64 MiB, 3 passadas, paralelismo 1, sal de 16 bytes, saída de 32 bytes**, com os parâmetros gravados no arquivo (podem subir no futuro sem quebrar arquivos antigos);
+  - `keyId`: identificador aleatório da chave do banco, gravado no arquivo de chaves e nos metadados de cada backup criptografado;
+  - trocar a senha só reembrulha a chave; o banco não é recriptografado.
+- **Chave de recuperação**: 160 bits aleatórios em Base32 de Crockford, 32 caracteres em 8 grupos de 4 (`XXXX-XXXX-…`), mostrada uma única vez. Na leitura, ignora hífens, espaços e maiúsculas/minúsculas, e aceita O/0 e I/L/1 trocados.
+- **Windows Hello**: opcional e por PC. A chave do banco é protegida com o DPAPI do usuário do Windows num arquivo ao lado do banco (`patrion.hello.bin`) e só é lida depois que o Windows Hello confirma o usuário. Protege contra quem copia a pasta de dados para outro PC ou outra conta; **não** protege contra quem já está logado na mesma conta do Windows (limitação mostrada nas Configurações).
+- **Senha do arquivo de save**: AES-256-GCM sobre o `.invsave` inteiro, com chave Argon2id (mesmos parâmetros) e sal e nonce próprios. O arquivo continua sendo um ZIP com `manifest.json`, que passa a dizer `encryption.scheme = "aes-256-gcm"` e os parâmetros, e `payload.bin` com o save original cifrado. A versão da F5 lê esse manifesto e recusa o arquivo com a mensagem "protegido por senha".
+- Motivo: SPEC §3 e §10.6, D-24; bibliotecas mantidas, com licença permissiva e suporte a Windows e às plataformas móveis.

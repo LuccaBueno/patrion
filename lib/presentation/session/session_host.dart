@@ -4,23 +4,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config/app_info.dart';
 import '../app.dart';
 import '../providers.dart';
+import '../screens/security/unlock_screen.dart';
+import '../screens/startup_error_app.dart';
 import '../theme/app_theme.dart';
 import 'app_session.dart';
+import 'inactivity_guard.dart';
 
 /// Raiz da interface: monta o app sobre a sessão aberta e o remonta do zero
-/// quando a sessão troca (restauração de backup; bloqueio na F5B).
+/// quando a sessão troca (restauração de backup, bloqueio e desbloqueio).
+/// Bloqueado, só existe a tela de desbloqueio: as telas e os provedores da
+/// sessão anterior são descartados.
 class SessionHost extends StatelessWidget {
-  const SessionHost({required this.manager, super.key});
+  const SessionHost({required this.manager, this.logsDir, super.key});
 
   final SessionManager manager;
+  final String? logsDir;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: manager,
       builder: (context, _) {
-        if (manager.phase == SessionPhase.restoring) {
-          return const _RestoringApp();
+        switch (manager.phase) {
+          case SessionPhase.busy:
+            return _BusyApp(message: manager.busyMessage);
+          case SessionPhase.locked:
+            return UnlockApp(manager: manager);
+          case SessionPhase.failed:
+            return StartupErrorApp(
+              message: manager.notice ?? 'Erro desconhecido.',
+              logsDir: logsDir,
+            );
+          case SessionPhase.ready:
+            break;
         }
         final session = manager.session;
         final notice = manager.notice;
@@ -38,17 +54,33 @@ class SessionHost extends StatelessWidget {
             databaseProvider.overrideWithValue(session.db),
             syncContextProvider.overrideWithValue(session.sync),
             sessionControllerProvider.overrideWithValue(manager),
-            sessionNoticeProvider.overrideWithValue(notice),
+            sessionNoticeProvider.overrideWithValue(
+              manager.noticeRoute == '/backup' ? notice : null,
+            ),
+            lockNoticeProvider.overrideWithValue(
+              manager.noticeRoute == '/backup' ? null : notice,
+            ),
+            sessionSecurityProvider.overrideWithValue(
+              SessionSecurity(key: session.key, keys: manager.keys),
+            ),
           ],
-          child: PatrionApp(initialLocation: notice == null ? '/' : '/backup'),
+          child: InactivityGuard(
+            enabled: manager.lockEnabled,
+            onIdle: manager.lockNow,
+            child: PatrionApp(
+              initialLocation: notice == null ? '/' : manager.noticeRoute,
+            ),
+          ),
         );
       },
     );
   }
 }
 
-class _RestoringApp extends StatelessWidget {
-  const _RestoringApp();
+class _BusyApp extends StatelessWidget {
+  const _BusyApp({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +89,14 @@ class _RestoringApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      home: const Scaffold(
+      home: Scaffold(
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Restaurando o backup…'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(message),
             ],
           ),
         ),

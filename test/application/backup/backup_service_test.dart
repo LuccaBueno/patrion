@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:patrion/application/portfolio/registry_service.dart';
 import 'package:patrion/core/config/app_paths.dart';
+import 'package:patrion/core/crypto/database_key.dart';
 import 'package:patrion/core/errors/app_error.dart';
 import 'package:patrion/data/db/app_database.dart';
 import 'package:patrion/data/repositories/backup_registry_repository.dart';
@@ -16,9 +17,12 @@ import 'package:patrion/data/sync/sync_tables_gateway.dart';
 import 'package:patrion/domain/backup/backup_metadata.dart';
 import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
+import 'package:patrion/domain/security/key_file.dart';
 import 'package:patrion/infrastructure/backup/local_backup_file_system.dart';
 import 'package:patrion/presentation/session/app_session.dart';
 import 'package:sqlite3/sqlite3.dart';
+
+import '../../helpers/fake_security.dart';
 
 /// Backup e restauração (SPEC §11), com banco em arquivo de verdade.
 void main() {
@@ -136,7 +140,8 @@ void main() {
 
   group('conferência antes de restaurar', () {
     test('recusa arquivo inexistente, que não é banco, de schema mais novo, '
-        'alterado depois do backup ou criptografado', () async {
+        'alterado depois do backup ou com a criptografia diferente da dos '
+        'metadados', () async {
       final service = session.backupService();
       expect(
         () => service.checkRestore(p.join(tmp.path, 'nao-existe.db')),
@@ -183,7 +188,7 @@ void main() {
       encMeta.writeAsStringSync(
         jsonEncode({
           ...encJson,
-          'encryption': {'scheme': 'sqlcipher'},
+          'encryption': {'scheme': 'sqlcipher-4'},
         }),
       );
       expect(
@@ -192,7 +197,7 @@ void main() {
           isA<DataError>().having(
             (e) => e.message,
             'm',
-            contains('criptografado'),
+            contains('criptografia'),
           ),
         ),
       );
@@ -208,7 +213,13 @@ void main() {
       final deviceId = session.identity.deviceId;
       final hlcBefore = session.sync.lastHlc;
 
-      final manager = SessionManager(session, beforeClose: () async {});
+      final manager = SessionManager(
+        paths: session.paths,
+        session: session,
+        hello: FakeHello(),
+        helloVault: MemoryHelloVault(),
+        beforeClose: () async {},
+      );
       await manager.restore(backup.path);
       session = manager.session;
 
@@ -254,7 +265,13 @@ void main() {
         await other.db.close();
         final deviceId = session.identity.deviceId;
 
-        final manager = SessionManager(session, beforeClose: () async {});
+        final manager = SessionManager(
+          paths: session.paths,
+          session: session,
+          hello: FakeHello(),
+          helloVault: MemoryHelloVault(),
+          beforeClose: () async {},
+        );
         await manager.restore(otherBackup.path);
         session = manager.session;
 
@@ -284,6 +301,8 @@ void main() {
         AppPaths paths, {
         SessionCarryOver? carry,
         Clock wallClock = const Clock(),
+        DatabaseKey? key,
+        KeyFile? keys,
       }) async {
         attempts++;
         if (attempts == 1) {
@@ -297,11 +316,20 @@ void main() {
           db.close();
           throw const DataError('falha simulada ao reabrir');
         }
-        return openSession(paths, carry: carry, wallClock: wallClock);
+        return openSession(
+          paths,
+          carry: carry,
+          wallClock: wallClock,
+          key: key,
+          keys: keys,
+        );
       }
 
       final manager = SessionManager(
-        session,
+        paths: session.paths,
+        session: session,
+        hello: FakeHello(),
+        helloVault: MemoryHelloVault(),
         beforeClose: () async {},
         opener: failingOnce,
       );
@@ -344,7 +372,13 @@ void main() {
     test('arquivo recusado na conferência: nada muda', () async {
       await addInstitution(session, 'Atual');
       final text = File(p.join(tmp.path, 'ruim.db'))..writeAsStringSync('x');
-      final manager = SessionManager(session, beforeClose: () async {});
+      final manager = SessionManager(
+        paths: session.paths,
+        session: session,
+        hello: FakeHello(),
+        helloVault: MemoryHelloVault(),
+        beforeClose: () async {},
+      );
 
       await expectLater(manager.restore(text.path), throwsA(isA<DataError>()));
 

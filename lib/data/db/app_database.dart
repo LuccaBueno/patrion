@@ -4,6 +4,7 @@ import 'package:decimal/decimal.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 
+import '../../core/crypto/database_key.dart';
 import 'app_database.steps.dart';
 import 'converters.dart';
 import 'tables.dart';
@@ -39,9 +40,19 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Abre (ou cria) o banco no arquivo [path], em um isolate de fundo.
-  factory AppDatabase.open(String path) =>
-      AppDatabase(NativeDatabase.createInBackground(File(path)));
+  /// Abre (ou cria) o banco no arquivo [path], em um isolate de fundo. Com
+  /// [key], o arquivo é criptografado pelo SQLCipher (SPEC §3, F5B).
+  factory AppDatabase.open(String path, {DatabaseKey? key}) {
+    final pragma = key?.pragmaValue;
+    return AppDatabase(
+      NativeDatabase.createInBackground(
+        File(path),
+        setup: pragma == null
+            ? null
+            : (raw) => raw.execute('PRAGMA key = $pragma'),
+      ),
+    );
+  }
 
   /// Banco em memória, para testes.
   factory AppDatabase.memory() => AppDatabase(NativeDatabase.memory());

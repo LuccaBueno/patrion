@@ -6,7 +6,9 @@ enum BackupReason {
   manual('manual', 'Manual'),
   preMigration('pre-migracao', 'Antes de atualizar o banco'),
   preImport('pre-importacao', 'Antes de importar um save'),
-  preRestore('pre-restauracao', 'Antes de restaurar um backup');
+  preRestore('pre-restauracao', 'Antes de restaurar um backup'),
+  preLock('pre-bloqueio', 'Antes de ativar o bloqueio'),
+  preUnlock('pre-desbloqueio', 'Antes de desativar o bloqueio');
 
   const BackupReason(this.code, this.label);
 
@@ -27,8 +29,9 @@ enum BackupReason {
 /// Metadados de um backup, gravados ao lado do arquivo (`<backup>.json`) e em
 /// `dev_backups`.
 ///
-/// O campo [encryption] prepara a F5B (DECISIONS D-24): `none` na v1.0; com
-/// o banco criptografado, ele diz o esquema e qual arquivo de chaves usar.
+/// [encryption] é `none` ou `sqlcipher-4` (F5B, DECISIONS D-32); com
+/// o banco criptografado, [keyId] diz qual chave abre o arquivo, e uma cópia
+/// do arquivo de chaves fica ao lado (`<backup>.keys.json`).
 class BackupMetadata {
   const BackupMetadata({
     required this.createdAt,
@@ -40,11 +43,13 @@ class BackupMetadata {
     required this.size,
     required this.sha256,
     this.encryption = encryptionNone,
+    this.keyId,
   });
 
   static const formatId = 'patrion-backup';
   static const formatVersion = 1;
   static const encryptionNone = 'none';
+  static const encryptionSqlcipher = 'sqlcipher-4';
 
   /// Instante UTC (ISO-8601 com ms).
   final String createdAt;
@@ -57,6 +62,11 @@ class BackupMetadata {
   final String sha256;
   final String encryption;
 
+  /// Chave do banco usada (`KeyFile.keyId`), se criptografado.
+  final String? keyId;
+
+  bool get encrypted => encryption != encryptionNone;
+
   Map<String, Object?> toJson() => {
     'format': formatId,
     'formatVersion': formatVersion,
@@ -67,7 +77,7 @@ class BackupMetadata {
     'device': {'id': deviceId, 'name': deviceName},
     'size': size,
     'sha256': sha256,
-    'encryption': {'scheme': encryption},
+    'encryption': {'scheme': encryption, 'keyId': ?keyId},
   };
 
   factory BackupMetadata.fromJson(Object? json) {
@@ -107,6 +117,7 @@ class BackupMetadata {
       size: size,
       sha256: sha,
       encryption: encryption['scheme']! as String,
+      keyId: encryption['keyId'] as String?,
     );
   }
 }
