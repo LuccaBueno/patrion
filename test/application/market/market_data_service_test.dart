@@ -340,7 +340,7 @@ void main() {
     // as retentativas de cada provedor.
     expect(ptax.calls, ptaxBefore);
     expect(
-      result.failures.where((f) => f.message.contains("sem internet")),
+      result.failures.where((f) => f.message.contains('sem internet')),
       isNotEmpty,
     );
     final snap = await query.load();
