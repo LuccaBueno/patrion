@@ -1,6 +1,6 @@
 # Arquitetura
 
-Estado em 17/10/2026 (Fase 5). Este documento descreve o código que existe; o que ainda não foi feito aparece como "a partir da F*n*".
+Estado em 18/10/2026 (Fase 6). Este documento descreve o código que existe; o que ainda não foi feito aparece como "a partir da F*n*".
 
 ## Camadas
 
@@ -10,7 +10,7 @@ lib/
   domain/          entidades, regras e cálculos financeiros (Dart puro)
   application/     casos de uso
   data/            tabelas Drift, repositórios, contexto de sincronização
-  infrastructure/  pastas do Windows, logs, janela; APIs externas (F6)
+  infrastructure/  pastas do Windows, logs, janela, criptografia, APIs de mercado
   presentation/    tema, navegação, telas e provedores do Riverpod
   main.dart        composição: monta tudo e chama runApp
 test/              espelha lib/ (mais architecture_test.dart e helpers/)
@@ -87,7 +87,7 @@ Funções puras em `domain/finance/` (Dart puro, sem `double`), com fórmulas em
 | `domain/portfolio/` | `performance.dart` | Fluxos do investidor a partir das operações e MWR líquido, bruto e sem proventos, por ativo e por moeda |
 | `application/portfolio/` | `portfolio_query.dart` | `PortfolioSnapshot.performance(moeda)` e `assetPerformance(id)`, calculados na primeira consulta |
 
-Na interface, o dashboard mostra o resultado total e a TIR (MWR) da moeda, e o detalhe do ativo mostra resultado e TIR com e sem proventos e antes de custos, sempre com a metodologia num tooltip. TWR, retornos por período, retorno real, efeito cambial e benchmarks estão prontos no domínio e aparecem quando houver histórico de cotações, IPCA e câmbio (F6).
+Na interface, o dashboard mostra o resultado total e a TIR (MWR) da moeda, e o detalhe do ativo mostra resultado e TIR com e sem proventos e antes de custos, sempre com a metodologia num tooltip. TWR, retornos por período, retorno real, efeito cambial e benchmarks estão prontos no domínio; o histórico de cotações, o IPCA e o câmbio chegaram na F6, e a exibição entra com as análises e benchmarks (F8).
 
 ## Backup e save (Fase 5)
 
@@ -140,3 +140,23 @@ Detalhes em `BLOQUEIO.md`; decisões em D-24, D-32 e D-33.
 
 - Tipos de erro (`core/errors/app_error.dart`): `NetworkError`, `DataError`, `CalculationError`, `InternalError` (SPEC §18).
 - Logs: `infrastructure/logging/rotating_file_log.dart` (D-16). Pasta: `%APPDATA%\Patrion\logs\`.
+
+## Dados de mercado (Fase 6)
+
+Fontes em `FONTES_DE_DADOS.md`; decisões em D-34 a D-36; fórmulas em `FORMULAS.md` §2.1 a §2.3.
+
+| Camada | Arquivos | Papel |
+|---|---|---|
+| `domain/market/` | `market_data.dart` | Tipos dos dados (barra diária, cotação, evento, indicador, câmbio, Tesouro, informe de fundo), sempre com fonte, datas e tipo (regra 2) |
+| | `provider_catalog.dart` | O que cada provedor fornece, o que recebe, licença, limites e chave (tela "Fontes de dados") |
+| | `market_price.dart`, `market_indicators.dart` | Escolha do preço de mercado, desatualização, Tesouro, CDI anualizado, IPCA 12 meses e patrimônio em reais |
+| `application/market/` | `market_ports.dart` | Interfaces dos provedores e do cofre de chaves |
+| | `market_data_service.dart` | Atualização da carteira, de um ativo, do câmbio, dos indicadores e do histórico; provedores ligados, cota, falhas e "sem internet" |
+| | `market_price_book.dart`, `market_overview.dart` | Preços, câmbio e indicadores a partir do que está guardado (sem rede) |
+| `data/` | `repositories/market_repository.dart`, `repositories/provider_state_repository.dart`, `sync/market_save_gateway.dart` | Tabelas `mkt_` por chave natural, estado dos provedores (`dev_provider_state`) e a pasta `market/` do save |
+| `infrastructure/market/` | `market_http.dart` | HTTP com fila por provedor, intervalo mínimo, timeout, retentativa com backoff, `Retry-After` e deduplicação; erros sem URL completa nem cabeçalhos |
+| | `providers/*.dart`, `market_setup.dart` | Um adaptador por provedor e a montagem na ordem de preferência |
+| `infrastructure/security/` | `api_key_store.dart` | Chaves de API com DPAPI, fora do banco e do save |
+| `presentation/` | `services/market_refresh.dart`, `screens/market/data_sources_screen.dart` | Atualização automática e manual, aviso de falha e de "sem conexão", tela "Fontes de dados" |
+
+O `PortfolioQuery` lê o preço de mercado do banco e recalcula a carteira quando os dados de mercado mudam; nenhuma tela acessa a rede diretamente. As requisições levam só códigos de ativos e de séries (regra 8).
