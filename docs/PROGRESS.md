@@ -43,7 +43,7 @@ Critério de pronto (SPEC §21): a versão v1.0.0 existe, com instalador testado
 - `flutter build windows --release`: compilou.
 - `tool/release/build_release.ps1`: gerou `Patrion-1.0.0-instalador.exe` (13,6 MB), `Patrion-1.0.0-portatil.zip` (16,3 MB), `SHA256SUMS.txt` e `RELEASE_NOTES.md`.
 - `tool/release/test_install.ps1` neste PC (pastas de teste, dados reais intocados): **26 de 26**.
-- CI e ensaio do workflow de release: ver o fim do relatório da sessão (rodados depois do push).
+- CI no GitHub Actions (push `ebce697`): **verde** (run 39194666868). Ensaio do workflow de release ("Run workflow", run 39194693238): **verde** em 8 min; instalou o Inno Setup, gerou instalador, ZIP e somas e guardou o artefato `patrion-release-ensaio`, sem criar Release (a etapa da Release ficou como "skipped", como esperado).
 
 **4. Problemas e limitações**
 
