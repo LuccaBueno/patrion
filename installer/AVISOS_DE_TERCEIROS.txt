@@ -1,0 +1,31 @@
+Patrion — avisos de terceiros
+=============================
+
+O Patrion é distribuído com componentes de terceiros. As licenças
+completas estão no próprio app, em Configurações > Sobre > "Licenças de
+terceiros", e nos arquivos indicados abaixo (dentro da pasta do app).
+
+SQLCipher Community Edition (sqlcipher.dll)
+  Copyright (c) Zetetic LLC. Licença de estilo BSD de 3 cláusulas.
+  Texto completo: data\flutter_assets\assets\licenses\sqlcipher.txt
+  Baseado no SQLite, de domínio público (https://sqlite.org/copyright.html).
+
+OpenSSL (embutido no sqlcipher.dll)
+  Copyright (c) The OpenSSL Project Authors. Apache License 2.0.
+  Texto completo: data\flutter_assets\assets\licenses\openssl.txt
+
+Flutter, Dart e pacotes Dart (flutter_windows.dll, data\app.so e plugins)
+  Licenças BSD, MIT e Apache 2.0, reunidas pelo Flutter em
+  data\flutter_assets\NOTICES.Z (compactado) e na tela de licenças do app.
+
+Runtime do Visual C++ (vcruntime140*.dll, msvcp140*.dll, concrt140.dll)
+  Copyright (c) Microsoft Corporation. Redistribuído conforme os termos de
+  redistribuição do Visual Studio.
+
+Dados de mercado
+  Os dados vêm dos provedores mostrados em "Fontes de dados", cada um com
+  a sua licença e os seus termos: Banco Central do Brasil (SGS e PTAX),
+  IBGE (SIDRA), Tesouro Transparente e CVM Dados Abertos (ODbL), B3
+  (arquivos públicos de cotações históricas), brapi, BCE (via Frankfurter),
+  Binance, Finnhub, Twelve Data e CoinGecko ("Data provided by CoinGecko").
+  Cada valor aparece no app com a fonte e a data de referência.

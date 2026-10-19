@@ -84,6 +84,16 @@ void main() {
     });
   });
 
+  testWidgets('Sobre abre as licenças de terceiros com o SQLCipher e o '
+      'OpenSSL', (tester) async {
+    final app = AppHarness(tester, t);
+    await app.run(location: '/configuracoes', size: _tall, () async {
+      await app.tap(find.byKey(const Key('third-party-licenses')));
+      await app.pumpUntil(find.text('SQLCipher'));
+      expect(find.text('OpenSSL'), findsOneWidget);
+    });
+  });
+
   testWidgets('o Início avisa da versão nova e o aviso some ao ignorar', (
     tester,
   ) async {

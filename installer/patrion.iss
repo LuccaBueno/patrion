@@ -86,6 +86,7 @@ Type: filesandordirs; Name: "{app}\data"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "AVISOS_DE_TERCEIROS.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
@@ -94,12 +95,15 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopico
 [Registry]
 ; Associação do .invsave (HKA: HKCU na instalação por usuário, HKLM para
 ; todos os usuários). Removida na desinstalação.
-Root: HKA; Subkey: "Software\Classes\.invsave"; ValueType: string; ValueName: ""; ValueData: "Patrion.Save"; Flags: uninsdeletevalue; Tasks: assocsave
-Root: HKA; Subkey: "Software\Classes\.invsave\OpenWithProgids"; ValueType: string; ValueName: "Patrion.Save"; ValueData: ""; Flags: uninsdeletevalue; Tasks: assocsave
+; As chaves do .invsave só somem se ficarem vazias (outro programa pode ter
+; posto valores nelas).
+Root: HKA; Subkey: "Software\Classes\.invsave"; ValueType: string; ValueName: ""; ValueData: "Patrion.Save"; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assocsave
+Root: HKA; Subkey: "Software\Classes\.invsave\OpenWithProgids"; ValueType: string; ValueName: "Patrion.Save"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assocsave
 Root: HKA; Subkey: "Software\Classes\Patrion.Save"; ValueType: string; ValueName: ""; ValueData: "{cm:SaveFileType}"; Flags: uninsdeletekey; Tasks: assocsave
 Root: HKA; Subkey: "Software\Classes\Patrion.Save\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#AppExe},0"; Tasks: assocsave
 Root: HKA; Subkey: "Software\Classes\Patrion.Save\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#AppExe}"" ""%1"""; Tasks: assocsave
-Root: HKA; Subkey: "Software\Classes\Applications\{#AppExe}\SupportedTypes"; ValueType: string; ValueName: ".invsave"; ValueData: ""; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Applications\{#AppExe}"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Applications\{#AppExe}\SupportedTypes"; ValueType: string; ValueName: ".invsave"; ValueData: ""
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent

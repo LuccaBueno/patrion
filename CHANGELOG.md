@@ -4,7 +4,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
-## [1.0.0] - 2026-10-18
+## [1.0.0] - 2026-10-19
 
 Primeira versão utilizável: carteira real, motor financeiro, backup e sincronização por arquivo, bloqueio opcional, dados de mercado e instalador.
 
@@ -29,6 +29,7 @@ Primeira versão utilizável: carteira real, motor financeiro, backup e sincroni
   - Verificador de atualizações em Configurações > Atualizações: consulta as Releases do GitHub ao abrir o app (no máximo uma vez por dia, pode ser desligado) ou em "Verificar agora", mostra as notas da versão e o link de download, permite ignorar uma versão e, por padrão, ignora as versões de teste (beta e rc). O Início avisa quando há versão nova. Sem internet, nada acontece.
   - O runtime do Visual C++ vai junto do app, que abre num Windows sem o "Visual C++ Redistributable".
   - Workflow de release no GitHub Actions: na tag `vX.Y.Z`, gera o instalador, o ZIP portátil e as somas SHA-256 e cria a Release como rascunho (tags `-beta` e `-rc` viram pré-lançamento).
+  - Avisos de terceiros: Configurações > Sobre > "Licenças de terceiros" (com o SQLCipher e o OpenSSL, além das bibliotecas do Flutter) e o arquivo `AVISOS_DE_TERCEIROS.txt` junto do app, com as fontes de dados e as suas licenças.
   - `docs/DISTRIBUICAO.md` e `docs/SOLUCAO_DE_PROBLEMAS.md`.
 - Fase 6 (dados de mercado):
   - Cotações automáticas: ações, FIIs, ETFs e BDRs da B3 (brapi e fechamento oficial do COTAHIST), Tesouro Direto (Tesouro Transparente), cripto (CoinGecko e Binance) e ações e ETFs dos EUA (Finnhub e Twelve Data, com chave; Yahoo opcional, desligado por padrão). Cada preço aparece com a fonte, a data e, ao passar o mouse, o tipo, a coleta e o atraso; um preço antigo aparece com a data e um ícone de desatualizado.

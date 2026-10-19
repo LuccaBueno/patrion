@@ -184,7 +184,9 @@ Check 'Desinstalação' ($p.ExitCode -eq 0) "código $($p.ExitCode)"
 Check 'App removido' (-not (Test-Path $exe)) ''
 Check 'Atalho removido' (-not (Test-Path $shortcut)) ''
 Check 'Registro de desinstalação removido' (-not (Test-Path $uninstallKey)) ''
-Check 'Associação do .invsave removida' (-not (Test-Path 'HKCU:\Software\Classes\Patrion.Save')) ''
+Check 'Associação do .invsave removida' ((-not (Test-Path 'HKCU:\Software\Classes\Patrion.Save')) -and
+  (-not (Test-Path 'HKCU:\Software\Classes\.invsave')) -and
+  (-not (Test-Path 'HKCU:\Software\Classes\Applications\patrion.exe'))) ''
 Check 'Dados continuam depois de desinstalar' ((Test-Path $db) -and ($before -eq (Data-Hash))) $DataDir
 Check 'Backups e logs continuam' ((Test-Path (Join-Path $DataDir 'logs')) -and (Test-Path (Join-Path $DataDir 'backups'))) ''
 

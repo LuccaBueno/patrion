@@ -110,4 +110,6 @@ flutter analyze
 flutter test
 flutter run -d windows
 flutter build windows --release
+powershell -ExecutionPolicy Bypass -File tool\release\build_release.ps1   # instalador e ZIP em dist\
+powershell -ExecutionPolicy Bypass -File tool\release\test_install.ps1    # teste de instalação (docs/DISTRIBUICAO.md)
 ```

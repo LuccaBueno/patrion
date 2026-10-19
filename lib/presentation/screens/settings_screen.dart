@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../application/settings/appearance_service.dart';
 import '../../core/config/app_info.dart';
 import '../providers.dart';
+import '../services/native_licenses.dart';
 import 'security/lock_settings_section.dart';
 import 'updates/update_widgets.dart';
 
@@ -70,6 +72,40 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             _InfoRow(label: 'Versão', value: env.appVersion),
             const _InfoRow(label: 'Aplicativo', value: AppInfo.subtitle),
+            const _InfoRow(
+              label: 'Dados de mercado',
+              value:
+                  'Fonte, licença e atribuição de cada provedor em Fontes '
+                  'de dados.',
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  key: const Key('third-party-licenses'),
+                  onPressed: () {
+                    NativeLicenses.ensureRegistered();
+                    showLicensePage(
+                      context: context,
+                      applicationName: AppInfo.name,
+                      applicationVersion: env.appVersion,
+                      applicationLegalese:
+                          'Copyright (C) 2026 Lucca Bueno. Usa o SQLCipher '
+                          '(Zetetic LLC) e o OpenSSL, além das bibliotecas '
+                          'listadas abaixo.',
+                    );
+                  },
+                  icon: const Icon(Icons.description_outlined),
+                  label: const Text('Licenças de terceiros'),
+                ),
+                TextButton(
+                  onPressed: () => GoRouter.of(context).go('/fontes'),
+                  child: const Text('Fontes de dados'),
+                ),
+              ],
+            ),
           ],
         ),
       ],

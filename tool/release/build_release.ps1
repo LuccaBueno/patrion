@@ -81,6 +81,7 @@ $stage = Join-Path $out 'portatil'
 $appDir = Join-Path $stage 'Patrion'
 New-Item -ItemType Directory -Force $appDir | Out-Null
 Copy-Item (Join-Path $release '*') $appDir -Recurse
+Copy-Item 'installer\AVISOS_DE_TERCEIROS.txt' $appDir
 $readme = Get-Content 'installer\LEIA-ME-PORTATIL.txt' -Raw -Encoding UTF8
 $readme = $readme.Replace('{{VERSAO}}', $Version)
 [IO.File]::WriteAllText((Join-Path $appDir 'LEIA-ME.txt'), $readme, (New-Object Text.UTF8Encoding $true))

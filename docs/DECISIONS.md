@@ -63,6 +63,7 @@ Versões consultadas no pub.dev em 17/10/2026. No `pubspec.yaml` elas entram com
 | `flutter_secure_storage` | 11.2.0 | BSD-3 | Chaves de API no Gerenciador de Credenciais do Windows |
 | `package_info_plus` | 10.2.2 | BSD-3 | Versão do app (manifest do save, sobre) |
 | `pub_semver` | 2.2.1 | BSD-3 | Comparação de versões (verificador de atualizações, F7) |
+| `url_launcher` | 6.3.3 | BSD-3 | Abrir a página da Release no navegador (verificador de atualizações, F7; registrado na D-40) |
 | `clock` | 1.1.3 | Apache-2.0 | Relógio injetável (testes de HLC e datas) |
 
 Entram só quando a fase correspondente começar (registradas agora para aprovação):
@@ -498,3 +499,43 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - Limitação: a brapi conta as requisições da chave em todos os PCs; o app conta só as deste PC (a tela avisa).
 - Alternativas: consultar a cota pela API da brapi (não há endpoint documentado no plano gratuito); bloquear também a atualização manual fora do pregão (o usuário pode querer conferir a qualquer hora).
 - Motivo: pedido do usuário; SPEC §5 (respeito aos limites das APIs).
+
+### 2026-10-18 — D-38: Instalador, ZIP portátil e Release (F7)
+
+- Decisão:
+  - **Instalador** do Inno Setup 6 (`installer/patrion.iss`), por usuário (D-06), com `AppId` fixo `{5A345516-F4A3-4E8D-B057-50475B9F06F9}` (nunca muda: é o que faz a atualização instalar por cima). Atalho no Menu Iniciar, atalho na área de trabalho opcional, associação do `.invsave` em `HKA` (HKCU ou HKLM) como tarefa marcada, `ChangesAssociations=yes`, interface em português (`BrazilianPortuguese.isl`).
+  - **Dados intocados:** nenhum `[UninstallDelete]`; o `[InstallDelete]` limpa só `{app}\data` (assets da versão anterior). A desinstalação mostra onde os dados ficaram. `test/installer_test.dart` protege essas regras.
+  - **App aberto:** o runner cria o mutex `PatrionAppMutex` (e `Global\PatrionAppMutex`); o instalador usa `AppMutex` e `CloseApplications=no`: pede para fechar, nunca fecha à força.
+  - **Runtime do Visual C++** junto do app pelo CMake (`InstallRequiredSystemLibraries`, sem o UCRT, que já vem no Windows 10 e 11). Sem isso, o app não abre num Windows limpo.
+  - **ZIP portátil**: pasta `Patrion\` com o app e o `LEIA-ME.txt` (`installer/LEIA-ME-PORTATIL.txt`). Mesmas pastas de dados da versão instalada (D-05).
+  - **Licenças:** os textos do SQLCipher (BSD-3) e do OpenSSL 4.0.3 (Apache-2.0, embutido no `sqlcipher.dll`), obtidos dos repositórios oficiais em 19/10/2026, ficam em `assets/licenses/` e entram na tela de licenças do Flutter (`NativeLicenses`), em Configurações > Sobre. `installer/AVISOS_DE_TERCEIROS.txt` vai junto do app (instalador e ZIP) com esses componentes, o runtime do Visual C++ e as fontes de dados (pendência da F5B e da F6).
+  - **Release:** `tool/release/build_release.ps1` gera instalador, ZIP, `SHA256SUMS.txt` e notas (seção da versão no `CHANGELOG.md` + `installer/RELEASE_TEMPLATE.md`). O mesmo script roda no PC e no workflow `.github/workflows/release.yml`, disparado pela tag `vX.Y.Z`: confere a tag com o `pubspec.yaml`, roda formatação, análise e testes, instala o Inno Setup pelo Chocolatey se o runner não tiver e cria a Release **em rascunho** com `gh release create --draft` (`--prerelease` para `-beta` e `-rc`). Permissão `contents: write` só nesse job. `workflow_dispatch` faz um ensaio que guarda os arquivos como artefato.
+  - **Versão:** `pubspec.yaml` `version: X.Y.Z+N`; a tag é `vX.Y.Z`; `AppInfo.version` acompanha (teste). O recurso de versão do instalador usa `X.Y.Z` sem o sufixo de pré-lançamento.
+  - **Testes de distribuição:** `tool/release/test_install.ps1` (26 verificações: instalar, abrir, segunda instância com `.invsave`, atualizar com o app aberto, atualizar por cima, desinstalar mantendo os dados) e `tool/release/sandbox_test.ps1` (o mesmo no Windows Sandbox, na pasta de dados padrão).
+- Alternativas: MSIX (exige assinatura e muda a pasta de dados para a virtualizada do pacote); WiX (mais verboso, sem ganho para um app por usuário); exigir o "Visual C++ Redistributable" no instalador (download extra e UAC).
+- Motivo: SPEC §19 e D-06. Um Windows recém-instalado (ou o Windows Sandbox) não tem garantidamente o runtime do Visual C++, de que o app e os plugins dependem.
+
+### 2026-10-18 — D-39: Instância única por pasta de dados e abertura do `.invsave` (F7)
+
+- Decisão:
+  - Argumentos soltos na linha de comando são arquivos para abrir (`LaunchOptions.files`); é assim que o Windows passa o `.invsave` do duplo clique.
+  - **Uma instância por pasta de dados** (`InstanceGate`, `infrastructure/system/single_instance.dart`): a primeira trava `<dados>\instance\patrion.lock` (trava do sistema, liberada quando o processo termina, mesmo num travamento). A segunda não abre o banco e não mostra janela: grava `{"files": [...]}` em `instance\inbox\` (arquivo temporário renomeado, atômico), chama `AllowSetForegroundWindow` e sai. A primeira lê a pasta a cada 400 ms, apaga o pedido, traz a janela para a frente e abre os arquivos. Pedidos com mais de 1 minuto achados ao abrir são descartados.
+  - Pastas diferentes (`--data-dir`) abrem ao mesmo tempo (teste de sincronização entre duas pastas, D-05).
+  - Os arquivos esperam numa fila fora da sessão (`OpenRequests`): com o bloqueio ativo, depois do desbloqueio. A fila leva à Sincronização, que abre a prévia da importação do arquivo; nada é aplicado sem confirmação.
+  - O log registra só o nome do arquivo recebido.
+  - **Cuidado do AOT:** o build release removia o campo com o arquivo da trava (só escrito; `close()` nunca é chamado pelo app), o coletor de lixo fechava o arquivo e a trava sumia logo depois de abrir. Os arquivos de trava ficam numa lista estática (`_openLocks`). Achado no teste de instalação; os testes unitários (JIT) não pegam.
+- Alternativas: mutex nomeado por FFI (o `GetLastError` depois de uma chamada FFI não é confiável no Dart); instância única no runner C++ com `WM_COPYDATA` (precisaria localizar a janela certa entre pastas de dados diferentes); deixar abrir duas instâncias (duas cópias gravando o mesmo banco).
+- Motivo: SPEC §19 (associação do `.invsave`) e integridade do banco.
+
+### 2026-10-18 — D-40: Verificador de atualizações (F7)
+
+- Decisão:
+  - `UpdateChecker` (`application/updates/`) atrás da interface `ReleaseFeed`; o adaptador `GitHubReleaseFeed` (`infrastructure/updates/`) consulta `api.github.com/repos/<AppInfo.releasesRepository>/releases/latest` sem token (D-07) ou, com as versões de teste, `/releases?per_page=30` (maior versão SemVer que não seja rascunho). Cabeçalho só com `User-Agent: Patrion/<versão>`.
+  - Comparação SemVer com `pub_semver`; `1.0.0 > 1.0.0-rc.1`. Pré-lançamentos ignorados por padrão (opção "Incluir versões de teste"). Tags fora do padrão `vX.Y.Z` são ignoradas.
+  - Frequência: automática no máximo uma vez a cada 24 horas (10 s depois de abrir; pode ser desligada); manual no máximo uma vez por minuto. A API sem token permite 60 consultas por hora por IP.
+  - Estado em `dev_settings` (`updates.state`, só deste PC): opções, última consulta bem-sucedida, última versão encontrada (com notas e link) e versão ignorada.
+  - Sem internet ou com erro, a automática falha em silêncio e mantém o último resultado; a manual mostra a mensagem. Nunca bloqueia o uso.
+  - Interface: Configurações > Atualizações (opções, "Verificar agora", notas, "Abrir página de download", "Ignorar esta versão") e aviso no Início. O link só abre páginas do próprio repositório no GitHub (outro endereço vira o link da tag).
+  - `url_launcher` 6.3.3 (BSD-3, do time do Flutter, suporta Windows, Android e iOS) para abrir o navegador.
+- Alternativas: baixar e executar o instalador sozinho (é a atualização automática da Fase 15, que exige verificação de autenticidade); consultar a página HTML das Releases (frágil).
+- Motivo: SPEC §19 ("Verificador de atualizações").

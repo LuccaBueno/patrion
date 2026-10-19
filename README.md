@@ -4,7 +4,7 @@ Aplicativo desktop pessoal para Windows 10 e 11 que registra, acompanha, analisa
 
 O app não é corretora, não executa ordens e não faz recomendações de investimento. Simulações e projeções são sempre hipotéticas.
 
-**Situação:** em desenvolvimento. Fases 5 e 5B concluídas: carteira real (cadastros, todos os tipos de operação, preço informado, posições e dashboard), motor financeiro (juros, CDI, XIRR, TWR), backup, restauração e sincronização entre computadores pelo arquivo de save, e bloqueio opcional do app (banco criptografado, senha, Windows Hello, inatividade e chave de recuperação). Cotações automáticas chegam na Fase 6. Veja `docs/PROGRESS.md`.
+**Situação:** versão 1.0.0 preparada (Fase 7, distribuição): carteira real, motor financeiro (juros, CDI, XIRR, TWR), backup, restauração e sincronização entre computadores pelo arquivo de save, bloqueio opcional do app, cotações e indicadores automáticos com fonte e data, instalador, versão portátil e verificador de atualizações. Veja `docs/PROGRESS.md`.
 
 ## Documentação
 
@@ -20,8 +20,14 @@ O app não é corretora, não executa ordens e não faz recomendações de inves
 | `docs/BLOQUEIO.md` | Bloqueio do app, chaves, chave de recuperação e senha do arquivo de save |
 | `docs/FONTES_DE_DADOS.md` | Provedores de dados avaliados |
 | `docs/DESENVOLVIMENTO.md` | Ambiente, comandos, migrações e CI |
+| `docs/DISTRIBUICAO.md` | Instalador, versão portátil, Releases, atualizações e testes de instalação |
+| `docs/SOLUCAO_DE_PROBLEMAS.md` | Problemas comuns de instalação, `.invsave`, atualizações e dados |
 | `docs/PROGRESS.md` | Estado atual |
 | `CHANGELOG.md` | Histórico de versões |
+
+## Instalação
+
+Baixe o instalador (`Patrion-X.Y.Z-instalador.exe`) ou o ZIP portátil na página de [Releases](https://github.com/LuccaBueno/patrion/releases). Windows 10 ou 11, 64 bits. O app não é assinado: o SmartScreen pede "Mais informações" > "Executar assim mesmo". Para atualizar, feche o app e execute o instalador da versão nova; os dados ficam onde estão. Detalhes em `docs/DISTRIBUICAO.md`.
 
 ## Desenvolvimento
 

@@ -32,17 +32,18 @@ Outras verificações automáticas: fora de `presentation/`, nenhum arquivo usa 
 
 ## Inicialização (`lib/main.dart`)
 
-1. Abre a janela (`window_manager`, tamanho mínimo 960 × 640).
-2. Lê `--data-dir` e `--cache-dir` (`LaunchOptions`) e resolve as pastas (`AppPathsResolver`, DECISIONS D-05), criando-as se preciso.
-3. Liga os logs rotativos (`setupLogging`, D-16) e os capturadores de erros não tratados.
-4. Cria o `SessionManager` (`presentation/session/app_session.dart`) e chama `start()`. Sem o bloqueio, abre a sessão na hora; com o bloqueio (banco criptografado e `patrion.keys.json`), mostra a tela de desbloqueio e só abre a sessão depois da senha, da chave de recuperação ou do Windows Hello (`BLOQUEIO.md`). A **sessão** (`openSession`) abre sempre na ordem:
+1. Lê `--data-dir`, `--cache-dir` e os arquivos recebidos (`LaunchOptions`; o `.invsave` do duplo clique) e resolve as pastas (`AppPathsResolver`, DECISIONS D-05), criando-as se preciso.
+2. Instância única por pasta de dados (`InstanceGate`, D-39): se outra instância já usa a pasta, entrega os arquivos a ela por `instance\inbox\` e termina sem mostrar janela.
+3. Abre a janela (`window_manager`, tamanho mínimo 960 × 640).
+4. Liga os logs rotativos (`setupLogging`, D-16) e os capturadores de erros não tratados.
+5. Cria o `SessionManager` (`presentation/session/app_session.dart`) e chama `start()`. Sem o bloqueio, abre a sessão na hora; com o bloqueio (banco criptografado e `patrion.keys.json`), mostra a tela de desbloqueio e só abre a sessão depois da senha, da chave de recuperação ou do Windows Hello (`BLOQUEIO.md`). A **sessão** (`openSession`) abre sempre na ordem:
    - (com o bloqueio) a chave do banco já liberada;
    - se o banco existente estiver num schema antigo, backup anterior à migração (`PreMigrationBackup`, D-19), criptografado com a mesma chave quando há bloqueio; sem backup válido, para aqui;
    - abre o banco (`AppDatabase.open`, em um isolate de fundo, com `PRAGMA key` quando há chave; o Drift migra se preciso);
    - carrega ou cria a identidade do dispositivo (`DeviceIdentityStore`) e cria o `SyncContext` (HLC + `device_id`);
    - registra em `dev_backups` o backup da migração, se houve.
-5. `SessionHost` monta a interface sobre a sessão, com banco, contexto, pastas e chave como provedores do Riverpod, dentro do `InactivityGuard` (bloqueio por inatividade). Quando a sessão troca (restauração de backup, bloqueio, desbloqueio, ativação ou desativação do bloqueio), a árvore inteira é remontada do zero; bloqueado, só existe a tela de desbloqueio.
-6. Se algo falhar, mostra a tela "O Patrion não conseguiu iniciar" com a mensagem e a pasta dos logs.
+6. `SessionHost` monta a interface sobre a sessão, com banco, contexto, pastas e chave como provedores do Riverpod, dentro do `InactivityGuard` (bloqueio por inatividade), da atualização automática de mercado e da verificação de atualizações (`UpdateAutoCheck`). Os arquivos recebidos (`OpenRequests`) vivem fora da sessão: esperam o desbloqueio e levam à Sincronização. Quando a sessão troca (restauração de backup, bloqueio, desbloqueio, ativação ou desativação do bloqueio), a árvore inteira é remontada do zero; bloqueado, só existe a tela de desbloqueio.
+7. Se algo falhar, mostra a tela "O Patrion não conseguiu iniciar" com a mensagem e a pasta dos logs.
 
 ## Dados e sincronização
 
@@ -160,3 +161,15 @@ Fontes em `FONTES_DE_DADOS.md`; decisões em D-34 a D-36; fórmulas em `FORMULAS
 | `presentation/` | `services/market_refresh.dart`, `screens/market/data_sources_screen.dart` | Atualização automática e manual, aviso de falha e de "sem conexão", tela "Fontes de dados" |
 
 O `PortfolioQuery` lê o preço de mercado do banco e recalcula a carteira quando os dados de mercado mudam; nenhuma tela acessa a rede diretamente. As requisições levam só códigos de ativos e de séries (regra 8).
+
+## Distribuição (Fase 7)
+
+| Camada | Arquivos | Papel |
+|---|---|---|
+| `core/config/` | `app_info.dart`, `launch_options.dart` | Versão, repositório das Releases (único lugar), arquivos recebidos pela linha de comando |
+| `application/updates/` | `update_checker.dart` | Verificador de atualizações: comparação SemVer, pré-lançamentos, versão ignorada, frequência e estado em `dev_settings` (D-40) |
+| `infrastructure/updates/` | `github_release_feed.dart` | Adaptador das Releases do GitHub (sem token) |
+| `infrastructure/system/` | `single_instance.dart`, `window_setup.dart` | Uma instância por pasta de dados, encaminhamento de arquivos e janela para a frente (D-39) |
+| `presentation/` | `services/open_requests.dart`, `screens/updates/update_widgets.dart` | Fila dos `.invsave` recebidos; seção "Atualizações", aviso no Início e consulta automática |
+| `windows/runner/main.cpp` | — | Mutex `PatrionAppMutex`, que o instalador usa para saber se o app está aberto |
+| `installer/`, `tool/release/` | `patrion.iss`, `*.ps1` | Instalador, ZIP portátil, notas e testes de instalação (`DISTRIBUICAO.md`) |

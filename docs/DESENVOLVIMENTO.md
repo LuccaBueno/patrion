@@ -88,3 +88,20 @@ Com `--data-dir`, banco, backups e logs ficam na pasta indicada. A tela Configur
 ## CI
 
 `.github/workflows/ci.yml` roda em todo push e PR, no `windows-latest`, com o Flutter fixado: código gerado atualizado, `dart format`, `flutter analyze`, `flutter test` e `flutter build windows --release`. Permissões mínimas (`contents: read`).
+
+`.github/workflows/release.yml` roda na tag `vX.Y.Z` (Release em rascunho) ou em "Run workflow" (ensaio, com os arquivos como artefato). Ver `DISTRIBUICAO.md`.
+
+## Instalador e Release
+
+Inno Setup 6 instalado (no PC do desenvolvedor, em `%LOCALAPPDATA%\Programs\Inno Setup 6`, fora do `PATH`; o script também procura em Program Files, no `PATH` e em `$env:ISCC`).
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tool\release\build_release.ps1             # dist\: instalador, ZIP, SHA256SUMS, notas
+powershell -ExecutionPolicy Bypass -File tool\release\build_release.ps1 -SkipBuild  # reaproveita o build
+powershell -ExecutionPolicy Bypass -File tool\release\test_install.ps1 ...          # teste de instalação (DISTRIBUICAO.md)
+powershell -ExecutionPolicy Bypass -File tool\release\sandbox_test.ps1              # o mesmo no Windows Sandbox
+```
+
+Os scripts `.ps1` são salvos em UTF-8 **com BOM**: sem ele, o Windows PowerShell 5.1 lê os acentos errado.
+
+**O build release se comporta diferente dos testes.** Os testes rodam em JIT; o release é AOT, que remove código e campos não usados. Um objeto com recurso nativo (arquivo, trava) guardado só num campo que nunca é lido pode ser coletado e fechado (D-39). O teste de instalação roda o app de verdade e pega esse tipo de problema.

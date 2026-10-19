@@ -4,9 +4,84 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 6 concluída** em 18/10/2026 (dados de mercado). Próxima: Fase 7 (Distribuição). Pendências suas: o teste com a sua chave da brapi (roteiro abaixo) e, da F5B, o Windows Hello num PC com o Hello configurado.
+**Fase 7 implementada** em 19/10/2026 (distribuição), com a v1.0.0 preparada e **sem tag nem Release** (aguardando sua autorização). Falta, para o critério de pronto ("instalador testado em ambiente limpo"), o seu teste no Windows Sandbox ou num PC sem Flutter (roteiro abaixo); aqui o teste automático passou num PC com Flutter, em pastas isoladas. Próxima: Fase 8. Pendências suas antigas: chave da brapi (F6) e Windows Hello (F5B).
 
 ## Concluído
+
+### Fase 7 — Distribuição
+
+Critério de pronto (SPEC §21): a versão v1.0.0 existe, com instalador testado em ambiente limpo.
+
+- **v1.0.0 preparada:** `pubspec.yaml` 1.0.0+1, `CHANGELOG.md` com a seção `[1.0.0]`, instalador, ZIP e notas gerados e conferidos. A tag `v1.0.0` e a Release **não foram criadas** (só com o seu pedido).
+- **Instalador testado neste PC** (26 de 26 verificações, `tool/release/test_install.ps1`), com pastas de instalação e de dados de teste: instalação, segunda instância com `.invsave`, recusa de atualizar com o app aberto, atualização 0.9.0 → 1.0.0 por cima, desinstalação mantendo os dados e sem sobras no registro. **Ambiente limpo: não testado** (o Windows Sandbox não está habilitado neste PC; ligá-lo pede administrador e reinicialização). Roteiro no item 6.
+
+**1. O que foi implementado**
+
+- **Instalador** (Inno Setup 6, `installer/patrion.iss`): por usuário em `%LOCALAPPDATA%\Programs\Patrion`, sem administrador (opção "para todos"); Menu Iniciar e atalho opcional na área de trabalho; atualização por cima (AppId fixo); pede para fechar o app aberto (mutex `PatrionAppMutex` criado pelo runner) e nunca o fecha à força; desinstalação sem apagar dados, com mensagem de onde eles ficaram; versão em "Aplicativos instalados"; associação do `.invsave`, removida na desinstalação.
+- **Runtime do Visual C++** junto do app (CMake), para abrir num Windows sem o Redistributable.
+- **ZIP portátil** com `LEIA-ME.txt` (onde ficam os dados, `--data-dir`, SmartScreen).
+- **Avisos de terceiros** (pendência da F5B e da F6): textos do SQLCipher e do OpenSSL 4.0.3 (embutido no `sqlcipher.dll`) na tela Configurações > Sobre > "Licenças de terceiros", junto das licenças do Flutter; `AVISOS_DE_TERCEIROS.txt` no pacote, com as fontes de dados.
+- **`.invsave` pelo Explorador:** o duplo clique abre a Sincronização com a prévia da importação (nada é aplicado sem "Aplicar"); com bloqueio, depois do desbloqueio.
+- **Instância única por pasta de dados:** a segunda instância entrega o arquivo à janela aberta, que vem para a frente, e sai. Pastas diferentes (`--data-dir`) abrem juntas. No teste do app real apareceu um defeito que os testes unitários não pegavam: no build release, a trava se soltava logo depois da abertura (o AOT removia o campo e o coletor de lixo fechava o arquivo). Corrigido e registrado na D-39.
+- **Verificador de atualizações:** Configurações > Atualizações (ao abrir, no máximo uma vez por dia, desligável; "Verificar agora"; versões de teste opcionais; notas; "Abrir página de download"; "Ignorar esta versão") e aviso no Início. Releases do GitHub sem token, SemVer, sem internet não atrapalha.
+- **Workflow de release** (`.github/workflows/release.yml`): na tag `vX.Y.Z`, confere a versão, roda formatação, análise e testes, gera os arquivos e cria a Release em **rascunho** (`-beta`/`-rc` = pré-lançamento). "Run workflow" faz um ensaio sem Release.
+- **Scripts:** `tool/release/build_release.ps1` (instalador, ZIP, SHA-256, notas), `release_notes.ps1`, `test_install.ps1` e `sandbox_test.ps1`.
+- **Pedido extra:** na janela de 1280 px, a tabela da Carteira cabe inteira, até "Resultado" (classe embaixo do ativo, preço médio embaixo da quantidade, percentual embaixo do resultado). Medido com a Segoe UI: 906 px de tabela numa área de 975 px.
+- **Docs:** `DISTRIBUICAO.md`, `SOLUCAO_DE_PROBLEMAS.md`, ARQUITETURA, DESENVOLVIMENTO, README, DECISIONS D-38 a D-40 e `url_launcher` na D-02.
+
+**2. Arquivos criados ou alterados (resumo)**
+
+- Novos: `installer/` (`patrion.iss`, `LEIA-ME-PORTATIL.txt`, `RELEASE_TEMPLATE.md`, `AVISOS_DE_TERCEIROS.txt`), `tool/release/*.ps1`, `.github/workflows/release.yml`, `assets/licenses/`, `lib/application/updates/update_checker.dart`, `lib/infrastructure/updates/github_release_feed.dart`, `lib/infrastructure/system/single_instance.dart`, `lib/presentation/services/open_requests.dart`, `lib/presentation/services/native_licenses.dart`, `lib/presentation/screens/updates/update_widgets.dart`, `docs/DISTRIBUICAO.md`, `docs/SOLUCAO_DE_PROBLEMAS.md`.
+- Alterados: `lib/main.dart`, `core/config/` (versão, repositório, arquivos recebidos, pasta `instance`), `window_setup.dart`, Sincronização, Configurações, Início, `app.dart`, `session_host.dart`, `providers.dart`, Carteira, `windows/CMakeLists.txt`, `windows/runner/main.cpp`, `pubspec.yaml` (1.0.0, `pub_semver`, `url_launcher`, assets), `.gitignore` (`dist/`).
+- Testes novos: largura da Carteira (com a Segoe UI), instância única, opções da linha de comando, verificador (7), adaptador do GitHub (5), telas de atualização e licenças (4), abertura do `.invsave`, regras do instalador (5).
+
+**3. Testes executados e resultados reais**
+
+- `dart format --set-exit-if-changed .`: 200 arquivos, 0 alterados.
+- `flutter analyze`: sem problemas.
+- `flutter test`: **447 testes passando**.
+- `flutter build windows --release`: compilou.
+- `tool/release/build_release.ps1`: gerou `Patrion-1.0.0-instalador.exe` (13,6 MB), `Patrion-1.0.0-portatil.zip` (16,3 MB), `SHA256SUMS.txt` e `RELEASE_NOTES.md`.
+- `tool/release/test_install.ps1` neste PC (pastas de teste, dados reais intocados): **26 de 26**.
+- CI e ensaio do workflow de release: ver o fim do relatório da sessão (rodados depois do push).
+
+**4. Problemas e limitações**
+
+- **Sem teste em ambiente limpo ainda** (critério de pronto): o Windows Sandbox não está habilitado aqui.
+- O teste de atualização usa um instalador "0.9.0" gerado do mesmo build (só o instalador tem outra versão): confere o mecanismo de atualização por cima, não uma migração real entre versões do app.
+- O teste automático confere que o `.invsave` chega à janela aberta (pelo log); a prévia na tela foi conferida só no teste de widget. A largura da Carteira também foi medida em teste de widget (com a Segoe UI), não numa captura do app.
+- Não assinado: aviso do SmartScreen (documentado). Sem atualização automática (Fase 15).
+- O ZIP gerado no PowerShell 5.1 usa `\` nos caminhos internos (o Explorador do Windows abre normalmente); o do workflow usa o PowerShell 7.
+- As notas da Release saem do CHANGELOG inteiro da 1.0.0, inclusive dois itens internos ("CI: actions/checkout…" e "Especificação: …"); dá para tirá-los antes de publicar.
+
+**5. Pendências**
+
+- Você: teste em ambiente limpo (roteiro abaixo) e autorizar a tag `v1.0.0`. Depois da tag, revisar a Release em rascunho e publicar.
+- Você (antigas): chave da brapi (F6) e Windows Hello (F5B).
+- F8 em diante, conforme a SPEC.
+
+**6. Como executar e o que testar manualmente**
+
+Os arquivos estão em `dist\` (não versionados): `Patrion-1.0.0-instalador.exe`, `Patrion-1.0.0-portatil.zip`, `SHA256SUMS.txt`, `RELEASE_NOTES.md`. Para gerar de novo: `powershell -ExecutionPolicy Bypass -File tool\release\build_release.ps1`.
+
+**Opção A — Windows Sandbox (recomendado):**
+
+1. Ligue o recurso: Painel de Controle > Programas > "Ativar ou desativar recursos do Windows" > **Área Restrita do Windows** (pede reinicialização). Requer Windows 11 Pro (o seu é) e virtualização ligada na BIOS.
+2. No PowerShell, na pasta do projeto: `powershell -ExecutionPolicy Bypass -File tool\release\sandbox_test.ps1`. O Sandbox abre e roda sozinho o teste automático (instalar 0.9.0, abrir, `.invsave` por duplo clique, atualizar com o app aberto, atualizar por cima, desinstalar). Espere o PowerShell do Sandbox terminar e veja `dist\sandbox\trabalho\resultado.txt` (deve dizer 26 de 26).
+3. Ainda no Sandbox, faça o roteiro manual da opção B com o instalador em `Desktop\patrion-teste\`. O Sandbox é descartável: ao fechar, tudo some.
+
+**Opção B — roteiro manual** (no Sandbox ou num PC sem Flutter; detalhes em `docs/DISTRIBUICAO.md`, "Testes de distribuição"):
+
+1. **Instalar:** dois cliques em `Patrion-1.0.0-instalador.exe`. Confira o SmartScreen ("Mais informações" > "Executar assim mesmo"), que não pede administrador, a opção do `.invsave` marcada, o atalho no Menu Iniciar e o app abrindo no fim.
+2. **Usar:** cadastre instituição e conta, registre um depósito e uma compra. Na Carteira, com a janela no tamanho padrão, a coluna "Resultado" aparece sem rolar para o lado.
+3. **Fechar e reabrir:** os dados continuam. Configurações > Sobre mostra 1.0.0; "Licenças de terceiros" lista SQLCipher e OpenSSL.
+4. **Offline:** sem rede, o app abre com o aviso "Sem conexão"; Configurações > Atualizações > "Verificar agora" mostra "Sem conexão" e nada trava.
+5. **Save:** Sincronização > "Salvar arquivo de save". Feche o app e dê dois cliques no arquivo: o app abre na Sincronização com a prévia. Repita com o app aberto: a janela vem para a frente com a prévia, sem abrir outra. (Entre duas instalações: leve o arquivo ao outro PC ou Sandbox.)
+6. **Atualizar sem perder dados:** com o app aberto, execute o instalador de novo: ele pede para fechar o app. Feche, continue; os dados continuam. (Com uma versão mais nova no futuro, o mesmo vale.)
+7. **Desinstalar sem perder dados:** "Aplicativos instalados" > Patrion > Desinstalar. A mensagem final mostra `%APPDATA%\Patrion`. Confira que a pasta continua com `patrion.db`, `backups\` e `logs\`, que o atalho sumiu e que o `.invsave` não abre mais com o Patrion. Reinstale: a carteira volta como estava.
+8. **Portátil:** extraia o ZIP, abra `Patrion\patrion.exe`; ele usa os mesmos dados da instalada (não abra as duas juntas: a segunda só traz a primeira para a frente).
+
+**Neste PC (com Flutter)**, sem tocar nos seus dados: `powershell -ExecutionPolicy Bypass -File tool\release\test_install.ps1 -OldInstaller <instalador 0.9.0> -NewInstaller dist\Patrion-1.0.0-instalador.exe -WorkDir C:\temp\teste -DataDir C:\temp\teste\dados -InstallDir C:\temp\teste\app` (o 0.9.0 sai de `build_release.ps1 -SkipBuild -Version 0.9.0 -OutDir dist-0.9.0`).
 
 ### Fase 6 — Dados de mercado
 
@@ -721,11 +796,11 @@ ou abra `build\windows\x64\runner\Release\patrion.exe`. Conferir: a janela abre 
 
 ## Pendências e problemas conhecidos
 
-Ver as seções 4 e 5 das Fases 6, 5B, 5, 4, 3, 2 e 1 acima.
+Ver as seções 4 e 5 das Fases 7, 6, 5B, 5, 4, 3, 2 e 1 acima.
 
 ## Próximo passo
 
-Fase 7 (Distribuição), conforme `docs/SPEC.md` §21: instalador e ZIP portátil, workflow de release, verificador de atualizações e associação do `.invsave`, até a v1.0.0 com instalador testado em ambiente limpo.
+Fechar a F7: seu teste do instalador em ambiente limpo (Windows Sandbox) e a autorização para criar a tag `v1.0.0`, que gera a Release em rascunho para você revisar e publicar. Depois, Fase 8 (classes, benchmarks, risco e renda passiva).
 
 ## Histórico de sessões
 
@@ -738,3 +813,4 @@ Fase 7 (Distribuição), conforme `docs/SPEC.md` §21: instalador e ZIP portáti
 | 2026-10-17 | F5 | Backup e save: arquivo .invsave com mesclagem por HLC, conflitos, unificação de cadastros repetidos e prévia; backup manual e automático com metadados e restauração com reabertura do banco; schema 3; S1 a S10 e sincronização real entre duas pastas de dados |
 | 2026-10-18 | F5B | Pendências da F5 (aviso de carteira inconsistente na prévia; teste da falha ao reabrir na restauração) e bloqueio do app: SQLCipher, senha, chave de recuperação, Windows Hello, inatividade, backups criptografados e senha do arquivo de save; conversão de um banco existente verificada no app real |
 | 2026-10-18 | F6 | Dados de mercado: pendências da F1, schema 4, 14 adaptadores, cache, atualização automática e manual, câmbio e indicadores, patrimônio em reais, tela Fontes de dados, chaves com DPAPI, dados de mercado no save; cotações reais e funcionamento sem internet verificados no app real |
+| 2026-10-19 | F7 | Distribuição: instalador Inno Setup (por usuário, atualização por cima, desinstalação sem perder dados, associação do .invsave), runtime do Visual C++ no pacote, ZIP portátil, avisos de licença, instância única por pasta de dados, verificador de atualizações, workflow de release em rascunho e teste de instalação (26/26 neste PC); Carteira cabe em 1280 px; v1.0.0 preparada, sem tag |
