@@ -26,6 +26,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
   - Sem internet, o app avisa "sem conexão" e continua com os últimos dados guardados, cada um com a sua data; a atualização para cedo quando o computador está sem rede.
   - Cadastro de ativo com a escolha "cotação automática" ou "preço ou saldo informado" (sugerida pela classe), e ação em "Fontes de dados" para passar os ativos antigos para a cotação automática.
   - O arquivo de save pode levar os dados de mercado já baixados (opção marcada por padrão), para o outro computador funcionar sem internet. Com eles, o arquivo usa o formato 2.
+  - brapi na atualização automática só em horário de pregão da B3 (dias úteis, 10:00 às 18:30 de Brasília) e no máximo a cada 30 minutos por ativo; "Fontes de dados" mostra quanto da cota mensal da brapi já foi usado, o app avisa a partir de 80% e, com a cota esgotada, os ativos da B3 usam o fechamento oficial do COTAHIST.
 - Fase 5B (bloqueio do app):
   - Bloqueio opcional, por computador, em Configurações: o banco de dados passa a ser criptografado (SQLCipher) e só abre com a senha. A conversão de um banco existente faz um backup antes, é conferida e pode ser desfeita ("Desativar o bloqueio", com a senha).
   - Tela de desbloqueio na abertura; "Bloquear agora"; bloqueio por inatividade (padrão 15 minutos; 1, 5, 30, 60 minutos ou nunca), que fecha o banco e descarta os dados da memória.

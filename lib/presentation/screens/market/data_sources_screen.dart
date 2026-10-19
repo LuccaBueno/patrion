@@ -1,5 +1,9 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../application/market/market_data_service.dart';
 
 import '../../../application/market/market_overview.dart';
 import '../../../application/settings/market_preferences.dart';
@@ -97,7 +101,10 @@ class RefreshStatusBanner extends ConsumerWidget {
       );
     }
     if (result == null) return const SizedBox.shrink();
-    final problem = result.offline || result.failures.isNotEmpty;
+    final problem =
+        result.offline ||
+        result.failures.isNotEmpty ||
+        result.notices.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
@@ -129,6 +136,7 @@ class RefreshStatusBanner extends ConsumerWidget {
                 for (final f in result.failures)
                   '${ProviderCatalog.nameOf(f.provider)}: ${f.message}',
               },
+              ...result.notices,
             ].join('\n'),
           ),
         ),
@@ -457,9 +465,13 @@ class _ProviderCardState extends ConsumerState<_ProviderCard> {
             Text('Envia: ${info.sends}', style: muted),
             Text('Licença: ${info.license}', style: muted),
             Text('Limites: ${info.limits}', style: muted),
-            if (s.quotaPeriod != null && s.quotaUsed > 0)
+            if (info.monthlyQuota != null) QuotaMeter(state: s),
+            if (info.autoOnlyInSession)
               Text(
-                'Uso no mês (${s.quotaPeriod}): ${s.quotaUsed} requisições',
+                'Na atualização automática, só em horário de pregão da B3 '
+                '(dias úteis, 10:00 às 18:30 de Brasília) e no máximo a cada '
+                '${info.minAutoInterval?.inMinutes ?? 30} minutos por ativo. '
+                '"Atualizar agora" consulta a qualquer hora.',
                 style: muted,
               ),
             if (info.attribution != null) Text(info.attribution!, style: muted),
@@ -638,6 +650,130 @@ class _ManualAssetsCard extends ConsumerWidget {
             key: const Key('manual-assets-apply'),
             onPressed: apply,
             child: const Text('Usar cotações'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Uso da cota mensal de um provedor neste computador (SPEC §5: respeito aos
+/// limites), com aviso a partir de 80% e ao esgotar.
+class QuotaMeter extends StatelessWidget {
+  const QuotaMeter({required this.state, super.key});
+
+  final ProviderState state;
+
+  /// Requisições do mês atual (a contagem de um mês anterior não vale).
+  static int usedNow(ProviderState s, DateTime now) =>
+      s.quotaPeriod == ProviderStateRepository.periodOf(now) ? s.quotaUsed : 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final quota = state.info.monthlyQuota!;
+    final now = DateTime.now();
+    final used = usedNow(state, now);
+    final theme = Theme.of(context);
+    final warn = used >= quota * ProviderInfo.quotaWarningFraction;
+    final exhausted = used >= quota;
+    final color = warn ? theme.colorScheme.error : null;
+    final pct = (used * 100) ~/ quota;
+    return Padding(
+      key: Key('quota-${state.info.code}'),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Cota do mês (${ProviderStateRepository.periodOf(now)}): '
+            '${Fmt.number(Decimal.fromInt(used))} de '
+            '${Fmt.number(Decimal.fromInt(quota))} requisições ($pct%)',
+            style: theme.textTheme.bodySmall?.copyWith(color: color),
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: 360,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                // Conversão para desenho apenas (regra 6, exceção).
+                value: (used / quota).clamp(0, 1).toDouble(),
+                minHeight: 6,
+                color: color,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              ),
+            ),
+          ),
+          if (warn)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                exhausted
+                    ? 'Cota esgotada: até o mês que vem, os ativos da B3 usam o '
+                          'fechamento oficial do COTAHIST.'
+                    : 'Mais de 80% da cota usada. Ao acabar, os ativos da B3 '
+                          'passam a usar o fechamento oficial do COTAHIST.',
+                style: theme.textTheme.bodySmall?.copyWith(color: color),
+              ),
+            ),
+          Text(
+            'Contadas neste computador; a brapi conta todas as requisições '
+            'da sua chave, inclusive de outros PCs.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Aviso no Início quando a cota de algum provedor passou de 80%.
+class QuotaWarningBanner extends ConsumerWidget {
+  const QuotaWarningBanner({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final states = ref.watch(providerStatesProvider).value ?? const [];
+    final now = DateTime.now();
+    final over = [
+      for (final s in states)
+        if (s.info.monthlyQuota case final q?)
+          if (s.enabled &&
+              QuotaMeter.usedNow(s, now) >=
+                  q * ProviderInfo.quotaWarningFraction)
+            s,
+    ];
+    if (over.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        key: const Key('quota-warning'),
+        child: ListTile(
+          leading: Icon(
+            Icons.data_usage,
+            color: theme.colorScheme.error,
+            semanticLabel: 'Aviso de cota',
+          ),
+          title: Text(
+            [
+              for (final s in over)
+                QuotaMeter.usedNow(s, now) >= s.info.monthlyQuota!
+                    ? 'A cota mensal de ${s.info.name} acabou: até o mês que '
+                          'vem, os ativos da B3 usam o fechamento oficial do '
+                          'COTAHIST.'
+                    : MarketDataService.quotaNotice(
+                        s.info.code,
+                        QuotaMeter.usedNow(s, now),
+                        s.info.monthlyQuota!,
+                      ),
+            ].join('\n'),
+          ),
+          trailing: TextButton(
+            onPressed: () => GoRouter.of(context).go('/fontes'),
+            child: const Text('Fontes de dados'),
           ),
         ),
       ),

@@ -73,8 +73,12 @@ class MarketRefreshController extends Notifier<MarketRefreshState> {
     return completer.future;
   }
 
-  Future<RefreshResult> refreshPortfolio() =>
-      run('Atualização da carteira', (s) => s.refreshPortfolio());
+  /// [automatic]: chamada pela atualização automática (respeita o horário
+  /// de pregão e o intervalo mínimo dos provedores que pedem isso).
+  Future<RefreshResult> refreshPortfolio({bool automatic = false}) => run(
+    automatic ? 'Atualização automática' : 'Atualização da carteira',
+    (s) => s.refreshPortfolio(automatic: automatic),
+  );
 }
 
 /// Atualização automática enquanto o app está aberto (SPEC §5): uma logo
@@ -111,7 +115,11 @@ class _MarketAutoRefreshState extends ConsumerState<MarketAutoRefresh> {
         _minutes ??
         MarketPreferences.defaultRefreshMinutes;
     if (minutes == 0) return;
-    unawaited(ref.read(marketRefreshProvider.notifier).refreshPortfolio());
+    unawaited(
+      ref
+          .read(marketRefreshProvider.notifier)
+          .refreshPortfolio(automatic: true),
+    );
   }
 
   void _schedule(int minutes) {

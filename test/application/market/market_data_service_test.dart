@@ -6,6 +6,7 @@ import 'package:patrion/application/market/market_ports.dart';
 import 'package:patrion/application/portfolio/portfolio_query.dart';
 import 'package:patrion/application/settings/market_preferences.dart';
 import 'package:patrion/core/errors/app_error.dart';
+import 'package:patrion/core/time/instant_format.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/device_settings_repository.dart';
 import 'package:patrion/data/repositories/market_repository.dart';
@@ -22,7 +23,10 @@ const _collected = '2026-10-17T12:00:00.000Z';
 
 /// Cotação de mentira: devolve [prices] ou falha como pedido.
 class FakeQuotes implements QuoteProvider {
-  FakeQuotes(this.code, {this.prices = const {}, this.error});
+  FakeQuotes(this.code, {this.prices = const {}, this.error, this.now});
+
+  /// Instante da coleta (o relógio do teste).
+  final DateTime Function()? now;
 
   @override
   final String code;
@@ -46,7 +50,7 @@ class FakeQuotes implements QuoteProvider {
       refAt: DateTime.utc(2026, 10, 16, 18),
       source: code,
       dataType: MarketDataType.intraday,
-      collectedAt: _collected,
+      collectedAt: now == null ? _collected : formatInstant(now!()),
       delayNote: 'até 30 min de atraso',
     );
   }
@@ -183,7 +187,11 @@ void main() {
     f.t.wall.now = DateTime.utc(2026, 10, 16, 21);
     repo = MarketRepository(f.t.db);
     states = ProviderStateRepository(f.t.db);
-    brapi = FakeQuotes('brapi', prices: {'PETR4': '35.50'});
+    brapi = FakeQuotes(
+      'brapi',
+      prices: {'PETR4': '35.50'},
+      now: () => f.t.wall.now,
+    );
     backup = FakeQuotes('yahoo', prices: {'PETR4': '35.40'});
     cotahist = FakeBatch();
     ptax = FakeFx('bcb_ptax');
@@ -389,5 +397,89 @@ void main() {
     expect(identical(a, b), isTrue);
     await a;
     expect(brapi.asked, hasLength(1));
+  });
+
+  group('brapi na atualização automática (D-37)', () {
+    Future<List<Asset>> petr() async => [
+      (await f.repos.assets.all()).firstWhere((a) => a.symbol == 'PETR4'),
+    ];
+
+    test(
+      'fora do pregão a automática não chama a brapi; a manual chama',
+      () async {
+        // Sábado, 17/10/2026, 12:00 em Brasília.
+        f.t.wall.now = DateTime.utc(2026, 10, 17, 15);
+        await states.setEnabled('yahoo', false);
+        await service.refreshQuotes(await petr(), automatic: true);
+        expect(brapi.asked, isEmpty);
+        await service.refreshQuotes(await petr());
+        expect(brapi.asked, hasLength(1));
+      },
+    );
+
+    test(
+      'no pregão, no máximo uma consulta por ativo a cada 30 minutos',
+      () async {
+        // Quinta, 15/10/2026, 11:00 em Brasília.
+        f.t.wall.now = DateTime.utc(2026, 10, 15, 14);
+        await states.setEnabled('yahoo', false);
+        await service.refreshQuotes(await petr(), automatic: true);
+        f.t.wall.advance(const Duration(minutes: 29));
+        await service.refreshQuotes(await petr(), automatic: true);
+        expect(brapi.asked, hasLength(1));
+        f.t.wall.advance(const Duration(minutes: 2));
+        await service.refreshQuotes(await petr(), automatic: true);
+        expect(brapi.asked, hasLength(2));
+      },
+    );
+  });
+
+  group('cota mensal da brapi', () {
+    late MarketDataService limited;
+    setUp(() async {
+      await states.setEnabled('yahoo', false);
+      limited = MarketDataService(
+        repo: repo,
+        states: states,
+        providers: MarketProviders(quotes: [brapi], batchHistory: cotahist),
+        preferences: MarketPreferences(DeviceSettingsRepository(f.t.db)),
+        portfolio: query,
+        wallClock: f.t.wall.clock,
+        monthlyQuotas: const {'brapi': 10},
+      );
+    });
+
+    test('avisa a partir de 80% da cota', () async {
+      await states.addQuota('brapi', f.t.wall.now, n: 6);
+      final below = await limited.refreshPortfolio();
+      expect(below.notices, isEmpty); // 7 de 10
+      final at80 = await limited.refreshPortfolio();
+      expect(at80.notices.single, contains('80%'));
+      expect(at80.notices.single, contains('8 de 10'));
+    });
+
+    test('cota esgotada: a brapi não é chamada nem contada, e a carteira usa '
+        'o fechamento do COTAHIST', () async {
+      await states.addQuota('brapi', f.t.wall.now, n: 10);
+      final result = await limited.refreshPortfolio();
+      expect(brapi.asked, isEmpty);
+      expect(result.failures.single.quotaExhausted, isTrue);
+      expect(result.failures.single.message, contains('COTAHIST'));
+      expect(result.offline, isFalse);
+      expect(await states.quotaUsedIn('brapi', f.t.wall.now), 10);
+      final snap = await query.load();
+      final v = snap.valued.firstWhere((v) => v.asset?.symbol == 'PETR4');
+      expect(v.marketPrice!.source, 'b3_cotahist');
+      expect(v.valuationDate, LocalDate(2026, 10, 15));
+    });
+
+    test('a contagem recomeça no mês seguinte', () async {
+      await states.addQuota('brapi', f.t.wall.now, n: 10);
+      f.t.wall.now = DateTime.utc(2026, 11, 3, 14);
+      await limited.refreshQuotes(
+        (await f.repos.assets.all()).where((a) => a.symbol == 'PETR4'),
+      );
+      expect(brapi.asked, hasLength(1));
+    });
   });
 }

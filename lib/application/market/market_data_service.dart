@@ -10,6 +10,7 @@ import '../../data/repositories/market_repository.dart';
 import '../../data/repositories/provider_state_repository.dart';
 import '../../domain/finance/business_calendar.dart';
 import '../../domain/market/market_data.dart';
+import '../../domain/market/market_schedule.dart';
 import '../../domain/market/provider_catalog.dart';
 import '../../domain/portfolio/codes.dart';
 import '../../domain/portfolio/entities.dart';
@@ -21,13 +22,21 @@ final _log = Logger('mercado');
 
 /// Falha de um provedor numa atualização.
 class ProviderFailure {
-  const ProviderFailure(this.provider, this.message, {this.network = false});
+  const ProviderFailure(
+    this.provider,
+    this.message, {
+    this.network = false,
+    this.quotaExhausted = false,
+  });
 
   final String provider;
   final String message;
 
   /// Falha de rede (sem conexão, fora do ar).
   final bool network;
+
+  /// A cota mensal do provedor acabou (o app não chamou).
+  final bool quotaExhausted;
 }
 
 /// Resultado de uma atualização.
@@ -41,6 +50,9 @@ class RefreshResult {
   /// Ativos sem nenhuma fonte disponível (sem chave, fonte desligada…).
   final unsupported = <String>[];
 
+  /// Avisos que não são falhas (por exemplo, 80% da cota do mês).
+  final notices = <String>{};
+
   /// Todas as falhas foram de rede: o app está sem internet.
   bool get offline => failures.isNotEmpty && failures.every((f) => f.network);
 
@@ -48,6 +60,7 @@ class RefreshResult {
     updated += other.updated;
     failures.addAll(other.failures);
     unsupported.addAll(other.unsupported);
+    notices.addAll(other.notices);
   }
 }
 
@@ -90,8 +103,9 @@ class MarketDataService {
     this._portfolio,
     Clock wallClock = const Clock(),
     BusinessCalendar? calendar,
-    this.monthlyQuotas = const {'brapi': 15000},
+    Map<String, int>? monthlyQuotas,
   }) : _clock = wallClock,
+       monthlyQuotas = monthlyQuotas ?? defaultQuotas,
        _calendar = calendar ?? BusinessCalendar.brazil;
 
   final MarketRepository _repo;
@@ -104,6 +118,11 @@ class MarketDataService {
 
   /// Cota mensal por provedor (o app para de chamar ao atingir).
   final Map<String, int> monthlyQuotas;
+
+  /// Cotas do catálogo de provedores.
+  static final defaultQuotas = <String, int>{
+    for (final p in ProviderCatalog.all) p.code: ?p.monthlyQuota,
+  };
 
   Future<RefreshResult>? _running;
 
@@ -162,16 +181,21 @@ class MarketDataService {
     }
     final quota = monthlyQuotas[code];
     if (quota != null) {
-      final used = await _states.addQuota(code, _clock.now());
-      if (used > quota) {
+      final name = ProviderCatalog.nameOf(code);
+      if (await _states.quotaUsedIn(code, _clock.now()) >= quota) {
         result.failures.add(
           ProviderFailure(
             code,
-            'Cota mensal de ${ProviderCatalog.nameOf(code)} atingida '
-            '($quota requisições). Volta no mês que vem.',
+            'Cota mensal de $name esgotada ($quota requisições). Até o mês '
+            'que vem, os ativos da B3 usam o fechamento oficial do COTAHIST.',
+            quotaExhausted: true,
           ),
         );
         return null;
+      }
+      final used = await _states.addQuota(code, _clock.now());
+      if (used >= quota * ProviderInfo.quotaWarningFraction) {
+        result.notices.add(quotaNotice(code, used, quota));
       }
     }
     try {
@@ -201,12 +225,12 @@ class MarketDataService {
   /// Atualiza tudo o que a carteira real usa: cotações dos ativos com
   /// posição aberta e preço de mercado, fechamentos da B3, Tesouro, informes
   /// de FII, câmbio e indicadores. Chamadas simultâneas viram uma só.
-  Future<RefreshResult> refreshPortfolio() {
+  Future<RefreshResult> refreshPortfolio({bool automatic = false}) {
     final running = _running;
     if (running != null) return running;
     _runNetworkDown = {};
     _runAnySuccess = false;
-    final future = _refreshPortfolio().whenComplete(() {
+    final future = _refreshPortfolio(automatic: automatic).whenComplete(() {
       _running = null;
       _runNetworkDown = null;
     });
@@ -214,12 +238,12 @@ class MarketDataService {
     return future;
   }
 
-  Future<RefreshResult> _refreshPortfolio() async {
+  Future<RefreshResult> _refreshPortfolio({required bool automatic}) async {
     final result = RefreshResult();
     final assets = await _portfolioAssets();
     _log.info('Atualização da carteira: ${assets.length} ativos');
     result
-      ..merge(await refreshQuotes(assets))
+      ..merge(await refreshQuotes(assets, automatic: automatic))
       ..merge(await _refreshB3Closes(assets))
       ..merge(await _refreshTreasuryIfNeeded(assets))
       ..merge(await _refreshFiiReports(assets))
@@ -255,7 +279,13 @@ class MarketDataService {
   }
 
   /// Cotação atual de cada ativo, pela primeira fonte que atende e responde.
-  Future<RefreshResult> refreshQuotes(Iterable<Asset> assets) async {
+  /// Na atualização [automatic], provedores com horário (`autoOnlyInSession`)
+  /// só são chamados no pregão da B3, e com intervalo mínimo por ativo
+  /// (`minAutoInterval`; DECISIONS D-37).
+  Future<RefreshResult> refreshQuotes(
+    Iterable<Asset> assets, {
+    bool automatic = false,
+  }) async {
     final result = RefreshResult();
     for (final asset in assets) {
       if (asset.assetClass == AssetClass.treasury) continue;
@@ -265,7 +295,10 @@ class MarketDataService {
       );
       final candidates = [
         for (final p in _providers.quotes)
-          if (p.supports(i) && await _states.isEnabled(p.code)) p,
+          if (p.supports(i) &&
+              await _states.isEnabled(p.code) &&
+              (!automatic || await _autoAllowed(p.code, i)))
+            p,
       ];
       if (candidates.isEmpty) {
         if (asset.market != Market.b3) result.unsupported.add(asset.symbol);
@@ -281,6 +314,34 @@ class MarketDataService {
       }
     }
     return result;
+  }
+
+  /// A atualização automática pode chamar [code] para [i] agora.
+  Future<bool> _autoAllowed(String code, MarketInstrument i) async {
+    final info = ProviderCatalog.byCode(code);
+    if (info == null) return true;
+    final now = _clock.now();
+    if (info.autoOnlyInSession &&
+        !MarketSchedule.inB3Session(now, calendar: _calendar)) {
+      return false;
+    }
+    final interval = info.minAutoInterval;
+    if (interval == null) return true;
+    for (final q in await _repo.quotes(i.symbol, i.market)) {
+      if (q.source != code) continue;
+      final last = parseInstant(q.collectedAt);
+      if (now.toUtc().difference(last) < interval) return false;
+    }
+    return true;
+  }
+
+  /// "Você já usou 82% da cota mensal da brapi (12.300 de 15.000)".
+  static String quotaNotice(String code, int used, int quota) {
+    final pct = (used * 100) ~/ quota;
+    return 'Você já usou $pct% da cota mensal de '
+        '${ProviderCatalog.nameOf(code)} ($used de $quota requisições, '
+        'contadas neste computador). Ao acabar, os ativos da B3 usam o '
+        'fechamento oficial do COTAHIST.';
   }
 
   /// Fechamentos oficiais recentes da B3 (arquivos diários do COTAHIST),

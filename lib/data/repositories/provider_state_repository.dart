@@ -69,6 +69,15 @@ class ProviderStateRepository {
     ),
   );
 
+  /// Requisições já contadas no mês de [at] (zero num mês novo).
+  Future<int> quotaUsedIn(String code, DateTime at) async {
+    final current = await of(code);
+    return current.quotaPeriod == periodOf(at) ? current.quotaUsed : 0;
+  }
+
+  static String periodOf(DateTime at) =>
+      '${at.year}-${at.month.toString().padLeft(2, '0')}';
+
   /// Soma [n] requisições à cota do mês de [at] e devolve o total do mês.
   Future<int> addQuota(String code, DateTime at, {int n = 1}) async {
     final period = '${at.year}-${at.month.toString().padLeft(2, '0')}';

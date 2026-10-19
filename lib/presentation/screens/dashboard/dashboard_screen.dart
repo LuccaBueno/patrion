@@ -143,6 +143,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
         padding: const EdgeInsets.only(bottom: 32),
         children: [
           const RefreshStatusBanner(),
+          const QuotaWarningBanner(),
           if (currencies.length > 1 || currencies.first != 'BRL')
             _ConsolidatedCard(summary: summary, fx: fx),
           const SyncReminder(),

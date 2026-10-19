@@ -487,3 +487,14 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - No save protegido por senha, a pasta vai dentro do conteúdo cifrado.
 - Alternativas: levar só o histórico (o outro PC ficaria sem câmbio e indicadores offline); usar HLC nos dados de mercado (são dados de terceiros, não edições do usuário).
 - Motivo: SPEC §10.1 ("para o outro PC funcionar offline") e regra 2 (a origem de cada dado viaja junto).
+
+### 2026-10-18 — D-37: brapi — horário de pregão, intervalo mínimo e cota (F6, pedido do usuário)
+
+- Decisão (pedido do usuário em 18/10/2026):
+  - **Horário de pregão:** na atualização automática, a brapi só é chamada em dias úteis da B3, das 10:00 às 18:30 de Brasília (UTC−3, sem horário de verão desde 2019). A meia hora depois do fim do call de fechamento (18:00) pega a última cotação do dia, que chega com até 30 minutos de atraso. Fora da janela, os ativos da B3 ficam com o fechamento oficial do COTAHIST. "Atualizar agora" e "Atualizar este ativo" consultam a qualquer hora (`MarketSchedule`, `domain/market/market_schedule.dart`).
+  - **Intervalo mínimo de 30 minutos** por ativo na atualização automática, pela data de coleta da última cotação da brapi guardada; vale mesmo com o intervalo automático configurado em 15 minutos.
+  - **Cota mensal** (15.000 requisições no plano gratuito, no catálogo do provedor): contada por PC em `dev_provider_state`. A tela "Fontes de dados" mostra o uso do mês (número, percentual e barra). A partir de 80%, a atualização e o Início avisam. Esgotada, a brapi não é chamada nem contada até o mês seguinte, e os ativos da B3 usam o fechamento oficial do COTAHIST (que a atualização da carteira já baixa).
+  - Os campos `monthlyQuota`, `autoOnlyInSession` e `minAutoInterval` do catálogo servem para outros provedores no futuro.
+- Limitação: a brapi conta as requisições da chave em todos os PCs; o app conta só as deste PC (a tela avisa).
+- Alternativas: consultar a cota pela API da brapi (não há endpoint documentado no plano gratuito); bloquear também a atualização manual fora do pregão (o usuário pode querer conferir a qualquer hora).
+- Motivo: pedido do usuário; SPEC §5 (respeito aos limites das APIs).

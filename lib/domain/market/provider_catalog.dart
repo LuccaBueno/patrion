@@ -18,6 +18,9 @@ class ProviderInfo {
     this.defaultEnabled = true,
     this.warning,
     this.shortName,
+    this.monthlyQuota,
+    this.autoOnlyInSession = false,
+    this.minAutoInterval,
   });
 
   /// Código gravado em `source` dos dados e em `dev_provider_state`.
@@ -48,6 +51,20 @@ class ProviderInfo {
   final String? shortName;
 
   String get short => shortName ?? name;
+
+  /// Requisições por mês no plano gratuito; o app conta as deste PC e para
+  /// de chamar ao atingir.
+  final int? monthlyQuota;
+
+  /// Na atualização automática, só chamado em horário de pregão da B3.
+  final bool autoOnlyInSession;
+
+  /// Na atualização automática, intervalo mínimo entre duas consultas do
+  /// mesmo ativo.
+  final Duration? minAutoInterval;
+
+  /// Fração da cota a partir da qual o app avisa.
+  static const quotaWarningFraction = 0.8;
 }
 
 /// Provedores usados pelo app, na ordem da tela.
@@ -111,6 +128,9 @@ abstract final class ProviderCatalog {
         'PETR4, VALE3, MGLU3 e ITUB4 (conferido em 18/10/2026).',
     key: KeyRequirement.optional,
     keyHelp: 'Crie uma conta em brapi.dev e copie o token do painel.',
+    monthlyQuota: 15000,
+    autoOnlyInSession: true,
+    minAutoInterval: Duration(minutes: 30),
   );
 
   static const b3Cotahist = ProviderInfo(

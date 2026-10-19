@@ -29,7 +29,8 @@ Critério de pronto (SPEC §21): as cotações reais aparecem com fonte e data; 
 - **Fonte de preço do ativo:** "cotação automática" ou "preço ou saldo informado" no cadastro (sugerida pela classe). Os ativos criados antes da F6 continuam com preço informado; Fontes de dados oferece trocá-los de uma vez.
 - **Avaliação:** num ativo com cotação automática, vale o mais recente entre o informado e o de mercado; na mesma data, o informado (FORMULAS §2.1).
 - **Save (D-36):** pasta `market/` opcional (marcada por padrão), mesclada pela coleta mais recente; formato 2 só quando leva dados de mercado.
-- Decisões D-34 a D-36; FORMULAS §2.1 a §2.3; FONTES_DE_DADOS, SINCRONIZACAO, BANCO e ARQUITETURA atualizados.
+- **brapi (D-37, pedido durante a fase):** na atualização automática, só em horário de pregão da B3 (dias úteis, 10:00 às 18:30 de Brasília) e no máximo a cada 30 minutos por ativo; "Fontes de dados" mostra a cota do mês usada (número, percentual e barra); aviso a partir de 80% (no resumo da atualização e no Início); cota esgotada: a brapi não é chamada e os ativos da B3 usam o fechamento oficial do COTAHIST.
+- Decisões D-34 a D-37; FORMULAS §2.1 a §2.3; FONTES_DE_DADOS, SINCRONIZACAO, BANCO e ARQUITETURA atualizados.
 
 **2. Arquivos criados ou alterados (resumo)**
 
@@ -43,7 +44,7 @@ Critério de pronto (SPEC §21): as cotações reais aparecem com fonte e data; 
 **3. Testes executados e resultados reais**
 
 - `dart format` (nenhuma mudança), `flutter analyze` (sem problemas), `flutter test`: **410 testes passando**; `flutter build windows --release` compilou.
-- Novos: regras do preço de mercado, Tesouro, desatualização, CDI anualizado, IPCA 12 meses (com mês faltando = indisponível), patrimônio em reais; avaliação com preço de mercado; repositório (preços, câmbio, indicadores, Tesouro, cotações) e estado dos provedores (cota mensal); serviço (cotação com fonte e data na carteira, só o código vai ao provedor, provedor desligado, falha com fonte seguinte, PTAX fora → BCE, cota atingida, sem internet com os dados guardados e parada antecipada, histórico só dos trechos que faltam, indicadores incrementais, chamadas simultâneas); save com dados de mercado (ida e volta, coleta mais nova vence, sem a opção, com senha); codec (formato 2, conteúdo alterado, valor não texto); cofre de chaves com o DPAPI real; telas (provedores, chave some da tela, "Atualizar agora" sem internet, cotação da brapi com fonte e data, troca dos ativos antigos para cotação automática); a tela nova em janela estreita.
+- Novos: regras do preço de mercado, Tesouro, desatualização, CDI anualizado, IPCA 12 meses (com mês faltando = indisponível), patrimônio em reais; avaliação com preço de mercado; repositório (preços, câmbio, indicadores, Tesouro, cotações) e estado dos provedores (cota mensal); serviço (cotação com fonte e data na carteira, só o código vai ao provedor, provedor desligado, falha com fonte seguinte, PTAX fora → BCE, cota atingida, sem internet com os dados guardados e parada antecipada, histórico só dos trechos que faltam, indicadores incrementais, chamadas simultâneas); save com dados de mercado (ida e volta, coleta mais nova vence, sem a opção, com senha); codec (formato 2, conteúdo alterado, valor não texto); cofre de chaves com o DPAPI real; telas (provedores, chave some da tela, "Atualizar agora" sem internet, cotação da brapi com fonte e data, troca dos ativos antigos para cotação automática); a tela nova em janela estreita. Da D-37: janela de pregão (horários, fim de semana, feriado, fuso), brapi fora do pregão só na manual, intervalo de 30 minutos, aviso de 80%, cota esgotada com o COTAHIST na carteira e contagem nova no mês seguinte, e a cota e o aviso na tela.
 - **Verificação com a internet real** (script de verificação fora do repositório, numa pasta de dados de teste, sem chaves): brapi (PETR4), COTAHIST (fechamentos diários e histórico de 01/10 a 16/10/2026), Tesouro, CVM, CoinGecko, PTAX, SIDRA e proventos da B3 (169 registros da PETR4) responderam. Depois, o app real (build release) com a mesma pasta, com e sem rede (capturas só da janela do Patrion).
 - **Não verificado com dados reais:** Finnhub, Twelve Data e CoinGecko com chave (precisam das suas chaves; cobertos por testes com respostas reais gravadas) e o SGS do Banco Central (fora do ar, ver item 4).
 
@@ -56,6 +57,7 @@ Critério de pronto (SPEC §21): as cotações reais aparecem com fonte e data; 
 - Sem internet, a primeira atualização ainda tenta duas fontes (cerca de 20 s) antes de concluir que o PC está sem rede.
 - Numa janela de 1280 px, a coluna "Resultado" da Carteira fica fora da área visível (a tabela rola na horizontal).
 - A cotação da CoinGecko sem chave tem limite baixo e compartilhado por IP; a do Tesouro é a da manhã do último dia útil publicado.
+- A cota da brapi é contada só neste PC; se a mesma chave for usada em outro computador, o uso real é maior que o mostrado (a tela avisa).
 - O save com dados de mercado usa o formato 2: uma versão anterior do app recusa esse arquivo ("formato mais novo"); atualize o app nos dois PCs ou desmarque a opção.
 
 **5. Pendências**
@@ -84,7 +86,7 @@ ou abra `build\windows\x64\runner\Release\patrion.exe`.
 5. Clique **Atualizar agora** e espere o aviso de conclusão (sem o SGS, aparece "falha em Banco Central — SGS"; isso é esperado enquanto ele estiver fora do ar).
 6. Em **Carteira**, cada ativo da B3 deve mostrar o valor com "brapi · data hora" embaixo. Passe o mouse no valor: tipo (intradiário), coleta e "atraso de até 30 min (plano gratuito da brapi)". Confira um ativo que não seja PETR4, VALE3, MGLU3 ou ITUB4 (sem chave ele viria do COTAHIST).
 7. Abra um ativo e veja o card **Dados de mercado** (fonte, data, tipo, coleta, atraso). Clique **Baixar histórico**: o "Histórico guardado" passa a mostrar os dias e o período.
-8. Em Fontes de dados, a linha "Uso no mês" da brapi deve contar as requisições.
+8. Em Fontes de dados, a linha "Cota do mês" da brapi deve contar as requisições (número, percentual e barra). A atualização automática só consulta a brapi em dia útil, das 10:00 às 18:30, e no máximo a cada 30 minutos por ativo: fora desse horário, deixe o app aberto e confira que a data da cotação não muda (a manual consulta a qualquer hora).
 9. Opcional: **Apagar** a chave. A brapi passa a atender só PETR4, VALE3, MGLU3 e ITUB4; os outros ativos da B3 voltam a mostrar o fechamento do COTAHIST, com a data do pregão.
 10. Sem internet (desligue o Wi-Fi), clique **Atualizar agora**: aparece "Sem conexão…" e os valores continuam, com a data de cada um.
 11. Opcional: **Salvar arquivo de save** com "Levar os dados de mercado já baixados" e importe no outro PC; lá, a carteira deve mostrar os mesmos preços e datas mesmo sem internet.

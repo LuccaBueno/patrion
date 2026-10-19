@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/market_repository.dart';
+import 'package:patrion/data/repositories/provider_state_repository.dart';
 import 'package:patrion/domain/market/market_data.dart';
 import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
@@ -171,6 +172,36 @@ void main() {
             (await f.repos.assets.all()).firstWhere((a) => a.id == f.cdb),
       );
       expect(cdb!.priceSource, PriceSource.manual);
+    });
+  });
+
+  testWidgets('mostra a cota da brapi usada no mês e avisa a partir de 80%, '
+      'também no Início', (tester) async {
+    await tester.runAsync(() async {
+      await seed();
+      await ProviderStateRepository(f.t.db)
+          .addQuota('brapi', DateTime.now(), n: 12000);
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(location: '/fontes', () async {
+      final quota = find.byKey(const Key('quota-brapi'));
+      await tester.scrollUntilVisible(
+        quota,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+        find.textContaining('12.000 de 15.000 requisições (80%)'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Mais de 80% da cota usada'), findsOneWidget);
+      expect(find.textContaining('horário de pregão da B3'), findsOneWidget);
+      await app.tap(find.text('Início').first);
+      expect(find.byKey(const Key('quota-warning')), findsOneWidget);
+      expect(
+        find.textContaining('80% da cota mensal de brapi'),
+        findsOneWidget,
+      );
     });
   });
 }
