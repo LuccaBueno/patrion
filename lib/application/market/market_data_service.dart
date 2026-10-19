@@ -163,11 +163,14 @@ class MarketDataService {
 
   /// Chama [run] no provedor [code] se ele estiver ligado e dentro da cota.
   /// Registra o resultado; em falha, devolve `null` e anota em [result].
+  /// [what] identifica o dado no log (série, moeda), nunca valores.
   Future<T?> _call<T>(
     String code,
     RefreshResult result,
-    Future<T> Function() run,
-  ) async {
+    Future<T> Function() run, {
+    String? what,
+  }) async {
+    final where = what == null ? code : '$code ($what)';
     if (!await _states.isEnabled(code)) return null;
     if (_looksOffline) {
       result.failures.add(
@@ -209,13 +212,13 @@ class MarketDataService {
       result.failures.add(
         ProviderFailure(code, error.message, network: error is NetworkError),
       );
-      _log.warning('$code: ${error.kind}');
+      _log.warning('$where: ${error.kind}');
       return null;
     } on Object catch (error, stack) {
       const message = 'Erro inesperado ao ler os dados do provedor.';
       await _states.recordError(code, _clock.now(), message);
       result.failures.add(ProviderFailure(code, message));
-      _log.severe('$code: erro inesperado', error, stack);
+      _log.severe('$where: erro inesperado', error, stack);
       return null;
     }
   }
@@ -490,32 +493,63 @@ class MarketDataService {
     return result;
   }
 
-  /// CDI, Selic, meta Selic, IPCA e IGP-M desde o último dado guardado (ou
-  /// desde o ano inicial).
+  /// CDI, Selic, meta Selic, IPCA e IGP-M desde o último dado guardado
+  /// (incluído, para o período nunca ficar vazio: o SGS responde "sem dados"
+  /// de formas ambíguas) ou desde o ano inicial.
+  ///
+  /// Cada série é independente: a falha de uma não impede as outras. As
+  /// falhas de um provedor viram um aviso só, com as séries que falharam.
   Future<RefreshResult> refreshIndicators() async {
     final result = RefreshResult();
+    final failed = <String, List<IndicatorSeries>>{};
+    final messages = <String, Set<String>>{};
     final startYear = await _preferences.historyStartYear(_today.year);
     for (final series in IndicatorSeries.values) {
       final last = (await _repo.latestIndicator(series))?.refDate;
-      final from = last == null
-          ? LocalDate(startYear, 1, 1)
-          : series.isMonthly
-          ? LocalDate(last.year, last.month + 1, 1)
-          : last.addDays(1);
+      final from = last ?? LocalDate(startYear, 1, 1);
       if (from.isAfter(_today)) continue;
+      // Falhas só contam se nenhuma fonte trouxe a série (o IPCA tem o IBGE).
+      final attempt = RefreshResult();
+      var obtained = false;
       for (final p in _providers.indicators) {
         if (!p.supports(series)) continue;
         final points = await _call(
           p.code,
-          result,
+          attempt,
           () => p.indicator(series, from: from, to: _today),
+          what: series.label,
         );
         if (points != null) {
           await _repo.saveIndicators(points);
           result.updated += points.length;
+          obtained = true;
           break;
         }
       }
+      result.notices.addAll(attempt.notices);
+      if (obtained) continue;
+      for (final f in attempt.failures) {
+        if (f.network || f.quotaExhausted) {
+          result.failures.add(f);
+        } else {
+          (failed[f.provider] ??= []).add(series);
+          (messages[f.provider] ??= {}).add(f.message);
+        }
+      }
+    }
+    for (final MapEntry(key: code, value: series) in failed.entries) {
+      final names = [for (final s in series) s.label];
+      final list = names.length == 1
+          ? names.single
+          : '${names.sublist(0, names.length - 1).join(', ')} e ${names.last}';
+      result.failures.add(
+        ProviderFailure(
+          code,
+          '${names.length == 1 ? 'Série' : 'Séries'} não '
+          '${names.length == 1 ? 'atualizada' : 'atualizadas'}: $list. '
+          '${messages[code]!.join(' ')}',
+        ),
+      );
     }
     return result;
   }

@@ -79,6 +79,70 @@ void main() {
       expect(points.first.source, 'bcb_sgs');
     });
 
+    // Respostas reais do SGS em 19/10/2026: a mesma consulta alterna dados,
+    // página HTML com status 200 e `{"erro":{}}`; período sem dados responde
+    // 404 com "Value(s) not found".
+    const notFound =
+        '{"erro":{"statusCode":404,"detail":"br.gov.bcb.pec.sgs.comum.'
+        'excecoes.SGSNegocioException: Value(s) not found"}}';
+    const htmlPage =
+        '<?xml version="1.0" encoding="pt-br"?>\n<!DOCTYPE html PUBLIC '
+        '"-//W3C//DTD XHTML 1.0 Strict//EN"><html>Requisição inválida</html>';
+
+    test('SGS: 404 "sem dados" é lista vazia, não erro', () async {
+      adapter.on('bcdata.sgs.189', FakeReply.text(notFound, status: 404));
+      final sgs = BcbSgsProvider(fakeMarketHttp(adapter), wallClock: clock);
+      final points = await sgs.indicator(
+        IndicatorSeries.igpm,
+        from: day('2026-10-01'),
+        to: day('2026-10-19'),
+      );
+      expect(points, isEmpty);
+      expect(adapter.requests, hasLength(1));
+    });
+
+    test(
+      'SGS: página de erro com status 200 é repetida até vir o dado',
+      () async {
+        adapter.on('bcdata.sgs.12', [
+          FakeReply.text(htmlPage),
+          FakeReply.text('{"erro":{}}'),
+          FakeReply.text('[{"data":"19/10/2026","valor":"0.050788"}]'),
+        ]);
+        final sleeps = <Duration>[];
+        final sgs = BcbSgsProvider(
+          fakeMarketHttp(adapter, sleeps: sleeps),
+          wallClock: clock,
+        );
+        final points = await sgs.indicator(
+          IndicatorSeries.cdi,
+          from: day('2026-10-16'),
+          to: day('2026-10-19'),
+        );
+        expect(adapter.requests, hasLength(3));
+        expect(points.single.value, d('0.050788'));
+        expect(sleeps, contains(const Duration(seconds: 1)));
+      },
+    );
+
+    test('SGS: página de erro persistente vira DataError depois das '
+        'tentativas', () async {
+      adapter.on('bcdata.sgs.11', FakeReply.text(htmlPage));
+      final sgs = BcbSgsProvider(fakeMarketHttp(adapter), wallClock: clock);
+      await expectLater(
+        sgs.indicator(
+          IndicatorSeries.selic,
+          from: day('2026-10-16'),
+          to: day('2026-10-19'),
+        ),
+        throwsA(isA<DataError>()),
+      );
+      // Política padrão: 3 tentativas.
+      expect(adapter.requests, hasLength(3));
+      expect(BcbSgsProvider.isTransient(notFound), isFalse);
+      expect(BcbSgsProvider.isTransient('[{"data":"19/10/2026"}]'), isFalse);
+    });
+
     test('SGS: "sem dados" é lista vazia; HTML ou erro é recusado', () {
       expect(
         BcbSgsProvider.parse(

@@ -61,13 +61,31 @@ class BcbSgsProvider implements IndicatorProvider {
           'dataFinal': MarketParse.brFormat(end),
         },
       );
-      final text = await _http.getText(code, uri);
+      final String text;
+      try {
+        text = await _http.getText(code, uri, retryIf: isTransient);
+      } on HttpStatusError catch (e) {
+        // Sem dados no período: o SGS responde 404 com "Value(s) not found".
+        if (e.statusCode == 404 && e.body.contains('not found')) {
+          start = end.addDays(1);
+          continue;
+        }
+        rethrow;
+      }
       result.addAll(
         parse(text, series, collectedAt: formatInstant(_clock.now())),
       );
       start = end.addDays(1);
     }
     return result;
+  }
+
+  /// Resposta 200 que não traz os dados nem o "sem dados": página HTML ou
+  /// `{"erro":{}}`. O SGS alterna essas respostas com os dados na mesma
+  /// consulta (verificado em 19/10/2026), por isso vale repetir.
+  static bool isTransient(String text) {
+    if (text.trimLeft().startsWith('<')) return true;
+    return !text.contains('not found') && text.trimLeft().startsWith('{');
   }
 
   /// `[{"data":"01/10/2026","valor":"0.055131"}, ...]`. O SGS responde

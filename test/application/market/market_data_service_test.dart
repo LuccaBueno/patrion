@@ -140,13 +140,23 @@ class FakeFx implements FxProvider {
 }
 
 class FakeIndicators implements IndicatorProvider {
+  FakeIndicators({
+    this.code = 'bcb_sgs',
+    this.series = const {IndicatorSeries.cdi},
+    this.failing = const {},
+  });
+
   @override
-  String get code => 'bcb_sgs';
+  final String code;
+
+  /// Séries atendidas e as que falham com [DataError].
+  final Set<IndicatorSeries> series;
+  final Set<IndicatorSeries> failing;
 
   final asked = <(IndicatorSeries, LocalDate)>[];
 
   @override
-  bool supports(IndicatorSeries series) => series == IndicatorSeries.cdi;
+  bool supports(IndicatorSeries series) => this.series.contains(series);
 
   @override
   Future<List<IndicatorPoint>> indicator(
@@ -155,6 +165,9 @@ class FakeIndicators implements IndicatorProvider {
     required LocalDate to,
   }) async {
     asked.add((series, from));
+    if (failing.contains(series)) {
+      throw const DataError('Banco Central (SGS) respondeu com uma página.');
+    }
     return [
       IndicatorPoint(
         series: series,
@@ -383,12 +396,56 @@ void main() {
     },
   );
 
-  test('indicadores: busca só depois do último dado guardado', () async {
+  test('indicadores: busca a partir do último dado guardado (incluído, para '
+      'o período nunca ficar vazio)', () async {
     await service.refreshIndicators();
     await service.refreshIndicators();
     expect(sgs.asked, hasLength(2));
     expect(sgs.asked[0].$2, LocalDate(2021, 1, 1));
-    expect(sgs.asked[1].$2, LocalDate(2026, 10, 16));
+    expect(sgs.asked[1].$2, LocalDate(2026, 10, 15));
+  });
+
+  test('indicadores: a falha de uma série não trava as outras e vira um '
+      'aviso só do provedor', () async {
+    final flaky = FakeIndicators(
+      series: IndicatorSeries.values.toSet(),
+      failing: {
+        IndicatorSeries.cdi,
+        IndicatorSeries.ipca,
+        IndicatorSeries.igpm,
+      },
+    );
+    final ibge = FakeIndicators(
+      code: 'ibge_sidra',
+      series: {IndicatorSeries.ipca},
+    );
+    final s = MarketDataService(
+      repo: repo,
+      states: states,
+      providers: MarketProviders(indicators: [flaky, ibge]),
+      preferences: MarketPreferences(DeviceSettingsRepository(f.t.db)),
+      portfolio: query,
+      wallClock: f.t.wall.clock,
+    );
+    final result = await s.refreshIndicators();
+    // Todas as séries foram pedidas; Selic e meta Selic foram gravadas, e o
+    // IPCA veio do IBGE.
+    expect(flaky.asked.map((a) => a.$1), IndicatorSeries.values);
+    for (final ok in [
+      IndicatorSeries.selic,
+      IndicatorSeries.selicTarget,
+      IndicatorSeries.ipca,
+    ]) {
+      expect(await repo.latestIndicator(ok), isNotNull, reason: ok.label);
+    }
+    expect(await repo.latestIndicator(IndicatorSeries.cdi), isNull);
+    // Um aviso só, com as séries que ficaram sem dado (o IPCA não conta).
+    expect(result.failures, hasLength(1));
+    expect(result.failures.single.provider, 'bcb_sgs');
+    expect(
+      result.failures.single.message,
+      startsWith('Séries não atualizadas: CDI e IGP-M. Banco Central'),
+    );
   });
 
   test('chamadas simultâneas da carteira viram uma só', () async {

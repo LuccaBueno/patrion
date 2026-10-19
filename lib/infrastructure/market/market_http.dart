@@ -76,16 +76,29 @@ class MarketHttp {
       _policies[provider] ?? const HttpPolicy();
 
   /// Texto da resposta (UTF-8, ou Latin-1 com [latin1]).
+  ///
+  /// [retryIf] marca respostas 2xx que são falha passageira do provedor (o
+  /// SGS às vezes responde uma página de erro com status 200): elas são
+  /// repetidas como um 5xx e, esgotadas as tentativas, a última volta para o
+  /// adaptador recusar.
   Future<String> getText(
     String provider,
     Uri uri, {
     Map<String, String> headers = const {},
     bool latin1 = false,
+    bool Function(String text)? retryIf,
   }) async {
-    final bytes = await getBytes(provider, uri, headers: headers);
-    return latin1
-        ? const Latin1Codec(allowInvalid: true).decode(bytes)
-        : const Utf8Codec(allowMalformed: true).decode(bytes);
+    final attempts = policyOf(provider).maxAttempts;
+    for (var n = 1; ; n++) {
+      final bytes = await getBytes(provider, uri, headers: headers);
+      final text = latin1
+          ? const Latin1Codec(allowInvalid: true).decode(bytes)
+          : const Utf8Codec(allowMalformed: true).decode(bytes);
+      if (retryIf == null || n >= attempts || !retryIf(text)) return text;
+      final wait = Duration(seconds: 1 << (n - 1));
+      _log.info('$provider: resposta inválida; nova tentativa em $wait');
+      await _sleep(wait);
+    }
   }
 
   Future<Uint8List> getBytes(

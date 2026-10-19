@@ -67,7 +67,7 @@ Por isso, a proposta é:
 | Histórico | Desde a criação de cada série (Selic desde 1986) |
 | Ajuste | Não se aplica |
 | Licença | ODbL (Open Data Commons Open Database License), indicada no portal de dados abertos |
-| Limitações e falha | Paginar por janelas de 10 anos. Em falha: usar cache; IPCA pode vir do SIDRA. |
+| Limitações e falha | Paginar por janelas (o app usa 5 anos). Em falha: usar cache; IPCA pode vir do SIDRA. **Instável (verificado em 19/10/2026):** a mesma consulta alterna os dados, página HTML com status 200, `{"erro":{}}` e 502; período sem dados responde 404 (ou 200) com `Value(s) not found`; mês ainda não publicado de série mensal responde `{"erro":{}}`. O app repete as respostas inválidas e pede sempre a partir do último dado guardado (D-41). |
 | Verificado | Testado (CDI) + Doc. |
 
 ### 2.2 Banco Central — PTAX (Olinda)

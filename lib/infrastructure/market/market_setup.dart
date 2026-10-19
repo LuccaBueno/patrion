@@ -24,9 +24,11 @@ abstract final class MarketSetup {
     ProviderCatalog.coingecko.code: const HttpPolicy(
       minInterval: Duration(milliseconds: 2500),
     ),
+    // O SGS alterna dados, páginas de erro e 502 na mesma consulta.
     ProviderCatalog.bcbSgs.code: const HttpPolicy(
       minInterval: Duration(seconds: 1),
       timeout: Duration(seconds: 40),
+      maxAttempts: 4,
     ),
     ProviderCatalog.b3Events.code: const HttpPolicy(
       minInterval: Duration(seconds: 1),
