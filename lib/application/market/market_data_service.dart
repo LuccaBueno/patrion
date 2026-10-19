@@ -107,6 +107,16 @@ class MarketDataService {
 
   Future<RefreshResult>? _running;
 
+  /// Provedores que falharam por rede na atualização da carteira em
+  /// andamento, e se algum respondeu. Duas fontes diferentes sem rede e
+  /// nenhuma resposta: o PC está sem internet e o resto da atualização é
+  /// pulado (cada fonte levaria vários segundos nas retentativas).
+  Set<String>? _runNetworkDown;
+  bool _runAnySuccess = false;
+
+  bool get _looksOffline =>
+      !_runAnySuccess && (_runNetworkDown?.length ?? 0) >= 2;
+
   /// Moedas sempre acompanhadas no câmbio.
   static const baseCurrencies = {'USD', 'EUR'};
 
@@ -140,6 +150,16 @@ class MarketDataService {
     Future<T> Function() run,
   ) async {
     if (!await _states.isEnabled(code)) return null;
+    if (_looksOffline) {
+      result.failures.add(
+        ProviderFailure(
+          code,
+          'Não consultado: o computador parece estar sem internet.',
+          network: true,
+        ),
+      );
+      return null;
+    }
     final quota = monthlyQuotas[code];
     if (quota != null) {
       final used = await _states.addQuota(code, _clock.now());
@@ -156,9 +176,11 @@ class MarketDataService {
     }
     try {
       final value = await run();
+      _runAnySuccess = true;
       await _states.recordSuccess(code, _clock.now());
       return value;
     } on AppError catch (error) {
+      if (error is NetworkError) _runNetworkDown?.add(code);
       await _states.recordError(code, _clock.now(), error.message);
       result.failures.add(
         ProviderFailure(code, error.message, network: error is NetworkError),
@@ -182,7 +204,12 @@ class MarketDataService {
   Future<RefreshResult> refreshPortfolio() {
     final running = _running;
     if (running != null) return running;
-    final future = _refreshPortfolio().whenComplete(() => _running = null);
+    _runNetworkDown = {};
+    _runAnySuccess = false;
+    final future = _refreshPortfolio().whenComplete(() {
+      _running = null;
+      _runNetworkDown = null;
+    });
     _running = future;
     return future;
   }

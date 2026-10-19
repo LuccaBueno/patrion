@@ -107,6 +107,7 @@ class FakeFx implements FxProvider {
   @override
   final String code;
   bool fail;
+  int calls = 0;
 
   @override
   bool supports(String currency) => true;
@@ -117,6 +118,7 @@ class FakeFx implements FxProvider {
     required LocalDate from,
     required LocalDate to,
   }) async {
+    calls++;
     if (fail) throw const NetworkError('sem conexão');
     return [
       FxRate(
@@ -331,8 +333,16 @@ void main() {
       portfolio: query,
       wallClock: f.t.wall.clock,
     );
+    final ptaxBefore = ptax.calls;
     final result = await offlineService.refreshPortfolio();
     expect(result.offline, isTrue);
+    // Duas fontes sem rede e nenhuma resposta: o resto é pulado, sem esperar
+    // as retentativas de cada provedor.
+    expect(ptax.calls, ptaxBefore);
+    expect(
+      result.failures.where((f) => f.message.contains("sem internet")),
+      isNotEmpty,
+    );
     final snap = await query.load();
     final v = snap.valued.firstWhere((v) => v.asset?.symbol == 'PETR4');
     expect(v.marketValue, Decimal.parse('3550'));
