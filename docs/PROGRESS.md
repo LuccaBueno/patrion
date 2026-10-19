@@ -15,7 +15,8 @@ Registro para retomar a fase se a sessão acabar.
   - `8c891ab`: schema 4 (tabelas `mkt_` e `dev_provider_state`), camada HTTP (timeout, backoff, `Retry-After`, fila por provedor, deduplicação), leitor de JSON exato e os 14 adaptadores, testados com respostas reais.
   - `9e7755c`: `MarketRepository`, `ProviderStateRepository`, `MarketPreferences`, `MarketDataService` (carteira, ativo, câmbio, indicadores, histórico, teste de provedor), `MarketPriceBook` e preço de mercado na avaliação da carteira.
   - Chaves de API: `DpapiApiKeyStore` (arquivo `patrion.apikeys.bin` na pasta de dados, protegido pelo DPAPI; fora do banco, do save, dos backups e do log).
-- **Falta:** injeção de dependências e atualização automática; tela "Fontes de dados"; fonte, data e atraso na carteira e no dashboard; painel de câmbio e indicadores; total em BRL com câmbio; pasta `market/` no save; testes do repositório, do serviço e das telas; D-34 a D-36, FONTES_DE_DADOS, FORMULAS §2.1, CHANGELOG; verificação no app real com e sem internet; push e CI.
+  - `954a145`: injeção (`MarketSetup`, provedores em `presentation/providers.dart`), `MarketRefreshController` e `MarketAutoRefresh` (na `SessionHost`), tela "Fontes de dados" (`/fontes`), fonte/data/atraso na carteira e no detalhe do ativo (atualizar ativo, baixar histórico), câmbio e indicadores no Início (`MarketOverview`, CDI anualizado e IPCA 12 meses em `domain/market/market_indicators.dart`), patrimônio total em BRL (`ConsolidatedEquity`), pasta `market/` no save (formato 2 só quando leva mercado; `MarketSaveGateway` mescla pela coleta mais nova).
+- **Falta:** testes do repositório, do serviço, do gateway do save, dos indicadores e das telas (inclusive sem internet); D-34 a D-36, FONTES_DE_DADOS, FORMULAS §2.1 a §2.3, SINCRONIZACAO (market/), BANCO, CHANGELOG; verificação no app real com e sem internet; build; push e CI.
 
 ## Concluído
 
