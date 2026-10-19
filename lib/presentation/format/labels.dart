@@ -181,3 +181,10 @@ extension PerformanceGapLabel on PerformanceGap {
           'dia).',
   };
 }
+
+extension PriceSourceLabel on PriceSource {
+  String get label => switch (this) {
+    PriceSource.market => 'Cotação automática (Fontes de dados)',
+    PriceSource.manual => 'Preço ou saldo informado por mim',
+  };
+}

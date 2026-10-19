@@ -39,6 +39,19 @@ class MarketPrice {
 
 /// Regras dos preços de mercado (`docs/FORMULAS.md` §2.1).
 abstract final class MarketPricing {
+  /// Classes que o app sabe cotar automaticamente (DECISIONS D-35). Renda
+  /// fixa privada, produtos bancários e caixa ficam com preço informado.
+  static bool hasAutomaticSource(AssetClass c) => switch (c) {
+    AssetClass.fixedIncome ||
+    AssetClass.bankProduct ||
+    AssetClass.cash => false,
+    _ => true,
+  };
+
+  /// Fonte de preço sugerida para um ativo novo da classe [c].
+  static PriceSource defaultSource(AssetClass c) =>
+      hasAutomaticSource(c) ? PriceSource.market : PriceSource.manual;
+
   /// Escolhe o preço de mercado de um ativo entre as cotações e os
   /// fechamentos guardados: vale o de data mais recente; na mesma data, a
   /// cotação (mais nova que o fechamento do dia anterior só quando a data

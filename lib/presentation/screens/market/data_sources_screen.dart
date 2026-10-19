@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../application/market/market_overview.dart';
 import '../../../application/settings/market_preferences.dart';
 import '../../../data/repositories/provider_state_repository.dart';
+import '../../../domain/market/market_price.dart';
 import '../../../domain/market/provider_catalog.dart';
+import '../../../domain/portfolio/codes.dart';
+import '../../../domain/portfolio/entities.dart';
 import '../../format/formatters.dart';
 import '../../format/market_labels.dart';
 import '../../format/sync_labels.dart';
@@ -31,6 +34,7 @@ class DataSourcesScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(bottom: 32),
           children: [
             const RefreshStatusBanner(),
+            const _ManualAssetsCard(),
             const _UpdateSettingsCard(),
             const MarketOverviewCard(),
             const SizedBox(height: 8),
@@ -169,6 +173,7 @@ class _UpdateSettingsCard extends ConsumerWidget {
                   width: 280,
                   child: DropdownButtonFormField<int>(
                     key: const Key('refresh-interval'),
+                    isExpanded: true,
                     initialValue: minutes,
                     decoration: const InputDecoration(
                       labelText: 'Atualização automática (app aberto)',
@@ -186,6 +191,7 @@ class _UpdateSettingsCard extends ConsumerWidget {
                   width: 280,
                   child: DropdownButtonFormField<int>(
                     key: const Key('history-start'),
+                    isExpanded: true,
                     initialValue: startYear,
                     decoration: const InputDecoration(
                       labelText: 'Histórico a partir de',
@@ -546,6 +552,92 @@ class _ProviderCardState extends ConsumerState<_ProviderCard> {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Ativos com preço informado que o app sabe cotar: oferece trocar para a
+/// cotação automática (os ativos criados antes da F6 ficaram com preço
+/// informado).
+class _ManualAssetsCard extends ConsumerWidget {
+  const _ManualAssetsCard();
+
+  static Asset _withMarket(Asset a) => Asset(
+    id: a.id,
+    symbol: a.symbol,
+    market: a.market,
+    assetClass: a.assetClass,
+    name: a.name,
+    currency: a.currency,
+    country: a.country,
+    priceSource: PriceSource.market,
+    isin: a.isin,
+    sector: a.sector,
+    segment: a.segment,
+    liquidity: a.liquidity,
+    notes: a.notes,
+  );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final snap = ref.watch(portfolioSnapshotProvider).value;
+    if (snap == null) return const SizedBox.shrink();
+    final candidates = [
+      for (final a in snap.assets.values)
+        if (a.priceSource == PriceSource.manual &&
+            MarketPricing.hasAutomaticSource(a.assetClass))
+          a,
+    ]..sort((a, b) => a.symbol.compareTo(b.symbol));
+    if (candidates.isEmpty) return const SizedBox.shrink();
+    Future<void> apply() async {
+      final ok = await confirm(
+        context,
+        title: 'Usar cotações automáticas?',
+        message:
+            '${candidates.map((a) => a.symbol).join(', ')} passam a usar a '
+            'cotação das fontes de dados. Os preços e saldos que você '
+            'informou continuam guardados e valem quando forem mais '
+            'recentes que a cotação. Dá para voltar em Editar, no detalhe '
+            'de cada ativo.',
+        confirmLabel: 'Usar cotações',
+      );
+      if (!ok) return;
+      try {
+        final registry = ref.read(registryServiceProvider);
+        for (final a in candidates) {
+          await registry.updateAsset(
+            _withMarket(a),
+            terms: snap.fixedIncome[a.id],
+          );
+        }
+        if (context.mounted) {
+          showInfo(context, 'Pronto. Use "Atualizar agora" para buscar.');
+        }
+      } on Object catch (error) {
+        if (context.mounted) showError(context, error);
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        key: const Key('manual-assets'),
+        child: ListTile(
+          leading: const Icon(Icons.price_change_outlined),
+          title: Text(
+            '${candidates.length} '
+            '${candidates.length == 1 ? 'ativo usa' : 'ativos usam'} preço '
+            'informado, mas ${candidates.length == 1 ? 'tem' : 'têm'} '
+            'cotação automática disponível',
+          ),
+          subtitle: Text(candidates.map((a) => a.symbol).join(', ')),
+          trailing: FilledButton.tonal(
+            key: const Key('manual-assets-apply'),
+            onPressed: apply,
+            child: const Text('Usar cotações'),
+          ),
+        ),
+      ),
     );
   }
 }

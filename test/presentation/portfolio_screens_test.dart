@@ -325,6 +325,7 @@ void main() {
           '/carteira/ativo/${f.petr}',
           '/operacoes',
           '/cadastros',
+          '/fontes',
         ]) {
           GoRouter.of(tester.element(find.byType(NavigationRail))).go(location);
           await app.settle();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../domain/market/market_price.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
 import '../../format/formatters.dart';
@@ -260,6 +261,12 @@ class _AssetDialogState extends ConsumerState<_AssetDialog> {
   late Market? _market = _a?.market ?? Market.b3;
   late Liquidity? _liquidity = _a?.liquidity;
 
+  /// Escolhida pelo usuário; sem escolha, a sugerida pela classe.
+  late PriceSource? _priceSource = _a?.priceSource;
+
+  PriceSource get _effectiveSource =>
+      _priceSource ?? MarketPricing.defaultSource(_class ?? AssetClass.stockBr);
+
   // Renda fixa.
   late FixedIncomeProduct? _product = _t?.product ?? FixedIncomeProduct.cdb;
   late Indexer? _indexer = _t?.indexer ?? Indexer.cdi;
@@ -327,6 +334,7 @@ class _AssetDialogState extends ConsumerState<_AssetDialog> {
       segment: textOrNull(_segment),
       liquidity: _liquidity,
       notes: textOrNull(_notes),
+      priceSource: _effectiveSource,
     );
     final terms = _class!.hasFixedIncomeTerms
         ? FixedIncomeTerms(
@@ -481,6 +489,16 @@ class _AssetDialogState extends ConsumerState<_AssetDialog> {
               ),
             ),
           ],
+        ),
+        Choice<PriceSource>(
+          // Recria o campo quando a sugestão muda com a classe.
+          key: ValueKey(_effectiveSource),
+          fieldKey: const Key('asset-price-source'),
+          label: 'Preço',
+          value: _effectiveSource,
+          items: PriceSource.values,
+          labelOf: (s) => s.label,
+          onChanged: (v) => setState(() => _priceSource = v),
         ),
         if (fixedIncome) ...[
           const Divider(),

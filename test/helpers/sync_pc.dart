@@ -11,6 +11,7 @@ import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/backup_registry_repository.dart';
 import 'package:patrion/data/repositories/portfolio_repositories.dart';
 import 'package:patrion/data/repositories/sync_peers_repository.dart';
+import 'package:patrion/data/sync/market_save_gateway.dart';
 import 'package:patrion/data/sync/sync_tables_gateway.dart';
 import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
@@ -51,6 +52,7 @@ class SyncPc {
       deviceName: name,
       wallClock: t.wall.clock,
       portfolio: query,
+      market: MarketSaveGateway(t.db),
       kdfPolicy: KdfPolicy.fastForTests,
       beforeWrite: (i) {
         if (failAtWrite != null && i == failAtWrite) {

@@ -182,9 +182,9 @@ class MarketDataService {
   Future<RefreshResult> refreshPortfolio() {
     final running = _running;
     if (running != null) return running;
-    final future = _refreshPortfolio();
+    final future = _refreshPortfolio().whenComplete(() => _running = null);
     _running = future;
-    return future.whenComplete(() => _running = null);
+    return future;
   }
 
   Future<RefreshResult> _refreshPortfolio() async {
