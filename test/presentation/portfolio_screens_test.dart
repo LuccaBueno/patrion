@@ -158,7 +158,7 @@ void main() {
     await app.run(location: '/carteira', () async {
       expect(find.text('PETR4'), findsOneWidget);
       expect(find.text('indisponível'), findsOneWidget);
-      expect(find.text(r'R$ 30,00'), findsOneWidget); // preço médio
+      expect(find.text(r'PM R$ 30,00'), findsOneWidget); // preço médio
     });
   });
 

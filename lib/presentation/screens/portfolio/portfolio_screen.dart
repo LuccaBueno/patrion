@@ -33,7 +33,10 @@ class PortfolioScreen extends ConsumerWidget {
   }
 }
 
-enum _Col { asset, assetClass, account, quantity, avgPrice, cost, value, pnl }
+/// Colunas da tabela. A classe fica embaixo do ativo, o preço médio embaixo
+/// da quantidade e o percentual embaixo do resultado, para a tabela inteira
+/// caber numa janela de 1280 px sem rolar para o lado.
+enum _Col { asset, account, quantity, cost, value, pnl }
 
 /// Tabela de posições, ordenável, com busca e opção de mostrar encerradas.
 class PositionsTable extends StatefulWidget {
@@ -66,15 +69,11 @@ class _PositionsTableState extends State<PositionsTable> {
 
     int compare(ValuedPosition a, ValuedPosition b) => switch (_sort) {
       _Col.asset => (a.asset?.symbol ?? '').compareTo(b.asset?.symbol ?? ''),
-      _Col.assetClass => (a.asset?.assetClass.label ?? '').compareTo(
-        b.asset?.assetClass.label ?? '',
-      ),
       _Col.account =>
         snap
             .accountLabel(a.position.accountId)
             .compareTo(snap.accountLabel(b.position.accountId)),
       _Col.quantity => a.position.quantity.compareTo(b.position.quantity),
-      _Col.avgPrice => _cmp(a.position.averagePrice, b.position.averagePrice),
       _Col.cost => a.position.totalCost.compareTo(b.position.totalCost),
       _Col.value => _cmp(a.marketValue, b.marketValue),
       _Col.pnl => _cmp(a.unrealizedPnl, b.unrealizedPnl),
@@ -143,15 +142,16 @@ class _PositionsTableState extends State<PositionsTable> {
         TableCard(
           child: DataTable(
             showCheckboxColumn: false,
-            columnSpacing: 28,
+            columnSpacing: 20,
+            horizontalMargin: 16,
+            dataRowMinHeight: 52,
+            dataRowMaxHeight: 60,
             sortColumnIndex: _Col.values.indexOf(_sort),
             sortAscending: _ascending,
             columns: [
               _column('Ativo', _Col.asset),
-              _column('Classe', _Col.assetClass),
               _column('Conta', _Col.account),
               _column('Quantidade', _Col.quantity, numeric: true),
-              _column('Preço médio', _Col.avgPrice, numeric: true),
               _column('Custo', _Col.cost, numeric: true),
               _column('Valor de mercado', _Col.value, numeric: true),
               _column('Resultado', _Col.pnl, numeric: true),
@@ -163,28 +163,26 @@ class _PositionsTableState extends State<PositionsTable> {
                       context.go('/carteira/ativo/${v.position.assetId}'),
                   cells: [
                     DataCell(
-                      Text(
-                        v.asset?.symbol ?? '?',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      _TwoLines(
+                        alignEnd: false,
+                        top: Text(
+                          v.asset?.symbol ?? '?',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        bottom: v.asset?.assetClass.label,
                       ),
                     ),
-                    DataCell(Text(v.asset?.assetClass.label ?? '—')),
                     DataCell(Text(snap.accountLabel(v.position.accountId))),
                     DataCell(
-                      Text(
-                        v.position.quantity == Decimal.zero
-                            ? '—'
-                            : Fmt.number(v.position.quantity),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        v.position.averagePrice == null
-                            ? '—'
-                            : Fmt.money(
-                                v.position.averagePrice!,
-                                v.position.currency,
-                              ),
+                      _TwoLines(
+                        top: Text(
+                          v.position.quantity == Decimal.zero
+                              ? '—'
+                              : Fmt.number(v.position.quantity),
+                        ),
+                        bottom: v.position.averagePrice == null
+                            ? null
+                            : 'PM ${Fmt.money(v.position.averagePrice!, v.position.currency)}',
                       ),
                     ),
                     DataCell(
@@ -196,11 +194,18 @@ class _PositionsTableState extends State<PositionsTable> {
                     DataCell(
                       v.unrealizedPnl == null
                           ? const Text('—')
-                          : PnlText(
-                              value: v.unrealizedPnl!,
-                              text:
-                                  '${Fmt.signedMoney(v.unrealizedPnl!, v.position.currency)}'
-                                  '${v.simpleReturn == null ? '' : ' (${Fmt.percent(v.simpleReturn!)})'}',
+                          : _TwoLines(
+                              top: PnlText(
+                                value: v.unrealizedPnl!,
+                                singleLine: true,
+                                text: Fmt.signedMoney(
+                                  v.unrealizedPnl!,
+                                  v.position.currency,
+                                ),
+                              ),
+                              bottom: v.simpleReturn == null
+                                  ? null
+                                  : Fmt.percent(v.simpleReturn!),
                             ),
                     ),
                   ],
@@ -210,9 +215,10 @@ class _PositionsTableState extends State<PositionsTable> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Resultado = valor de mercado − custo (retorno simples sobre o '
-          'custo, sem proventos). Abaixo do valor, a fonte e a data do preço; '
-          'o tipo, a coleta e o atraso aparecem ao passar o mouse.',
+          'Resultado = valor de mercado − custo; embaixo, o retorno simples '
+          'sobre o custo, sem proventos. PM = preço médio. Abaixo do valor, a '
+          'fonte e a data do preço; o tipo, a coleta e o atraso aparecem ao '
+          'passar o mouse.',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -294,6 +300,37 @@ class _MarketValueCell extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Célula com o valor e uma nota menor embaixo.
+class _TwoLines extends StatelessWidget {
+  const _TwoLines({required this.top, this.bottom, this.alignEnd = true});
+
+  final Widget top;
+  final String? bottom;
+  final bool alignEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final note = bottom;
+    if (note == null) return top;
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        top,
+        Text(
+          note,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
