@@ -4,21 +4,90 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 6 em andamento** (Dados de mercado). A Fase 5B foi concluída em 18/10/2026 (o teste do Windows Hello no app real fica com você).
-
-## Fase 6 — andamento
-
-Registro para retomar a fase se a sessão acabar.
-
-- **Pendências da F1 resolvidas:** nenhuma fonte é inviável. Finnhub (plano gratuito: só cotação dos EUA; histórico e outras bolsas só pagos) e Twelve Data (Basic: 8 créditos/min e 800/dia; EUA, câmbio e cripto; B3 só pago) confirmados pela documentação oficial; o teste com chave real fica no seu roteiro (as chaves são digitadas só na tela do app). Tesouro Transparente e CVM: dados abertos com licença ODbL.
-- **Feito e commitado:**
-  - `8c891ab`: schema 4 (tabelas `mkt_` e `dev_provider_state`), camada HTTP (timeout, backoff, `Retry-After`, fila por provedor, deduplicação), leitor de JSON exato e os 14 adaptadores, testados com respostas reais.
-  - `9e7755c`: `MarketRepository`, `ProviderStateRepository`, `MarketPreferences`, `MarketDataService` (carteira, ativo, câmbio, indicadores, histórico, teste de provedor), `MarketPriceBook` e preço de mercado na avaliação da carteira.
-  - Chaves de API: `DpapiApiKeyStore` (arquivo `patrion.apikeys.bin` na pasta de dados, protegido pelo DPAPI; fora do banco, do save, dos backups e do log).
-  - `954a145`: injeção (`MarketSetup`, provedores em `presentation/providers.dart`), `MarketRefreshController` e `MarketAutoRefresh` (na `SessionHost`), tela "Fontes de dados" (`/fontes`), fonte/data/atraso na carteira e no detalhe do ativo (atualizar ativo, baixar histórico), câmbio e indicadores no Início (`MarketOverview`, CDI anualizado e IPCA 12 meses em `domain/market/market_indicators.dart`), patrimônio total em BRL (`ConsolidatedEquity`), pasta `market/` no save (formato 2 só quando leva mercado; `MarketSaveGateway` mescla pela coleta mais nova).
-- **Falta:** testes do repositório, do serviço, do gateway do save, dos indicadores e das telas (inclusive sem internet); D-34 a D-36, FONTES_DE_DADOS, FORMULAS §2.1 a §2.3, SINCRONIZACAO (market/), BANCO, CHANGELOG; verificação no app real com e sem internet; build; push e CI.
+**Fase 6 concluída** em 18/10/2026 (dados de mercado). Próxima: Fase 7 (Distribuição). Pendências suas: o teste com a sua chave da brapi (roteiro abaixo) e, da F5B, o Windows Hello num PC com o Hello configurado.
 
 ## Concluído
+
+### Fase 6 — Dados de mercado
+
+Critério de pronto (SPEC §21): as cotações reais aparecem com fonte e data; o app funciona sem internet.
+
+- **Cotações reais com fonte e data: verificado no app real** (build release, pasta de dados de teste separada da sua): PETR4 pela brapi (16/10/2026 23:29, intradiário com até 30 min de atraso), BTC pela CoinGecko, HGLG11 pelo fechamento do COTAHIST (16/10/2026) e Tesouro Selic 2031 pelo Tesouro Transparente (15/10/2026, com o ícone de desatualizado), além de USD e EUR pela PTAX (16/10/2026) e IPCA pelo IBGE (09/2026).
+- **Sem internet: verificado no app real**, com o app aberto sem acesso à rede (proxy inexistente só para o processo do Patrion): aviso "Sem conexão", carteira e Início com os últimos valores guardados, cada um com a sua data. Também coberto por testes automáticos.
+
+**1. O que foi implementado**
+
+- **Pendências da F1:** nenhuma fonte é inviável. Finnhub (gratuito: só cotação dos EUA; histórico pago) e Twelve Data (Basic: 8 créditos/min, 800/dia; EUA, câmbio e cripto; B3 pago) confirmados na documentação oficial. Tesouro Transparente e CVM: licença ODbL. O SGS passou a exigir `User-Agent` e o Frankfurter mudou de endereço (D-35).
+- **Adaptadores** (um por provedor, atrás de interfaces): BCB SGS e PTAX, IBGE SIDRA, Frankfurter, brapi, B3 COTAHIST, B3 proventos e eventos, Tesouro Transparente, CVM, CoinGecko, Binance, Finnhub, Twelve Data e Yahoo (desligado por padrão). Acesso HTTP com timeout, retentativa com backoff, `Retry-After`, fila e intervalo mínimo por provedor e deduplicação.
+- **Cache** nas tabelas `mkt_` (schema 4), por chave natural, cada dado com fonte, data de referência, data de coleta e tipo. Estado de cada provedor em `dev_provider_state` (ligado, último sucesso, último erro, cota do mês).
+- **Atualização automática** com o app aberto (5 s depois de abrir e a cada 30 minutos; 15, 60, 240 ou desligada) e **manual**: carteira inteira ("Atualizar agora"), um ativo ("Atualizar este ativo"), histórico ("Baixar histórico") e teste de cada provedor. Só ativos com posição aberta e "cotação automática"; sempre a partir do último dado guardado.
+- **COTAHIST:** só os anos (ou os dias recentes) que faltam, a partir do ano inicial configurável (padrão: 5 anos atrás); o ZIP e o TXT são apagados depois da extração, inclusive em falha. Verificado com a B3 real: a pasta de cache fica vazia depois.
+- **Câmbio, CDI, Selic e IPCA:** PTAX (alternativa BCE), SGS (CDI, Selic, meta Selic, IPCA, IGP-M) e SIDRA (IPCA). CDI anualizado e IPCA em 12 meses calculados (FORMULAS §2.2). Painel "Câmbio e indicadores" no Início e em Fontes de dados.
+- **Patrimônio total em reais** no Início quando há mais de uma moeda (FORMULAS §2.3), indisponível se faltar o câmbio de alguma moeda.
+- **Tela "Fontes de dados"** (`/fontes`): o que cada provedor fornece e recebe, licença, limites, estado, liga/desliga, chave de API, teste, intervalo da atualização e ano inicial do histórico.
+- **Chaves de API (D-34):** digitadas só na tela, num campo oculto; guardadas em `patrion.apikeys.bin` na pasta de dados, protegido pelo DPAPI do Windows; fora do banco, do save, dos backups e do log; enviadas só em cabeçalho, nunca na URL.
+- **Fonte de preço do ativo:** "cotação automática" ou "preço ou saldo informado" no cadastro (sugerida pela classe). Os ativos criados antes da F6 continuam com preço informado; Fontes de dados oferece trocá-los de uma vez.
+- **Avaliação:** num ativo com cotação automática, vale o mais recente entre o informado e o de mercado; na mesma data, o informado (FORMULAS §2.1).
+- **Save (D-36):** pasta `market/` opcional (marcada por padrão), mesclada pela coleta mais recente; formato 2 só quando leva dados de mercado.
+- Decisões D-34 a D-36; FORMULAS §2.1 a §2.3; FONTES_DE_DADOS, SINCRONIZACAO, BANCO e ARQUITETURA atualizados.
+
+**2. Arquivos criados ou alterados (resumo)**
+
+- Domínio: `lib/domain/market/` (`market_data.dart`, `provider_catalog.dart`, `market_price.dart`, `market_indicators.dart`); `domain/portfolio/portfolio_valuation.dart`; `domain/sync/invsave_codec.dart` e `save_manifest.dart` (pasta `market/`).
+- Aplicação: `lib/application/market/` (`market_ports.dart`, `market_data_service.dart`, `market_price_book.dart`, `market_overview.dart`), `settings/market_preferences.dart`, `portfolio/portfolio_query.dart`, `sync/save_service.dart`.
+- Dados: `data/db/tables.dart` (schema 4) e migração, `repositories/market_repository.dart`, `repositories/provider_state_repository.dart`, `sync/market_save_gateway.dart`.
+- Infraestrutura: `infrastructure/market/` (`market_http.dart`, `market_setup.dart`, `providers/*.dart`), `security/api_key_store.dart`, `core/json/exact_json.dart`.
+- Interface: `screens/market/data_sources_screen.dart`, `services/market_refresh.dart`, `format/market_labels.dart`; Início, Carteira, detalhe do ativo, cadastro do ativo, diálogo e prévia do save, navegação e `providers.dart`.
+- Testes: `test/domain/market/`, `test/application/market/`, `test/application/sync/save_market_test.dart`, `test/data/repositories/market_repository_test.dart`, `test/infrastructure/market/` (com respostas reais em `test/fixtures/market/`), `test/infrastructure/security/api_key_store_test.dart`, `test/presentation/data_sources_screen_test.dart`.
+
+**3. Testes executados e resultados reais**
+
+- `dart format` (nenhuma mudança), `flutter analyze` (sem problemas), `flutter test`: **410 testes passando**; `flutter build windows --release` compilou.
+- Novos: regras do preço de mercado, Tesouro, desatualização, CDI anualizado, IPCA 12 meses (com mês faltando = indisponível), patrimônio em reais; avaliação com preço de mercado; repositório (preços, câmbio, indicadores, Tesouro, cotações) e estado dos provedores (cota mensal); serviço (cotação com fonte e data na carteira, só o código vai ao provedor, provedor desligado, falha com fonte seguinte, PTAX fora → BCE, cota atingida, sem internet com os dados guardados e parada antecipada, histórico só dos trechos que faltam, indicadores incrementais, chamadas simultâneas); save com dados de mercado (ida e volta, coleta mais nova vence, sem a opção, com senha); codec (formato 2, conteúdo alterado, valor não texto); cofre de chaves com o DPAPI real; telas (provedores, chave some da tela, "Atualizar agora" sem internet, cotação da brapi com fonte e data, troca dos ativos antigos para cotação automática); a tela nova em janela estreita.
+- **Verificação com a internet real** (script de verificação fora do repositório, numa pasta de dados de teste, sem chaves): brapi (PETR4), COTAHIST (fechamentos diários e histórico de 01/10 a 16/10/2026), Tesouro, CVM, CoinGecko, PTAX, SIDRA e proventos da B3 (169 registros da PETR4) responderam. Depois, o app real (build release) com a mesma pasta, com e sem rede (capturas só da janela do Patrion).
+- **Não verificado com dados reais:** Finnhub, Twelve Data e CoinGecko com chave (precisam das suas chaves; cobertos por testes com respostas reais gravadas) e o SGS do Banco Central (fora do ar, ver item 4).
+
+**4. Problemas e limitações**
+
+- **SGS do Banco Central fora do ar** desde pelo menos 17/10/2026 16:25 até 18/10/2026 22:00: toda consulta com dados responde uma página "Requisição inválida", e o próprio site do SGS (`www3.bcb.gov.br/sgspub`) responde erro 500. Parece indisponibilidade do serviço (fim de semana), não mudança da API, por isso não tratei como fonte inviável. Enquanto isso, CDI, Selic, meta Selic e IGP-M ficam "indisponíveis" (sem nada inventado) e o IPCA vem do IBGE. **Se continuar fora nos próximos dias úteis, me avise para eu procurar uma alternativa** (com sua aprovação, como pede o CLAUDE.md).
+- **brapi sem chave** responde agora só PETR4, VALE3, MGLU3 e ITUB4 (MXRF11 e HGLG11 passaram a pedir chave entre 17 e 18/10). Sem chave, os outros ativos da B3 usam o fechamento oficial do COTAHIST do último pregão.
+- Os ativos que você cadastrou antes da F6 estão com "preço informado": use "Usar cotações" em Fontes de dados (ou Editar no ativo) para passá-los à cotação automática.
+- O histórico guardado é o preço bruto da fonte. O ajuste por proventos e eventos, o TWR, a rentabilidade por período, a evolução patrimonial e os benchmarks na tela ficam para a F8 (§12; a SPEC não os põe na F6). O PROGRESS da F4 dizia "F6" para essa exibição: ela foi para a F8 porque depende do ajuste por eventos e da tela de benchmarks.
+- Sem internet, a primeira atualização ainda tenta duas fontes (cerca de 20 s) antes de concluir que o PC está sem rede.
+- Numa janela de 1280 px, a coluna "Resultado" da Carteira fica fora da área visível (a tabela rola na horizontal).
+- A cotação da CoinGecko sem chave tem limite baixo e compartilhado por IP; a do Tesouro é a da manhã do último dia útil publicado.
+- O save com dados de mercado usa o formato 2: uma versão anterior do app recusa esse arquivo ("formato mais novo"); atualize o app nos dois PCs ou desmarque a opção.
+
+**5. Pendências**
+
+- Você: testar com a sua chave da brapi (roteiro abaixo); opcionalmente, Finnhub, Twelve Data e CoinGecko.
+- Você (da F5B): Windows Hello num PC com o Hello configurado.
+- Conferir o SGS de novo num dia útil; se seguir fora, decidir uma alternativa para CDI e Selic.
+- F7: instalador e ZIP, associação do `.invsave`, avisos de licença do SQLCipher, do OpenSSL e as atribuições das fontes de dados.
+- F8: ajuste por proventos e eventos, TWR, rentabilidade por período, evolução, benchmarks, retorno real e efeito cambial na tela.
+- F9: `hypo_runs`; F11: pasta de sincronização.
+
+**6. Como executar e o que testar manualmente**
+
+```powershell
+flutter build windows --release
+```
+
+ou abra `build\windows\x64\runner\Release\patrion.exe`.
+
+**Roteiro com a sua chave da brapi** (a chave é digitada só no app; não me mande a chave):
+
+1. Abra o app e vá em **Fontes de dados**. No card **brapi**, confira "Envia: só o código do ativo… e a sua chave" e os limites do plano gratuito.
+2. Cole ou digite a chave no campo **Chave de API** e clique **Guardar chave**. O campo some e aparece "Chave cadastrada neste computador".
+3. Clique **Testar conexão** no card da brapi. Deve aparecer "brapi respondeu corretamente." e o estado "Funcionando · último acesso em …".
+4. Se os seus ativos foram cadastrados antes desta fase, use **Usar cotações** no aviso do topo de Fontes de dados (ou **Editar → Preço: Cotação automática** em cada ativo).
+5. Clique **Atualizar agora** e espere o aviso de conclusão (sem o SGS, aparece "falha em Banco Central — SGS"; isso é esperado enquanto ele estiver fora do ar).
+6. Em **Carteira**, cada ativo da B3 deve mostrar o valor com "brapi · data hora" embaixo. Passe o mouse no valor: tipo (intradiário), coleta e "atraso de até 30 min (plano gratuito da brapi)". Confira um ativo que não seja PETR4, VALE3, MGLU3 ou ITUB4 (sem chave ele viria do COTAHIST).
+7. Abra um ativo e veja o card **Dados de mercado** (fonte, data, tipo, coleta, atraso). Clique **Baixar histórico**: o "Histórico guardado" passa a mostrar os dias e o período.
+8. Em Fontes de dados, a linha "Uso no mês" da brapi deve contar as requisições.
+9. Opcional: **Apagar** a chave. A brapi passa a atender só PETR4, VALE3, MGLU3 e ITUB4; os outros ativos da B3 voltam a mostrar o fechamento do COTAHIST, com a data do pregão.
+10. Sem internet (desligue o Wi-Fi), clique **Atualizar agora**: aparece "Sem conexão…" e os valores continuam, com a data de cada um.
+11. Opcional: **Salvar arquivo de save** com "Levar os dados de mercado já baixados" e importe no outro PC; lá, a carteira deve mostrar os mesmos preços e datas mesmo sem internet.
 
 ### Fase 5B — Bloqueio do app
 
@@ -649,11 +718,11 @@ ou abra `build\windows\x64\runner\Release\patrion.exe`. Conferir: a janela abre 
 
 ## Pendências e problemas conhecidos
 
-Ver as seções 4 e 5 das Fases 5B, 5, 4, 3, 2 e 1 acima.
+Ver as seções 4 e 5 das Fases 6, 5B, 5, 4, 3, 2 e 1 acima.
 
 ## Próximo passo
 
-Fase 6 (Dados de mercado), conforme `docs/SPEC.md` §21: adaptadores escolhidos na F1, cache e atualização automática e manual, câmbio, CDI, Selic e IPCA e a tela "Fontes de dados", até as cotações reais aparecerem com fonte e data e o app funcionar sem internet. Na F6, incluir a pasta `market/` no save (SINCRONIZACAO.md).
+Fase 7 (Distribuição), conforme `docs/SPEC.md` §21: instalador e ZIP portátil, workflow de release, verificador de atualizações e associação do `.invsave`, até a v1.0.0 com instalador testado em ambiente limpo.
 
 ## Histórico de sessões
 
@@ -665,3 +734,4 @@ Fase 6 (Dados de mercado), conforme `docs/SPEC.md` §21: adaptadores escolhidos 
 | 2026-10-17 | F4 | Motor financeiro: ln/exp/pow em Decimal, juros e bases, calendário de dias úteis, CDI, XIRR, TWR, retornos e câmbio; resultado total e TIR por ativo e por moeda na interface; cards do dashboard sem quebra de linha |
 | 2026-10-17 | F5 | Backup e save: arquivo .invsave com mesclagem por HLC, conflitos, unificação de cadastros repetidos e prévia; backup manual e automático com metadados e restauração com reabertura do banco; schema 3; S1 a S10 e sincronização real entre duas pastas de dados |
 | 2026-10-18 | F5B | Pendências da F5 (aviso de carteira inconsistente na prévia; teste da falha ao reabrir na restauração) e bloqueio do app: SQLCipher, senha, chave de recuperação, Windows Hello, inatividade, backups criptografados e senha do arquivo de save; conversão de um banco existente verificada no app real |
+| 2026-10-18 | F6 | Dados de mercado: pendências da F1, schema 4, 14 adaptadores, cache, atualização automática e manual, câmbio e indicadores, patrimônio em reais, tela Fontes de dados, chaves com DPAPI, dados de mercado no save; cotações reais e funcionamento sem internet verificados no app real |
