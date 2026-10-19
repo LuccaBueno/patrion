@@ -59,17 +59,43 @@ O serviço de operações recusa gravar, editar ou excluir uma operação que cr
 
 ## 2. Valor de mercado (`PortfolioValuator`)
 
-Só com preços e saldos informados pelo usuário até a F6. Para a data de hoje (`asOf`):
+Para a data de hoje (`asOf`), conforme a fonte de preço do ativo:
+
+**Ativo com preço informado** (`price_source = manual`):
 
 1. Se há saldo informado para a conta e o ativo, vale o mais recente com data ≤ `asOf`.
 2. Senão, `valor = Q × P`, com `P` = preço unitário informado mais recente com data ≤ `asOf`.
+
+**Ativo com cotação automática** (`price_source = market`): vale o mais recente entre o saldo informado, o preço informado e o preço de mercado (§2.1). Na mesma data, vale o informado pelo usuário. Com o preço de mercado, `valor = Q × P` e a posição guarda a fonte, a data, o tipo e o atraso do preço.
+
+Em todos os casos:
+
 3. Sem preço nem saldo: **indisponível** (regra 1). O valor nunca é estimado pelo custo.
-4. Preço ou saldo em moeda diferente da posição é ignorado (sem câmbio até a F6).
+4. Preço ou saldo em moeda diferente da posição é ignorado (o valor da posição não é convertido).
 5. Saldo com data anterior à última operação da posição é marcado como desatualizado.
+
+### 2.1 Preço de mercado (`MarketPricing`, `MarketPriceBook`; `lib/domain/market/market_price.dart`)
+
+Montado só com o que está guardado no banco (sem rede):
+
+- **Candidatos**: as cotações guardadas do ativo (uma por fonte) e o último fechamento guardado (`mkt_prices`, tipo fechamento, preço bruto da fonte).
+- **Escolha**: vale a data de referência mais recente; na mesma data, a de instante mais novo. A data de uma cotação é o dia do instante dela no horário de Brasília (UTC−3).
+- **COTAHIST**: o preço vem por lote de `fator de cotação` ações; preço unitário = fechamento ÷ fator.
+- **Tesouro Direto**: o título cadastrado é ligado ao do Tesouro Transparente pelo produto (Selic, Prefixado, IPCA+, com ou sem juros semestrais, Renda+, Educa+) e pelo vencimento. Só com uma correspondência única; o preço é o PU de venda da manhã (o que o Tesouro paga no resgate antecipado), ou o PU base se faltar.
+- **Desatualizado**: a data de referência é anterior ao último dia útil (calendário B3) antes de hoje; em cripto, que não fecha, anterior a ontem. O valor continua aparecendo, com a data e um ícone.
+
+### 2.2 Indicadores derivados (`MarketIndicators`, `lib/domain/market/market_indicators.dart`)
+
+- **CDI anualizado**: `(1 + d ÷ 100)^252 − 1`, com `d` = último CDI diário publicado (% ao dia). Exemplo: 0,055131% a.d. → 14,90% a.a.
+- **IPCA em 12 meses**: `∏(1 + mᵢ ÷ 100) − 1` sobre os 12 meses terminados no último mês publicado. Se faltar algum mês, fica **indisponível** (nada é preenchido). Exemplo: 0,5% em 12 meses → 6,1678%.
+
+### 2.3 Patrimônio total em reais (`ConsolidatedEquity`)
+
+`Σ patrimônio(moeda) × câmbio(moeda)`, com o patrimônio em reais somado sem conversão e o câmbio mais recente guardado de cada moeda contra o real (PTAX de fechamento; na mesma data, a PTAX antes da referência do BCE), pelo valor de venda (ou de compra, se faltar o de venda). Arredondado a 2 casas, meio para cima. Se faltar o câmbio de alguma moeda, o total fica **indisponível**; é **parcial** se algum patrimônio somado for parcial. Os totais por moeda (§3) continuam sem conversão.
 
 ## 3. Totais do dashboard (`PortfolioSummary`)
 
-Calculados separadamente para cada moeda (nada é convertido até a F6):
+Calculados separadamente para cada moeda (o total em reais está em §2.3):
 
 - Valor investido = Σ `K` das posições abertas.
 - Valor de mercado = Σ valor das posições com preço ou saldo.

@@ -180,7 +180,7 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - Alternativas: instantes em inteiros (menos legíveis no JSONL do save).
 - Motivo: legibilidade no save, ordenação natural e mesclagem determinística.
 
-### 2026-10-17 — D-11: Chaves de API (aprovada em 2026-10-17)
+### 2026-10-17 — D-11: Chaves de API (aprovada em 2026-10-17; local substituído pela D-34)
 
 - Decisão: chaves ficam no **Gerenciador de Credenciais do Windows** via `flutter_secure_storage`, nunca no banco nem no código. Por isso, elas não vão no save. A opção futura de exportá-las (SPEC §10.1) será explícita, desmarcada por padrão e com aviso.
 - Alternativas: tabela de configurações do dispositivo em texto puro.
@@ -443,3 +443,47 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - **Windows Hello**: só pode ser ativado com o Windows Hello disponível (`UserConsentVerifier`); a cópia da chave (DPAPI) é apagada ao desativar o Hello ou o bloqueio.
 - Alternativas: reescrever o banco no lugar com `PRAGMA rekey` (o SQLCipher não criptografa um banco aberto assim, e uma falha no meio deixaria o único arquivo em estado incerto); pedir para reiniciar o app depois de ativar (pior para o usuário); apagar os backups antigos sem criptografia ao ativar (apagaria dados sem pedido).
 - Motivo: SPEC §3 e §11, regra 5 (os dados nunca ficam sem uma cópia legível) e D-24.
+
+### 2026-10-18 — D-34: Chaves de API (F6; substitui a D-11 quanto ao local)
+
+- Decisão: as chaves de API ficam num arquivo próprio na pasta de dados, `patrion.apikeys.bin`, protegido pelo **DPAPI** do Windows (conta do usuário, com entropia própria `patrion-apikeys-v1`), lido por `DpapiApiKeyStore` (`infrastructure/security/api_key_store.dart`).
+  - **Fora do banco**: não vão no save, nos backups nem na pasta `market/`. A SPEC §10.1 permitia levá-las no save como opção; por pedido do usuário (18/10/2026), elas **nunca** vão no save.
+  - **Fora do log**: o cofre só registra "chave gravada" ou "removida", sem o provedor nem a chave; as requisições levam a chave em cabeçalho (`Authorization`, `X-Finnhub-Token`, `x-cg-demo-api-key`), nunca na URL, e as mensagens de erro do acesso HTTP não incluem URL completa nem cabeçalhos.
+  - **Digitadas só na tela** "Fontes de dados", num campo oculto; depois de guardada, a tela mostra só "Chave cadastrada neste computador" (trocar ou apagar).
+  - **Por PC**: uma cópia da pasta de dados em outro computador ou outra conta do Windows não abre o arquivo; o app avisa e pede para cadastrar de novo.
+  - As chaves são lidas a cada requisição: cadastrar ou apagar vale na hora.
+- Alternativas: `flutter_secure_storage` (D-11; descartado na F5B, D-32, para não trazer outro plugin nativo, e o DPAPI já é usado pelo Windows Hello); tabela `dev_settings` em texto (iria para os backups); Gerenciador de Credenciais via FFI (mais código para a mesma proteção do DPAPI).
+- Motivo: regra 7, SPEC §3 (privacidade) e o pedido do usuário. Limitação: quem está logado na mesma conta do Windows consegue abrir o arquivo (mesma limitação do DPAPI registrada em D-24).
+
+### 2026-10-18 — D-35: Dados de mercado — provedores, ordem, atualização e cache (F6)
+
+- Pendências da F1 resolvidas (sem fonte inviável):
+  - **Finnhub**: no swagger oficial, o plano gratuito tem a cotação atual dos EUA (`/quote`); candles históricos e outras bolsas são pagos. Usado só para cotação dos EUA, com chave.
+  - **Twelve Data**: plano Basic com 8 créditos por minuto e 800 por dia, EUA, câmbio e cripto; B3 só nos pagos. Usado para histórico diário e cotação dos EUA, com chave, com intervalo mínimo de 7,6 s entre requisições.
+  - **Tesouro Transparente** (CKAN) e **CVM Dados Abertos**: licença ODbL.
+  - Mudanças encontradas: o SGS recusa requisições sem `User-Agent`; o Frankfurter mudou para `api.frankfurter.dev/v1`.
+  - O teste com chaves reais é do usuário (roteiro no relatório da F6): as chaves nunca passam pelo chat.
+- Ordem de preferência (`infrastructure/market/market_setup.dart`):
+  - Cotação: brapi (B3; sem chave, só os tickers de teste) → CoinGecko (cripto) → Finnhub (EUA) → Twelve Data (EUA) → Yahoo (desligado por padrão).
+  - Histórico: B3 COTAHIST em lote (B3) → Binance (cripto em BRL) → Twelve Data → Yahoo.
+  - Câmbio: PTAX → Frankfurter. Indicadores: SGS → SIDRA (IPCA). Tesouro: Tesouro Transparente. FIIs: CVM. Proventos e eventos: B3.
+  - Provedor desligado ou sem chave é pulado; em falha, vale a próxima fonte. Cota mensal da brapi (15.000) contada em `dev_provider_state`.
+- Atualização (SPEC §5): automática com o app aberto, 5 s depois de abrir e depois a cada 30 minutos (15, 30, 60, 240 minutos ou desligada, por PC em `dev_settings`); manual pela carteira inteira ("Atualizar agora"), por ativo ("Atualizar este ativo" e "Baixar histórico") e pelo teste de cada provedor. Uma atualização por vez; pedidos simultâneos da carteira viram um só.
+  - A carteira atualiza só ativos com posição aberta e fonte de preço "cotação automática": cotação atual, fechamentos recentes da B3 (arquivos diários do COTAHIST, só a janela que falta, até 15 dias), Tesouro (se o último dia guardado for anterior ao último pregão), informe de FII (se tiver mais de 40 dias), câmbio de USD, EUR e das moedas da carteira e os indicadores, sempre a partir do último dado guardado.
+  - **Histórico** a partir de um ano inicial por PC (padrão: 5 anos antes do atual). Só os trechos que faltam (antes do primeiro e depois do último dia guardado). No COTAHIST, só os anos necessários; o ZIP e o TXT são apagados depois da extração, inclusive em falha (D-05).
+  - **Sem internet**: as falhas de rede viram "sem conexão" na tela; tudo continua funcionando com o que está guardado, cada dado com a sua data. Nada é preenchido ou estimado.
+- Fonte de preço do ativo: "cotação automática" ou "preço ou saldo informado". Ativo novo recebe a sugestão da classe (renda fixa privada, produto bancário e caixa: informado; as demais: automática). Os ativos criados antes da F6 continuam com preço informado; "Fontes de dados" oferece trocá-los de uma vez (com confirmação).
+- Avaliação: num ativo com cotação automática, vale o mais recente entre o preço ou saldo informado e o preço de mercado; na mesma data, o informado (`FORMULAS.md` §2.1).
+- Alternativas: atualizar todos os ativos cadastrados (gasta cota com ativos sem posição); preencher com o custo quando falta cotação (proibido pela regra 1).
+- Motivo: SPEC §4 e §5, regras 1, 2 e 8.
+
+### 2026-10-18 — D-36: Dados de mercado no save (F6)
+
+- Decisão: a pasta `market/` do save (SPEC §10.1) leva todas as tabelas `mkt_` com registros, uma linha JSON por registro, com todos os valores em texto. Opção "Levar os dados de mercado já baixados", marcada por padrão, no diálogo de salvar.
+  - **Formato do arquivo 2** só quando o save leva `market/`; sem ela, o save continua no formato 1, que as versões anteriores do app leem. Uma versão anterior recusa o formato 2 com "formato mais novo: atualize o aplicativo".
+  - O manifesto traz `market: {"included": true, "counts": {...}}` e o SHA-256 de cada arquivo em `files`; a validação é a mesma das tabelas (checksum, contagem, arquivo não declarado, colunas exatas, campos obrigatórios, valores só texto ou nulo).
+  - **Mesclagem** pela chave primária de cada tabela: registro novo entra; um que já existe só é trocado se a coleta recebida (`collected_at`) for mais recente. Nada é apagado. Roda na mesma transação da importação.
+  - Dados de mercado de um save de outro schema são ignorados (são baixados de novo); a prévia avisa.
+  - No save protegido por senha, a pasta vai dentro do conteúdo cifrado.
+- Alternativas: levar só o histórico (o outro PC ficaria sem câmbio e indicadores offline); usar HLC nos dados de mercado (são dados de terceiros, não edições do usuário).
+- Motivo: SPEC §10.1 ("para o outro PC funcionar offline") e regra 2 (a origem de cada dado viaja junto).

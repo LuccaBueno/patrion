@@ -1,14 +1,14 @@
 # Fontes de dados
 
-Pesquisa feita em **17/10/2026** (Fase 1), com base na documentação publicada e em chamadas reais de teste. Cada chamada de teste levou só tickers públicos (PETR4, HGLG11, BTC), nunca dados da carteira.
+Pesquisa feita em **17/10/2026** (Fase 1) e revisada em **18/10/2026** (Fase 6), com base na documentação publicada e em chamadas reais de teste. Cada chamada de teste levou só tickers públicos (PETR4, HGLG11, BTC), nunca dados da carteira.
 
 Legenda da coluna "Verificado":
 
 - **Testado:** chamada real feita em 17/10/2026 e resposta conferida.
 - **Doc.:** confirmado na documentação oficial do provedor.
-- **Terceiros:** só fontes não oficiais; tratar como não confirmado e reconferir na Fase 6.
+- **Terceiros:** só fontes não oficiais; tratar como não confirmado.
 
-Preços, limites e condições mudam. Esta matriz deve ser revisada antes da Fase 6 e sempre que um adaptador falhar.
+Preços, limites e condições mudam. Esta matriz foi revisada na Fase 6 e deve ser revisada de novo sempre que um adaptador falhar.
 
 ## 1. Resumo e recomendação
 
@@ -24,7 +24,7 @@ Preços, limites e condições mudam. Esta matriz deve ser revisada antes da Fas
 | Internacional (ações, ETFs, REITs) | Finnhub (cotação) + Yahoo (histórico, não oficial) | Twelve Data, Alpha Vantage (limitados) | Não há fonte gratuita, oficial e completa |
 | Cripto | CoinGecko Demo (cotação) + Binance (histórico) | CoinGecko pago | Demo só tem 1 ano de histórico |
 | IMA, IDkA | ANBIMA (site: últimos 5 dias úteis) | — | Histórico só pelo ANBIMA Feed (pago); fica como "indisponível" |
-| S&P 500, Nasdaq | Yahoo (não oficial) | Finnhub/Twelve Data (a confirmar) | Benchmarks internacionais são o ponto mais frágil |
+| S&P 500, Nasdaq | Yahoo (não oficial, desligado por padrão) | — (Finnhub e Twelve Data gratuitos não têm os índices) | Benchmarks internacionais são o ponto mais frágil |
 
 ### Ponto crítico: backtest de retorno total BR
 
@@ -79,7 +79,7 @@ Por isso, a proposta é:
 | Limites e custo | Gratuito; sem limite publicado |
 | Chave | Não |
 | Atualização | Dias úteis (o fechamento do dia testado tinha horário de 13h) |
-| Histórico | Várias décadas (data inicial a confirmar na Fase 6) |
+| Histórico | Várias décadas (data inicial não conferida; o app só pede a partir do ano inicial configurado) |
 | Licença | Dados abertos do BCB (ODbL) |
 | Limitações e falha | Só dias úteis no Brasil. Em falha: cache e Frankfurter para moedas não-USD. |
 | Verificado | Testado |
@@ -90,10 +90,10 @@ Por isso, a proposta é:
 |---|---|
 | Dados | IPCA (tabela 1737 e outras), INPC, PIB etc. |
 | Endpoint | `https://apisidra.ibge.gov.br/values/t/{tabela}/n1/all/v/{variavel}/p/{periodo}` |
-| Limites e custo | Gratuito; limite por consulta a confirmar na documentação da API (Fase 6) |
+| Limites e custo | Gratuito; limite por consulta não conferido (o app pede só o período que falta) |
 | Chave | Não |
 | Atualização | Mensal (IPCA por volta do dia 10) |
-| Histórico | Série longa do IPCA (data inicial a confirmar na Fase 6) |
+| Histórico | Série longa do IPCA (data inicial não conferida; o app só pede a partir do ano inicial configurado) |
 | Licença | Dados públicos do IBGE |
 | Limitações e falha | Formato com cabeçalho na primeira linha. Alternativa: SGS 433. |
 | Verificado | Testado |
@@ -107,9 +107,9 @@ Por isso, a proposta é:
 | Limites e custo | Gratuito; arquivos grandes |
 | Chave | Não |
 | Atualização | Cotas: diária (arquivo mensal atualizado); FII: mensal, com defasagem |
-| Histórico | Vários anos de arquivos (datas iniciais a confirmar na Fase 6) |
+| Histórico | Vários anos de arquivos (datas iniciais não conferidas; o app só pede os anos necessários) |
 | Ajuste | Cotas de fundos já são líquidas de taxas; não há "ajuste" de eventos |
-| Licença | Dados abertos do governo federal (conferir termos no portal na Fase 6) |
+| Licença | Dados abertos do governo federal, licença ODbL (conferido em 18/10/2026) |
 | Limitações e falha | Não traz cotação de mercado de FII (essa vem da B3). Defasagem do informe mensal. |
 | Verificado | Testado (arquivos acessíveis) |
 
@@ -155,9 +155,9 @@ Por isso, a proposta é:
 | Limites e custo | Gratuito; um arquivo único com todo o histórico (vários MB) |
 | Chave | Não |
 | Atualização | Diária (valores da manhã do dia útil) |
-| Histórico | Arquivo único com todo o histórico publicado (início a confirmar na Fase 6) |
+| Histórico | Arquivo único com todo o histórico publicado (o app grava só a partir do ano inicial configurado) |
 | Ajuste | Não se aplica (PU já é o preço do título) |
-| Licença | Dados abertos do Tesouro (conferir a licença indicada no CKAN na Fase 6) |
+| Licença | Dados abertos do Tesouro Nacional, licença ODbL indicada no CKAN (conferido em 18/10/2026; arquivo de 14,6 MB atualizado em 16/10/2026) |
 | Limitações e falha | Não é cotação em tempo real. O site do Tesouro Direto tem JSON interno, mas ele já mudou e bloqueou acessos no passado; não usar. |
 | Verificado | Testado |
 
@@ -192,22 +192,22 @@ Por isso, a proposta é:
 | Item | Detalhe |
 |---|---|
 | Dados | Cotação EUA em tempo real, fundamentos básicos, forex, cripto, notícias |
-| Limites e custo | Free: ~60 req/min, uso pessoal não comercial (Terceiros; a página oficial não exibiu os números) |
+| Limites e custo | Free: uso pessoal; limite de 30 requisições por segundo (o app usa bem menos) |
 | Chave | Sim |
-| Histórico | Candles históricos e bolsas internacionais **provavelmente premium** (não confirmado) |
-| Limitações | Bom para cotação atual de ativos dos EUA; histórico a confirmar na Fase 6 |
-| Verificado | Terceiros |
+| Histórico | Candles históricos e bolsas fora dos EUA são **pagos** (confirmado no swagger oficial em 18/10/2026) |
+| Limitações | Usado só para a cotação atual de ações e ETFs dos EUA, com a chave do usuário |
+| Verificado | Doc. (swagger oficial, 18/10/2026); teste com chave real no roteiro do usuário |
 
 ### 2.10 Twelve Data
 
 | Item | Detalhe |
 |---|---|
-| Limites e custo | Basic (grátis): 8 créditos/min, 800/dia, "3 mercados" (não nomeados). Grow US$ 79/mês; Pro US$ 229/mês. |
+| Limites e custo | Basic (grátis): 8 créditos/min, 800/dia; EUA, câmbio e cripto. Grow US$ 79/mês; Pro US$ 229/mês. |
 | Chave | Sim (a chave `demo` não serve para testes reais) |
-| Cobertura BR | Não confirmada no plano grátis |
+| Cobertura BR | Só nos planos pagos (conferido em 18/10/2026) |
 | Licença | Basic indica uso interno; direitos de exibição não listados |
-| Limitações | Alternativa para internacional; avaliar na Fase 6 se Finnhub falhar |
-| Verificado | Doc. (parcial) |
+| Limitações | Usado para o histórico diário (sem ajuste) e como segunda fonte de cotação dos EUA, com a chave do usuário; o app espera 7,6 s entre requisições |
+| Verificado | Doc. (18/10/2026); teste com chave real no roteiro do usuário |
 
 ### 2.11 Stooq
 
@@ -268,9 +268,10 @@ Por isso, a proposta é:
 - Deduplicação de requisições em andamento.
 - Nenhuma requisição leva quantidades, valores ou composição da carteira: só tickers e séries.
 
-## 4. Pendências para a Fase 6
+## 4. Revisão da Fase 6 (18/10/2026)
 
-- Confirmar na documentação oficial os limites do Finnhub e se o plano grátis tem histórico.
-- Confirmar a cobertura do plano grátis do Twelve Data.
-- Conferir licenças do CKAN do Tesouro e do portal da CVM.
-- Escolher a ordem de fallback para internacional depois de testar com chaves reais.
+- Finnhub e Twelve Data confirmados na documentação oficial (§2.9 e §2.10). Nenhuma fonte se mostrou inviável.
+- Licenças: Tesouro Transparente e CVM com ODbL.
+- Mudanças encontradas: o SGS do Banco Central recusa requisições sem `User-Agent`; o Frankfurter passou para `api.frankfurter.dev/v1`.
+- Ordem de preferência e fallback, atualização e cache: DECISIONS D-35. Chaves de API: D-34. Dados de mercado no save: D-36.
+- Pendente: o teste com chaves reais (brapi, Finnhub, Twelve Data, CoinGecko) é feito pelo usuário na tela "Fontes de dados"; as chaves nunca passam pelo chat nem pelo repositório.
