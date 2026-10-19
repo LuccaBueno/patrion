@@ -1,14 +1,24 @@
+import 'dart:async';
+
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../application/market/market_data_service.dart';
 import '../../../application/portfolio/portfolio_query.dart';
+import '../../../core/time/instant_format.dart';
+import '../../../core/time/local_date.dart';
+import '../../../domain/market/market_data.dart';
+import '../../../domain/market/market_price.dart';
+import '../../../domain/market/provider_catalog.dart';
 import '../../../domain/finance/returns.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
+import '../../format/market_labels.dart';
+import '../../format/sync_labels.dart';
 import '../../format/performance_format.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
@@ -86,6 +96,8 @@ class AssetDetailScreen extends ConsumerWidget {
             children: [
               _PositionsCard(snap: snap, asset: asset),
               _PerformanceCard(snap: snap, asset: asset),
+              if (asset.assetClass != AssetClass.cash)
+                _MarketCard(snap: snap, asset: asset),
               if (snap.fixedIncome[asset.id] != null)
                 _TermsCard(terms: snap.fixedIncome[asset.id]!),
               _ValuationsCard(snap: snap, asset: asset),
@@ -353,8 +365,9 @@ class _ValuationsCard extends ConsumerWidget {
               style: theme.textTheme.titleMedium,
             ),
             Text(
-              'Fonte: informado por você. Cotações automáticas chegam numa '
-              'próxima etapa.',
+              'Fonte: informado por você. Num ativo com preço de mercado, vale o '
+              'mais recente entre o informado e a cotação (na mesma data, o '
+              'informado).',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -404,6 +417,186 @@ class _ValuationsCard extends ConsumerWidget {
                   },
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Dados de mercado guardados de um ativo.
+typedef _AssetMarketData = ({
+  List<MarketQuote> quotes,
+  (LocalDate, LocalDate, int)? range,
+  int events,
+});
+
+final _assetMarketProvider =
+    StreamProvider.family<_AssetMarketData, (String, String)>((ref, key) {
+      final repo = ref.watch(marketRepositoryProvider);
+      final (symbol, market) = key;
+      Future<_AssetMarketData> load() async => (
+        quotes: await repo.quotes(symbol, market),
+        range: await repo.priceRange(symbol, market),
+        events: (await repo.events(symbol, market)).length,
+      );
+      final controller = StreamController<_AssetMarketData>();
+      Future<void> emit() async {
+        final value = await load();
+        if (!controller.isClosed) controller.add(value);
+      }
+
+      unawaited(emit());
+      final sub = repo.watchChanges().listen((_) => unawaited(emit()));
+      ref.onDispose(() {
+        unawaited(sub.cancel());
+        unawaited(controller.close());
+      });
+      return controller.stream;
+    });
+
+/// Cotação usada, fonte e data, histórico guardado e atualização deste
+/// ativo (SPEC §5: atualizar um ativo; regra 2).
+class _MarketCard extends ConsumerWidget {
+  const _MarketCard({required this.snap, required this.asset});
+
+  final PortfolioSnapshot snap;
+  final Asset asset;
+
+  Future<void> _run(
+    BuildContext context,
+    WidgetRef ref,
+    String task,
+    Future<RefreshResult> Function(MarketDataService s) job,
+  ) async {
+    final result = await ref
+        .read(marketRefreshProvider.notifier)
+        .run(task, job);
+    if (context.mounted) showInfo(context, MarketLabels.result(result));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    final busy = ref.watch(marketRefreshProvider).busy;
+    final data = ref
+        .watch(
+          _assetMarketProvider((asset.symbol.toUpperCase(), asset.market.code)),
+        )
+        .value;
+    final used = snap.valued
+        .map((v) => v.marketPrice)
+        .whereType<MarketPrice>()
+        .where((p) => p.assetId == asset.id)
+        .firstOrNull;
+    final manual = asset.priceSource != PriceSource.market;
+    final stale =
+        used != null &&
+        MarketPricing.isStale(used, snap.asOf, market: asset.market.code);
+    final range = data?.range;
+    return Card(
+      key: const Key('asset-market'),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Dados de mercado', style: theme.textTheme.titleMedium),
+            if (manual)
+              Text(
+                'Este ativo usa preço informado por você. Para usar cotações '
+                'automáticas, escolha "preço de mercado" em Editar.',
+                style: muted,
+              ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 32,
+              runSpacing: 8,
+              children: [
+                _Metric(
+                  'Preço de mercado usado',
+                  used == null ? null : Fmt.money(used.price, used.currency),
+                  manual
+                      ? 'O ativo usa preço informado.'
+                      : 'Sem cotação guardada para este ativo.',
+                ),
+                if (used != null) ...[
+                  _Metric('Fonte', ProviderCatalog.nameOf(used.source)),
+                  _Metric(
+                    'Data de referência',
+                    stale
+                        ? '${MarketLabels.refOf(used)} (desatualizado)'
+                        : MarketLabels.refOf(used),
+                  ),
+                  _Metric('Tipo', used.dataType.label),
+                  _Metric('Coleta', SyncLabels.instant(used.collectedAt)),
+                  if (used.delayNote != null) _Metric('Atraso', used.delayNote),
+                ],
+                _Metric(
+                  'Histórico guardado',
+                  range == null
+                      ? 'nenhum'
+                      : '${range.$3} dias, de ${Fmt.date(range.$1)} a '
+                            '${Fmt.date(range.$2)}',
+                ),
+                if (data != null && data.events > 0)
+                  _Metric('Proventos e eventos', '${data.events} guardados'),
+              ],
+            ),
+            if (data != null && data.quotes.length > 1) ...[
+              const SizedBox(height: 8),
+              Text('Cotações guardadas por fonte', style: muted),
+              for (final q in data.quotes)
+                Text(
+                  '${ProviderCatalog.nameOf(q.source)}: '
+                  '${Fmt.money(q.price, q.currency)} · '
+                  '${SyncLabels.instant(formatInstant(q.refAt))}',
+                  style: theme.textTheme.bodySmall,
+                ),
+            ],
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  key: const Key('asset-refresh'),
+                  onPressed: busy
+                      ? null
+                      : () => _run(
+                          context,
+                          ref,
+                          'Atualizando ${asset.symbol}',
+                          (s) => s.refreshAsset(asset),
+                        ),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Atualizar este ativo'),
+                ),
+                OutlinedButton.icon(
+                  key: const Key('asset-history'),
+                  onPressed: busy || asset.assetClass == AssetClass.treasury
+                      ? null
+                      : () => _run(
+                          context,
+                          ref,
+                          'Baixando o histórico de ${asset.symbol}',
+                          (s) => s.downloadHistory(asset),
+                        ),
+                  icon: const Icon(Icons.download_outlined, size: 18),
+                  label: const Text('Baixar histórico'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'O histórico é o preço publicado pela fonte, sem ajuste por '
+              'proventos ou eventos. Na B3 vem do COTAHIST: só os anos que '
+              'faltam, a partir do ano escolhido em Fontes de dados.',
+              style: muted,
+            ),
           ],
         ),
       ),

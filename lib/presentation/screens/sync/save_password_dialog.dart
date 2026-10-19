@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../security/security_dialogs.dart';
 
 /// Escolha da proteção do arquivo de save antes de salvar (SPEC §10.6).
-/// Devolve `(senha ou null)` dentro de um registro, ou `null` se cancelar.
+/// Devolve `(senha ou null, levar dados de mercado)`, ou `null` se cancelar.
 class SavePasswordDialog extends StatefulWidget {
   const SavePasswordDialog({
     required this.protectByDefault,
@@ -29,6 +29,7 @@ class _SavePasswordDialogState extends State<SavePasswordDialog> {
   late bool _protect =
       widget.protectByDefault || widget.importedPassword != null;
   late bool _reuse = widget.importedPassword != null;
+  bool _market = true;
 
   @override
   void dispose() {
@@ -39,15 +40,16 @@ class _SavePasswordDialogState extends State<SavePasswordDialog> {
 
   void _submit() {
     if (!_protect) {
-      Navigator.of(context).pop((password: null));
+      Navigator.of(context).pop((password: null, market: _market));
       return;
     }
     if (_reuse && widget.importedPassword != null) {
-      Navigator.of(context).pop((password: widget.importedPassword));
+      Navigator.of(context)
+          .pop((password: widget.importedPassword, market: _market));
       return;
     }
     if (!_form.currentState!.validate()) return;
-    Navigator.of(context).pop((password: _password.text));
+    Navigator.of(context).pop((password: _password.text, market: _market));
   }
 
   @override
@@ -69,6 +71,18 @@ class _SavePasswordDialogState extends State<SavePasswordDialog> {
                 'O arquivo leva todos os dados da carteira. Com senha, ele é '
                 'criptografado (AES-256) e só abre no outro computador com a '
                 'mesma senha.',
+              ),
+              CheckboxListTile(
+                key: const Key('save-market'),
+                contentPadding: EdgeInsets.zero,
+                value: _market,
+                onChanged: (v) => setState(() => _market = v!),
+                title: const Text('Levar os dados de mercado já baixados'),
+                subtitle: const Text(
+                  'Histórico de preços, câmbio e indicadores, para o outro '
+                  'computador funcionar sem internet. Chaves de API nunca vão '
+                  'no arquivo.',
+                ),
               ),
               CheckboxListTile(
                 key: const Key('save-protect'),

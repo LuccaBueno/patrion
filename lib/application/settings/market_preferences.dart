@@ -27,7 +27,9 @@ class MarketPreferences {
   /// Ano inicial do histórico (COTAHIST, indicadores, câmbio). Padrão:
   /// cinco anos antes de [currentYear].
   Future<int> historyStartYear(int currentYear) async =>
-      _int(await _settings.get(startYearKey)) ?? currentYear - 5;
+      _int(await _settings.get(startYearKey)) ?? defaultStartYear(currentYear);
+
+  static int defaultStartYear(int currentYear) => currentYear - 5;
 
   Stream<int?> watchHistoryStartYear() =>
       _settings.watch(startYearKey).map(_int);

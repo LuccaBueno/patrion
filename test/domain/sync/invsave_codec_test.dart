@@ -96,7 +96,10 @@ void main() {
 
   test('formato mais novo e formato desconhecido são recusados', () {
     expect(
-      () => SaveManifest.fromJson({...manifest.toJson(), 'formatVersion': 2}),
+      () => SaveManifest.fromJson({
+        ...manifest.toJson(),
+        'formatVersion': SaveManifest.currentFormatVersion + 1,
+      }),
       throwsA(
         isA<DataError>().having((e) => e.message, 'm', contains('mais novo')),
       ),
@@ -121,5 +124,101 @@ void main() {
       'shared_settings': [row],
     });
     expect(() => InvsaveCodec.decode(bytes), throwsA(isA<DataError>()));
+  });
+
+  group('pasta market/ (formato 2)', () {
+    final price = {
+      'symbol': 'PETR4',
+      'market': 'B3',
+      'ref_date': '2026-10-16',
+      'source': 'b3_cotahist',
+      'data_type': 'close',
+      'open': null,
+      'close': '59.68',
+      'collected_at': '2026-10-17T12:00:00.000Z',
+    };
+    final market = {
+      'mkt_prices': [price],
+    };
+
+    test('ida e volta com contagens e checksum; formato 2', () {
+      final bytes = InvsaveCodec.encode(manifest, {
+        'shared_settings': [row],
+        'operations': [],
+      }, market: market);
+      final package = InvsaveCodec.decode(bytes);
+      expect(package.market, market);
+      expect(package.manifest.marketIncluded, isTrue);
+      expect(package.manifest.marketCounts, {'mkt_prices': 1});
+      expect(package.manifest.formatVersion, 2);
+      expect(package.manifest.files.keys, contains('market/mkt_prices.jsonl'));
+    });
+
+    test('sem dados de mercado, o save continua no formato 1', () {
+      final bytes = InvsaveCodec.encode(manifest, {
+        'shared_settings': [row],
+        'operations': [],
+      });
+      final package = InvsaveCodec.decode(bytes);
+      expect(package.manifest.formatVersion, 1);
+      expect(package.manifest.marketIncluded, isFalse);
+      expect(package.market, isEmpty);
+    });
+
+    test('dado de mercado alterado é recusado', () {
+      final bytes = InvsaveCodec.encode(manifest, {
+        'shared_settings': [row],
+        'operations': [],
+      }, market: market);
+      final archive = unzip(bytes);
+      final changed = rezip(
+        archive,
+        'market/mkt_prices.jsonl',
+        utf8.encode('${jsonEncode({...price, 'close': '99.99'})}\n'),
+      );
+      expect(() => InvsaveCodec.decode(changed), throwsA(isA<DataError>()));
+    });
+
+    test('valor que não é texto é recusado', () {
+      final archive = unzip(
+        InvsaveCodec.encode(manifest, {
+          'shared_settings': [row],
+          'operations': [],
+        }, market: market),
+      );
+      // Monta um save coerente (checksum certo) com um número no lugar do
+      // texto: o conteúdo é recusado mesmo assim.
+      final content = utf8.encode(
+        '${jsonEncode({...price, 'close': 59.68})}\n',
+      );
+      final json = jsonDecode(
+        utf8.decode(archive.findFile('manifest.json')!.readBytes()!),
+      ) as Map<String, Object?>;
+      final files = {
+        ...(json['files'] as Map<String, Object?>),
+        'market/mkt_prices.jsonl': InvsaveCodec.sha256Hex(content),
+      };
+      final manifestBytes = utf8.encode(jsonEncode({...json, 'files': files}));
+      final out = Archive()
+        ..addFile(ArchiveFile.bytes('manifest.json', manifestBytes))
+        ..addFile(
+          ArchiveFile.string(
+            'manifest.sha256',
+            InvsaveCodec.sha256Hex(manifestBytes),
+          ),
+        );
+      for (final f in archive.files) {
+        if (f.name.startsWith('data/')) {
+          out.addFile(ArchiveFile.bytes(f.name, f.readBytes()!));
+        }
+      }
+      out.addFile(ArchiveFile.bytes('market/mkt_prices.jsonl', content));
+      expect(
+        () => InvsaveCodec.decode(ZipEncoder().encodeBytes(out)),
+        throwsA(
+          isA<DataError>().having((e) => e.message, 'm', contains('inválido')),
+        ),
+      );
+    });
   });
 }

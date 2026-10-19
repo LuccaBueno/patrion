@@ -28,14 +28,20 @@ class SaveManifest {
     this.encryption = encryptionNone,
     this.encryptionParams = const {},
     this.marketIncluded = false,
+    this.marketCounts = const {},
     this.formatVersion = currentFormatVersion,
   });
 
   /// Identificador do formato.
   static const formatId = 'patrion-invsave';
 
-  /// Versão do formato do arquivo (independente do schema do banco).
-  static const currentFormatVersion = 1;
+  /// Versão do formato do arquivo (independente do schema do banco). A 2
+  /// acrescentou a pasta `market/` (DECISIONS D-36); um save sem ela sai
+  /// como versão 1, que as versões anteriores do app ainda leem.
+  static const currentFormatVersion = 2;
+
+  /// Versão do formato sem a pasta `market/`.
+  static const formatWithoutMarket = 1;
 
   /// Sem criptografia.
   static const encryptionNone = 'none';
@@ -68,11 +74,18 @@ class SaveManifest {
   /// Parâmetros da criptografia (KDF e nonce), ao lado de `scheme`.
   final Map<String, Object?> encryptionParams;
 
-  /// Se a pasta `market/` (dados de mercado) foi incluída. Sempre `false` até
-  /// a F6, quando passam a existir dados de mercado no banco.
+  /// Se a pasta `market/` (dados de mercado, SPEC §10.1) foi incluída.
   final bool marketIncluded;
 
-  SaveManifest copyWith({Map<String, String>? files}) => SaveManifest(
+  /// Registros por tabela de mercado (`mkt_`), quando incluída.
+  final Map<String, int> marketCounts;
+
+  SaveManifest copyWith({
+    Map<String, String>? files,
+    bool? marketIncluded,
+    Map<String, int>? marketCounts,
+    int? formatVersion,
+  }) => SaveManifest(
     appVersion: appVersion,
     schemaVersion: schemaVersion,
     deviceId: deviceId,
@@ -84,8 +97,9 @@ class SaveManifest {
     knownPeers: knownPeers,
     encryption: encryption,
     encryptionParams: encryptionParams,
-    marketIncluded: marketIncluded,
-    formatVersion: formatVersion,
+    marketIncluded: marketIncluded ?? this.marketIncluded,
+    marketCounts: marketCounts ?? this.marketCounts,
+    formatVersion: formatVersion ?? this.formatVersion,
   );
 
   /// HLC que o autor do save já recebeu deste dispositivo, se recebeu.
@@ -111,7 +125,14 @@ class SaveManifest {
         {'deviceId': p.deviceId, 'lastHlcReceived': p.lastHlcReceived},
     ],
     'encryption': {...encryptionParams, 'scheme': encryption},
-    'market': {'included': marketIncluded},
+    'market': {
+      'included': marketIncluded,
+      if (marketIncluded)
+        'counts': {
+          for (final k in marketCounts.keys.toList()..sort())
+            k: marketCounts[k],
+        },
+    },
   };
 
   /// Lê e valida o manifesto. Lança [DataError] se ele não for de um save do
@@ -182,6 +203,16 @@ class SaveManifest {
     final marketIncluded = market is Map<String, Object?>
         ? market['included'] == true
         : false;
+    final marketCounts = <String, int>{};
+    if (marketIncluded) {
+      final c = market['counts'];
+      if (c is! Map<String, Object?>) invalid('market.counts');
+      for (final e in c.entries) {
+        final v = e.value;
+        if (v is! int || v < 0) invalid('market.counts');
+        marketCounts[e.key] = v;
+      }
+    }
 
     return SaveManifest(
       formatVersion: formatVersion,
@@ -200,6 +231,7 @@ class SaveManifest {
           if (e.key != 'scheme') e.key: e.value,
       },
       marketIncluded: marketIncluded,
+      marketCounts: marketCounts,
     );
   }
 

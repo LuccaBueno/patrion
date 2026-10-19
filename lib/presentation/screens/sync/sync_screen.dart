@@ -61,7 +61,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
   }
 
   Future<void> _export({String? importedPassword}) async {
-    final choice = await showDialog<({String? password})>(
+    final choice = await showDialog<({String? password, bool market})>(
       context: context,
       builder: (context) => SavePasswordDialog(
         protectByDefault:
@@ -71,7 +71,10 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     );
     if (choice == null) return;
     final service = ref.read(saveServiceProvider);
-    final export = await service.buildExport(password: choice.password);
+    final export = await service.buildExport(
+      password: choice.password,
+      includeMarket: choice.market,
+    );
     final path = await ref
         .read(fileDialogsProvider)
         .saveBytes(
@@ -381,6 +384,11 @@ class _ExportSummary extends StatelessWidget {
             const SizedBox(height: 8),
             for (final e in counts)
               Text('${SyncLabels.table(e.key)}: ${e.value}'),
+            Text(
+              export.marketRecords == 0
+                  ? 'Dados de mercado: não incluídos'
+                  : 'Dados de mercado: ${export.marketRecords} registros',
+            ),
             const SizedBox(height: 12),
             const Text(
               'Leve este arquivo ao outro computador e use "Importar save" '

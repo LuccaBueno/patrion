@@ -87,6 +87,21 @@ class _ImportPreviewDialogState extends State<ImportPreviewDialog> {
               'O save é de uma versão anterior do banco (schema '
               '${m.schemaVersion}) e foi convertido para a atual.',
         ),
+      if (preview.marketRecords > 0)
+        _Note(
+          icon: Icons.cloud_download_outlined,
+          text:
+              'Traz ${preview.marketRecords} registros de dados de mercado '
+              '(preços, câmbio, indicadores). Eles completam os deste PC; '
+              'um dado que já existe só é trocado por uma coleta mais nova.',
+        )
+      else if (m.marketIncluded)
+        const _Note(
+          icon: Icons.info_outline,
+          text:
+              'Os dados de mercado do arquivo são de outra versão do banco e '
+              'não serão importados; eles são baixados de novo.',
+        ),
       if (_checking)
         const Padding(
           padding: EdgeInsets.only(top: 8),

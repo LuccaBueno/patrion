@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrion/core/config/app_info.dart';
 import 'package:patrion/core/config/app_paths.dart';
+import 'package:patrion/infrastructure/market/market_http.dart';
+import 'package:patrion/infrastructure/security/api_key_store.dart';
 import 'package:patrion/presentation/app.dart';
 import 'package:patrion/presentation/providers.dart';
 
+import 'fake_http.dart';
 import 'test_database.dart';
 
 /// Monta o app inteiro sobre um banco de teste.
@@ -15,6 +18,9 @@ class AppHarness {
 
   final WidgetTester tester;
   final TestDb t;
+
+  /// Chaves de API em memória (nunca o arquivo real do DPAPI).
+  final keys = MemoryApiKeyStore();
 
   static const _defaultPaths = AppPaths(
     dataDir: r'C:\dados',
@@ -26,6 +32,7 @@ class AppHarness {
     Size size = const Size(1280, 900),
     AppPaths paths = _defaultPaths,
     List<Override> overrides = const [],
+    MarketHttp? marketHttp,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -43,6 +50,11 @@ class AppHarness {
           ),
           databaseProvider.overrideWithValue(t.db),
           syncContextProvider.overrideWithValue(t.sync),
+          // Sem rede nos testes: por padrão, toda requisição falha.
+          marketHttpProvider.overrideWithValue(
+            marketHttp ?? fakeMarketHttp(FakeHttpAdapter()..offline = true),
+          ),
+          apiKeyStoreProvider.overrideWithValue(keys),
           ...overrides,
         ],
         child: PatrionApp(initialLocation: location),
@@ -101,12 +113,14 @@ class AppHarness {
     Size size = const Size(1280, 900),
     AppPaths paths = _defaultPaths,
     List<Override> overrides = const [],
+    MarketHttp? marketHttp,
   }) async {
     await pump(
       location: location,
       size: size,
       paths: paths,
       overrides: overrides,
+      marketHttp: marketHttp,
     );
     try {
       await body();

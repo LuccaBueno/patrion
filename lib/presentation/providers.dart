@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/backup/backup_service.dart';
+import '../application/market/market_data_service.dart';
+import '../application/market/market_overview.dart';
+import '../application/market/market_ports.dart';
+import '../application/settings/market_preferences.dart';
 import '../application/portfolio/operation_service.dart';
 import '../application/portfolio/portfolio_query.dart';
 import '../application/portfolio/registry_service.dart';
@@ -14,14 +20,21 @@ import '../core/crypto/database_key.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/backup_registry_repository.dart';
 import '../data/repositories/device_settings_repository.dart';
+import '../data/repositories/market_repository.dart';
 import '../data/repositories/portfolio_repositories.dart';
+import '../data/repositories/provider_state_repository.dart';
 import '../data/repositories/shared_settings_repository.dart';
 import '../data/repositories/sync_peers_repository.dart';
+import '../data/sync/market_save_gateway.dart';
 import '../data/sync/sync_context.dart';
 import '../data/sync/sync_tables_gateway.dart';
 import '../domain/security/key_file.dart';
 import '../infrastructure/backup/local_backup_file_system.dart';
+import '../infrastructure/market/market_http.dart';
+import '../infrastructure/market/market_setup.dart';
+import '../infrastructure/security/api_key_store.dart';
 import 'services/file_dialogs.dart';
+import 'services/market_refresh.dart';
 
 /// Ambiente montado na inicialização (`main.dart`). Os provedores abaixo são
 /// sobrescritos no `ProviderScope` raiz; nos testes, com um banco em memória.
@@ -92,7 +105,10 @@ final valuationServiceProvider = Provider<ValuationService>(
 );
 
 final portfolioQueryProvider = Provider<PortfolioQuery>(
-  (ref) => PortfolioQuery(ref.watch(portfolioRepositoriesProvider)),
+  (ref) => PortfolioQuery(
+    ref.watch(portfolioRepositoriesProvider),
+    market: ref.watch(marketRepositoryProvider),
+  ),
 );
 
 /// Retrato da carteira real, recalculado a cada alteração.
@@ -186,6 +202,7 @@ final saveServiceProvider = Provider<SaveService>((ref) {
     appVersion: env.appVersion,
     deviceName: env.deviceName,
     portfolio: ref.watch(portfolioQueryProvider),
+    market: MarketSaveGateway(ref.watch(databaseProvider)),
   );
 });
 
@@ -226,3 +243,66 @@ final sessionSecurityProvider = Provider<SessionSecurity>(
 /// Aviso deixado por uma troca do bloqueio (ativar, desativar, recuperar),
 /// mostrado nas Configurações.
 final lockNoticeProvider = Provider<String?>((ref) => null);
+
+// -- Dados de mercado (F6) ----------------------------------------------------
+
+final marketRepositoryProvider = Provider<MarketRepository>(
+  (ref) => MarketRepository(ref.watch(databaseProvider)),
+);
+
+final providerStateRepositoryProvider = Provider<ProviderStateRepository>(
+  (ref) => ProviderStateRepository(ref.watch(databaseProvider)),
+);
+
+final marketPreferencesProvider = Provider<MarketPreferences>(
+  (ref) => MarketPreferences(ref.watch(deviceSettingsRepositoryProvider)),
+);
+
+/// Chaves de API deste PC, fora do banco e do save (DECISIONS D-34).
+final apiKeyStoreProvider = Provider<ApiKeyStore>((ref) {
+  if (!Platform.isWindows) return MemoryApiKeyStore();
+  return DpapiApiKeyStore(ref.watch(appEnvironmentProvider).paths.dataDir);
+});
+
+/// Acesso HTTP dos provedores (sobrescrito nos testes, sem rede).
+final marketHttpProvider = Provider<MarketHttp>((ref) => MarketSetup.http());
+
+final marketProvidersProvider = Provider<MarketProviders>(
+  (ref) => MarketSetup.providers(
+    http: ref.watch(marketHttpProvider),
+    keys: ref.watch(apiKeyStoreProvider),
+    cacheDir: ref.watch(appEnvironmentProvider).paths.cacheDir,
+  ),
+);
+
+final marketDataServiceProvider = Provider<MarketDataService>(
+  (ref) => MarketDataService(
+    repo: ref.watch(marketRepositoryProvider),
+    states: ref.watch(providerStateRepositoryProvider),
+    providers: ref.watch(marketProvidersProvider),
+    preferences: ref.watch(marketPreferencesProvider),
+    portfolio: ref.watch(portfolioQueryProvider),
+  ),
+);
+
+final providerStatesProvider = StreamProvider<List<ProviderState>>(
+  (ref) => ref.watch(providerStateRepositoryProvider).watchAll(),
+);
+
+/// Intervalo da atualização automática, em minutos (0 = desligada).
+final marketRefreshMinutesProvider = StreamProvider<int>(
+  (ref) => ref.watch(marketPreferencesProvider).watchRefreshMinutes(),
+);
+
+/// Câmbio e indicadores mais recentes guardados (painel do Início e Fontes
+/// de dados), recalculados quando os dados de mercado mudam.
+final marketOverviewProvider = StreamProvider<MarketOverview>((ref) {
+  final repo = ref.watch(marketRepositoryProvider);
+  return MarketOverview.watch(repo);
+});
+
+/// Estado das atualizações de mercado (automática e manuais).
+final marketRefreshProvider =
+    NotifierProvider<MarketRefreshController, MarketRefreshState>(
+      MarketRefreshController.new,
+    );

@@ -4,10 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
+import '../../../core/time/local_date.dart';
+import '../../../domain/market/market_price.dart';
+import '../../../domain/market/provider_catalog.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/portfolio_valuation.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
+import '../../format/market_labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
 
@@ -187,7 +191,7 @@ class _PositionsTableState extends State<PositionsTable> {
                         Fmt.money(v.position.totalCost, v.position.currency),
                       ),
                     ),
-                    DataCell(_MarketValueCell(v: v)),
+                    DataCell(_MarketValueCell(v: v, today: snap.asOf)),
                     DataCell(
                       v.unrealizedPnl == null
                           ? const Text('—')
@@ -206,8 +210,8 @@ class _PositionsTableState extends State<PositionsTable> {
         const SizedBox(height: 8),
         Text(
           'Resultado = valor de mercado − custo (retorno simples sobre o '
-          'custo, sem proventos). Preços e saldos informados por você; a '
-          'data de referência aparece ao passar o mouse.',
+          'custo, sem proventos). Abaixo do valor, a fonte e a data do preço; '
+          'o tipo, a coleta e o atraso aparecem ao passar o mouse.',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -218,40 +222,75 @@ class _PositionsTableState extends State<PositionsTable> {
 }
 
 class _MarketValueCell extends StatelessWidget {
-  const _MarketValueCell({required this.v});
+  const _MarketValueCell({required this.v, required this.today});
 
   final ValuedPosition v;
+  final LocalDate today;
 
   @override
   Widget build(BuildContext context) {
     if (!v.position.isOpen) return const Text('—');
     if (v.marketValue == null) {
-      return const UnavailableText(
-        tooltip: 'Sem preço ou saldo informado. Informe no detalhe do ativo.',
+      return UnavailableText(
+        tooltip: v.asset?.priceSource == PriceSource.market
+            ? 'Sem cotação guardada. Use "Atualizar agora" em Fontes de '
+                  'dados ou informe o preço no detalhe do ativo.'
+            : 'Sem preço ou saldo informado. Informe no detalhe do ativo.',
       );
     }
-    final source = v.valuationKind == ValuationKind.balance
-        ? 'Saldo informado'
-        : 'Preço informado';
-    final stale = v.valuationStale
-        ? '\nHá operações depois desta data: o valor pode estar desatualizado.'
-        : '';
+    final market = v.marketPrice;
+    final String message;
+    final bool stale;
+    if (market != null) {
+      stale = MarketPricing.isStale(
+        market,
+        today,
+        market: v.asset?.market.code,
+      );
+      message =
+          '${MarketLabels.price(market)}\n'
+          '${MarketLabels.collected(market.collectedAt)}'
+          '${stale ? '\nDesatualizado: a data é anterior ao último pregão.' : ''}';
+    } else {
+      stale = v.valuationStale;
+      final source = v.valuationKind == ValuationKind.balance
+          ? 'Saldo informado'
+          : 'Preço informado';
+      message =
+          '$source em ${Fmt.date(v.valuationDate!)}'
+          '${stale ? '\nHá operações depois desta data: o valor pode estar desatualizado.' : ''}';
+    }
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return Tooltip(
-      message: '$source em ${Fmt.date(v.valuationDate!)}$stale',
+      message: message,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (v.valuationStale)
+          if (stale)
             Padding(
               padding: const EdgeInsets.only(right: 4),
               child: Icon(
                 Icons.history,
                 size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: muted,
                 semanticLabel: 'Valor desatualizado',
               ),
             ),
-          Text(Fmt.money(v.marketValue!, v.position.currency)),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(Fmt.money(v.marketValue!, v.position.currency)),
+              Text(
+                market != null
+                    ? '${ProviderCatalog.nameOf(market.source)} · '
+                          '${MarketLabels.refOf(market)}'
+                    : 'informado · ${Fmt.date(v.valuationDate!)}',
+                style: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(color: muted),
+              ),
+            ],
+          ),
         ],
       ),
     );

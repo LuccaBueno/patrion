@@ -9,6 +9,7 @@ import '../../core/sync/hlc.dart';
 import '../../core/time/instant_format.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/sync_peers_repository.dart';
+import '../../data/sync/market_save_gateway.dart';
 import '../../data/sync/sync_context.dart';
 import '../../data/sync/sync_tables_gateway.dart';
 import '../../core/time/local_date.dart';
@@ -65,6 +66,10 @@ class SaveExport {
   final bool protected;
 
   int get totalRecords => manifest.counts.values.fold(0, (a, b) => a + b);
+
+  /// Registros de mercado levados (pasta `market/`).
+  int get marketRecords =>
+      manifest.marketCounts.values.fold(0, (a, b) => a + b);
 }
 
 /// Save lido e validado, com a prévia da mesclagem (valores padrão nos
@@ -78,6 +83,7 @@ class ImportPreview {
     required this.plan,
     required this.fromThisDevice,
     this.warnings = const [],
+    this.market = const {},
   });
 
   final String fileName;
@@ -96,6 +102,12 @@ class ImportPreview {
   /// Inconsistências novas da carteira real depois de aplicar, com as
   /// escolhas padrão dos conflitos.
   final List<ImportWarning> warnings;
+
+  /// Dados de mercado do arquivo (pasta `market/`), já validados. Vazio se o
+  /// save não os trouxe ou é de outro schema (são baixados de novo).
+  final MarketRows market;
+
+  int get marketRecords => market.values.fold(0, (a, b) => a + b.length);
 
   bool get upgradedFromOlderSchema =>
       manifest.schemaVersion < AppDatabase.latestSchemaVersion;
@@ -127,10 +139,15 @@ class SaveService {
     Clock wallClock = const Clock(),
     this.beforeWrite,
     this._portfolio,
+    this._market,
     this.kdfPolicy = KdfPolicy.standard,
   }) : _clock = wallClock;
 
   final SyncTablesGateway _tables;
+
+  /// Dados de mercado (pasta `market/`). Sem ele, o save não os leva nem
+  /// os importa.
+  final MarketSaveGateway? _market;
 
   /// Carteira real do mesmo banco, para conferir a consistência do resultado
   /// na prévia. Sem ela, a prévia não confere.
@@ -152,8 +169,13 @@ class SaveService {
   // -- Exportar ---------------------------------------------------------------
 
   /// Gera o save. Com [password], o arquivo sai protegido por senha (SPEC
-  /// §10.6, DECISIONS D-32).
-  Future<SaveExport> buildExport({String? password}) async {
+  /// §10.6, DECISIONS D-32). Com [includeMarket] (padrão), leva os dados de
+  /// mercado já baixados, para o outro PC funcionar sem internet (SPEC
+  /// §10.1).
+  Future<SaveExport> buildExport({
+    String? password,
+    bool includeMarket = true,
+  }) async {
     final schemas = await _tables.schemas();
     final data = await _tables.readAll(schemas);
     String? maxHlc;
@@ -180,7 +202,12 @@ class SaveService {
             ),
       ],
     );
-    final plain = InvsaveCodec.encode(manifest, data);
+    final market = includeMarket ? await _market?.readAll() : null;
+    final plain = InvsaveCodec.encode(
+      manifest,
+      data,
+      market: market == null || market.isEmpty ? null : market,
+    );
     final bytes = password == null
         ? plain
         : await InvsaveCodec.protect(plain, password, policy: kdfPolicy);
@@ -248,6 +275,12 @@ class SaveService {
       to: AppDatabase.latestSchemaVersion,
     );
     SaveContents.validate(tables, schemas);
+    final market =
+        manifest.schemaVersion == AppDatabase.latestSchemaVersion &&
+            _market != null
+        ? package.market
+        : const <String, List<Map<String, String?>>>{};
+    _market?.validate(market);
     final plan = await _plan(manifest, tables, schemas, const {});
     return ImportPreview(
       fileName: fileName,
@@ -257,6 +290,7 @@ class SaveService {
       plan: plan,
       fromThisDevice: manifest.deviceId == _sync.deviceId,
       warnings: await _consistencyOf(plan, schemas),
+      market: market,
     );
   }
 
@@ -339,6 +373,7 @@ class SaveService {
           await _sync.receive(Hlc.parse(plan.maxIncomingHlc!));
         }
         await _tables.apply(plan, schemas, beforeWrite: beforeWrite);
+        if (preview.market.isNotEmpty) await _market?.merge(preview.market);
         if (!preview.fromThisDevice) {
           await _peers.recordImport(
             deviceId: manifest.deviceId,
@@ -362,6 +397,7 @@ class SaveService {
       );
       _log.info(
         'Save importado: ${plan.totalChanges} alterações, '
+        '${preview.marketRecords} registros de mercado, '
         '${plan.conflicts.length} conflitos, '
         '${plan.unifications.length} unificações',
       );

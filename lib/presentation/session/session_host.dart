@@ -6,6 +6,7 @@ import '../app.dart';
 import '../providers.dart';
 import '../screens/security/unlock_screen.dart';
 import '../screens/startup_error_app.dart';
+import '../services/market_refresh.dart';
 import '../theme/app_theme.dart';
 import 'app_session.dart';
 import 'inactivity_guard.dart';
@@ -67,8 +68,10 @@ class SessionHost extends StatelessWidget {
           child: InactivityGuard(
             enabled: manager.lockEnabled,
             onIdle: manager.lockNow,
-            child: PatrionApp(
-              initialLocation: notice == null ? '/' : manager.noticeRoute,
+            child: MarketAutoRefresh(
+              child: PatrionApp(
+                initialLocation: notice == null ? '/' : manager.noticeRoute,
+              ),
             ),
           ),
         );

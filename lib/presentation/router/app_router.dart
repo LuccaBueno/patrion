@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../screens/backup/backup_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
+import '../screens/market/data_sources_screen.dart';
 import '../screens/operations/operations_screen.dart';
 import '../screens/portfolio/asset_detail_screen.dart';
 import '../screens/portfolio/portfolio_screen.dart';
@@ -65,6 +66,12 @@ const navDestinations = [
     selectedIcon: Icons.backup,
   ),
   NavDestination(
+    path: '/fontes',
+    label: 'Fontes de dados',
+    icon: Icons.cloud_download_outlined,
+    selectedIcon: Icons.cloud_download,
+  ),
+  NavDestination(
     path: '/configuracoes',
     label: 'Configurações',
     icon: Icons.settings_outlined,
@@ -113,6 +120,10 @@ GoRouter createRouter({String initialLocation = '/'}) {
           GoRoute(
             path: '/backup',
             pageBuilder: (context, state) => _page(const BackupScreen()),
+          ),
+          GoRoute(
+            path: '/fontes',
+            pageBuilder: (context, state) => _page(const DataSourcesScreen()),
           ),
           GoRoute(
             path: '/configuracoes',

@@ -70,7 +70,7 @@ void main() {
       expect(find.textContaining('de 10/01/2024 a 31/05/2024'), findsOneWidget);
       expect(find.text('Alocação por classe'), findsOneWidget);
       expect(find.text('Ações BR'), findsOneWidget);
-      expect(find.textContaining('informados até 31/05/2024'), findsOneWidget);
+      expect(find.textContaining('saldos até 31/05/2024'), findsOneWidget);
     });
   });
 

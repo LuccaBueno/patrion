@@ -360,6 +360,18 @@ class MarketRepository {
     return _fx(sameDay.first);
   }
 
+  /// Moedas com câmbio contra o real guardado.
+  Future<List<String>> fxCurrencies() async {
+    final rows = await _db
+        .customSelect(
+          "SELECT DISTINCT base FROM mkt_fx_rates WHERE quote = 'BRL' "
+          'ORDER BY base',
+          readsFrom: {_db.mktFxRates},
+        )
+        .get();
+    return [for (final r in rows) r.read<String>('base')];
+  }
+
   Future<DateTime?> lastFxDate(String currency) async {
     final rate = await latestFx(currency);
     return rate == null

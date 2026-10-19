@@ -9,14 +9,24 @@ import '../../core/errors/app_error.dart';
 import 'save_manifest.dart';
 import 'sync_rows.dart';
 
+/// Registros de mercado por tabela `mkt_`: coluna → valor em texto.
+typedef MarketRows = Map<String, List<Map<String, String?>>>;
+
 /// Conteúdo de um arquivo de save já validado.
 class SavePackage {
-  const SavePackage({required this.manifest, required this.tables});
+  const SavePackage({
+    required this.manifest,
+    required this.tables,
+    this.market = const {},
+  });
 
   final SaveManifest manifest;
 
   /// Registros por tabela, como estão no arquivo (schema do manifesto).
   final Map<String, List<SyncRow>> tables;
+
+  /// Dados de mercado (pasta `market/`), se incluídos.
+  final MarketRows market;
 }
 
 /// Lê e grava o arquivo `.invsave` (SPEC §10.1, `docs/SINCRONIZACAO.md`).
@@ -25,6 +35,7 @@ class SavePackage {
 /// manifest.json          manifesto (versões, dispositivo, contagens, SHA-256)
 /// manifest.sha256        SHA-256 do manifest.json
 /// data/<tabela>.jsonl    um registro por linha, inclusive tombstones
+/// market/<tabela>.jsonl  dados de mercado (opcional, formato 2)
 /// ```
 ///
 /// Na leitura, qualquer divergência (ZIP ilegível, checksum, contagem, HLC
@@ -35,6 +46,7 @@ abstract final class InvsaveCodec {
   static const manifestPath = 'manifest.json';
   static const manifestChecksumPath = 'manifest.sha256';
   static const dataDir = 'data';
+  static const marketDir = 'market';
   static const payloadPath = 'payload.bin';
   static final _payloadAad = Uint8List.fromList(
     utf8.encode('patrion-invsave-payload/v1'),
@@ -42,16 +54,34 @@ abstract final class InvsaveCodec {
 
   static String dataPath(String table) => '$dataDir/$table.jsonl';
 
+  static String marketPath(String table) => '$marketDir/$table.jsonl';
+
   static String sha256Hex(List<int> bytes) => sha256.convert(bytes).toString();
 
   /// Gera o arquivo. Preenche `files` do manifesto com o SHA-256 de cada
-  /// tabela; [manifest] traz o resto.
+  /// tabela; [manifest] traz o resto. Com [market], inclui a pasta
+  /// `market/` (formato 2).
   static Uint8List encode(
     SaveManifest manifest,
-    Map<String, List<SyncRow>> tables,
-  ) {
+    Map<String, List<SyncRow>> tables, {
+    MarketRows? market,
+  }) {
     final archive = Archive();
     final files = <String, String>{};
+    if (market != null) {
+      for (final table in market.keys.toList()..sort()) {
+        final buffer = StringBuffer();
+        for (final row in market[table]!) {
+          buffer
+            ..write(jsonEncode(row))
+            ..write('\n');
+        }
+        final bytes = utf8.encode(buffer.toString());
+        final path = marketPath(table);
+        files[path] = sha256Hex(bytes);
+        archive.addFile(ArchiveFile.bytes(path, bytes));
+      }
+    }
     for (final table in tables.keys.toList()..sort()) {
       final buffer = StringBuffer();
       for (final row in tables[table]!) {
@@ -65,8 +95,21 @@ abstract final class InvsaveCodec {
       archive.addFile(ArchiveFile.bytes(path, bytes));
     }
     final manifestBytes = utf8.encode(
-      const JsonEncoder.withIndent('  ')
-          .convert(manifest.copyWith(files: files).toJson()),
+      const JsonEncoder.withIndent('  ').convert(
+        manifest
+            .copyWith(
+              files: files,
+              marketIncluded: market != null,
+              marketCounts: {
+                for (final e in (market ?? const {}).entries)
+                  e.key: e.value.length,
+              },
+              formatVersion: market == null
+                  ? SaveManifest.formatWithoutMarket
+                  : SaveManifest.currentFormatVersion,
+            )
+            .toJson(),
+      ),
     );
     archive
       ..addFile(ArchiveFile.bytes(manifestPath, manifestBytes))
@@ -93,12 +136,26 @@ abstract final class InvsaveCodec {
     }
 
     final tables = <String, List<SyncRow>>{};
+    final market = <String, List<Map<String, String?>>>{};
     String? maxHlc;
     for (final MapEntry(key: path, value: expectedSum)
         in manifest.files.entries) {
       final content = entries[path];
       if (content == null) _corrupt('arquivo ausente');
       if (sha256Hex(content) != expectedSum) _corrupt('checksum de $path');
+      final marketMatch = RegExp(r'^market/(mkt_[a-z0-9_]+)\.jsonl$')
+          .firstMatch(path);
+      if (marketMatch != null) {
+        if (!manifest.marketIncluded) {
+          _corrupt('dados de mercado não declarados');
+        }
+        final table = marketMatch.group(1)!;
+        market[table] = _marketRows(content, table);
+        if (manifest.marketCounts[table] != market[table]!.length) {
+          _corrupt('contagem de $table');
+        }
+        continue;
+      }
       final match = RegExp(r'^data/([a-z0-9_]+)\.jsonl$').firstMatch(path);
       if (match == null) _corrupt('caminho inesperado');
       final table = match.group(1)!;
@@ -123,9 +180,39 @@ abstract final class InvsaveCodec {
     for (final table in manifest.counts.keys) {
       if (!tables.containsKey(table)) _corrupt('tabela $table ausente');
     }
+    for (final table in manifest.marketCounts.keys) {
+      if (!market.containsKey(table)) _corrupt('tabela $table ausente');
+    }
     if (maxHlc != manifest.maxHlc) _corrupt('HLC máximo');
 
-    return SavePackage(manifest: manifest, tables: tables);
+    return SavePackage(manifest: manifest, tables: tables, market: market);
+  }
+
+  static List<Map<String, String?>> _marketRows(
+    List<int> content,
+    String table,
+  ) {
+    final rows = <Map<String, String?>>[];
+    try {
+      for (final line in const LineSplitter().convert(utf8.decode(content))) {
+        if (line.isEmpty) continue;
+        final json = jsonDecode(line);
+        if (json is! Map<String, Object?>) {
+          _corrupt('registro inválido em $table');
+        }
+        final row = <String, String?>{};
+        for (final MapEntry(:key, :value) in json.entries) {
+          if (value != null && value is! String) {
+            _corrupt('registro inválido em $table');
+          }
+          row[key] = value as String?;
+        }
+        rows.add(row);
+      }
+    } on FormatException {
+      _corrupt('registro ilegível em $table');
+    }
+    return rows;
   }
 
   /// Manifesto do arquivo, sem conferir o conteúdo: diz se ele é protegido
@@ -157,6 +244,7 @@ abstract final class InvsaveCodec {
     );
     key.fillRange(0, key.length, 0);
     final outer = SaveManifest(
+      formatVersion: inner.formatVersion,
       appVersion: inner.appVersion,
       schemaVersion: inner.schemaVersion,
       deviceId: inner.deviceId,

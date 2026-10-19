@@ -6,11 +6,16 @@ import 'package:go_router/go_router.dart';
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../core/config/app_info.dart';
 import '../../../domain/finance/returns.dart';
+import '../../../domain/market/market_data.dart';
+import '../../../domain/market/market_indicators.dart';
+import '../../../domain/market/provider_catalog.dart';
 import '../../../domain/portfolio/portfolio_summary.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
+import '../../format/market_labels.dart';
 import '../../format/performance_format.dart';
 import '../../providers.dart';
+import '../market/data_sources_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
 import '../sync/sync_screen.dart';
@@ -89,16 +94,16 @@ class _Welcome extends StatelessWidget {
   }
 }
 
-class _Dashboard extends StatefulWidget {
+class _Dashboard extends ConsumerStatefulWidget {
   const _Dashboard({required this.snap});
 
   final PortfolioSnapshot snap;
 
   @override
-  State<_Dashboard> createState() => _DashboardState();
+  ConsumerState<_Dashboard> createState() => _DashboardState();
 }
 
-class _DashboardState extends State<_Dashboard> {
+class _DashboardState extends ConsumerState<_Dashboard> {
   String? _currency;
 
   @override
@@ -110,6 +115,7 @@ class _DashboardState extends State<_Dashboard> {
         : currencies.first;
     final totals = summary.byCurrency[currency]!;
     final performance = widget.snap.performance(currency);
+    final fx = ref.watch(marketOverviewProvider).value?.fx ?? const {};
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
@@ -119,9 +125,10 @@ class _DashboardState extends State<_Dashboard> {
       title: 'Início',
       subtitle: summary.lastValuationDate == null
           ? 'Carteira real · nenhum preço informado ainda'
-          : 'Carteira real · preços e saldos informados até '
+          : 'Carteira real · preços e saldos até '
                 '${Fmt.date(summary.lastValuationDate!)}',
       actions: [
+        const RefreshButton(),
         if (currencies.length > 1)
           SegmentedButton<String>(
             segments: [
@@ -135,15 +142,9 @@ class _DashboardState extends State<_Dashboard> {
       child: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
-          if (currencies.length > 1)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                'Cada moeda tem seus próprios totais: a conversão para BRL '
-                'chega com as cotações de câmbio.',
-                style: muted,
-              ),
-            ),
+          const RefreshStatusBanner(),
+          if (currencies.length > 1 || currencies.first != 'BRL')
+            _ConsolidatedCard(summary: summary, fx: fx),
           const SyncReminder(),
           ..._warnings(context, summary),
           Wrap(
@@ -171,7 +172,7 @@ class _DashboardState extends State<_Dashboard> {
                 key: const Key('stat-market'),
                 label: 'Valor de mercado',
                 value: Fmt.money(totals.marketValue, currency),
-                note: 'Só posições com preço ou saldo informado',
+                note: 'Só posições com preço, cotação ou saldo',
               ),
               _StatCard(
                 key: const Key('stat-cash'),
@@ -276,11 +277,12 @@ class _DashboardState extends State<_Dashboard> {
             _MaturitiesCard(items: summary.upcomingMaturities),
           ],
           const SizedBox(height: 16),
+          const MarketOverviewCard(),
+          const SizedBox(height: 16),
           Text(
             'O TWR, a rentabilidade por mês e por ano, a evolução '
-            'patrimonial e a comparação com benchmarks precisam do histórico '
-            'de cotações e aparecem quando as cotações automáticas estiverem '
-            'prontas.',
+            'patrimonial e a comparação com benchmarks usam o histórico de '
+            'cotações e entram com as análises e benchmarks (Fase 8).',
             style: muted,
           ),
         ],
@@ -602,6 +604,77 @@ class _MaturitiesCard extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Patrimônio de todas as moedas em reais, pelo câmbio mais recente
+/// guardado (`docs/FORMULAS.md` §2.3). Sem o câmbio de alguma moeda, fica
+/// indisponível.
+class _ConsolidatedCard extends StatelessWidget {
+  const _ConsolidatedCard({required this.summary, required this.fx});
+
+  final PortfolioSummary summary;
+  final Map<String, FxRate> fx;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    final total = ConsolidatedEquity.build(summary.byCurrency, fx);
+    final missing = [
+      for (final c in summary.byCurrency.keys)
+        if (c != 'BRL' && fx[c]?.mid == null) c,
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        key: const Key('stat-consolidated'),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Patrimônio total em reais',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 4),
+              if (total == null)
+                UnavailableText(
+                  tooltip:
+                      'Falta o câmbio de ${missing.join(', ')}. Atualize os '
+                      'dados de mercado com internet.',
+                )
+              else
+                Text(
+                  Fmt.money(total.equity, 'BRL'),
+                  style: theme.textTheme.titleLarge,
+                ),
+              const SizedBox(height: 4),
+              Text(
+                total == null
+                    ? 'Cada moeda continua com seus próprios totais abaixo.'
+                    : [
+                        if (total.partial) 'Parcial (há posições sem preço).',
+                        for (final MapEntry(key: c, value: r)
+                            in total.rates.entries)
+                          '$c a ${MarketLabels.fx(r.mid!)} '
+                              '(${MarketLabels.fxKind(r.kind)} de '
+                              '${Fmt.date(r.refDate)}, '
+                              '${ProviderCatalog.nameOf(r.source)})',
+                        'Os totais por moeda estão abaixo.',
+                      ].join(' · '),
+                style: muted,
+              ),
+            ],
+          ),
         ),
       ),
     );
