@@ -19,6 +19,7 @@ import '../market/data_sources_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
 import '../sync/sync_screen.dart';
+import '../updates/update_widgets.dart';
 
 /// Dashboard da carteira real (SPEC §8).
 ///
@@ -79,6 +80,7 @@ class _Welcome extends StatelessWidget {
           const SizedBox(height: 4),
           Text(AppInfo.subtitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: 32),
+          const UpdateReminder(),
           MessageCard(
             icon: Icons.info_outline,
             title: title,
@@ -147,6 +149,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
           if (currencies.length > 1 || currencies.first != 'BRL')
             _ConsolidatedCard(summary: summary, fx: fx),
           const SyncReminder(),
+          const UpdateReminder(),
           ..._warnings(context, summary),
           Wrap(
             spacing: 16,

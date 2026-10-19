@@ -200,6 +200,8 @@ void main() {
           expect(lock.calls, ['lock', 'hello:true']);
         },
         location: '/configuracoes',
+        // Janela alta: a tela inteira cabe, sem rolagem no meio do teste.
+        size: const Size(1280, 2400),
         overrides: [sessionControllerProvider.overrideWithValue(lock)],
       );
     });

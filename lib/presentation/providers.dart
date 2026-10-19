@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../application/backup/backup_service.dart';
 import '../application/market/market_data_service.dart';
@@ -15,6 +17,7 @@ import '../application/portfolio/valuation_service.dart';
 import '../application/settings/appearance_service.dart';
 import '../application/settings/lock_preferences.dart';
 import '../application/sync/save_service.dart';
+import '../application/updates/update_checker.dart';
 import '../core/config/app_paths.dart';
 import '../core/crypto/database_key.dart';
 import '../data/db/app_database.dart';
@@ -33,6 +36,7 @@ import '../infrastructure/backup/local_backup_file_system.dart';
 import '../infrastructure/market/market_http.dart';
 import '../infrastructure/market/market_setup.dart';
 import '../infrastructure/security/api_key_store.dart';
+import '../infrastructure/updates/github_release_feed.dart';
 import 'services/file_dialogs.dart';
 import 'services/market_refresh.dart';
 import 'services/open_requests.dart';
@@ -310,3 +314,26 @@ final marketRefreshProvider =
     NotifierProvider<MarketRefreshController, MarketRefreshState>(
       MarketRefreshController.new,
     );
+
+// Atualizações (SPEC §19; DECISIONS D-40)
+
+/// Versões publicadas (sobrescrito nos testes, sem rede).
+final releaseFeedProvider = Provider<ReleaseFeed>((ref) => GitHubReleaseFeed());
+
+final updateCheckerProvider = Provider<UpdateChecker>(
+  (ref) => UpdateChecker(
+    settings: ref.watch(deviceSettingsRepositoryProvider),
+    feed: ref.watch(releaseFeedProvider),
+    current: Version.parse(ref.watch(appEnvironmentProvider).appVersion),
+  ),
+);
+
+final updateSnapshotProvider = StreamProvider<UpdateSnapshot>(
+  (ref) => ref.watch(updateCheckerProvider).watch(),
+);
+
+/// Abre um endereço no navegador padrão (sobrescrito nos testes).
+final linkOpenerProvider = Provider<Future<bool> Function(Uri)>(
+  (ref) =>
+      (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
+);

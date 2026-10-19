@@ -6,6 +6,7 @@ import '../app.dart';
 import '../providers.dart';
 import '../screens/security/unlock_screen.dart';
 import '../screens/startup_error_app.dart';
+import '../screens/updates/update_widgets.dart';
 import '../services/market_refresh.dart';
 import '../services/open_requests.dart';
 import '../theme/app_theme.dart';
@@ -79,12 +80,14 @@ class SessionHost extends StatelessWidget {
             enabled: manager.lockEnabled,
             onIdle: manager.lockNow,
             child: MarketAutoRefresh(
-              child: PatrionApp(
-                initialLocation: notice != null
-                    ? manager.noticeRoute
-                    : (openRequests?.hasPending ?? false)
-                    ? '/sincronizacao'
-                    : '/',
+              child: UpdateAutoCheck(
+                child: PatrionApp(
+                  initialLocation: notice != null
+                      ? manager.noticeRoute
+                      : (openRequests?.hasPending ?? false)
+                      ? '/sincronizacao'
+                      : '/',
+                ),
               ),
             ),
           ),

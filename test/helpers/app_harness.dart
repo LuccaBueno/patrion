@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/application/updates/update_checker.dart';
 import 'package:patrion/core/config/app_info.dart';
 import 'package:patrion/core/config/app_paths.dart';
 import 'package:patrion/infrastructure/market/market_http.dart';
@@ -33,6 +34,7 @@ class AppHarness {
     AppPaths paths = _defaultPaths,
     List<Override> overrides = const [],
     MarketHttp? marketHttp,
+    ReleaseFeed? releaseFeed,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -55,6 +57,9 @@ class AppHarness {
             marketHttp ?? fakeMarketHttp(FakeHttpAdapter()..offline = true),
           ),
           apiKeyStoreProvider.overrideWithValue(keys),
+          releaseFeedProvider.overrideWithValue(
+            releaseFeed ?? const OfflineReleaseFeed(),
+          ),
           ...overrides,
         ],
         child: PatrionApp(initialLocation: location),
@@ -114,6 +119,7 @@ class AppHarness {
     AppPaths paths = _defaultPaths,
     List<Override> overrides = const [],
     MarketHttp? marketHttp,
+    ReleaseFeed? releaseFeed,
   }) async {
     await pump(
       location: location,
@@ -121,6 +127,7 @@ class AppHarness {
       paths: paths,
       overrides: overrides,
       marketHttp: marketHttp,
+      releaseFeed: releaseFeed,
     );
     try {
       await body();
@@ -149,4 +156,13 @@ class AppHarness {
     await tester.enterText(field, text);
     await tester.pump();
   }
+}
+
+/// Versões publicadas sem rede: toda consulta falha como "sem conexão".
+class OfflineReleaseFeed implements ReleaseFeed {
+  const OfflineReleaseFeed();
+
+  @override
+  Future<ReleaseInfo?> latest({required bool includePrerelease}) async =>
+      throw const UpdateCheckFailure('Sem conexão.', offline: true);
 }

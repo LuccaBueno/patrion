@@ -5,6 +5,7 @@ import '../../application/settings/appearance_service.dart';
 import '../../core/config/app_info.dart';
 import '../providers.dart';
 import 'security/lock_settings_section.dart';
+import 'updates/update_widgets.dart';
 
 /// Configurações deste PC: aparência, bloqueio, pastas e versão.
 class SettingsScreen extends ConsumerWidget {
@@ -59,6 +60,10 @@ class SettingsScreen extends ConsumerWidget {
             _InfoRow(label: 'Logs', value: env.paths.logsDir),
             _InfoRow(label: 'Cache', value: env.paths.cacheDir),
           ],
+        ),
+        const _Section(
+          title: 'Atualizações',
+          children: [UpdateSettingsSection()],
         ),
         _Section(
           title: 'Sobre',
