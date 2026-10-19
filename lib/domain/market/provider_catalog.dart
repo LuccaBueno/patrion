@@ -98,7 +98,7 @@ abstract final class ProviderCatalog {
     limits:
         'Plano gratuito: 15.000 requisições por mês, uma por vez, cotação '
         'atualizada a cada 30 minutos (não é tempo real). Sem chave, só '
-        'PETR4, VALE3, MGLU3, ITUB4, MXRF11 e HGLG11.',
+        'PETR4, VALE3, MGLU3 e ITUB4 (conferido em 18/10/2026).',
     key: KeyRequirement.optional,
     keyHelp: 'Crie uma conta em brapi.dev e copie o token do painel.',
   );

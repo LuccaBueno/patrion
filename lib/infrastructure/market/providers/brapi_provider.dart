@@ -24,14 +24,7 @@ class BrapiProvider implements QuoteProvider {
   final String? Function() _apiKey;
   final Clock _clock;
 
-  static const freeTickers = {
-    'PETR4',
-    'VALE3',
-    'MGLU3',
-    'ITUB4',
-    'MXRF11',
-    'HGLG11',
-  };
+  static const freeTickers = {'PETR4', 'VALE3', 'MGLU3', 'ITUB4'};
 
   static const _classes = {'stock_br', 'fii', 'etf_br', 'bdr'};
 
@@ -60,7 +53,11 @@ class BrapiProvider implements QuoteProvider {
       );
     } on HttpStatusError catch (e) {
       throw DataError(switch (e.statusCode) {
-        401 => 'A chave da brapi foi recusada. Confira em Fontes de dados.',
+        401 =>
+          key == null
+              ? 'Sem chave, a brapi só responde ${freeTickers.join(', ')}. '
+                    'Cadastre a sua chave em Fontes de dados.'
+              : 'A chave da brapi foi recusada. Confira em Fontes de dados.',
         402 ||
         403 => 'O plano da brapi não permite consultar ${instrument.symbol}.',
         404 => 'A brapi não encontrou o ativo ${instrument.symbol}.',

@@ -205,7 +205,22 @@ void main() {
         await expectLater(
           withKey.quote(petr4),
           throwsA(
-            isA<DataError>().having((e) => e.message, 'm', contains('chave')),
+            isA<DataError>().having(
+              (e) => e.message,
+              'm',
+              contains('recusada'),
+            ),
+          ),
+        );
+        // Sem chave, a recusa explica quais tickers a brapi atende.
+        await expectLater(
+          noKey.quote(petr4),
+          throwsA(
+            isA<DataError>().having(
+              (e) => e.message,
+              'm',
+              allOf(contains('Sem chave'), contains('PETR4, VALE3')),
+            ),
           ),
         );
       },

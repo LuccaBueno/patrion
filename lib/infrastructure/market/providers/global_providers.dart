@@ -166,7 +166,8 @@ class CoinGeckoProvider implements QuoteProvider {
       source: ProviderCatalog.coingecko.code,
       dataType: MarketDataType.intraday,
       collectedAt: collectedAt,
-      delayNote: 'agregado de várias corretoras, atualizado a cada minutos',
+      delayNote:
+          'agregado de várias corretoras; pode ter alguns minutos de atraso',
     );
   }
 }

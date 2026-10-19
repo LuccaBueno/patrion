@@ -167,7 +167,7 @@ Por isso, a proposta é:
 |---|---|
 | Dados | Cotações BR (ações, FIIs, ETFs, BDRs), histórico, proventos, eventos, fundamentos, câmbio, cripto, Tesouro, inflação e juros |
 | Planos | **Free:** R$ 0, 15.000 req/mês, 1 req simultânea, 1 ticker por req, histórico de até 3 meses, atualização a cada 30 min, só diário. **Startup:** R$ 1.199,90/ano, 150 mil req/mês, histórico de 1 ano, proventos de 1 ano. **Pro:** R$ 1.399,90/ano, 500 mil req/mês, histórico de 10+ anos, proventos completos, preços brutos. |
-| Chave | Sim (header `Authorization: Bearer`). Sem chave: só PETR4, VALE3, MGLU3, ITUB4, MXRF11 e HGLG11, a 20 req/min por IP. |
+| Chave | Sim (header `Authorization: Bearer`). Sem chave: só PETR4, VALE3, MGLU3 e ITUB4 (em 17/10/2026 também MXRF11 e HGLG11, que em 18/10/2026 já pediam chave), a 20 req/min por IP. |
 | Atualização | 30 / 15 / 5 min conforme o plano. **Não é tempo real.** |
 | Histórico | Depende do plano (acima). Os tickers de teste sem chave retornaram histórico desde 2000. |
 | Ajuste | `adjustedClose` considera proventos, desdobramentos e grupamentos. `close` às vezes vem ajustado e às vezes não (documentação). Preço bruto só no Pro. |
