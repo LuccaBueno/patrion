@@ -15,6 +15,7 @@ import '../../../domain/market/provider_catalog.dart';
 import '../../../domain/finance/returns.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
+import '../../../domain/portfolio/portfolio_valuation.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../format/market_labels.dart';
@@ -158,6 +159,8 @@ class _PositionsCard extends StatelessWidget {
                           ? '—'
                           : Fmt.money(v.position.averagePrice!, asset.currency),
                     ),
+                    if (v.position.isOpen)
+                      _CurrentPrice(v: v, today: snap.asOf),
                     _Metric(
                       'Custo',
                       Fmt.money(v.position.totalCost, asset.currency),
@@ -256,6 +259,71 @@ class _PerformanceCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Preço unitário atual, em destaque ao lado do preço médio, com a fonte e
+/// a data embaixo e o detalhe (tipo, coleta) no tooltip.
+class _CurrentPrice extends StatelessWidget {
+  const _CurrentPrice({required this.v, required this.today});
+
+  final ValuedPosition v;
+  final LocalDate today;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final price = v.unitPrice;
+    final note = MarketLabels.valuation(v, today);
+    if (price == null || note == null) {
+      return _Metric(
+        'Preço atual',
+        null,
+        v.valuationKind == ValuationKind.balance
+            ? 'Avaliado por saldo informado: não há preço unitário.'
+            : 'Sem cotação nem preço informado para este ativo.',
+      );
+    }
+    return Tooltip(
+      message: note.message,
+      child: Column(
+        key: const Key('asset-current-price'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Preço atual',
+            style: theme.textTheme.bodySmall?.copyWith(color: muted),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (note.stale)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(
+                    Icons.history,
+                    size: 18,
+                    color: muted,
+                    semanticLabel: 'Valor desatualizado',
+                  ),
+                ),
+              SelectableText(
+                Fmt.money(price, v.position.currency),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            note.short,
+            style: theme.textTheme.labelSmall?.copyWith(color: muted),
+          ),
+        ],
       ),
     );
   }

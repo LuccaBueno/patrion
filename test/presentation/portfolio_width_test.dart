@@ -6,6 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:patrion/core/time/local_date.dart';
+import 'package:patrion/data/repositories/market_repository.dart';
+import 'package:patrion/domain/market/market_data.dart';
+import 'package:patrion/domain/portfolio/codes.dart';
+import 'package:patrion/domain/portfolio/entities.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
 import 'package:patrion/presentation/widgets/common.dart';
 
@@ -88,6 +92,35 @@ void main() {
           refDate: LocalDate(2024, 5, 31),
           balance: dec('1387654.32'),
         );
+        // PETR4 com cotação da brapi (com hora) antiga: a nota mais larga
+        // embaixo do valor e o ícone de desatualizado no preço atual.
+        final petr = (await f.repos.assets.all()).firstWhere(
+          (a) => a.id == f.petr,
+        );
+        await f.registry.updateAsset(
+          Asset(
+            id: petr.id,
+            symbol: petr.symbol,
+            market: petr.market,
+            assetClass: petr.assetClass,
+            name: petr.name,
+            currency: petr.currency,
+            country: petr.country,
+            priceSource: PriceSource.market,
+          ),
+        );
+        await MarketRepository(f.t.db).saveQuote(
+          MarketQuote(
+            symbol: 'PETR4',
+            market: 'B3',
+            price: dec('31.84'),
+            currency: 'BRL',
+            refAt: DateTime.utc(2024, 6, 3, 20, 29),
+            source: 'brapi',
+            dataType: MarketDataType.intraday,
+            collectedAt: '2024-06-03T20:31:00.000Z',
+          ),
+        );
       });
       debugDefaultTargetPlatformOverride = TargetPlatform.windows;
       try {
@@ -106,6 +139,23 @@ void main() {
             final right = box.localToGlobal(Offset(box.size.width, 0)).dx;
             expect(right, lessThanOrEqualTo(visible.right));
           }
+          // Preço médio e atual lado a lado: o PETR4 com a cotação, com a
+          // fonte e a data no tooltip; o CDB, avaliado por saldo, sem preço
+          // unitário.
+          expect(find.text('Preço médio /\nAtual'), findsOneWidget);
+          expect(find.text(r'R$ 38,27'), findsOneWidget);
+          final current = find.byKey(const Key('current-price'));
+          expect(tester.widget<Text>(current).data, r'R$ 31,84');
+          final tip = tester.widget<Tooltip>(
+            find.ancestor(of: current, matching: find.byType(Tooltip)).first,
+          );
+          expect(tip.message, contains('brapi'));
+          expect(tip.message, contains('03/06/2024'));
+          expect(tip.message, contains('Desatualizado'));
+          expect(find.byIcon(Icons.history), findsWidgets);
+          expect(find.text('indisponível'), findsOneWidget);
+          final price = tester.getRect(current);
+          expect(price.right, lessThanOrEqualTo(visible.right));
         });
       } finally {
         debugDefaultTargetPlatformOverride = null;

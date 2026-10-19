@@ -157,8 +157,48 @@ void main() {
     final app = AppHarness(tester, f.t);
     await app.run(location: '/carteira', () async {
       expect(find.text('PETR4'), findsOneWidget);
-      expect(find.text('indisponível'), findsOneWidget);
-      expect(find.text(r'PM R$ 30,00'), findsOneWidget); // preço médio
+      // Valor de mercado e preço atual; o preço médio continua visível.
+      expect(find.text('indisponível'), findsNWidgets(2));
+      expect(find.text(r'R$ 30,00'), findsOneWidget);
+    });
+  });
+
+  testWidgets('preço atual ao lado do preço médio, na carteira e em destaque '
+      'no detalhe do ativo', (tester) async {
+    await tester.runAsync(() async {
+      await f.add(
+        f.draft(OperationType.buy, '2024-01-10', qty: '100', price: '30'),
+      );
+      await f.valuations.setUnitPrice(
+        assetId: f.petr,
+        refDate: LocalDate(2024, 5, 31),
+        price: dec('31.84'),
+      );
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(location: '/carteira', () async {
+      expect(find.text(r'R$ 30,00'), findsOneWidget);
+      final current = find.byKey(const Key('current-price'));
+      expect(tester.widget<Text>(current).data, r'R$ 31,84');
+      final tip = tester.widget<Tooltip>(
+        find.ancestor(of: current, matching: find.byType(Tooltip)).first,
+      );
+      expect(tip.message, 'Preço informado em 31/05/2024');
+
+      await app.tap(find.text('PETR4'));
+      final detail = find.byKey(const Key('asset-current-price'));
+      expect(detail, findsOneWidget);
+      expect(
+        find.descendant(of: detail, matching: find.text(r'R$ 31,84')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: detail,
+          matching: find.text('informado · 31/05/2024'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 

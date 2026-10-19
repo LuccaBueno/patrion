@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../core/time/local_date.dart';
-import '../../../domain/market/market_price.dart';
-import '../../../domain/market/provider_catalog.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/portfolio_valuation.dart';
 import '../../format/formatters.dart';
@@ -33,10 +31,10 @@ class PortfolioScreen extends ConsumerWidget {
   }
 }
 
-/// Colunas da tabela. A classe fica embaixo do ativo, o preço médio embaixo
-/// da quantidade e o percentual embaixo do resultado, para a tabela inteira
+/// Colunas da tabela. A classe fica embaixo do ativo, o preço atual embaixo
+/// do preço médio e o percentual embaixo do resultado, para a tabela inteira
 /// caber numa janela de 1280 px sem rolar para o lado.
-enum _Col { asset, account, quantity, cost, value, pnl }
+enum _Col { asset, account, quantity, price, cost, value, pnl }
 
 /// Tabela de posições, ordenável, com busca e opção de mostrar encerradas.
 class PositionsTable extends StatefulWidget {
@@ -74,6 +72,7 @@ class _PositionsTableState extends State<PositionsTable> {
             .accountLabel(a.position.accountId)
             .compareTo(snap.accountLabel(b.position.accountId)),
       _Col.quantity => a.position.quantity.compareTo(b.position.quantity),
+      _Col.price => _cmp(a.unitPrice, b.unitPrice),
       _Col.cost => a.position.totalCost.compareTo(b.position.totalCost),
       _Col.value => _cmp(a.marketValue, b.marketValue),
       _Col.pnl => _cmp(a.unrealizedPnl, b.unrealizedPnl),
@@ -82,19 +81,24 @@ class _PositionsTableState extends State<PositionsTable> {
     return rows;
   }
 
-  DataColumn _column(String label, _Col column, {bool numeric = false}) =>
-      DataColumn(
-        label: Text(label),
-        numeric: numeric,
-        onSort: (_, _) => setState(() {
-          if (_sort == column) {
-            _ascending = !_ascending;
-          } else {
-            _sort = column;
-            _ascending = !numeric;
-          }
-        }),
-      );
+  DataColumn _column(
+    String label,
+    _Col column, {
+    bool numeric = false,
+    String? tooltip,
+  }) => DataColumn(
+    label: Text(label, textAlign: numeric ? TextAlign.end : null),
+    tooltip: tooltip,
+    numeric: numeric,
+    onSort: (_, _) => setState(() {
+      if (_sort == column) {
+        _ascending = !_ascending;
+      } else {
+        _sort = column;
+        _ascending = !numeric;
+      }
+    }),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -142,8 +146,8 @@ class _PositionsTableState extends State<PositionsTable> {
         TableCard(
           child: DataTable(
             showCheckboxColumn: false,
-            columnSpacing: 20,
-            horizontalMargin: 16,
+            columnSpacing: 16,
+            horizontalMargin: 12,
             dataRowMinHeight: 52,
             dataRowMaxHeight: 60,
             sortColumnIndex: _Col.values.indexOf(_sort),
@@ -151,7 +155,22 @@ class _PositionsTableState extends State<PositionsTable> {
             columns: [
               _column('Ativo', _Col.asset),
               _column('Conta', _Col.account),
-              _column('Quantidade', _Col.quantity, numeric: true),
+              _column(
+                'Qtd.',
+                _Col.quantity,
+                numeric: true,
+                tooltip: 'Quantidade',
+              ),
+              // Duas linhas, como as células: preço médio em cima, atual
+              // embaixo.
+              _column(
+                'Preço médio /\nAtual',
+                _Col.price,
+                numeric: true,
+                tooltip:
+                    'Preço médio de compra e, embaixo, o preço unitário '
+                    'atual. Ordena pelo atual.',
+              ),
               _column('Custo', _Col.cost, numeric: true),
               _column('Valor de mercado', _Col.value, numeric: true),
               _column('Resultado', _Col.pnl, numeric: true),
@@ -172,19 +191,15 @@ class _PositionsTableState extends State<PositionsTable> {
                         bottom: v.asset?.assetClass.label,
                       ),
                     ),
-                    DataCell(Text(snap.accountLabel(v.position.accountId))),
+                    DataCell(_AccountCell(snap: snap, v: v)),
                     DataCell(
-                      _TwoLines(
-                        top: Text(
-                          v.position.quantity == Decimal.zero
-                              ? '—'
-                              : Fmt.number(v.position.quantity),
-                        ),
-                        bottom: v.position.averagePrice == null
-                            ? null
-                            : 'PM ${Fmt.money(v.position.averagePrice!, v.position.currency)}',
+                      Text(
+                        v.position.quantity == Decimal.zero
+                            ? '—'
+                            : Fmt.number(v.position.quantity),
                       ),
                     ),
+                    DataCell(_PriceCell(v: v, today: snap.asOf)),
                     DataCell(
                       Text(
                         Fmt.money(v.position.totalCost, v.position.currency),
@@ -216,9 +231,9 @@ class _PositionsTableState extends State<PositionsTable> {
         const SizedBox(height: 8),
         Text(
           'Resultado = valor de mercado − custo; embaixo, o retorno simples '
-          'sobre o custo, sem proventos. PM = preço médio. Abaixo do valor, a '
-          'fonte e a data do preço; o tipo, a coleta e o atraso aparecem ao '
-          'passar o mouse.',
+          'sobre o custo, sem proventos. Abaixo do preço médio, o preço '
+          'unitário atual; abaixo do valor, a fonte e a data do preço. O '
+          'tipo, a coleta e o atraso aparecem ao passar o mouse.',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -245,54 +260,21 @@ class _MarketValueCell extends StatelessWidget {
             : 'Sem preço ou saldo informado. Informe no detalhe do ativo.',
       );
     }
-    final market = v.marketPrice;
-    final String message;
-    final bool stale;
-    if (market != null) {
-      stale = MarketPricing.isStale(
-        market,
-        today,
-        market: v.asset?.market.code,
-      );
-      message =
-          '${MarketLabels.price(market)}\n'
-          '${MarketLabels.collected(market.collectedAt)}'
-          '${stale ? '\nDesatualizado: a data é anterior ao último pregão.' : ''}';
-    } else {
-      stale = v.valuationStale;
-      final source = v.valuationKind == ValuationKind.balance
-          ? 'Saldo informado'
-          : 'Preço informado';
-      message =
-          '$source em ${Fmt.date(v.valuationDate!)}'
-          '${stale ? '\nHá operações depois desta data: o valor pode estar desatualizado.' : ''}';
-    }
+    final note = MarketLabels.valuation(v, today)!;
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return Tooltip(
-      message: message,
+      message: note.message,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (stale)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Icon(
-                Icons.history,
-                size: 16,
-                color: muted,
-                semanticLabel: 'Valor desatualizado',
-              ),
-            ),
+          if (note.stale) _StaleIcon(color: muted),
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(Fmt.money(v.marketValue!, v.position.currency)),
               Text(
-                market != null
-                    ? '${ProviderCatalog.shortNameOf(market.source)} · '
-                          '${MarketLabels.refOf(market)}'
-                    : 'informado · ${Fmt.date(v.valuationDate!)}',
+                note.short,
                 style: Theme.of(context).textTheme.labelSmall
                     ?.copyWith(color: muted),
               ),
@@ -302,6 +284,120 @@ class _MarketValueCell extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Instituição em cima e conta embaixo (em uma linha, o nome completo
+/// alargava a tabela além de 1280 px); nomes longos são cortados, com o
+/// nome inteiro no tooltip.
+class _AccountCell extends StatelessWidget {
+  const _AccountCell({required this.snap, required this.v});
+
+  final PortfolioSnapshot snap;
+  final ValuedPosition v;
+
+  @override
+  Widget build(BuildContext context) {
+    final account = snap.accounts[v.position.accountId];
+    final institution = account == null
+        ? null
+        : snap.institutions[account.institutionId];
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: snap.accountLabel(v.position.accountId),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 150),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              institution?.name ?? account?.name ?? '—',
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (institution != null)
+              Text(
+                account!.name,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Preço médio em cima e preço unitário atual embaixo, alinhados para
+/// comparar. A fonte e a data do preço atual ficam no tooltip; sem preço,
+/// "indisponível".
+class _PriceCell extends StatelessWidget {
+  const _PriceCell({required this.v, required this.today});
+
+  final ValuedPosition v;
+  final LocalDate today;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!v.position.isOpen) return const Text('—');
+    final currency = v.position.currency;
+    final average = v.position.averagePrice;
+    final price = v.unitPrice;
+    final note = MarketLabels.valuation(v, today);
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final Widget current;
+    if (price == null || note == null) {
+      current = UnavailableText(
+        tooltip: v.valuationKind == ValuationKind.balance
+            ? 'Avaliado por saldo informado: não há preço unitário.'
+            : v.asset?.priceSource == PriceSource.market
+            ? 'Sem cotação guardada. Use "Atualizar agora" em Fontes de '
+                  'dados ou informe o preço no detalhe do ativo.'
+            : 'Sem preço informado. Informe no detalhe do ativo.',
+      );
+    } else {
+      current = Tooltip(
+        message: note.message,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (note.stale) _StaleIcon(color: muted),
+            Text(
+              Fmt.money(price, currency),
+              key: const Key('current-price'),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(average == null ? '—' : Fmt.money(average, currency)),
+        current,
+      ],
+    );
+  }
+}
+
+class _StaleIcon extends StatelessWidget {
+  const _StaleIcon({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(right: 4),
+    child: Icon(
+      Icons.history,
+      size: 16,
+      color: color,
+      semanticLabel: 'Valor desatualizado',
+    ),
+  );
 }
 
 /// Célula com o valor e uma nota menor embaixo.
