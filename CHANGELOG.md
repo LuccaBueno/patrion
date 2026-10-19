@@ -15,6 +15,17 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ### Adicionado
 
+- Fase 6 (dados de mercado):
+  - Cotações automáticas: ações, FIIs, ETFs e BDRs da B3 (brapi e fechamento oficial do COTAHIST), Tesouro Direto (Tesouro Transparente), cripto (CoinGecko e Binance) e ações e ETFs dos EUA (Finnhub e Twelve Data, com chave; Yahoo opcional, desligado por padrão). Cada preço aparece com a fonte, a data e, ao passar o mouse, o tipo, a coleta e o atraso; um preço antigo aparece com a data e um ícone de desatualizado.
+  - Câmbio (PTAX do Banco Central, com a referência do BCE como alternativa) e indicadores (CDI, Selic, meta Selic, IPCA e IGP-M do Banco Central; IPCA também pelo IBGE), com CDI anualizado e IPCA em 12 meses calculados. Painel "Câmbio e indicadores" no Início.
+  - Patrimônio total em reais no Início quando a carteira tem mais de uma moeda, pelo câmbio mais recente guardado (com a data e a fonte do câmbio).
+  - Atualização automática com o app aberto (ao abrir e a cada 30 minutos, configurável ou desligada) e manual: "Atualizar agora", "Atualizar este ativo" e "Baixar histórico" no detalhe do ativo, e "Testar conexão" em cada provedor.
+  - Tela "Fontes de dados": o que cada provedor fornece e o que recebe (só códigos de ativos e de séries), licença, limites, estado (último acesso, erro, uso da cota), ligar e desligar, chave de API e ano inicial do histórico.
+  - Chaves de API digitadas na tela e guardadas só neste computador, protegidas pelo Windows; nunca vão no save, nos backups nem no log.
+  - Histórico da B3 pelo COTAHIST: só os anos (ou dias) que faltam, e o arquivo baixado é apagado depois de extraído.
+  - Sem internet, o app avisa "sem conexão" e continua com os últimos dados guardados, cada um com a sua data; a atualização para cedo quando o computador está sem rede.
+  - Cadastro de ativo com a escolha "cotação automática" ou "preço ou saldo informado" (sugerida pela classe), e ação em "Fontes de dados" para passar os ativos antigos para a cotação automática.
+  - O arquivo de save pode levar os dados de mercado já baixados (opção marcada por padrão), para o outro computador funcionar sem internet. Com eles, o arquivo usa o formato 2.
 - Fase 5B (bloqueio do app):
   - Bloqueio opcional, por computador, em Configurações: o banco de dados passa a ser criptografado (SQLCipher) e só abre com a senha. A conversão de um banco existente faz um backup antes, é conferida e pode ser desfeita ("Desativar o bloqueio", com a senha).
   - Tela de desbloqueio na abertura; "Bloquear agora"; bloqueio por inatividade (padrão 15 minutos; 1, 5, 30, 60 minutos ou nunca), que fecha o banco e descarta os dados da memória.
