@@ -4,8 +4,13 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.0.0] - 2026-10-18
+
+Primeira versão utilizável: carteira real, motor financeiro, backup e sincronização por arquivo, bloqueio opcional, dados de mercado e instalador.
+
 ### Alterado
 
+- Carteira: na janela de 1280 px, a tabela inteira (até a coluna "Resultado") aparece sem rolar para o lado. A classe fica embaixo do ativo, o preço médio (PM) embaixo da quantidade e o percentual embaixo do resultado.
 - A prévia da importação de um save avisa, antes de aplicar, quando a carteira resultante fica inconsistente (por exemplo, uma venda maior que a posição depois de vendas feitas nos dois computadores), e recalcula o aviso quando a versão de um conflito muda.
 - O SQLite do app passou a ser o build do SQLCipher (sem chave, ele funciona como o SQLite comum).
 - Dashboard: os valores dos cards ficam sempre numa linha (a fonte diminui se não couber); o percentual do resultado não realizado passou para a nota do card.
@@ -15,6 +20,16 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ### Adicionado
 
+- Fase 7 (distribuição):
+  - Instalador para Windows 10 e 11 (x64): instala só para o seu usuário, sem pedir administrador (ou para todos, se preferir), com atalho no Menu Iniciar e atalho opcional na área de trabalho. A nova versão instala por cima da anterior, e o instalador pede para fechar o app se ele estiver aberto.
+  - A desinstalação não apaga os dados (`%APPDATA%\Patrion`) e mostra onde eles ficaram.
+  - Versão portátil em ZIP, com `LEIA-ME.txt` explicando onde ficam os dados.
+  - Arquivos `.invsave` abrem com o Patrion: o duplo clique leva à Sincronização com a prévia da importação, que pede a confirmação antes de aplicar. Com o bloqueio ativo, a importação espera o desbloqueio.
+  - Uma janela por pasta de dados: abrir o app (ou um `.invsave`) com ele já aberto traz a janela existente para a frente, em vez de abrir uma segunda cópia sobre o mesmo banco.
+  - Verificador de atualizações em Configurações > Atualizações: consulta as Releases do GitHub ao abrir o app (no máximo uma vez por dia, pode ser desligado) ou em "Verificar agora", mostra as notas da versão e o link de download, permite ignorar uma versão e, por padrão, ignora as versões de teste (beta e rc). O Início avisa quando há versão nova. Sem internet, nada acontece.
+  - O runtime do Visual C++ vai junto do app, que abre num Windows sem o "Visual C++ Redistributable".
+  - Workflow de release no GitHub Actions: na tag `vX.Y.Z`, gera o instalador, o ZIP portátil e as somas SHA-256 e cria a Release como rascunho (tags `-beta` e `-rc` viram pré-lançamento).
+  - `docs/DISTRIBUICAO.md` e `docs/SOLUCAO_DE_PROBLEMAS.md`.
 - Fase 6 (dados de mercado):
   - Cotações automáticas: ações, FIIs, ETFs e BDRs da B3 (brapi e fechamento oficial do COTAHIST), Tesouro Direto (Tesouro Transparente), cripto (CoinGecko e Binance) e ações e ETFs dos EUA (Finnhub e Twelve Data, com chave; Yahoo opcional, desligado por padrão). Cada preço aparece com a fonte, a data e, ao passar o mouse, o tipo, a coleta e o atraso; um preço antigo aparece com a data e um ícone de desatualizado.
   - Câmbio (PTAX do Banco Central, com a referência do BCE como alternativa) e indicadores (CDI, Selic, meta Selic, IPCA e IGP-M do Banco Central; IPCA também pelo IBGE), com CDI anualizado e IPCA em 12 meses calculados. Painel "Câmbio e indicadores" no Início.
@@ -79,3 +94,10 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 - Fase 1: projeto Flutter para Windows com app vazio (nome e subtítulo).
 - Documentação: fontes de dados, decisões técnicas, modelo de dados.
 - Proposta de símbolo vetorial do app (`assets/branding/patrion-simbolo.svg`).
+
+### Problemas conhecidos
+
+- O instalador e o app não são assinados digitalmente: o Windows SmartScreen mostra um aviso na primeira execução ("Mais informações" > "Executar assim mesmo").
+- Não há atualização automática: o verificador avisa e abre a página da versão; o instalador é baixado e executado à mão.
+- O desbloqueio pelo Windows Hello ainda não foi testado num computador com o Hello configurado.
+- Se outro programa já tiver sido escolhido no Windows para abrir arquivos `.invsave`, o Windows mantém essa escolha; use "Abrir com" > Patrion.

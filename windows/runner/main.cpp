@@ -13,6 +13,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     CreateAndAttachConsole();
   }
 
+  // Sinaliza ao instalador (Inno Setup, AppMutex) que o app está aberto, para
+  // ele pedir que seja fechado antes de atualizar ou desinstalar. Não
+  // controla a instância única: isso é feito em Dart, por pasta de dados
+  // (DECISIONS D-38 e D-39). O sistema libera o mutex quando o processo sai.
+  ::CreateMutexW(nullptr, FALSE, L"PatrionAppMutex");
+  ::CreateMutexW(nullptr, FALSE, L"Global\\PatrionAppMutex");
+
   // Initialize COM, so that it is available for use in the library and/or
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);

@@ -114,3 +114,12 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+
+# Runtime do Visual C++ (vcruntime140, vcruntime140_1 e msvcp140) junto do
+# executável, para o app abrir num Windows sem o "Visual C++ Redistributable"
+# instalado (instalação limpa, Windows Sandbox). O UCRT já vem no Windows 10
+# e 11. DECISIONS D-38.
+set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT Runtime)
+include(InstallRequiredSystemLibraries)

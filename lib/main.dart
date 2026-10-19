@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 
 import 'core/config/app_info.dart';
 import 'core/config/app_paths.dart';
@@ -50,9 +51,18 @@ Future<void> main(List<String> args) async {
       return true;
     };
     _log.info('Iniciando ${AppInfo.name} ${AppInfo.version}');
+    // Só o nome do arquivo vai para o log, nunca o conteúdo.
+    void logFiles(Iterable<String> files, String origin) {
+      for (final f in files) {
+        _log.info('Arquivo recebido para abrir ($origin): ${p.basename(f)}');
+      }
+    }
 
     final openRequests = OpenRequests()..addAll(options.files);
+    logFiles(options.files, 'linha de comando');
     gate.requests.listen((files) {
+      _log.info('Outra instância pediu a janela');
+      logFiles(files, 'outra instância');
       openRequests.addAll(files);
       unawaited(bringMainWindowToFront());
     });

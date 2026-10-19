@@ -1,0 +1,44 @@
+Patrion {{VERSAO}} — versão portátil
+=====================================
+
+Como usar
+---------
+1. Extraia a pasta "Patrion" inteira para onde quiser (por exemplo,
+   C:\Apps\Patrion ou um pen drive). Não rode o app de dentro do ZIP.
+2. Abra patrion.exe.
+
+Nada é instalado: sem atalho no Menu Iniciar, sem entrada em "Aplicativos
+instalados" e sem associação do .invsave (para abrir um save, use
+"Sincronização > Importar save" no app).
+
+Onde ficam os dados
+-------------------
+Por padrão, os mesmos lugares da versão instalada:
+
+  %APPDATA%\Patrion\              banco (patrion.db), backups e logs
+  %LOCALAPPDATA%\Patrion\cache\   arquivos baixados (pode ser apagado)
+
+Ou seja: a versão portátil e a instalada, no mesmo usuário do Windows, usam
+os MESMOS dados. Não abra as duas ao mesmo tempo (o app avisa e traz a
+janela já aberta para a frente).
+
+Para guardar os dados em outra pasta (por exemplo, junto do app num pen
+drive), crie um atalho para patrion.exe com:
+
+  patrion.exe --data-dir "D:\Patrion\dados" --cache-dir "D:\Patrion\cache"
+
+Atualizar
+---------
+Feche o app, apague os arquivos da pasta antiga do app (os dados não ficam
+nela, a não ser que você tenha usado --data-dir apontando para lá) e
+extraia a nova versão no lugar.
+
+Aviso do Windows (SmartScreen)
+------------------------------
+O app não é assinado digitalmente. Na primeira vez, o Windows pode mostrar
+"O Windows protegeu o computador". Clique em "Mais informações" e
+"Executar assim mesmo". Confira antes a soma SHA-256 do ZIP com a do
+arquivo SHA256SUMS.txt da página da Release.
+
+Mais detalhes: docs/DISTRIBUICAO.md no repositório
+https://github.com/LuccaBueno/patrion

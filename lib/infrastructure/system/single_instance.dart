@@ -28,6 +28,12 @@ class InstanceGate {
   /// de uma instância anterior que terminou sem lê-los).
   static const staleAfter = Duration(minutes: 1);
 
+  /// Arquivos de trava abertos neste processo. Sem esta lista, o build
+  /// release perde a trava: o compilador AOT remove um campo que só é
+  /// escrito (o app nunca chama [close]), o arquivo fica sem referência e o
+  /// coletor de lixo o fecha, soltando a trava logo depois de abrir.
+  static final _openLocks = <RandomAccessFile>[];
+
   final RandomAccessFile _lock;
   final Directory _inbox;
   final _requests = StreamController<List<String>>.broadcast();
@@ -53,6 +59,7 @@ class InstanceGate {
     final gate = InstanceGate._(raf, inbox);
     await gate._dropStale();
     gate._timer = Timer.periodic(pollInterval, (_) => gate._poll());
+    _openLocks.add(raf);
     return gate;
   }
 
@@ -133,6 +140,7 @@ class InstanceGate {
   Future<void> close() async {
     _timer?.cancel();
     await _requests.close();
+    _openLocks.remove(_lock);
     await _lock.close();
   }
 

@@ -1,0 +1,95 @@
+# Release (SPEC §19; DECISIONS D-38). Na tag vX.Y.Z: verificação completa,
+# instalador, ZIP portátil, somas SHA-256 e Release em RASCUNHO no GitHub,
+# para aprovação manual. Tags com -beta ou -rc viram pré-lançamento.
+#
+# "Run workflow" (workflow_dispatch) faz um ensaio: gera os mesmos arquivos e
+# os guarda como artefato do workflow, sem criar Release.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Instalador, ZIP e Release (rascunho)
+    runs-on: windows-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write # criar a Release em rascunho
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Instalar o Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+
+      - name: Versão da tag confere com o pubspec.yaml
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $pub = (Select-String -Path pubspec.yaml -Pattern '^version:\s*([^+\s]+)').Matches[0].Groups[1].Value
+          if ($tag -ne "v$pub") { throw "Tag $tag não confere com a versão $pub do pubspec.yaml." }
+          Write-Host "Versão $pub"
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Formatação
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Análise
+        run: flutter analyze
+
+      - name: Testes
+        run: flutter test --timeout 2m
+
+      - name: Inno Setup 6
+        shell: pwsh
+        run: |
+          $known = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe")
+          if (-not ($known | Where-Object { Test-Path $_ })) {
+            choco install innosetup --no-progress -y
+          }
+
+      - name: Build, instalador e ZIP portátil
+        shell: pwsh
+        run: ./tool/release/build_release.ps1
+
+      - name: Guardar os arquivos (ensaio)
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v7
+        with:
+          name: patrion-release-ensaio
+          path: dist/
+          retention-days: 7
+
+      - name: Criar a Release em rascunho
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $version = $tag.Substring(1)
+          $flags = @('--draft', '--verify-tag', '--title', "Patrion $version", '--notes-file', 'dist/RELEASE_NOTES.md')
+          if ($tag -match '-(beta|rc)') { $flags += '--prerelease' }
+          gh release create $tag @flags `
+            "dist/Patrion-$version-instalador.exe" `
+            "dist/Patrion-$version-portatil.zip" `
+            'dist/SHA256SUMS.txt'

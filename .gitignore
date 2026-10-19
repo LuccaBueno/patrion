@@ -82,3 +82,6 @@ COTAHIST_*
 
 # Trechos pequenos de respostas reais usados nos testes (não são arquivos brutos).
 !test/fixtures/market/cotahist_*.txt
+
+# Arquivos de Release gerados por tool/release/build_release.ps1
+/dist/
