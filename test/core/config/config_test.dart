@@ -22,9 +22,21 @@ void main() {
       expect(o.cacheDir, r'D:\cacheB');
     });
 
-    test('ignora argumentos desconhecidos', () {
-      final o = LaunchOptions.parse([r'C:\x\arquivo.invsave', '--outro']);
+    test('ignora opções desconhecidas', () {
+      final o = LaunchOptions.parse(['--outro', '-x']);
       expect(o.dataDir, isNull);
+      expect(o.files, isEmpty);
+    });
+
+    test('argumentos soltos são arquivos para abrir (duplo clique)', () {
+      final o = LaunchOptions.parse([
+        '--data-dir',
+        r'D:\PatrionB',
+        r'C:\Meus saves\Patrion_PC_2026-10-18.invsave',
+        '--outro',
+      ]);
+      expect(o.dataDir, r'D:\PatrionB');
+      expect(o.files, [r'C:\Meus saves\Patrion_PC_2026-10-18.invsave']);
     });
 
     test('recusa pasta ausente ou vazia', () {

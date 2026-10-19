@@ -2,8 +2,8 @@ name: patrion
 description: "Patrion - Investimentos e Patrimônio"
 publish_to: 'none'
 
-# SemVer. 0.x até a v1.0.0 (fim da Fase 7).
-version: 0.1.0+1
+# SemVer (DECISIONS D-38). A tag da Release é "v" + esta versão, sem o "+build".
+version: 1.0.0+1
 
 environment:
   sdk: ^3.13.5
@@ -32,7 +32,9 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.6
   pointycastle: 4.0.0
+  pub_semver: ^2.2.1
   sqlite3: ^3.7.1
+  url_launcher: ^6.3.3
   uuid: ^4.6.0
   window_manager: ^0.5.2
 

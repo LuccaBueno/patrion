@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,6 +15,7 @@ import '../../../domain/sync/invsave_codec.dart';
 import '../../../domain/sync/merge_planner.dart';
 import '../../format/sync_labels.dart';
 import '../../providers.dart';
+import '../../services/open_requests.dart';
 import '../../widgets/common.dart';
 import '../security/security_dialogs.dart';
 import 'import_preview_dialog.dart';
@@ -33,6 +35,29 @@ class SyncScreen extends ConsumerStatefulWidget {
 
 class _SyncScreenState extends ConsumerState<SyncScreen> {
   bool _busy = false;
+  OpenRequests? _requests;
+
+  @override
+  void initState() {
+    super.initState();
+    // Arquivo aberto pelo Explorador: começa a importação com a prévia, que
+    // pede a confirmação antes de aplicar (D-39).
+    _requests = ref.read(openRequestsProvider)?..addListener(_openPending);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openPending());
+  }
+
+  @override
+  void dispose() {
+    _requests?.removeListener(_openPending);
+    super.dispose();
+  }
+
+  void _openPending() {
+    if (!mounted || _busy) return;
+    final path = _requests?.take();
+    if (path == null) return;
+    unawaited(_run(() => _import(thenExport: false, path: path)));
+  }
 
   Future<void> _run(Future<void> Function() action) async {
     if (_busy) return;
@@ -56,7 +81,11 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        // Um arquivo pode ter chegado durante a ação.
+        scheduleMicrotask(_openPending);
+      }
     }
   }
 
@@ -92,16 +121,19 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     );
   }
 
-  Future<void> _import({required bool thenExport}) async {
-    final path = await ref
-        .read(fileDialogsProvider)
-        .pickFile(
-          dialogTitle: 'Escolha o arquivo de save',
-          extensions: const [InvsaveCodec.extension],
-        );
-    if (path == null) return;
+  /// Sem [path], pede o arquivo ao usuário.
+  Future<void> _import({required bool thenExport, String? path}) async {
+    final chosen =
+        path ??
+        await ref
+            .read(fileDialogsProvider)
+            .pickFile(
+              dialogTitle: 'Escolha o arquivo de save',
+              extensions: const [InvsaveCodec.extension],
+            );
+    if (chosen == null) return;
     final service = ref.read(saveServiceProvider);
-    final bytes = await File(path).readAsBytes();
+    final bytes = await File(chosen).readAsBytes();
     String? password;
     if (InvsaveCodec.isProtected(bytes)) {
       if (!mounted) return;
@@ -110,7 +142,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
         builder: (context) => PasswordPromptDialog(
           title: 'Arquivo protegido por senha',
           message:
-              'O save ${p.basename(path)} foi protegido com uma senha no '
+              'O save ${p.basename(chosen)} foi protegido com uma senha no '
               'outro computador. Digite a senha do arquivo.',
           label: 'Senha do arquivo',
           action: 'Abrir',
@@ -120,7 +152,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     }
     final preview = await service.preview(
       bytes,
-      fileName: p.basename(path),
+      fileName: p.basename(chosen),
       password: password,
     );
     if (!mounted) return;

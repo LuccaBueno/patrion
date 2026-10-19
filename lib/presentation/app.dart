@@ -7,6 +7,7 @@ import '../application/settings/appearance_service.dart';
 import '../core/config/app_info.dart';
 import 'providers.dart';
 import 'router/app_router.dart';
+import 'services/open_requests.dart';
 import 'theme/app_theme.dart';
 
 class PatrionApp extends ConsumerStatefulWidget {
@@ -22,9 +23,23 @@ class _PatrionAppState extends ConsumerState<PatrionApp> {
   late final GoRouter _router = createRouter(
     initialLocation: widget.initialLocation,
   );
+  OpenRequests? _requests;
+
+  @override
+  void initState() {
+    super.initState();
+    _requests = ref.read(openRequestsProvider)?..addListener(_onOpenRequest);
+  }
+
+  /// Um `.invsave` aberto pelo Explorador leva à Sincronização, que o
+  /// importa (DECISIONS D-39).
+  void _onOpenRequest() {
+    if (_requests?.hasPending ?? false) _router.go('/sincronizacao');
+  }
 
   @override
   void dispose() {
+    _requests?.removeListener(_onOpenRequest);
     _router.dispose();
     super.dispose();
   }

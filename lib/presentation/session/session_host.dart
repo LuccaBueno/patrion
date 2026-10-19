@@ -7,6 +7,7 @@ import '../providers.dart';
 import '../screens/security/unlock_screen.dart';
 import '../screens/startup_error_app.dart';
 import '../services/market_refresh.dart';
+import '../services/open_requests.dart';
 import '../theme/app_theme.dart';
 import 'app_session.dart';
 import 'inactivity_guard.dart';
@@ -16,10 +17,18 @@ import 'inactivity_guard.dart';
 /// Bloqueado, só existe a tela de desbloqueio: as telas e os provedores da
 /// sessão anterior são descartados.
 class SessionHost extends StatelessWidget {
-  const SessionHost({required this.manager, this.logsDir, super.key});
+  const SessionHost({
+    required this.manager,
+    this.logsDir,
+    this.openRequests,
+    super.key,
+  });
 
   final SessionManager manager;
   final String? logsDir;
+
+  /// Arquivos recebidos para abrir; esperam o desbloqueio, se houver.
+  final OpenRequests? openRequests;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +64,7 @@ class SessionHost extends StatelessWidget {
             databaseProvider.overrideWithValue(session.db),
             syncContextProvider.overrideWithValue(session.sync),
             sessionControllerProvider.overrideWithValue(manager),
+            openRequestsProvider.overrideWithValue(openRequests),
             sessionNoticeProvider.overrideWithValue(
               manager.noticeRoute == '/backup' ? notice : null,
             ),
@@ -70,7 +80,11 @@ class SessionHost extends StatelessWidget {
             onIdle: manager.lockNow,
             child: MarketAutoRefresh(
               child: PatrionApp(
-                initialLocation: notice == null ? '/' : manager.noticeRoute,
+                initialLocation: notice != null
+                    ? manager.noticeRoute
+                    : (openRequests?.hasPending ?? false)
+                    ? '/sincronizacao'
+                    : '/',
               ),
             ),
           ),

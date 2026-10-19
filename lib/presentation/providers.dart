@@ -35,6 +35,7 @@ import '../infrastructure/market/market_setup.dart';
 import '../infrastructure/security/api_key_store.dart';
 import 'services/file_dialogs.dart';
 import 'services/market_refresh.dart';
+import 'services/open_requests.dart';
 
 /// Ambiente montado na inicialização (`main.dart`). Os provedores abaixo são
 /// sobrescritos no `ProviderScope` raiz; nos testes, com um banco em memória.
@@ -160,6 +161,9 @@ final sessionControllerProvider = Provider<SessionController?>((ref) => null);
 
 /// Aviso deixado pela troca de sessão (resultado da restauração).
 final sessionNoticeProvider = Provider<String?>((ref) => null);
+
+/// Arquivos `.invsave` recebidos para abrir (nulo nos testes que não usam).
+final openRequestsProvider = Provider<OpenRequests?>((ref) => null);
 
 /// Diálogos de arquivo do Windows (sobrescritos nos testes).
 final fileDialogsProvider = Provider<FileDialogs>(

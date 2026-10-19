@@ -11,6 +11,7 @@ import 'package:patrion/domain/portfolio/operation_type.dart';
 import 'package:patrion/domain/sync/invsave_codec.dart';
 import 'package:patrion/presentation/providers.dart';
 import 'package:patrion/presentation/services/file_dialogs.dart';
+import 'package:patrion/presentation/services/open_requests.dart';
 
 import '../helpers/app_harness.dart';
 import '../helpers/portfolio_fixture.dart';
@@ -273,6 +274,41 @@ void main() {
       location: '/sincronizacao',
       paths: pathsIn('b'),
       overrides: [fileDialogsProvider.overrideWithValue(dialogs)],
+    );
+    await tester.runAsync(() async {
+      await a.close();
+      await b.close();
+    });
+  });
+
+  testWidgets('save aberto pelo Explorador leva à prévia da importação', (
+    tester,
+  ) async {
+    final a = (await tester.runAsync(() => SyncPc.open('PC-A', tmp)))!;
+    final b = (await tester.runAsync(() => SyncPc.open('PC-B', tmp)))!;
+    final saveFile = p.join(tmp.path, 'de-a.invsave');
+    await tester.runAsync(() async {
+      final inst = await a.institution('Corretora');
+      final acc = await a.account(inst, 'Principal');
+      await a.buy(acc, await a.stock('VALE3'), '10');
+      File(saveFile).writeAsBytesSync(await a.export());
+    });
+    final requests = OpenRequests();
+    final h = AppHarness(tester, b.t);
+
+    await h.run(
+      () async {
+        expect(find.text('Prévia da importação'), findsNothing);
+        // Chega com o app no Início (segunda instância ou duplo clique).
+        requests.addAll([saveFile]);
+        await h.pumpUntil(find.text('Prévia da importação'));
+        expect(find.text('Sincronização'), findsWidgets);
+        expect(requests.hasPending, isFalse);
+        await h.press(find.text('Aplicar'));
+        await h.pumpUntil(find.textContaining('Importação concluída'));
+      },
+      paths: pathsIn('b'),
+      overrides: [openRequestsProvider.overrideWithValue(requests)],
     );
     await tester.runAsync(() async {
       await a.close();

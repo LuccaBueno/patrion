@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 ///   patrion.db
 ///   backups\
 ///   logs\
+///   instance\       trava de instância única e pedidos de abertura (D-39)
 /// <cacheDir>\       padrão %LOCALAPPDATA%\Patrion\cache
 /// ```
 class AppPaths {
@@ -21,4 +22,5 @@ class AppPaths {
   String get databaseFile => p.join(dataDir, databaseFileName);
   String get backupsDir => p.join(dataDir, 'backups');
   String get logsDir => p.join(dataDir, 'logs');
+  String get instanceDir => p.join(dataDir, 'instance');
 }
