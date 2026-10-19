@@ -67,7 +67,7 @@ class CotahistExtract {
 ///   para os últimos [dailyWindowDays] dias, os arquivos diários (pequenos).
 /// - Extrai em fluxo, num isolate, só os tickers pedidos (mercado à vista).
 /// - Apaga o ZIP e o TXT assim que termina, inclusive em falha (D-05).
-class B3CotahistProvider implements HistoryProvider {
+class B3CotahistProvider implements BatchHistoryProvider {
   B3CotahistProvider(
     this._http, {
     required this.cacheDir,
@@ -103,6 +103,17 @@ class B3CotahistProvider implements HistoryProvider {
   }) async {
     final result = await historyFor({instrument.symbol}, from: from, to: to);
     return result.bars[instrument.symbol.toUpperCase()] ?? const [];
+  }
+
+  @override
+  Future<({Map<String, List<PriceBar>> bars, Map<String, String> isins})>
+  historyBatch(
+    Set<String> symbols, {
+    required LocalDate from,
+    required LocalDate to,
+  }) async {
+    final r = await historyFor(symbols, from: from, to: to);
+    return (bars: r.bars, isins: r.isins);
   }
 
   /// Histórico de vários tickers de uma vez (um download serve a todos).

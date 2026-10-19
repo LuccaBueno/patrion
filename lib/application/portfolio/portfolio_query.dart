@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 
 import '../../core/time/local_date.dart';
+import '../../data/repositories/market_repository.dart';
 import '../../data/repositories/portfolio_repositories.dart';
+import '../../domain/market/market_price.dart';
 import '../../domain/portfolio/entities.dart';
 import '../../domain/portfolio/performance.dart';
 import '../../domain/portfolio/portfolio_calculator.dart';
 import '../../domain/portfolio/portfolio_summary.dart';
 import '../../domain/portfolio/portfolio_valuation.dart';
+import '../market/market_price_book.dart';
 
 /// Retrato da carteira real: cadastros, operações e tudo o que é calculado a
 /// partir deles. Nada daqui é gravado: é recalculado a cada alteração
@@ -38,6 +41,7 @@ class PortfolioSnapshot {
     required List<FixedIncomeTerms> fixedIncome,
     required List<Operation> operations,
     required List<ManualValuation> valuations,
+    Map<String, MarketPrice> marketPrices = const {},
   }) {
     final assetMap = {for (final a in assets) a.id: a};
     final state = PortfolioCalculator.compute(
@@ -50,6 +54,7 @@ class PortfolioSnapshot {
       valuations: valuations,
       assets: assetMap,
       asOf: asOf,
+      marketPrices: marketPrices,
     );
     final summary = PortfolioSummary.build(
       state: state,
@@ -135,12 +140,14 @@ class PortfolioSnapshot {
   }
 }
 
-/// Lê a carteira real e a recalcula a cada alteração nas tabelas.
+/// Lê a carteira real e a recalcula a cada alteração nas tabelas (e nos
+/// dados de mercado, quando há [MarketRepository]).
 class PortfolioQuery {
-  PortfolioQuery(this._repos, {Clock wallClock = const Clock()})
+  PortfolioQuery(this._repos, {Clock wallClock = const Clock(), this._market})
     : _clock = wallClock;
 
   final PortfolioRepositories _repos;
+  final MarketRepository? _market;
   final Clock _clock;
 
   Future<PortfolioSnapshot> load() async {
@@ -152,14 +159,24 @@ class PortfolioQuery {
       _repos.operations.all(),
       _repos.valuations.all(),
     ]);
+    final assets = results[2].cast<Asset>();
+    final fixedIncome = results[3].cast<FixedIncomeTerms>();
+    final market = _market;
     return PortfolioSnapshot.compute(
       asOf: LocalDate.fromDateTime(_clock.now()),
       institutions: results[0].cast<Institution>(),
       accounts: results[1].cast<Account>(),
-      assets: results[2].cast<Asset>(),
-      fixedIncome: results[3].cast<FixedIncomeTerms>(),
+      assets: assets,
+      fixedIncome: fixedIncome,
       operations: results[4].cast<Operation>(),
       valuations: results[5].cast<ManualValuation>(),
+      marketPrices: market == null
+          ? const {}
+          : await MarketPriceBook.load(
+              market,
+              assets: assets,
+              termsByAsset: {for (final t in fixedIncome) t.assetId: t},
+            ),
     );
   }
 
@@ -170,7 +187,7 @@ class PortfolioQuery {
   /// (um gerador `async*` aqui travava ao cancelar).
   Stream<PortfolioSnapshot> watch() {
     late final StreamController<PortfolioSnapshot> controller;
-    StreamSubscription<void>? changes;
+    final subscriptions = <StreamSubscription<void>>[];
     var queue = Future<void>.value();
 
     void refresh() {
@@ -187,11 +204,16 @@ class PortfolioQuery {
     controller = StreamController<PortfolioSnapshot>(
       onListen: () {
         refresh();
-        changes = _repos.watchChanges().listen((_) => refresh());
+        subscriptions.addAll([
+          _repos.watchChanges().listen((_) => refresh()),
+          ?_market?.watchChanges().listen((_) => refresh()),
+        ]);
       },
       onCancel: () {
-        unawaited(changes?.cancel());
-        changes = null;
+        for (final s in subscriptions) {
+          unawaited(s.cancel());
+        }
+        subscriptions.clear();
         unawaited(controller.close());
       },
     );

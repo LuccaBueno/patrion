@@ -5,8 +5,10 @@ import '../../core/time/local_date.dart';
 import 'codes.dart';
 import 'entities.dart';
 import 'portfolio_calculator.dart';
+import '../market/market_price.dart';
 
-/// Posição com o valor de mercado vindo dos preços e saldos informados.
+/// Posição com o valor de mercado vindo dos preços e saldos informados ou
+/// das cotações de mercado.
 ///
 /// Sem preço ou saldo, o valor de mercado é nulo ("indisponível", regra 1):
 /// nunca é estimado pelo custo.
@@ -19,6 +21,7 @@ class ValuedPosition {
     this.valuationDate,
     this.valuationKind,
     this.valuationStale = false,
+    this.marketPrice,
   });
 
   final Position position;
@@ -36,6 +39,10 @@ class ValuedPosition {
   /// não reflete essa operação.
   final bool valuationStale;
 
+  /// Preço de mercado usado (com fonte, data e tipo), quando o valor veio
+  /// dele e não de um preço ou saldo informado.
+  final MarketPrice? marketPrice;
+
   bool get hasMarketValue => marketValue != null;
 
   /// Lucro ou prejuízo não realizado: valor de mercado − custo.
@@ -50,19 +57,23 @@ class ValuedPosition {
   }
 }
 
-/// Aplica preços e saldos informados às posições (SPEC §8, preço manual).
+/// Aplica preços e saldos às posições (SPEC §8; preço manual e de mercado).
 ///
-/// Regras (`docs/FORMULAS.md` §2):
-/// - Se há saldo informado para a conta e o ativo, vale o mais recente até
-///   [asOf].
-/// - Senão, vale quantidade × o preço unitário mais recente até [asOf].
-/// - Preço em moeda diferente da posição é ignorado (sem câmbio até a F6).
+/// Regras (`docs/FORMULAS.md` §2 e §2.1):
+/// - Ativo com preço **manual**: saldo informado mais recente até [asOf]
+///   para a conta e o ativo; senão, quantidade × o preço informado mais
+///   recente.
+/// - Ativo com preço **de mercado**: vale o mais recente entre o saldo
+///   informado, o preço informado e o preço de mercado ([marketPrices]); na
+///   mesma data, o informado pelo usuário.
+/// - Preço em moeda diferente da posição é ignorado (sem conversão).
 abstract final class PortfolioValuator {
   static List<ValuedPosition> value({
     required PortfolioState state,
     required Iterable<ManualValuation> valuations,
     required Map<String, Asset> assets,
     required LocalDate asOf,
+    Map<String, MarketPrice> marketPrices = const {},
   }) {
     final latestBalance = <(String, String), ManualValuation>{};
     final latestPrice = <String, ManualValuation>{};
@@ -91,6 +102,9 @@ abstract final class PortfolioValuator {
           assets[p.assetId],
           latestBalance[(p.accountId, p.assetId)],
           latestPrice[p.assetId],
+          assets[p.assetId]?.priceSource == PriceSource.market
+              ? marketPrices[p.assetId]
+              : null,
         ),
     ];
   }
@@ -100,6 +114,7 @@ abstract final class PortfolioValuator {
     Asset? asset,
     ManualValuation? balance,
     ManualValuation? price,
+    MarketPrice? market,
   ) {
     if (!p.isOpen) {
       return ValuedPosition(
@@ -108,25 +123,58 @@ abstract final class PortfolioValuator {
         marketValue: Decimal.zero,
       );
     }
-    if (balance != null && balance.currency == p.currency) {
+    final usableBalance = balance != null && balance.currency == p.currency
+        ? balance
+        : null;
+    final usablePrice =
+        price != null &&
+            price.currency == p.currency &&
+            p.quantity > Decimal.zero
+        ? price
+        : null;
+    final usableMarket =
+        market != null &&
+            market.currency == p.currency &&
+            p.quantity > Decimal.zero
+        ? market
+        : null;
+
+    // O preço de mercado só vence se for mais recente que o informado.
+    final manualDate = [
+      ?usableBalance?.refDate,
+      ?usablePrice?.refDate,
+    ].fold<LocalDate?>(null, (a, b) => a == null || b.isAfter(a) ? b : a);
+    if (usableMarket != null &&
+        (manualDate == null || usableMarket.refDate.isAfter(manualDate))) {
       return ValuedPosition(
         position: p,
         asset: asset,
-        marketValue: balance.value,
-        valuationDate: balance.refDate,
-        valuationKind: ValuationKind.balance,
-        valuationStale: p.lastOperationDate.isAfter(balance.refDate),
+        marketValue: p.quantity * usableMarket.price,
+        unitPrice: usableMarket.price,
+        valuationDate: usableMarket.refDate,
+        marketPrice: usableMarket,
       );
     }
-    if (price != null &&
-        price.currency == p.currency &&
-        p.quantity > Decimal.zero) {
+    if (usableBalance != null &&
+        (usablePrice == null ||
+            !usablePrice.refDate.isAfter(usableBalance.refDate) ||
+            asset?.priceSource != PriceSource.market)) {
       return ValuedPosition(
         position: p,
         asset: asset,
-        marketValue: p.quantity * price.value,
-        unitPrice: price.value,
-        valuationDate: price.refDate,
+        marketValue: usableBalance.value,
+        valuationDate: usableBalance.refDate,
+        valuationKind: ValuationKind.balance,
+        valuationStale: p.lastOperationDate.isAfter(usableBalance.refDate),
+      );
+    }
+    if (usablePrice != null) {
+      return ValuedPosition(
+        position: p,
+        asset: asset,
+        marketValue: p.quantity * usablePrice.value,
+        unitPrice: usablePrice.value,
+        valuationDate: usablePrice.refDate,
         valuationKind: ValuationKind.unitPrice,
       );
     }
