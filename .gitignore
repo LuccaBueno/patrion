@@ -79,3 +79,6 @@ COTAHIST_*
 # Instalador e pacotes gerados
 /dist/
 /installer/Output/
+
+# Trechos pequenos de respostas reais usados nos testes (não são arquivos brutos).
+!test/fixtures/market/cotahist_*.txt
