@@ -4,7 +4,18 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 5B concluída** em 18/10/2026 (bloqueio do app; o teste do Windows Hello no app real fica com você, ver o relatório). Próxima: Fase 6 (Dados de mercado).
+**Fase 6 em andamento** (Dados de mercado). A Fase 5B foi concluída em 18/10/2026 (o teste do Windows Hello no app real fica com você).
+
+## Fase 6 — andamento
+
+Registro para retomar a fase se a sessão acabar.
+
+- **Pendências da F1 resolvidas:** nenhuma fonte é inviável. Finnhub (plano gratuito: só cotação dos EUA; histórico e outras bolsas só pagos) e Twelve Data (Basic: 8 créditos/min e 800/dia; EUA, câmbio e cripto; B3 só pago) confirmados pela documentação oficial; o teste com chave real fica no seu roteiro (as chaves são digitadas só na tela do app). Tesouro Transparente e CVM: dados abertos com licença ODbL.
+- **Feito e commitado:**
+  - `8c891ab`: schema 4 (tabelas `mkt_` e `dev_provider_state`), camada HTTP (timeout, backoff, `Retry-After`, fila por provedor, deduplicação), leitor de JSON exato e os 14 adaptadores, testados com respostas reais.
+  - `9e7755c`: `MarketRepository`, `ProviderStateRepository`, `MarketPreferences`, `MarketDataService` (carteira, ativo, câmbio, indicadores, histórico, teste de provedor), `MarketPriceBook` e preço de mercado na avaliação da carteira.
+  - Chaves de API: `DpapiApiKeyStore` (arquivo `patrion.apikeys.bin` na pasta de dados, protegido pelo DPAPI; fora do banco, do save, dos backups e do log).
+- **Falta:** injeção de dependências e atualização automática; tela "Fontes de dados"; fonte, data e atraso na carteira e no dashboard; painel de câmbio e indicadores; total em BRL com câmbio; pasta `market/` no save; testes do repositório, do serviço e das telas; D-34 a D-36, FONTES_DE_DADOS, FORMULAS §2.1, CHANGELOG; verificação no app real com e sem internet; push e CI.
 
 ## Concluído
 
