@@ -120,10 +120,7 @@ void main() {
       await app.settle();
       await app.tap(find.text('Carteira').first);
       expect(find.text(r'R$ 3.550,00'), findsOneWidget);
-      expect(
-        find.textContaining('B3 — Séries históricas (COTAHIST) · 16/10/2026'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('COTAHIST · 16/10/2026'), findsOneWidget);
     });
   });
 

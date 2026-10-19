@@ -8,8 +8,13 @@ import '../../../core/time/local_date.dart';
 /// nome do provedor, sem o conteúdo (que pode ser grande).
 abstract final class MarketParse {
   static Never invalid(String provider, String detail) => throw DataError(
-    'A resposta de $provider veio num formato inesperado ($detail). O '
-    'provedor pode ter mudado; os dados já baixados continuam disponíveis.',
+    detail == 'página HTML'
+        ? '$provider respondeu com uma página de erro em vez dos dados: o '
+              'serviço pode estar fora do ar ou ter mudado. Os dados já '
+              'baixados continuam disponíveis.'
+        : 'A resposta de $provider veio num formato inesperado ($detail). O '
+              'provedor pode ter mudado; os dados já baixados continuam '
+              'disponíveis.',
   );
 
   /// JSON com números exatos.

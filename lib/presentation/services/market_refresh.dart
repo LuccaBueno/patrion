@@ -74,7 +74,7 @@ class MarketRefreshController extends Notifier<MarketRefreshState> {
   }
 
   Future<RefreshResult> refreshPortfolio() =>
-      run('Atualizando a carteira', (s) => s.refreshPortfolio());
+      run('Atualização da carteira', (s) => s.refreshPortfolio());
 }
 
 /// Atualização automática enquanto o app está aberto (SPEC §5): uma logo

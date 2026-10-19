@@ -17,6 +17,7 @@ class ProviderInfo {
     this.attribution,
     this.defaultEnabled = true,
     this.warning,
+    this.shortName,
   });
 
   /// Código gravado em `source` dos dados e em `dev_provider_state`.
@@ -42,12 +43,18 @@ class ProviderInfo {
 
   /// Aviso (por exemplo, fonte não oficial).
   final String? warning;
+
+  /// Nome curto, para mostrar ao lado de um valor em tabelas.
+  final String? shortName;
+
+  String get short => shortName ?? name;
 }
 
 /// Provedores usados pelo app, na ordem da tela.
 abstract final class ProviderCatalog {
   static const bcbSgs = ProviderInfo(
     code: 'bcb_sgs',
+    shortName: 'BCB SGS',
     name: 'Banco Central — SGS',
     site: 'https://dadosabertos.bcb.gov.br',
     role: 'CDI, Selic, meta Selic, IPCA e IGP-M',
@@ -60,6 +67,7 @@ abstract final class ProviderCatalog {
 
   static const bcbPtax = ProviderInfo(
     code: 'bcb_ptax',
+    shortName: 'PTAX',
     name: 'Banco Central — PTAX',
     site: 'https://olinda.bcb.gov.br',
     role: 'Câmbio oficial (PTAX de fechamento) de dólar, euro e outras moedas',
@@ -70,6 +78,7 @@ abstract final class ProviderCatalog {
 
   static const ibgeSidra = ProviderInfo(
     code: 'ibge_sidra',
+    shortName: 'IBGE',
     name: 'IBGE — SIDRA',
     site: 'https://apisidra.ibge.gov.br',
     role: 'IPCA, como alternativa ao Banco Central',
@@ -80,6 +89,7 @@ abstract final class ProviderCatalog {
 
   static const frankfurter = ProviderInfo(
     code: 'frankfurter',
+    shortName: 'BCE',
     name: 'Frankfurter (BCE)',
     site: 'https://frankfurter.dev',
     role: 'Câmbio de referência do Banco Central Europeu, quando falta PTAX',
@@ -105,6 +115,7 @@ abstract final class ProviderCatalog {
 
   static const b3Cotahist = ProviderInfo(
     code: 'b3_cotahist',
+    shortName: 'COTAHIST',
     name: 'B3 — Séries históricas (COTAHIST)',
     site: 'https://www.b3.com.br',
     role:
@@ -123,6 +134,7 @@ abstract final class ProviderCatalog {
 
   static const b3Events = ProviderInfo(
     code: 'b3_events',
+    shortName: 'B3',
     name: 'B3 — Proventos e eventos',
     site: 'https://www.b3.com.br',
     role:
@@ -139,6 +151,7 @@ abstract final class ProviderCatalog {
 
   static const tesouro = ProviderInfo(
     code: 'tesouro',
+    shortName: 'Tesouro',
     name: 'Tesouro Transparente',
     site: 'https://www.tesourotransparente.gov.br',
     role: 'Preços e taxas diários dos títulos do Tesouro Direto',
@@ -149,6 +162,7 @@ abstract final class ProviderCatalog {
 
   static const cvm = ProviderInfo(
     code: 'cvm',
+    shortName: 'CVM',
     name: 'CVM — Dados abertos',
     site: 'https://dados.cvm.gov.br',
     role:
@@ -218,6 +232,7 @@ abstract final class ProviderCatalog {
 
   static const yahoo = ProviderInfo(
     code: 'yahoo',
+    shortName: 'Yahoo',
     name: 'Yahoo Finance (não oficial)',
     site: 'https://finance.yahoo.com',
     role:
@@ -260,6 +275,10 @@ abstract final class ProviderCatalog {
     }
     return null;
   }
+
+  /// Nome curto (tabelas).
+  static String shortNameOf(String code) =>
+      code == appCode ? 'calculado' : byCode(code)?.short ?? code;
 
   /// Nome para mostrar ao lado de um dado.
   static String nameOf(String code) =>

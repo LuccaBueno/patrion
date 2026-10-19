@@ -69,8 +69,7 @@ abstract final class MarketLabels {
           ? 'Nada novo para gravar'
           : '${r.updated} ${r.updated == 1 ? 'registro atualizado' : 'registros atualizados'}',
       if (r.failures.isNotEmpty)
-        '${r.failures.length} ${r.failures.length == 1 ? 'falha' : 'falhas'}: '
-            '${{for (final f in r.failures) ProviderCatalog.nameOf(f.provider)}.join(', ')}',
+        'falha em ${{for (final f in r.failures) ProviderCatalog.nameOf(f.provider)}.join(', ')}',
       if (r.unsupported.isNotEmpty)
         'sem fonte disponível para ${r.unsupported.toSet().join(', ')}',
     ];

@@ -143,6 +143,7 @@ class _PositionsTableState extends State<PositionsTable> {
         TableCard(
           child: DataTable(
             showCheckboxColumn: false,
+            columnSpacing: 28,
             sortColumnIndex: _Col.values.indexOf(_sort),
             sortAscending: _ascending,
             columns: [
@@ -283,7 +284,7 @@ class _MarketValueCell extends StatelessWidget {
               Text(Fmt.money(v.marketValue!, v.position.currency)),
               Text(
                 market != null
-                    ? '${ProviderCatalog.nameOf(market.source)} · '
+                    ? '${ProviderCatalog.shortNameOf(market.source)} · '
                           '${MarketLabels.refOf(market)}'
                     : 'informado · ${Fmt.date(v.valuationDate!)}',
                 style: Theme.of(context).textTheme.labelSmall

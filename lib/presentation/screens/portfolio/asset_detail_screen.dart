@@ -569,7 +569,7 @@ class _MarketCard extends ConsumerWidget {
                       : () => _run(
                           context,
                           ref,
-                          'Atualizando ${asset.symbol}',
+                          'Atualização de ${asset.symbol}',
                           (s) => s.refreshAsset(asset),
                         ),
                   icon: const Icon(Icons.refresh, size: 18),
@@ -582,7 +582,7 @@ class _MarketCard extends ConsumerWidget {
                       : () => _run(
                           context,
                           ref,
-                          'Baixando o histórico de ${asset.symbol}',
+                          'Histórico de ${asset.symbol}',
                           (s) => s.downloadHistory(asset),
                         ),
                   icon: const Icon(Icons.download_outlined, size: 18),

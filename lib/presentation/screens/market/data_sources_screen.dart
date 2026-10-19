@@ -120,12 +120,15 @@ class RefreshStatusBanner extends ConsumerWidget {
           subtitle: Text(
             [
               if (state.lastRunAt != null)
-                '${state.lastTask} às '
+                '${state.lastTask} · '
                     '${state.lastRunAt!.hour.toString().padLeft(2, '0')}:'
                     '${state.lastRunAt!.minute.toString().padLeft(2, '0')}',
-              if (!result.offline)
+              // Uma linha por provedor e mensagem (o SGS falha uma vez por
+              // série, com a mesma mensagem).
+              if (!result.offline) ...{
                 for (final f in result.failures)
                   '${ProviderCatalog.nameOf(f.provider)}: ${f.message}',
+              },
             ].join('\n'),
           ),
         ),
@@ -369,7 +372,7 @@ class _ProviderCardState extends ConsumerState<_ProviderCard> {
     setState(() => _testing = true);
     final result = await ref
         .read(marketRefreshProvider.notifier)
-        .run('Testando ${_info.name}', (s) => s.testProvider(_info.code));
+        .run('Teste de ${_info.name}', (s) => s.testProvider(_info.code));
     if (!mounted) return;
     setState(() => _testing = false);
     if (result.failures.isEmpty) {
