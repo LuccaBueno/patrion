@@ -10,13 +10,18 @@ Primeira versão utilizável: carteira real, motor financeiro, backup e sincroni
 
 ### Alterado
 
-- Carteira: na janela de 1280 px, a tabela inteira (até a coluna "Resultado") aparece sem rolar para o lado. A classe fica embaixo do ativo, o preço médio (PM) embaixo da quantidade e o percentual embaixo do resultado.
+- Carteira: na janela de 1280 px, a tabela inteira (até a coluna "Resultado") aparece sem rolar para o lado. A classe fica embaixo do ativo, a conta embaixo da instituição e o percentual embaixo do resultado.
+- Carteira: coluna "Preço médio / Atual", com o preço médio e, embaixo, o preço atual por unidade, para comparar de relance; a fonte e a data da cotação aparecem ao passar o mouse, e sem cotação aparece "indisponível". No detalhe do ativo, o preço atual fica em destaque ao lado do preço médio.
 - A prévia da importação de um save avisa, antes de aplicar, quando a carteira resultante fica inconsistente (por exemplo, uma venda maior que a posição depois de vendas feitas nos dois computadores), e recalcula o aviso quando a versão de um conflito muda.
 - O SQLite do app passou a ser o build do SQLCipher (sem chave, ele funciona como o SQLite comum).
 - Dashboard: os valores dos cards ficam sempre numa linha (a fonte diminui se não couber); o percentual do resultado não realizado passou para a nota do card.
 - CI: `actions/checkout` atualizado para a v7 (Node.js 24), eliminando o aviso de descontinuação do Node.js 20.
 - Especificação: bloqueio do app (banco criptografado com SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação) planejado para a fase F5B da v1.x, com o impacto na arquitetura registrado em DECISIONS D-24 (implementado, ver Adicionado).
 - Temas claro e escuro refeitos: fundo e superfícies neutros (grafite no escuro, branco e cinza-claro no claro), verde-esmeralda só em destaques e dourado só no símbolo e no nome (DECISIONS D-18).
+
+### Corrigido
+
+- Indicadores do Banco Central (SGS): a atualização não mostra mais "erro inesperado" nem "formato inesperado" quando ainda não há dado novo (o app pede a partir do último dado guardado), e repete as consultas quando o serviço responde, de forma passageira, uma página de erro. Se uma série falhar, as outras são atualizadas normalmente e aparece um aviso só, com o nome das séries que ficaram sem dado.
 
 ### Adicionado
 

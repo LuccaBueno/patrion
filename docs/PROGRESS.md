@@ -4,9 +4,52 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 7 implementada** em 19/10/2026 (distribuição), com a v1.0.0 preparada e **sem tag nem Release** (aguardando sua autorização). Falta, para o critério de pronto ("instalador testado em ambiente limpo"), o seu teste no Windows Sandbox ou num PC sem Flutter (roteiro abaixo); aqui o teste automático passou num PC com Flutter, em pastas isoladas. Próxima: Fase 8. Pendências suas antigas: chave da brapi (F6) e Windows Hello (F5B).
+**Fase 7 implementada** em 19/10/2026 (distribuição), com a v1.0.0 preparada e **sem tag nem Release** (aguardando sua autorização). Depois dela, dois ajustes entraram na 1.0.0 (falhas do SGS e preço atual na Carteira; ver "Ajustes antes da tag v1.0.0"), com o `dist\` regenerado. Falta, para o critério de pronto ("instalador testado em ambiente limpo"), o seu teste no Windows Sandbox ou num PC sem Flutter (roteiro abaixo); aqui o teste automático passou num PC com Flutter, em pastas isoladas. Próxima: Fase 8. Pendências suas antigas: chave da brapi (F6) e Windows Hello (F5B).
 
 ## Concluído
+
+### Ajustes antes da tag v1.0.0 (19/10/2026)
+
+Dois pedidos depois da Fase 7, incluídos na 1.0.0 (ainda sem tag): falhas do SGS e preço atual na Carteira (DECISIONS D-41).
+
+**1. O que foi implementado**
+
+- **Falhas do SGS — causa encontrada.** Consultei o SGS real várias vezes com as mesmas URLs. A mesma consulta alterna os dados, uma página HTML de erro **com status 200**, `{"erro":{}}` e 502 (instabilidade do BCB). Um período sem dados responde **404** "Value(s) not found". O IPCA de um mês ainda não publicado responde sempre `{"erro":{}}`. A janela de 5 anos (abaixo do limite de 10) e a Selic diária não eram o problema. As duas mensagens que você viu vinham daí:
+  - "erro inesperado": nosso. A busca incremental pedia a partir do dia (ou mês) **seguinte** ao último dado guardado, quase sempre um período vazio, e o 404 do "sem dados" não era tratado. No log de hoje aparece `HttpStatusError(bcb_sgs, 404)` duas vezes. O log não dizia a série (agora diz); refazendo as consultas que o app faria hoje, dão 404 as de período vazio: IGP-M de outubro (ainda não publicado) e CDI e Selic depois do último dia publicado.
+  - "página de erro" e "formato inesperado": do BCB (a página HTML com status 200), mais o `{"erro":{}}` do IPCA de outubro (nosso, pelo mesmo período vazio).
+- **Correções:** a busca começa **no último dado guardado (incluído)**, então o período sempre tem dado e regravar é idempotente; o 404 "not found" vira lista vazia; respostas 200 inválidas são repetidas (1 s, 2 s, 4 s; 4 tentativas no SGS). Cada série segue independente, e as falhas de um provedor viram **um aviso só**, com as séries ("Séries não atualizadas: CDI e IGP-M. …"). O IPCA que vem do IBGE não conta como falha. O log passou a dizer a série (`bcb_sgs (CDI): dados`).
+- **Preço atual na Carteira:** coluna "Preço médio / Atual" com o preço médio em cima e o preço unitário atual em negrito embaixo (ícone de desatualizado quando for o caso), com fonte, data, tipo e coleta no tooltip. Sem cotação, "indisponível" (também no CDB avaliado por saldo, que não tem preço unitário). O percentual fica só no resultado. Para caber em 1280 px: conta em duas linhas (instituição e conta), cabeçalho "Qtd." (tooltip "Quantidade") e espaçamento menor.
+- **Detalhe do ativo:** "Preço atual" em destaque (fonte maior, negrito) ao lado do preço médio, com fonte e data embaixo e o detalhe no tooltip.
+
+**2. Arquivos alterados (resumo)**
+
+- SGS: `infrastructure/market/providers/bcb_providers.dart`, `market_http.dart` (`getText(retryIf:)`), `market_setup.dart`, `application/market/market_data_service.dart`.
+- Carteira: `presentation/screens/portfolio/portfolio_screen.dart`, `asset_detail_screen.dart`, `presentation/format/market_labels.dart` (`MarketLabels.valuation`).
+- Testes: `providers_test.dart` (404 "sem dados", página de erro repetida até vir o dado, página persistente vira erro), `market_data_service_test.dart` (busca a partir do último dado; falha de três séries não trava as outras, IPCA pelo IBGE, um aviso só), `portfolio_width_test.dart` (pior caso com cotação da brapi antiga, ícone e tooltip com fonte e data), `portfolio_screens_test.dart` (preço atual na carteira e no detalhe; "indisponível").
+- Docs: DECISIONS D-41, FONTES_DE_DADOS §2.1, CHANGELOG (1.0.0: Alterado e Corrigido).
+
+**3. Testes executados e resultados reais**
+
+- `dart format --set-exit-if-changed .`: 200 arquivos, 0 alterados. `flutter analyze`: sem problemas. `flutter test`: **452 testes passando**. `flutter build windows --release`: compilou.
+- **SGS real** com o adaptador corrigido: CDI, Selic, meta Selic, IPCA e IGP-M desde 01/01/2021 baixados sem falha (as retentativas apareceram no log e resolveram). Pedidos a partir de hoje: lista vazia, sem erro. Única falha restante: o IPCA pedido a partir de 01/10 (sempre `{"erro":{}}`), consulta que o app não faz mais.
+- **App real (build release)** numa pasta de dados de teste fictícia (no scratchpad, seus dados intocados): a atualização automática gravou 8.100 registros **sem nenhuma falha** e sem aviso do SGS no log. Carteira na janela de 1280 × 720: tabela inteira visível, com folga até "Resultado". PETR4 e VALE3 pela brapi, HGLG11 pelo COTAHIST, ITSA4 e o CDB com "indisponível". Detalhe da PETR4 com "Preço atual" em destaque ao lado do preço médio. Capturas só da janela do Patrion.
+- **Não conferido no app real:** o tooltip ao passar o mouse (o mouse simulado não aciona o tooltip do Flutter, e não movi o seu cursor). O texto do tooltip está coberto pelos testes de widget.
+- `tool/release/build_release.ps1`: regenerou `dist\Patrion-1.0.0-instalador.exe` (13,6 MB), `Patrion-1.0.0-portatil.zip` (16,3 MB), `SHA256SUMS.txt` e `RELEASE_NOTES.md` (com as duas mudanças). O `test_install.ps1` **não** foi rodado de novo: o instalador não mudou, só o app dentro dele.
+
+**4. Problemas e limitações**
+
+- O SGS continua instável do lado do BCB. Se ele falhar nas 4 tentativas, a série fica para a próxima atualização, com um aviso só.
+- Com "Qtd." e a conta em duas linhas, nomes de instituição ou conta com mais de 150 px são cortados com "…" (o nome inteiro fica no tooltip).
+
+**5. Pendências**
+
+- As mesmas da Fase 7: seu teste em ambiente limpo, autorizar a tag `v1.0.0` e publicar a Release em rascunho.
+
+**6. O que testar manualmente**
+
+- Abra o app (ou instale o novo `dist\Patrion-1.0.0-instalador.exe` por cima) e use "Atualizar agora" em Fontes de dados: CDI, Selic, meta Selic, IPCA e IGP-M sem falha. Se o SGS falhar, deve aparecer um aviso só, com o nome das séries.
+- Carteira em 1280 px: coluna "Preço médio / Atual" e "Resultado" visíveis sem rolar. Passe o mouse no preço atual: aparecem fonte, data, tipo e coleta.
+- Detalhe de um ativo: "Preço atual" em destaque ao lado do preço médio.
 
 ### Fase 7 — Distribuição
 
