@@ -299,13 +299,15 @@ Todo registro guarda `source`, `ref_date` (ou `ref_at`), `collected_at` e `data_
 | Tabela | Chave | Campos |
 |---|---|---|
 | `mkt_prices` | (`symbol`, `market`, `ref_date`, `source`, `data_type`) | `open`, `high`, `low`, `close`, `volume`, `currency`, `quote_factor`, `collected_at` |
-| `mkt_quotes` | (`symbol`, `market`, `source`) | Última cotação: `price`, `currency`, `ref_at`, `delay_note`, `collected_at`, `data_type` |
-| `mkt_corporate_events` | (`symbol`, `market`, `event_kind`, `ex_date`, `source`, `seq`) | `com_date`, `payment_date`, `factor`, `amount`, `currency`, `status` (`paid`, `announced`, `suspect`), `raw_label`, `collected_at` |
-| `mkt_indicators` | (`series_code`, `ref_date`, `source`) | `value`, `unit` (`pct_day`, `pct_month`, `index`), `collected_at` |
-| `mkt_fx_rates` | (`base`, `quote`, `ref_date`, `kind`, `source`) | `bid`, `ask`, `ref_at`, `collected_at` (`kind`: `ptax_close`, `reference`, `intraday`) |
+| `mkt_quotes` | (`symbol`, `market`, `source`) | Última cotação: `price`, `currency`, `ref_at`, `delay_note`, `data_type`, `collected_at` |
+| `mkt_corporate_events` | (`symbol`, `market`, `event_kind`, `ex_date`, `source`, `seq`) | `com_date`, `payment_date`, `factor`, `amount`, `currency`, `status` (`paid`, `announced`, `suspect`), `raw_label`, `isin`, `collected_at` |
+| `mkt_indicators` | (`series_code`, `ref_date`, `source`) | `value`, `unit` (`pct_day`, `pct_month`, `pct_year`, `index`), `collected_at` |
+| `mkt_fx_rates` | (`base`, `quote`, `ref_date`, `kind`, `source`) | `bid`, `ask`, `ref_at`, `collected_at` (`kind`: `ptax_close`, `reference`) |
 | `mkt_treasury_prices` | (`title`, `maturity_date`, `ref_date`, `source`) | `buy_rate`, `sell_rate`, `buy_pu`, `sell_pu`, `base_pu`, `collected_at` |
-| `mkt_fund_quotas` | (`cnpj`, `ref_date`, `source`) | `quota`, `nav`, `holders`, `collected_at` |
-| `mkt_holidays` | (`calendar`, `date`) | `name`, `source` (calendário B3/ANBIMA para a base 252) |
+| `mkt_fund_quotas` | (`cnpj`, `ref_date`, `kind`, `source`) | `quota`, `nav`, `holders`, `isin`, `name`, `collected_at` (`kind`: informe mensal de FII ou cota diária) |
+| `mkt_instruments` | (`symbol`, `market`, `source`) | `isin`, `name`, `source_id` (identificador no provedor), `collected_at` |
+
+Todas as colunas são texto (decimais exatos, regra 6). O calendário de feriados da base 252 fica no código (`BusinessCalendar`), não numa tabela. O estado de cada provedor neste PC (ligado ou desligado, último sucesso e erro, uso da cota do mês) fica em `dev_provider_state` (§7), que nunca vai no save. As chaves de API ficam fora do banco (DECISIONS D-34).
 
 Valores ajustados por proventos e eventos são **calculados** pelo app a partir dos preços brutos e de eventos confirmados, e gravados com `data_type = 'calculated'` e `source = 'patrion'`. Eles podem ser apagados e recalculados a qualquer momento.
 
@@ -320,7 +322,7 @@ Valores ajustados por proventos e eventos são **calculados** pelo app a partir 
 | `dev_sync_peers` | `peer_device_id`, `peer_name`, `last_hlc_received` (maior HLC do último save importado do parceiro), `last_hlc_sent` (maior HLC deste PC que o parceiro confirmou ter recebido, vindo do manifesto dele), `last_sync_at` | Base para detectar conflitos (SPEC §10.4, D-29) e avisar sincronização antiga |
 | `dev_sync_history` | `id`, `direction` (`export`/`import`), `peer_device_id`, `peer_name`, `file_name`, `at`, `max_hlc`, `counts_json` (só contagens), `result` (`ok`/`failed`), `message` | Histórico de sincronizações |
 | `dev_backups` | `id`, `path`, `at`, `reason`, `schema_version`, `app_version`, `size`, `sha256`, `encryption` (`none` ou `sqlcipher-4`, D-24 e D-32; o `keyId` fica no `.json` do backup) | Backups e retenção (`BACKUP.md`) |
-| `dev_provider_state` | `provider`, `last_success_at`, `last_error_at`, `last_error`, `quota_used`, `quota_period` | Controle de limites e estado dos provedores |
+| `dev_provider_state` | `provider`, `enabled`, `last_success_at`, `last_error_at`, `last_error`, `quota_used`, `quota_period` | Controle de limites e estado dos provedores |
 
 Chaves de API **não ficam no banco**: ficam no Gerenciador de Credenciais do Windows (DECISIONS D-11).
 

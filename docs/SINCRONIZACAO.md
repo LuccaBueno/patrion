@@ -51,13 +51,14 @@ Um ZIP com extensão `.invsave` (codec em `domain/sync/invsave_codec.dart`):
 manifest.json          manifesto
 manifest.sha256        SHA-256 do manifest.json
 data/<tabela>.jsonl    um registro por linha, inclusive tombstones
+market/<tabela>.jsonl  dados de mercado (opcional; formato 2)
 ```
 
 **Manifesto** (`domain/sync/save_manifest.dart`):
 
 | Campo | Conteúdo |
 |---|---|
-| `format`, `formatVersion` | `patrion-invsave`, versão 1 do formato do arquivo |
+| `format`, `formatVersion` | `patrion-invsave`; versão 1 do formato do arquivo, ou 2 quando leva a pasta `market/` |
 | `appVersion`, `schemaVersion` | versão do app e do schema do banco que gerou o save |
 | `device` | `id` e `name` do PC de origem |
 | `createdAt` | instante UTC |
@@ -66,11 +67,13 @@ data/<tabela>.jsonl    um registro por linha, inclusive tombstones
 | `files` | SHA-256 de cada `data/<tabela>.jsonl` |
 | `knownPeers` | para cada PC do qual o autor já importou saves, o maior HLC recebido dele (base da detecção de conflitos) |
 | `encryption` | `{"scheme": "none"}` no save sem senha. No save protegido, `{"scheme": "aes-256-gcm", "kdf": {...}, "nonce": ..., "payload": "payload.bin"}` (DECISIONS D-32, abaixo) |
-| `market` | `{"included": false}`. A pasta `market/` com dados de mercado entra quando existirem dados de mercado no banco (F6) |
+| `market` | `{"included": false}`, ou `{"included": true, "counts": {...}}` com os registros de cada tabela `mkt_` quando o save leva a pasta `market/` (DECISIONS D-36) |
 
 **O que vai:** todas as tabelas sincronizáveis (as que têm os campos de sincronização), descobertas pelo próprio banco: cadastros, operações, preços informados, configurações compartilhadas, `asset_aliases` e as tabelas hipotéticas. Uma tabela nova entra no save sem código extra.
 
-**O que não vai:** tabelas `dev_` (identidade, configurações do dispositivo, histórico, backups), dados derivados, logs e chaves de API.
+**Dados de mercado (opcional, marcado por padrão):** a pasta `market/` leva as tabelas `mkt_` (preços, cotações, câmbio, indicadores, Tesouro, informes, eventos e instrumentos), uma linha JSON por registro, com os valores em texto, para o outro PC funcionar sem internet. Com ela, o arquivo sai no formato 2; sem ela, continua no formato 1, que as versões anteriores do app leem. Na importação, cada registro é mesclado pela chave primária da tabela: um registro novo entra e um que já existe só é trocado se a coleta recebida (`collected_at`) for mais recente. Nada é apagado, e a mesclagem roda na mesma transação da importação. Dados de mercado de um save de outro schema são ignorados (são baixados de novo).
+
+**O que não vai:** tabelas `dev_` (identidade, configurações do dispositivo, histórico, backups, estado dos provedores), dados derivados, logs e chaves de API (nunca, nem como opção: DECISIONS D-34).
 
 **Senha do arquivo (F5B).** Ao salvar, o app pergunta se o arquivo deve ser protegido por senha (marcado por padrão com o bloqueio do app ativo). O save protegido é um ZIP com `manifest.json` (só versões, PC de origem, data e os parâmetros da criptografia; sem contagens nem dados), `manifest.sha256` e `payload.bin`: o save comum inteiro, cifrado com AES-256-GCM e chave Argon2id (64 MiB, 3 passadas) derivada da senha. Ao importar, o app pede a senha, decifra e valida o save de dentro como sempre; o manifesto de dentro precisa bater com o de fora. Sem senha, quem tiver o arquivo lê a carteira; a tela avisa.
 
