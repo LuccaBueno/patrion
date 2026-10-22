@@ -20,6 +20,8 @@ import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
 import '../sync/sync_screen.dart';
 import '../updates/update_widgets.dart';
+import '../portfolio/add_asset_dialog.dart';
+import '../../router/app_router.dart';
 
 /// Dashboard da carteira real (SPEC §8).
 ///
@@ -52,17 +54,18 @@ class _Welcome extends StatelessWidget {
     final (title, message, label, route) = snap.accounts.isEmpty
         ? (
             'Nenhum investimento registrado',
-            'Comece cadastrando a instituição e a conta onde ficam seus '
-                'investimentos. Depois registre as operações.',
+            'Adicione as ações, FIIs, ETFs e BDRs que você já tem: digite o '
+                'ticker, a quantidade e o preço médio da corretora. Renda '
+                'fixa, cripto e internacional ficam em Cadastros.',
             'Ir para Cadastros',
-            '/cadastros',
+            Routes.registry,
           )
         : (
             'Nenhuma operação registrada',
-            'Registre compras, aportes, depósitos e proventos para ver a '
-                'carteira aqui.',
+            'Adicione um ativo pelo ticker ou registre compras, aportes, '
+                'depósitos e proventos em Operações.',
             'Ir para Operações',
-            '/operacoes',
+            Routes.operations,
           );
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
@@ -85,9 +88,21 @@ class _Welcome extends StatelessWidget {
             icon: Icons.info_outline,
             title: title,
             message: message,
-            action: FilledButton(
-              onPressed: () => context.go(route),
-              child: Text(label),
+            action: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.icon(
+                  key: const Key('welcome-add-asset'),
+                  onPressed: () => showAddAssetDialog(context),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Adicionar ativo'),
+                ),
+                OutlinedButton(
+                  onPressed: () => context.go(route),
+                  child: Text(label),
+                ),
+              ],
             ),
           ),
         ],
@@ -124,7 +139,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
     );
 
     return PageScaffold(
-      title: 'Início',
+      title: 'Painel',
       subtitle: summary.lastValuationDate == null
           ? 'Carteira real · nenhum preço informado ainda'
           : 'Carteira real · preços e saldos até '

@@ -1,6 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/presentation/screens/market/data_sources_screen.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/market_repository.dart';
 import 'package:patrion/data/repositories/provider_state_repository.dart';
@@ -56,7 +57,12 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('provider-yahoo')),
         300,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: find
+            .descendant(
+              of: find.byType(DataSourcesScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       final yahoo = tester.widget<Switch>(
         find.byKey(const Key('provider-switch-yahoo')),
@@ -75,7 +81,12 @@ void main() {
       await tester.scrollUntilVisible(
         field,
         300,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: find
+            .descendant(
+              of: find.byType(DataSourcesScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       await app.type(field, secret);
       await app.tap(find.byKey(const Key('key-save-brapi')));
@@ -188,7 +199,12 @@ void main() {
       await tester.scrollUntilVisible(
         quota,
         300,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: find
+            .descendant(
+              of: find.byType(DataSourcesScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       expect(
         find.textContaining('12.000 de 15.000 requisições (80%)'),
@@ -196,7 +212,7 @@ void main() {
       );
       expect(find.textContaining('Mais de 80% da cota usada'), findsOneWidget);
       expect(find.textContaining('horário de pregão da B3'), findsOneWidget);
-      await app.tap(find.text('Início').first);
+      await app.tap(find.text('Painel').first);
       expect(find.byKey(const Key('quota-warning')), findsOneWidget);
       expect(
         find.textContaining('80% da cota mensal de brapi'),

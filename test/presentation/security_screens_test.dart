@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:patrion/presentation/router/app_router.dart';
 import 'package:patrion/application/settings/lock_preferences.dart';
 import 'package:patrion/core/config/app_paths.dart';
 import 'package:patrion/core/crypto/crypto_box.dart';
@@ -169,7 +170,7 @@ void main() {
           expect(find.text('Bloquear agora'), findsOneWidget);
           expect(find.text('Desbloquear com o Windows Hello'), findsOneWidget);
         },
-        location: '/configuracoes',
+        location: Routes.security,
         overrides: [sessionControllerProvider.overrideWithValue(lock)],
       );
     });
@@ -199,7 +200,7 @@ void main() {
           await h.tap(find.text('Desbloquear com o Windows Hello'));
           expect(lock.calls, ['lock', 'hello:true']);
         },
-        location: '/configuracoes',
+        location: Routes.security,
         // Janela alta: a tela inteira cabe, sem rolagem no meio do teste.
         size: const Size(1280, 2400),
         overrides: [sessionControllerProvider.overrideWithValue(lock)],

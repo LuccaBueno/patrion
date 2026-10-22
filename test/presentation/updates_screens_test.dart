@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/presentation/router/app_router.dart';
 import 'package:patrion/application/updates/update_checker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:patrion/presentation/app.dart';
@@ -43,7 +44,7 @@ void main() {
     final opened = <Uri>[];
     final app = AppHarness(tester, t);
     await app.run(
-      location: '/configuracoes',
+      location: Routes.about,
       size: _tall,
       releaseFeed: _Feed(_release('9.1.0')),
       overrides: [
@@ -77,7 +78,7 @@ void main() {
     tester,
   ) async {
     final app = AppHarness(tester, t);
-    await app.run(location: '/configuracoes', size: _tall, () async {
+    await app.run(location: Routes.about, size: _tall, () async {
       await app.tap(find.byKey(const Key('updates-check-now')));
       expect(find.text('Sem conexão.'), findsOneWidget);
       expect(find.byKey(const Key('update-release')), findsNothing);
@@ -87,7 +88,7 @@ void main() {
   testWidgets('Sobre abre as licenças de terceiros com o SQLCipher e o '
       'OpenSSL', (tester) async {
     final app = AppHarness(tester, t);
-    await app.run(location: '/configuracoes', size: _tall, () async {
+    await app.run(location: Routes.about, size: _tall, () async {
       await app.tap(find.byKey(const Key('third-party-licenses')));
       await app.pumpUntil(find.text('SQLCipher'));
       expect(find.text('OpenSSL'), findsOneWidget);

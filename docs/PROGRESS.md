@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01. Próximos: M-02, M-03, M-05, M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01 e M-02. Próximos: M-03, M-05, M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -19,6 +19,15 @@ Itens de `docs/MUDANCAS.md`. Cada item tem um commit; o relatório completo sai 
 - Arquivos: `application/portfolio/quick_add_service.dart`, `application/market/market_ports.dart` (`TickerInfo`), `market_data_service.dart` (`lookupTicker`), `infrastructure/market/providers/b3_ticker_catalog.dart`, `brapi_provider.dart` (`BrapiLookup`), `domain/market/tickers.dart`, `presentation/screens/portfolio/add_asset_dialog.dart`; `MessageCard` não estica mais na altura.
 - Testes: `ticker_lookup_test.dart` (catálogo com linhas reais do COTAHIST de 21/10, offline, arquivo não publicado; brapi com e sem chave, 404, nomes), `quick_add_service_test.dart`, `market_data_service_test.dart` (junção das fontes, cota, offline, fonte desligada), `tickers_test.dart`, `add_asset_dialog_test.dart` ("bbas3", 100, 25,00; inexistente; já cadastrado; offline). Suíte inteira: 474 testes passando antes dos ajustes finais; analyze sem problemas.
 - **No app real** (build release, pasta de dados de teste no scratchpad com a sua chave da brapi copiada; seus dados intocados), em 1280 × 800: "bbas3" virou BBAS3, "Banco do Brasil S.A." / Ação vieram da B3 e da brapi, e salvar criou o ativo e o saldo inicial numa tela só, já com cotação (R$ 23,92, brapi). HGLG11 veio como FII, com "Nova compra" e a conta preenchidas.
+
+**M-02 — Menu e Configurações por seções (concluído)** (DECISIONS D-43, SPEC §16)
+
+- Menu: Painel, Carteira, Operações e Cadastros em cima; Sincronizar (com marca quando a última sincronização tem 7 dias ou mais) e Configurações no rodapé, depois de um divisor.
+- Configurações com seções e endereço próprio: Geral, Segurança, Fontes de dados, Backup, Sincronização e Sobre. Endereços antigos redirecionam; avisos abrem a seção certa. Painel e Carteira vazios oferecem "Adicionar ativo".
+- Arquivos: `presentation/router/app_router.dart` (`Routes`, rodapé, redirecionamentos), `shell/app_shell.dart`, `screens/settings_screen.dart`, `dashboard_screen.dart`, `portfolio_screen.dart`, sessão e telas que apontavam para os endereços antigos.
+- Testes: `app_test.dart` (menu, posição do rodapé, Sincronizar em 1 clique até "Salvar arquivo de save", todas as seções abrem, endereços antigos); testes de telas ajustados aos novos endereços. Suíte inteira: 476 passando; analyze sem problemas.
+- **No app** (1280 × 800, pasta de teste): menu com 4 itens em cima e o rodapé; Sincronizar abre a seção com "Salvar arquivo de save"; Geral, Backup e Fontes de dados cabem sem rolagem lateral. Observação: as capturas desta etapa foram feitas no build de depuração; o build release abriu com a janela em branco na captura (ver pendências do relatório final).
+
 
 ### Ajustes antes da tag v1.0.0 (19/10/2026)
 

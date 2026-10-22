@@ -55,7 +55,7 @@ void main() {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
     await app.run(() async {
-      expect(find.text('Início'), findsWidgets);
+      expect(find.text('Painel'), findsWidgets);
       // Caixa 10.000 − 3.005 − 2.000; mercado 3.500 + 2.100.
       expect(find.text(r'R$ 10.595,00'), findsOneWidget);
       expect(find.text(r'R$ 5.005,00'), findsOneWidget);

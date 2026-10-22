@@ -34,7 +34,7 @@ class _PatrionAppState extends ConsumerState<PatrionApp> {
   /// Um `.invsave` aberto pelo Explorador leva à Sincronização, que o
   /// importa (DECISIONS D-39).
   void _onOpenRequest() {
-    if (_requests?.hasPending ?? false) _router.go('/sincronizacao');
+    if (_requests?.hasPending ?? false) _router.go(Routes.sync);
   }
 
   @override

@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../screens/backup/backup_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
-import '../screens/market/data_sources_screen.dart';
 import '../screens/operations/operations_screen.dart';
 import '../screens/portfolio/asset_detail_screen.dart';
 import '../screens/portfolio/portfolio_screen.dart';
 import '../screens/registry/registry_screen.dart';
 import '../screens/settings_screen.dart';
-import '../screens/sync/sync_screen.dart';
 import '../shell/app_shell.dart';
+
+/// Endereços das telas.
+abstract final class Routes {
+  static const dashboard = '/';
+  static const portfolio = '/carteira';
+  static const operations = '/operacoes';
+  static const registry = '/cadastros';
+  static const settings = '/configuracoes';
+  static const security = '/configuracoes/seguranca';
+  static const dataSources = '/configuracoes/fontes';
+  static const backup = '/configuracoes/backup';
+  static const sync = '/configuracoes/sincronizacao';
+  static const about = '/configuracoes/sobre';
+
+  static String asset(String id) => '/carteira/ativo/$id';
+}
 
 /// Item da navegação lateral.
 class NavDestination {
@@ -27,52 +40,46 @@ class NavDestination {
   final IconData selectedIcon;
 }
 
-/// Telas disponíveis. Novas telas entram aqui conforme as fases (SPEC §16).
+/// Telas de uso diário, na parte de cima do menu (M-02). As das próximas
+/// fases (renda passiva, benchmarks, hipotéticas, simuladores) entram aqui.
 const navDestinations = [
   NavDestination(
-    path: '/',
-    label: 'Início',
+    path: Routes.dashboard,
+    label: 'Painel',
     icon: Icons.space_dashboard_outlined,
     selectedIcon: Icons.space_dashboard,
   ),
   NavDestination(
-    path: '/carteira',
+    path: Routes.portfolio,
     label: 'Carteira',
     icon: Icons.pie_chart_outline,
     selectedIcon: Icons.pie_chart,
   ),
   NavDestination(
-    path: '/operacoes',
+    path: Routes.operations,
     label: 'Operações',
     icon: Icons.receipt_long_outlined,
     selectedIcon: Icons.receipt_long,
   ),
   NavDestination(
-    path: '/cadastros',
+    path: Routes.registry,
     label: 'Cadastros',
     icon: Icons.account_balance_outlined,
     selectedIcon: Icons.account_balance,
   ),
+];
+
+/// Rodapé do menu, depois de um divisor: Sincronizar e, sempre por último,
+/// Configurações.
+const footerDestinations = [
   NavDestination(
-    path: '/sincronizacao',
-    label: 'Sincronização',
+    path: Routes.sync,
+    label: 'Sincronizar',
     icon: Icons.sync_alt,
     selectedIcon: Icons.sync_alt,
   ),
   NavDestination(
-    path: '/backup',
-    label: 'Backup',
-    icon: Icons.backup_outlined,
-    selectedIcon: Icons.backup,
-  ),
-  NavDestination(
-    path: '/fontes',
-    label: 'Fontes de dados',
-    icon: Icons.cloud_download_outlined,
-    selectedIcon: Icons.cloud_download,
-  ),
-  NavDestination(
-    path: '/configuracoes',
+    path: Routes.settings,
     label: 'Configurações',
     icon: Icons.settings_outlined,
     selectedIcon: Icons.settings,
@@ -81,20 +88,24 @@ const navDestinations = [
 
 Page<void> _page(Widget child) => NoTransitionPage(child: child);
 
-GoRouter createRouter({String initialLocation = '/'}) {
+GoRouter createRouter({String initialLocation = Routes.dashboard}) {
   return GoRouter(
     initialLocation: initialLocation,
     routes: [
+      // Endereços da 1.0.0, mantidos para avisos e atalhos antigos.
+      GoRoute(path: '/fontes', redirect: (_, _) => Routes.dataSources),
+      GoRoute(path: '/backup', redirect: (_, _) => Routes.backup),
+      GoRoute(path: '/sincronizacao', redirect: (_, _) => Routes.sync),
       ShellRoute(
         builder: (context, state, child) =>
             AppShell(location: state.uri.path, child: child),
         routes: [
           GoRoute(
-            path: '/',
+            path: Routes.dashboard,
             pageBuilder: (context, state) => _page(const DashboardScreen()),
           ),
           GoRoute(
-            path: '/carteira',
+            path: Routes.portfolio,
             pageBuilder: (context, state) => _page(const PortfolioScreen()),
             routes: [
               GoRoute(
@@ -106,28 +117,29 @@ GoRouter createRouter({String initialLocation = '/'}) {
             ],
           ),
           GoRoute(
-            path: '/operacoes',
+            path: Routes.operations,
             pageBuilder: (context, state) => _page(const OperationsScreen()),
           ),
           GoRoute(
-            path: '/cadastros',
+            path: Routes.registry,
             pageBuilder: (context, state) => _page(const RegistryScreen()),
           ),
           GoRoute(
-            path: '/sincronizacao',
-            pageBuilder: (context, state) => _page(const SyncScreen()),
-          ),
-          GoRoute(
-            path: '/backup',
-            pageBuilder: (context, state) => _page(const BackupScreen()),
-          ),
-          GoRoute(
-            path: '/fontes',
-            pageBuilder: (context, state) => _page(const DataSourcesScreen()),
-          ),
-          GoRoute(
-            path: '/configuracoes',
-            pageBuilder: (context, state) => _page(const SettingsScreen()),
+            path: Routes.settings,
+            pageBuilder: (context, state) =>
+                _page(const SettingsScreen(section: SettingsSection.general)),
+            routes: [
+              GoRoute(
+                path: ':section',
+                pageBuilder: (context, state) => _page(
+                  SettingsScreen(
+                    section: SettingsSection.ofPath(
+                      state.pathParameters['section']!,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

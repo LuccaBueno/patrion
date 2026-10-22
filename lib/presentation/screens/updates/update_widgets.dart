@@ -9,6 +9,7 @@ import '../../../application/updates/update_checker.dart';
 import '../../../core/time/instant_format.dart';
 import '../../format/sync_labels.dart';
 import '../../providers.dart';
+import '../../router/app_router.dart';
 
 final _log = Logger('updates');
 
@@ -81,7 +82,7 @@ class UpdateReminder extends ConsumerWidget {
             style: theme.textTheme.bodyMedium,
           ),
           trailing: TextButton(
-            onPressed: () => GoRouter.of(context).go('/configuracoes'),
+            onPressed: () => GoRouter.of(context).go(Routes.about),
             child: const Text('Ver detalhes'),
           ),
         ),

@@ -119,8 +119,8 @@ class _PositionsTableState extends State<PositionsTable> {
           icon: Icons.pie_chart_outline,
           title: 'Nenhuma posição',
           message:
-              'As posições aparecem aqui depois que você registrar compras, '
-              'aportes ou outras operações em Operações.',
+              'Use "Adicionar ativo" para incluir as ações, FIIs, ETFs e '
+              'BDRs que você tem, ou registre operações em Operações.',
         ),
       );
     }

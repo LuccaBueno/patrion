@@ -17,6 +17,7 @@ import '../../format/market_labels.dart';
 import '../../format/sync_labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import '../../router/app_router.dart';
 
 /// Fontes de dados (SPEC §3 e §16): o que cada provedor fornece, o que é
 /// enviado a ele, licença e limites, chave de API, estado e atualização.
@@ -772,7 +773,7 @@ class QuotaWarningBanner extends ConsumerWidget {
             ].join('\n'),
           ),
           trailing: TextButton(
-            onPressed: () => GoRouter.of(context).go('/fontes'),
+            onPressed: () => GoRouter.of(context).go(Routes.dataSources),
             child: const Text('Fontes de dados'),
           ),
         ),

@@ -563,3 +563,14 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Ativo, conta e compra são gravados **numa transação só** (`QuickAddService`). Depois de gravar, o app busca a cotação do ativo novo em segundo plano (fechamento do COTAHIST).
 - Alternativas: catálogo de tickers no banco (cresceria o banco com dado público recuperável); classe pelo final do código (ambígua no "11": unit, FII ou ETF); tipo de operação "saldo inicial" (quebraria a compatibilidade do save com a 1.0.0).
 - Motivo: pedido do usuário (uso real); regras 1, 2 e 8.
+
+### 2026-10-22 — D-43: Menu com uso diário em cima e Configurações por seções (M-02)
+
+- Contexto: Sincronização, Backup e Fontes de dados ficavam no mesmo nível de Início, Carteira e Operações, e o menu vai crescer com as próximas fases.
+- Decisão:
+  - Menu de cima: **Painel** (o antigo Início), Carteira, Operações e Cadastros. Rodapé (`NavigationRail.trailingAtBottom`), depois de um divisor: **Sincronizar** e **Configurações** (sempre a última). O item Sincronizar ganha uma marca (e o tooltip explica) quando a última importação de algum computador tem 7 dias ou mais (`staleSyncDays`, o mesmo aviso do Painel).
+  - **Configurações** com endereço por seção (`/configuracoes/<seção>`): Geral, Segurança, Fontes de dados, Backup, Sincronização e Sobre (as pastas deste computador foram para Sobre). As telas de Backup, Fontes de dados e Sincronização continuam as mesmas, dentro da seção. Sincronizar abre a seção de sincronização: **exportar o save leva 2 cliques** de qualquer tela.
+  - Endereços constantes em `Routes`; os da 1.0.0 (`/fontes`, `/backup`, `/sincronizacao`) redirecionam para as seções, e os avisos (restauração, bloqueio, cota, atualização, `.invsave` aberto pelo Explorador) abrem a seção correspondente.
+  - O Painel vazio e a Carteira vazia oferecem "Adicionar ativo" (M-01).
+- Alternativas: menu "Sincronizar" com um menu suspenso de exportar/importar (a lógica de exportação e a prévia vivem na tela de sincronização; ir até ela mantém o fluxo e o histórico à vista); abas no topo das Configurações (seis abas não cabiam bem ao lado das ações das telas).
+- Motivo: pedido do usuário (uso real).

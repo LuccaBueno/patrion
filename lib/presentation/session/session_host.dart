@@ -12,6 +12,7 @@ import '../services/open_requests.dart';
 import '../theme/app_theme.dart';
 import 'app_session.dart';
 import 'inactivity_guard.dart';
+import '../router/app_router.dart';
 
 /// Raiz da interface: monta o app sobre a sessão aberta e o remonta do zero
 /// quando a sessão troca (restauração de backup, bloqueio e desbloqueio).
@@ -67,10 +68,10 @@ class SessionHost extends StatelessWidget {
             sessionControllerProvider.overrideWithValue(manager),
             openRequestsProvider.overrideWithValue(openRequests),
             sessionNoticeProvider.overrideWithValue(
-              manager.noticeRoute == '/backup' ? notice : null,
+              manager.noticeRoute == Routes.backup ? notice : null,
             ),
             lockNoticeProvider.overrideWithValue(
-              manager.noticeRoute == '/backup' ? null : notice,
+              manager.noticeRoute == Routes.backup ? null : notice,
             ),
             sessionSecurityProvider.overrideWithValue(
               SessionSecurity(key: session.key, keys: manager.keys),
@@ -85,7 +86,7 @@ class SessionHost extends StatelessWidget {
                   initialLocation: notice != null
                       ? manager.noticeRoute
                       : (openRequests?.hasPending ?? false)
-                      ? '/sincronizacao'
+                      ? Routes.sync
                       : '/',
                 ),
               ),

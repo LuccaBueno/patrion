@@ -5,6 +5,8 @@ import 'package:patrion/core/config/app_info.dart';
 import 'package:patrion/core/config/app_paths.dart';
 import 'package:patrion/presentation/app.dart';
 import 'package:patrion/presentation/providers.dart';
+import 'package:patrion/presentation/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 import '../helpers/test_database.dart';
 
@@ -80,14 +82,77 @@ void main() {
     });
   });
 
-  testWidgets('navega para Configurações e mostra as pastas', (tester) async {
+  testWidgets('navega para Configurações e mostra as pastas em Sobre', (
+    tester,
+  ) async {
     await withApp(tester, () async {
       await tester.tap(find.text('Configurações').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Geral'), findsWidgets);
+      await tester.tap(find.byKey(const Key('settings-sobre')));
       await tester.pumpAndSettle();
 
       expect(find.text('Dados deste computador'), findsOneWidget);
       expect(find.text(r'C:\dados'), findsOneWidget);
       expect(find.text(t.identity.deviceId), findsOneWidget);
+    });
+  });
+
+  testWidgets('menu: uso diário em cima; Sincronizar e Configurações no '
+      'rodapé; todas as seções das Configurações abrem', (tester) async {
+    await withApp(tester, () async {
+      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+      expect(
+        [for (final d in rail.destinations) (d.label as Text).data],
+        ['Painel', 'Carteira', 'Operações', 'Cadastros'],
+      );
+      final sync = tester.getCenter(find.byKey(const Key('nav-Sincronizar')));
+      final settings = tester.getCenter(
+        find.byKey(const Key('nav-Configurações')),
+      );
+      final cadastros = tester.getCenter(find.text('Cadastros'));
+      expect(sync.dy, greaterThan(cadastros.dy + 100), reason: 'no rodapé');
+      expect(settings.dy, greaterThan(sync.dy), reason: 'sempre por último');
+
+      // Exportar o save: dois cliques a partir de qualquer tela.
+      await tester.tap(find.byKey(const Key('nav-Sincronizar')));
+      await tester.pumpAndSettle();
+      expect(find.text('Salvar arquivo de save'), findsOneWidget);
+      expect(find.text('Importar save…'), findsOneWidget);
+
+      for (final (key, text) in [
+        ('settings-geral', 'Tema'),
+        ('settings-seguranca', 'Bloqueio do app'),
+        ('settings-fontes', 'Atualizar agora'),
+        ('settings-backup', 'Fazer backup agora'),
+        ('settings-sincronizacao', 'Histórico'),
+        ('settings-sobre', 'Licenças de terceiros'),
+      ]) {
+        await tester.tap(find.byKey(Key(key)));
+        await settleDb(tester);
+        expect(find.textContaining(text), findsWidgets, reason: key);
+      }
+    });
+  });
+
+  testWidgets('endereços antigos levam à seção das Configurações', (
+    tester,
+  ) async {
+    await withApp(tester, () async {
+      final router = GoRouter.of(tester.element(find.byType(NavigationRail)));
+      for (final (old, now) in [
+        ('/fontes', Routes.dataSources),
+        ('/backup', Routes.backup),
+        ('/sincronizacao', Routes.sync),
+      ]) {
+        router.go(old);
+        await settleDb(tester);
+        expect(
+          router.routerDelegate.currentConfiguration.uri.path,
+          now,
+          reason: old,
+        );
+      }
     });
   });
 

@@ -653,6 +653,8 @@ Cada indicador traz fórmula, unidade, período, fonte e limitações.
 
 - Em português brasileiro, pensada para desktop, com navegação lateral.
 - As telas aparecem conforme as fases forem implementadas.
+- **Menu lateral (ajuste M-02, DECISIONS D-43):** em cima, só as telas de uso diário (Painel, Carteira, Operações e Cadastros; as próximas fases — Renda passiva, Benchmarks, Hipotéticas, Simuladores — entram aqui). No rodapé, depois de um divisor: **Sincronizar** (leva direto à exportação e importação do save, com uma marca quando a última sincronização com outro computador tem 7 dias ou mais) e **Configurações**, sempre por último.
+- **Configurações** tem seções: Geral (tema e preferências), Segurança (senha, Windows Hello, inatividade, chave de recuperação), Fontes de dados (chaves, cota da brapi, intervalo), Backup (manual, restauração, lista), Sincronização (save, computadores, histórico) e Sobre (versão, atualizações, licenças e pastas). Avisos que levavam a Backup ou Fontes de dados abrem a seção correspondente.
 
 **Telas**
 
@@ -662,8 +664,7 @@ Cada indicador traz fórmula, unidade, período, fonte e limitações.
 - Renda passiva, Benchmarks e Risco.
 - Carteiras hipotéticas e Simuladores.
 - Análises, Alertas e Relatórios.
-- Sincronização (save) e Backup.
-- Fontes de dados e Configurações.
+- Configurações, com Sincronização (save), Backup e Fontes de dados como seções.
 
 **Padrões visuais**
 

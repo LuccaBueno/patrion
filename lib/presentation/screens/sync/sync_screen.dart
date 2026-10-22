@@ -20,6 +20,7 @@ import '../../widgets/common.dart';
 import '../security/security_dialogs.dart';
 import 'import_preview_dialog.dart';
 import 'save_password_dialog.dart';
+import '../../router/app_router.dart';
 
 /// Dias sem sincronizar a partir dos quais o app avisa (sem bloquear,
 /// SPEC §10.5).
@@ -470,7 +471,7 @@ class SyncReminder extends ConsumerWidget {
             style: theme.textTheme.bodyMedium,
           ),
           trailing: TextButton(
-            onPressed: () => GoRouter.of(context).go('/sincronizacao'),
+            onPressed: () => GoRouter.of(context).go(Routes.sync),
             child: const Text('Sincronizar'),
           ),
         ),

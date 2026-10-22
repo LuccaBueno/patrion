@@ -394,7 +394,7 @@ void main() {
         find.textContaining('A última sincronização com PC-NOTEBOOK foi há 10'),
         findsOneWidget,
       );
-      expect(find.text('Sincronizar'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Sincronizar'), findsOneWidget);
     });
     await tester.runAsync(pc.close);
   });

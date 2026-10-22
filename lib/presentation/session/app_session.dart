@@ -26,6 +26,7 @@ import '../../infrastructure/backup/pre_migration_backup.dart';
 import '../../infrastructure/security/database_encryption.dart';
 import '../../infrastructure/security/key_file_store.dart';
 import '../providers.dart';
+import '../router/app_router.dart';
 
 final _log = Logger('sessao');
 
@@ -209,7 +210,7 @@ class SessionManager extends ChangeNotifier implements SessionController {
   int _generation = 0;
   String? _notice;
   String _busyMessage = 'Abrindo…';
-  String _noticeRoute = '/configuracoes';
+  String _noticeRoute = Routes.security;
   String? _pendingRecoveryKey;
 
   /// Sessão aberta. Só existe na fase [SessionPhase.ready].
@@ -387,7 +388,7 @@ class SessionManager extends ChangeNotifier implements SessionController {
   }
 
   Future<void> _openAndPublish({DatabaseKey? key, String? notice}) async {
-    _noticeRoute = '/configuracoes';
+    _noticeRoute = Routes.security;
     _session = await _open(paths, wallClock: _clock, key: key, keys: _keys);
     _notice = notice;
     _generation++;
@@ -688,7 +689,7 @@ class SessionManager extends ChangeNotifier implements SessionController {
     } finally {
       if (!identical(backupKey, key)) backupKey?.destroy();
     }
-    _noticeRoute = '/backup';
+    _noticeRoute = Routes.backup;
     _generation++;
     _phase = SessionPhase.ready;
     notifyListeners();
