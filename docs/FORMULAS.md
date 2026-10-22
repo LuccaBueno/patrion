@@ -100,7 +100,7 @@ Calculados separadamente para cada moeda (o total em reais está em §2.3):
 - Valor investido = Σ `K` das posições abertas.
 - Valor de mercado = Σ valor das posições com preço ou saldo.
 - Caixa = Σ caixa das contas na moeda.
-- Patrimônio = valor de mercado + caixa. É **parcial** quando há posições sem preço; o custo delas aparece à parte.
+- Patrimônio = valor de mercado + caixa, com o **controle de caixa ligado**. Com ele desligado (padrão desde a 1.1.0, DECISIONS D-44), o caixa não entra: **patrimônio = valor de mercado das posições**, e dinheiro parado entra como um ativo da classe Caixa com saldo informado. É **parcial** quando há posições sem preço; o custo delas aparece à parte. A TIR e o resultado não dependem do controle de caixa (compras e vendas são sempre fluxos).
 - Resultado não realizado = valor de mercado − custo das posições com valor de mercado.
 - Retorno simples = resultado não realizado ÷ custo das posições com valor de mercado. Não inclui proventos e não é TWR nem MWR (para esses, ver §8 e §10).
 - Lucro realizado e proventos = soma de todas as posições, inclusive encerradas.

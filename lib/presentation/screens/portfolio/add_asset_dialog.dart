@@ -68,6 +68,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
   String? _sourceNote;
   Future<void>? _pending;
   bool _saving = false;
+  bool _offsetCash = true;
 
   @override
   void initState() {
@@ -233,6 +234,8 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
       date: dateOf(_date)!,
       fees: mode == AddMode.buy ? decimalOf(_fees) : null,
       initialBalance: mode == AddMode.initialBalance,
+      offsetCash:
+          mode == AddMode.initialBalance && snap.trackCash && _offsetCash,
     );
     try {
       final result = await ref
@@ -513,6 +516,20 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
             ],
           ],
         ),
+        if (initial && snap.trackCash)
+          CheckboxListTile(
+            key: const Key('add-offset-cash'),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _offsetCash,
+            onChanged: (v) => setState(() => _offsetCash = v ?? true),
+            title: const Text('Não mexer no caixa'),
+            subtitle: const Text(
+              'Com o controle de caixa ligado, registra também um depósito '
+              'do mesmo valor, para o saldo inicial não deixar o caixa '
+              'negativo.',
+            ),
+          ),
         if (initial)
           Text(
             'Copie a quantidade e o preço médio da corretora. A TIR fica '

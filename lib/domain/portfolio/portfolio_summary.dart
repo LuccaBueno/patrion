@@ -42,8 +42,8 @@ class CurrencySummary {
   final Decimal incomeGross;
   final Decimal incomeNet;
 
-  /// Patrimônio = valor de mercado + caixa. É parcial quando
-  /// [unpricedCount] > 0.
+  /// Patrimônio = valor de mercado + caixa (zero sem o controle de caixa,
+  /// M-03). É parcial quando [unpricedCount] > 0.
   Decimal get equity => marketValue + cash;
 
   bool get isPartial => unpricedCount > 0;
@@ -86,6 +86,7 @@ class PortfolioSummary {
     required this.upcomingMaturities,
     required this.negativeCashAccounts,
     required this.issues,
+    this.trackCash = true,
   });
 
   final Map<String, CurrencySummary> byCurrency;
@@ -100,6 +101,11 @@ class PortfolioSummary {
   /// Contas com caixa negativo (faltam depósitos registrados).
   final Set<String> negativeCashAccounts;
   final List<PortfolioIssue> issues;
+
+  /// O controle de caixa está ligado (M-03). Desligado, o caixa é zero, o
+  /// patrimônio é o valor de mercado das posições e não há aviso de caixa
+  /// negativo.
+  final bool trackCash;
 
   bool get isEmpty => positions.isEmpty && byCurrency.isEmpty;
 
@@ -157,6 +163,7 @@ class PortfolioSummary {
     required Map<String, FixedIncomeTerms> termsByAsset,
     required LocalDate asOf,
     int maturityWindowDays = 90,
+    bool trackCash = true,
   }) {
     final acc = <String, _CurrencyAcc>{};
     _CurrencyAcc of(String c) => acc.putIfAbsent(c, () => _CurrencyAcc(c));
@@ -187,12 +194,15 @@ class PortfolioSummary {
     }
 
     final negativeCash = <String>{};
-    state.cash.forEach((accountId, byCurrency) {
-      byCurrency.forEach((currency, amount) {
-        of(currency).cash += amount;
-        if (amount < Decimal.zero) negativeCash.add(accountId);
+    // Sem controle de caixa, compras e vendas não movimentam caixa (M-03).
+    if (trackCash) {
+      state.cash.forEach((accountId, byCurrency) {
+        byCurrency.forEach((currency, amount) {
+          of(currency).cash += amount;
+          if (amount < Decimal.zero) negativeCash.add(accountId);
+        });
       });
-    });
+    }
 
     final maturities = <UpcomingMaturity>[];
     final seen = <String>{};
@@ -215,6 +225,7 @@ class PortfolioSummary {
       upcomingMaturities: maturities,
       negativeCashAccounts: negativeCash,
       issues: state.issues,
+      trackCash: trackCash,
     );
   }
 }

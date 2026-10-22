@@ -10,6 +10,7 @@ import '../application/market/market_data_service.dart';
 import '../application/market/market_overview.dart';
 import '../application/market/market_ports.dart';
 import '../application/settings/market_preferences.dart';
+import '../application/settings/portfolio_preferences.dart';
 import '../application/portfolio/operation_service.dart';
 import '../application/portfolio/portfolio_query.dart';
 import '../application/portfolio/quick_add_service.dart';
@@ -119,10 +120,20 @@ final quickAddServiceProvider = Provider<QuickAddService>(
   ),
 );
 
+/// Preferências da carteira que vão no save (controle de caixa, M-03).
+final portfolioPreferencesProvider = Provider<PortfolioPreferences>(
+  (ref) => PortfolioPreferences(ref.watch(sharedSettingsRepositoryProvider)),
+);
+
+final trackCashProvider = StreamProvider<bool>(
+  (ref) => ref.watch(portfolioPreferencesProvider).watchTrackCash(),
+);
+
 final portfolioQueryProvider = Provider<PortfolioQuery>(
   (ref) => PortfolioQuery(
     ref.watch(portfolioRepositoriesProvider),
     market: ref.watch(marketRepositoryProvider),
+    preferences: ref.watch(portfolioPreferencesProvider),
   ),
 );
 

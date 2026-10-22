@@ -277,7 +277,7 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 - Alternativas: gravar `drv_positions` e recalcular a partir da operação alterada.
 - Motivo: com o volume de um usuário (centenas a poucos milhares de operações), o recálculo completo leva milissegundos, é mais simples e não tem como ficar dessincronizado. As tabelas `drv_` entram quando a evolução diária (F4/F6) exigir; a regra "dados derivados não são sincronizáveis" continua valendo.
 
-### 2026-10-17 — D-21: Regras das operações (Fase 3)
+### 2026-10-17 — D-21: Regras das operações (Fase 3) — o caixa passou a ser opcional na D-44
 
 - Decisão (fórmulas em `FORMULAS.md` §1):
   - Cada conta tem caixa por moeda, calculado de todas as operações: compras debitam, vendas e proventos creditam. Caixa negativo gera um aviso no dashboard ("registre os depósitos"), sem esconder nem ajustar nada.
@@ -574,3 +574,17 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - O Painel vazio e a Carteira vazia oferecem "Adicionar ativo" (M-01).
 - Alternativas: menu "Sincronizar" com um menu suspenso de exportar/importar (a lógica de exportação e a prévia vivem na tela de sincronização; ir até ela mantém o fluxo e o histórico à vista); abas no topo das Configurações (seis abas não cabiam bem ao lado das ações das telas).
 - Motivo: pedido do usuário (uso real).
+
+### 2026-10-22 — D-44: Controle de caixa opcional, desligado por padrão (M-03; altera D-21)
+
+- Contexto: cada compra era descontada do caixa da conta (D-21). Quem não registra depósitos via caixa e patrimônio negativos (ex.: −R$ 3.729,60 logo depois de uma compra), o que não faz sentido para quem só acompanha os ativos da corretora.
+- Decisão:
+  - Preferência **"Controlar saldo em caixa"**, **desligada por padrão**, em Configurações → Geral. É **geral** (não por conta) e fica em `shared_settings` (`portfolio.track_cash`, JSON `true`/`false`): vai no save e vale nos dois computadores, porque muda os totais. Por conta foi descartado por ora: exigiria mudar o schema de `accounts` (sincronizável) para um caso que a opção geral já resolve.
+  - O motor continua calculando o caixa por conta (`PortfolioCalculator`, sem mudança). `PortfolioSummary.build(trackCash:)` decide se ele entra: **desligado**, o caixa de cada moeda é zero, não há aviso de caixa negativo, o patrimônio é o valor de mercado das posições e a alocação não tem fatia de caixa; **ligado**, tudo como na 1.0.0. No domínio o padrão é `true` (os testes antigos do motor seguem iguais); no app, sem a preferência gravada, vale `false`.
+  - O Painel esconde o card "Caixa" e explica o patrimônio ("valor de mercado das posições"). Proventos, vendas e lucro realizado continuam nos próprios cards. Depósitos e retiradas continuam registráveis (sem efeito nos totais com a opção desligada).
+  - **TIR e resultado** não mudam: compras, vendas e proventos sempre foram fluxos do MWR, que já excluía o caixa.
+  - Dinheiro parado: ativo da classe **Caixa** com saldo informado (já existia), que entra no valor de mercado.
+  - No saldo inicial do cadastro rápido (M-01), com a opção ligada, "Não mexer no caixa" (marcado) registra também um depósito do mesmo valor.
+  - Os retratos da carteira passam a ser recalculados quando `shared_settings` muda (`PortfolioRepositories.watchChanges`).
+- Alternativas: ajustar o caixa automaticamente com depósitos fictícios (inventaria operações); esconder só o aviso (o patrimônio continuaria negativo).
+- Motivo: pedido do usuário (uso real); regra 1 (nada inventado).

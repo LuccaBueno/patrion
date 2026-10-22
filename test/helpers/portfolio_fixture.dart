@@ -3,6 +3,8 @@ import 'package:patrion/application/portfolio/operation_service.dart';
 import 'package:patrion/application/portfolio/portfolio_query.dart';
 import 'package:patrion/application/portfolio/registry_service.dart';
 import 'package:patrion/application/portfolio/valuation_service.dart';
+import 'package:patrion/application/settings/portfolio_preferences.dart';
+import 'package:patrion/data/repositories/shared_settings_repository.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/portfolio_repositories.dart';
 import 'package:patrion/domain/portfolio/codes.dart';
@@ -24,9 +26,15 @@ class PortfolioFixture {
       ),
       operations = OperationService(PortfolioRepositories(t.db, t.sync)),
       valuations = ValuationService(PortfolioRepositories(t.db, t.sync)),
+      preferences = PortfolioPreferences(
+        SharedSettingsRepository(t.db, t.sync),
+      ),
       query = PortfolioQuery(
         PortfolioRepositories(t.db, t.sync),
         wallClock: t.wall.clock,
+        preferences: PortfolioPreferences(
+          SharedSettingsRepository(t.db, t.sync),
+        ),
       );
 
   final TestDb t;
@@ -35,6 +43,9 @@ class PortfolioFixture {
   final OperationService operations;
   final ValuationService valuations;
   final PortfolioQuery query;
+
+  /// Controle de caixa (M-03), desligado por padrão como no app.
+  final PortfolioPreferences preferences;
 
   late String broker;
   late String account;

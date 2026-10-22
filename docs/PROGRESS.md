@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01 e M-02. Próximos: M-03, M-05, M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01, M-02 e M-03. Próximos: M-05, M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -26,7 +26,15 @@ Itens de `docs/MUDANCAS.md`. Cada item tem um commit; o relatório completo sai 
 - Configurações com seções e endereço próprio: Geral, Segurança, Fontes de dados, Backup, Sincronização e Sobre. Endereços antigos redirecionam; avisos abrem a seção certa. Painel e Carteira vazios oferecem "Adicionar ativo".
 - Arquivos: `presentation/router/app_router.dart` (`Routes`, rodapé, redirecionamentos), `shell/app_shell.dart`, `screens/settings_screen.dart`, `dashboard_screen.dart`, `portfolio_screen.dart`, sessão e telas que apontavam para os endereços antigos.
 - Testes: `app_test.dart` (menu, posição do rodapé, Sincronizar em 1 clique até "Salvar arquivo de save", todas as seções abrem, endereços antigos); testes de telas ajustados aos novos endereços. Suíte inteira: 476 passando; analyze sem problemas.
-- **No app** (1280 × 800, pasta de teste): menu com 4 itens em cima e o rodapé; Sincronizar abre a seção com "Salvar arquivo de save"; Geral, Backup e Fontes de dados cabem sem rolagem lateral. Observação: as capturas desta etapa foram feitas no build de depuração; o build release abriu com a janela em branco na captura (ver pendências do relatório final).
+- **No app** (1280 × 800, pasta de teste): menu com 4 itens em cima e o rodapé; Sincronizar abre a seção com "Salvar arquivo de save"; Geral, Backup e Fontes de dados cabem sem rolagem lateral. O build release foi conferido depois: abre e redimensiona normalmente (uma captura em branco no meio da abertura era da minha ferramenta de captura, não do app).
+
+
+**M-03 — Controle de caixa opcional (concluído)** (DECISIONS D-44, altera D-21; SPEC §8; FORMULAS §2)
+
+- Configurações → Geral → "Controlar saldo em caixa", **desligado por padrão**, geral e sincronizado (`shared_settings`). Desligado: caixa fora dos totais, sem card "Caixa" nem aviso de caixa negativo, patrimônio = valor de mercado das posições. Ligado: o comportamento da 1.0.0. A TIR e o resultado não mudam. No saldo inicial do cadastro rápido, com o caixa ligado, "Não mexer no caixa" registra o depósito do mesmo valor.
+- Arquivos: `domain/portfolio/portfolio_summary.dart` (`trackCash`), `application/settings/portfolio_preferences.dart`, `portfolio_query.dart`, `portfolio_repositories.dart` (recalcula quando a preferência muda), `providers.dart`, `settings_screen.dart`, `dashboard_screen.dart`, `add_asset_dialog.dart`. A lista de seções das Configurações passou a destacar só a seção escolhida.
+- Testes: compra de R$ 3.729,60 sem depósito (patrimônio = posição, sem aviso; ligando, volta o caixa −3.729,60 com aviso), TIR igual com e sem o controle, retrato com o caixa ligado e desligado; os testes antigos de caixa do Painel rodam com a opção ligada e passam; teste de tela do padrão e do botão em Configurações. Suíte inteira: 479 passando.
+- **No app (release, 1280 × 800):** a carteira de teste que mostrava patrimônio −R$ 108,00 e caixa −R$ 2.500,00 passou a mostrar patrimônio R$ 2.392,00 (o valor da posição), sem card de caixa nem aviso.
 
 
 ### Ajustes antes da tag v1.0.0 (19/10/2026)

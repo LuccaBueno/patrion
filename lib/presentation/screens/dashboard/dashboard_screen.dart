@@ -179,7 +179,9 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                           '${totals.unpricedCount == 1 ? 'posição sem preço' : 'posições sem preço'} '
                           '(custo de ${Fmt.money(totals.unpricedCost, currency)} '
                           'fora do total)'
-                    : 'Valor de mercado + caixa',
+                    : summary.trackCash
+                    ? 'Valor de mercado + caixa'
+                    : 'Valor de mercado das posições (sem controle de caixa)',
               ),
               _StatCard(
                 key: const Key('stat-invested'),
@@ -193,12 +195,13 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                 value: Fmt.money(totals.marketValue, currency),
                 note: 'Só posições com preço, cotação ou saldo',
               ),
-              _StatCard(
-                key: const Key('stat-cash'),
-                label: 'Caixa',
-                value: Fmt.money(totals.cash, currency),
-                note: 'Depósitos, vendas e proventos menos compras e saídas',
-              ),
+              if (summary.trackCash)
+                _StatCard(
+                  key: const Key('stat-cash'),
+                  label: 'Caixa',
+                  value: Fmt.money(totals.cash, currency),
+                  note: 'Depósitos, vendas e proventos menos compras e saídas',
+                ),
               _StatCard(
                 key: const Key('stat-unrealized'),
                 label: 'Resultado não realizado',

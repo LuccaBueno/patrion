@@ -92,12 +92,38 @@ class _GeneralSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themePreference =
         ref.watch(themePreferenceProvider).value ?? ThemePreference.system;
+    final trackCash = ref.watch(trackCashProvider).value ?? false;
     return PageScaffold(
       title: 'Geral',
       subtitle: 'Aparência e preferências',
       child: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
+          SettingsCard(
+            title: 'Carteira',
+            children: [
+              SwitchListTile(
+                key: const Key('track-cash'),
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Controlar saldo em caixa'),
+                subtitle: Text(
+                  trackCash
+                      ? 'Ligado: depósitos, retiradas, compras e vendas '
+                            'movimentam o caixa de cada conta, que entra no '
+                            'patrimônio. Registre os depósitos para o caixa '
+                            'não ficar negativo.'
+                      : 'Desligado: compras e vendas não movimentam caixa e '
+                            'o patrimônio é o valor de mercado das posições. '
+                            'Para incluir dinheiro parado, cadastre um ativo '
+                            'da classe Caixa e informe o saldo. Vale nos '
+                            'computadores sincronizados.',
+                ),
+                value: trackCash,
+                onChanged: (v) =>
+                    ref.read(portfolioPreferencesProvider).setTrackCash(v),
+              ),
+            ],
+          ),
           SettingsCard(
             title: 'Aparência',
             children: [

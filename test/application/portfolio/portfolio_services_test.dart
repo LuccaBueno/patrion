@@ -394,14 +394,70 @@ void main() {
         balance: dec('2100'),
       );
 
+      // Controle de caixa ligado (M-03): o comportamento da 1.0.0.
+      await f.preferences.setTrackCash(true);
       final snap = await f.query.load();
       final brl = snap.summary.byCurrency['BRL']!;
+      expect(snap.trackCash, isTrue);
       expect(brl.invested, dec('5000'));
       expect(brl.marketValue, dec('5600'));
       expect(brl.cash, dec('5000'));
       expect(brl.equity, dec('10600'));
       expect(snap.summary.lastValuationDate, LocalDate(2024, 5, 31));
       expect(snap.accountLabel(f.account), 'Corretora Exemplo · Principal');
+
+      // Desligado (padrão): o caixa não entra; patrimônio = posições.
+      await f.preferences.setTrackCash(false);
+      final off = (await f.query.load()).summary;
+      expect(off.trackCash, isFalse);
+      expect(off.byCurrency['BRL']!.cash, dec('0'));
+      expect(off.byCurrency['BRL']!.equity, dec('5600'));
+    });
+
+    test('sem controle de caixa (padrão), uma compra sem depósito não deixa o '
+        'patrimônio negativo nem avisa caixa negativo (M-03)', () async {
+      f.t.wall.now = DateTime(2026, 10, 22, 12);
+      expect(await f.preferences.trackCash(), isFalse);
+      await f.add(
+        f.draft(OperationType.buy, '2026-10-22', qty: '120', price: '31.08'),
+      );
+      await f.valuations.setUnitPrice(
+        assetId: f.petr,
+        refDate: LocalDate(2026, 10, 22),
+        price: dec('31.08'),
+      );
+      var summary = (await f.query.load()).summary;
+      var brl = summary.byCurrency['BRL']!;
+      expect(brl.invested, dec('3729.6'));
+      expect(brl.equity, dec('3729.6'));
+      expect(brl.cash, dec('0'));
+      expect(summary.negativeCashAccounts, isEmpty);
+      expect(summary.allocation('BRL', (v) => v.asset?.symbol), hasLength(1));
+
+      // Ligado: volta o caixa negativo, com o aviso.
+      await f.preferences.setTrackCash(true);
+      summary = (await f.query.load()).summary;
+      brl = summary.byCurrency['BRL']!;
+      expect(brl.cash, dec('-3729.6'));
+      expect(brl.equity, dec('0'));
+      expect(summary.negativeCashAccounts, {f.account});
+    });
+
+    test('a TIR não depende do controle de caixa', () async {
+      f.t.wall.now = DateTime(2025, 6, 1, 12);
+      await f.add(
+        f.draft(OperationType.buy, '2024-06-03', qty: '100', price: '30'),
+      );
+      await f.valuations.setUnitPrice(
+        assetId: f.petr,
+        refDate: LocalDate(2025, 5, 30),
+        price: dec('33'),
+      );
+      final off = (await f.query.load()).performance('BRL');
+      await f.preferences.setTrackCash(true);
+      final on = (await f.query.load()).performance('BRL');
+      expect(off.net!.annual, on.net!.annual);
+      expect(off.totalResult, on.totalResult);
     });
 
     test('watch emite um novo retrato a cada alteração', () async {

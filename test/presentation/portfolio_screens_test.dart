@@ -16,8 +16,10 @@ void main() {
   setUp(() async => f = await PortfolioFixture.open());
   tearDown(() => f.t.close());
 
-  /// Carteira com caixa, ação com preço e CDB com saldo informado.
+  /// Carteira com caixa, ação com preço e CDB com saldo informado, com o
+  /// controle de caixa ligado (M-03; o comportamento da 1.0.0).
   Future<void> seed() async {
+    await f.preferences.setTrackCash(true);
     await f.add(
       f.draft(OperationType.deposit, '2024-01-02', asset: null, gross: '10000'),
     );
@@ -78,6 +80,7 @@ void main() {
     tester,
   ) async {
     await tester.runAsync(() async {
+      await f.preferences.setTrackCash(true);
       await f.add(
         f.draft(
           OperationType.deposit,
@@ -205,6 +208,7 @@ void main() {
   testWidgets('dashboard sem preço avisa que o patrimônio é parcial', (
     tester,
   ) async {
+    await tester.runAsync(() => f.preferences.setTrackCash(true));
     await tester.runAsync(
       () => f.add(
         f.draft(OperationType.buy, '2024-01-10', qty: '100', price: '30'),
@@ -374,4 +378,44 @@ void main() {
       });
     });
   }
+
+  testWidgets('sem controle de caixa (padrão): patrimônio = posições, sem '
+      'card de caixa nem aviso; ligar em Configurações traz o caixa de volta '
+      '(M-03)', (tester) async {
+    await tester.runAsync(() async {
+      await f.add(
+        f.draft(OperationType.buy, '2026-10-20', qty: '120', price: '31.08'),
+      );
+      await f.valuations.setUnitPrice(
+        assetId: f.petr,
+        refDate: LocalDate(2026, 10, 20),
+        price: dec('31.08'),
+      );
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(() async {
+      expect(find.byKey(const Key('stat-cash')), findsNothing);
+      expect(find.textContaining('Caixa negativo'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('stat-equity')),
+          matching: find.text(r'R$ 3.729,60'),
+        ),
+        findsOneWidget,
+      );
+
+      await app.tap(find.text('Configurações').first);
+      await app.tap(find.byKey(const Key('track-cash')));
+      await app.tap(find.text('Painel').first);
+      expect(find.byKey(const Key('stat-cash')), findsOneWidget);
+      expect(find.textContaining('Caixa negativo'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('stat-equity')),
+          matching: find.text(r'R$ 0,00'),
+        ),
+        findsOneWidget,
+      );
+    });
+  });
 }

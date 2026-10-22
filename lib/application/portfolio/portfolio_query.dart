@@ -12,6 +12,7 @@ import '../../domain/portfolio/portfolio_calculator.dart';
 import '../../domain/portfolio/portfolio_summary.dart';
 import '../../domain/portfolio/portfolio_valuation.dart';
 import '../market/market_price_book.dart';
+import '../settings/portfolio_preferences.dart';
 
 /// Retrato da carteira real: cadastros, operações e tudo o que é calculado a
 /// partir deles. Nada daqui é gravado: é recalculado a cada alteração
@@ -42,6 +43,7 @@ class PortfolioSnapshot {
     required List<Operation> operations,
     required List<ManualValuation> valuations,
     Map<String, MarketPrice> marketPrices = const {},
+    bool trackCash = PortfolioPreferences.defaultTrackCash,
   }) {
     final assetMap = {for (final a in assets) a.id: a};
     final state = PortfolioCalculator.compute(
@@ -61,6 +63,7 @@ class PortfolioSnapshot {
       valued: valued,
       termsByAsset: {for (final t in fixedIncome) t.assetId: t},
       asOf: asOf,
+      trackCash: trackCash,
     );
     return PortfolioSnapshot(
       asOf: asOf,
@@ -93,6 +96,9 @@ class PortfolioSnapshot {
   /// Todas as posições (inclusive encerradas), com valor de mercado.
   final List<ValuedPosition> valued;
   final PortfolioSummary summary;
+
+  /// O controle de caixa está ligado (M-03).
+  bool get trackCash => summary.trackCash;
 
   final _performanceByCurrency = <String, Performance>{};
   final _performanceByAsset = <String, Performance>{};
@@ -143,11 +149,19 @@ class PortfolioSnapshot {
 /// Lê a carteira real e a recalcula a cada alteração nas tabelas (e nos
 /// dados de mercado, quando há [MarketRepository]).
 class PortfolioQuery {
-  PortfolioQuery(this._repos, {Clock wallClock = const Clock(), this._market})
-    : _clock = wallClock;
+  PortfolioQuery(
+    this._repos, {
+    Clock wallClock = const Clock(),
+    this._market,
+    this._preferences,
+  }) : _clock = wallClock;
 
   final PortfolioRepositories _repos;
   final MarketRepository? _market;
+
+  /// Sem preferências (testes de serviço), vale o padrão: sem controle de
+  /// caixa.
+  final PortfolioPreferences? _preferences;
   final Clock _clock;
 
   Future<PortfolioSnapshot> load() async {
@@ -162,7 +176,11 @@ class PortfolioQuery {
     final assets = results[2].cast<Asset>();
     final fixedIncome = results[3].cast<FixedIncomeTerms>();
     final market = _market;
+    final trackCash =
+        await _preferences?.trackCash() ??
+        PortfolioPreferences.defaultTrackCash;
     return PortfolioSnapshot.compute(
+      trackCash: trackCash,
       asOf: LocalDate.fromDateTime(_clock.now()),
       institutions: results[0].cast<Institution>(),
       accounts: results[1].cast<Account>(),

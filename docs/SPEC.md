@@ -185,7 +185,7 @@ Data, ativo, quantidade, preço, valor bruto, custos, impostos, moeda, câmbio, 
 
 **Indicadores exibidos**
 
-- Patrimônio, valor investido, valor de mercado e caixa.
+- Patrimônio, valor investido, valor de mercado e caixa. O **controle do saldo em caixa é opcional e vem desligado** (ajuste M-03, DECISIONS D-44; Configurações → Geral, vale em todos os computadores): desligado, compras e vendas não movimentam caixa, o card "Caixa" e o aviso de caixa negativo somem e o patrimônio é o valor de mercado das posições; ligado, vale o comportamento da 1.0.0 (depósitos, retiradas, caixa calculado e aviso de caixa negativo). Dinheiro parado pode entrar como um ativo da classe Caixa com saldo informado. A TIR não depende do caixa.
 - Lucro ou prejuízo.
 - Rentabilidade acumulada e por período.
 - Proventos e renda passiva.

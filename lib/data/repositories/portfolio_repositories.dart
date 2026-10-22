@@ -43,6 +43,8 @@ class PortfolioRepositories {
       db.fixedIncomeTerms,
       db.operations,
       db.manualValuations,
+      // Preferências da carteira, como o controle de caixa (M-03).
+      db.sharedSettings,
     ]),
   );
 }
