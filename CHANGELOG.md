@@ -4,7 +4,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
-## [1.0.0] - 2026-10-19
+## [1.0.0] - 2026-10-22
 
 Primeira versão utilizável: carteira real, motor financeiro, backup e sincronização por arquivo, bloqueio opcional, dados de mercado e instalador.
 
