@@ -61,7 +61,13 @@ void main() {
       // Caixa 10.000 − 3.005 − 2.000; mercado 3.500 + 2.100.
       expect(find.text(r'R$ 10.595,00'), findsOneWidget);
       expect(find.text(r'R$ 5.005,00'), findsOneWidget);
-      expect(find.text(r'R$ 5.600,00'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('stat-market')),
+          matching: find.text(r'R$ 5.600,00'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(r'R$ 4.995,00'), findsWidgets);
       // Resultado não realizado e resultado total (sem vendas nem proventos).
       expect(find.text(r'+R$ 595,00'), findsNWidgets(2));
@@ -70,8 +76,16 @@ void main() {
       // mostra o retorno do período.
       expect(find.text('+11,89% no período'), findsOneWidget);
       expect(find.textContaining('de 10/01/2024 a 31/05/2024'), findsOneWidget);
-      expect(find.text('Alocação por classe'), findsOneWidget);
-      expect(find.text('Ações BR'), findsOneWidget);
+      expect(find.text('Por classe'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('dist-class')),
+          matching: find.text('Ações BR'),
+        ),
+        findsOneWidget,
+      );
+      // Resultado total sobre o aplicado: 595 ÷ 5.005.
+      expect(find.textContaining('+11,89% sobre o aplicado'), findsOneWidget);
       expect(find.textContaining('saldos até 31/05/2024'), findsOneWidget);
     });
   });

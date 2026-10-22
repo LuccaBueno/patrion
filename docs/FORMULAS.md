@@ -116,6 +116,14 @@ Calculados separadamente para cada moeda (o total em reais está em §2.3):
 - Lucro realizado e proventos = soma de todas as posições, inclusive encerradas.
 - Alocação = valor de mercado de cada grupo (mais o caixa, na alocação por classe) ÷ total. Posições sem preço ficam fora.
 
+### 3.1 Painel (`DashboardMetrics`, `lib/domain/portfolio/dashboard_metrics.dart`; M-04)
+
+- **Resultado total %** = resultado total (§10) ÷ dinheiro aplicado (compras e aportes, com custos, desde o início).
+- **Variação do dia da carteira** = Σ quantidade × (cotação − fechamento anterior) dos ativos com cotação de mercado e fechamento anterior guardado; em %, ÷ Σ quantidade × fechamento anterior desses ativos. Ativos sem a variação ficam fora e o valor aparece como **parcial**; sem nenhum, **indisponível**.
+- **Aportes do mês** = Σ (valor + custos) das compras, aportes e reinvestimentos com data no mês, na moeda; **no ano**, do 1º de janeiro até hoje. A compra de **saldo inicial** (cadastro rápido) não conta. **Vendas** = Σ (valor − custos) de vendas e resgates. **Proventos** = Σ (valor − custos) de dividendos, JCP, rendimentos e juros, pela data registrada.
+- **Distribuição** = §3 (alocação), por ativo, classe, setor (do cadastro; sem setor, "Sem setor informado") e instituição. Até 7 fatias; o resto vira "Outros".
+- **Maiores altas e baixas** = ativos com a variação do dia (ou do mês, §2.4) calculada, ordenados pela variação %.
+
 ## 4. Potências, logaritmos e exponenciais (`DecimalMath`, DECISIONS D-26)
 
 - `ln x`, `e^x` e `b^e` com expoente fracionário são calculados sem ponto flutuante: ponto fixo com 60 casas internas, resultado com 20 casas, meio para o par.

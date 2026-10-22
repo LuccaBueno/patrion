@@ -18,6 +18,10 @@ import '../../providers.dart';
 import '../market/data_sources_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
+import 'dashboard_charts.dart';
+import '../../../domain/portfolio/dashboard_metrics.dart';
+import '../../../domain/portfolio/holdings.dart';
+import '../../../core/money/decimal_math.dart';
 import '../sync/sync_screen.dart';
 import '../updates/update_widgets.dart';
 import '../portfolio/add_asset_dialog.dart';
@@ -133,6 +137,24 @@ class _DashboardState extends ConsumerState<_Dashboard> {
     final totals = summary.byCurrency[currency]!;
     final performance = widget.snap.performance(currency);
     final fx = ref.watch(marketOverviewProvider).value?.fx ?? const {};
+    final holdings = Holdings.build(
+      widget.snap.valued,
+      toBrl: {
+        for (final MapEntry(:key, :value) in fx.entries)
+          if (value.mid != null) key: value.mid!,
+      },
+    );
+    final day = DashboardMetrics.dayChange(holdings, currency);
+    final total = performance.totalResult;
+    // Resultado total sobre o dinheiro aplicado (FORMULAS §3.1).
+    final totalFraction = total == null || performance.invested <= Decimal.zero
+        ? null
+        : DecimalMath.divide(total, performance.invested);
+    final months = DashboardMetrics.monthly(
+      widget.snap.operations,
+      currency: currency,
+      asOf: widget.snap.asOf,
+    );
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
@@ -157,6 +179,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
           ),
       ],
       child: ListView(
+        key: const Key('dashboard-list'),
         padding: const EdgeInsets.only(bottom: 32),
         children: [
           const RefreshStatusBanner(),
@@ -166,12 +189,11 @@ class _DashboardState extends ConsumerState<_Dashboard> {
           const SyncReminder(),
           const UpdateReminder(),
           ..._warnings(context, summary),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
+          _HeroRow(
             children: [
               _StatCard(
                 key: const Key('stat-equity'),
+                big: true,
                 label: 'Patrimônio',
                 value: Fmt.money(totals.equity, currency),
                 note: totals.isPartial
@@ -183,6 +205,47 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                     ? 'Valor de mercado + caixa'
                     : 'Valor de mercado das posições (sem controle de caixa)',
               ),
+              _StatCard(
+                key: const Key('stat-total-result'),
+                big: true,
+                label: 'Resultado total',
+                pnl: performance.totalResult,
+                value: performance.totalResult == null
+                    ? null
+                    : Fmt.signedMoney(performance.totalResult!, currency),
+                unavailableReason: performance.gap?.label,
+                note: totalFraction == null
+                    ? 'Realizado + não realizado + proventos, líquido de '
+                          'custos e impostos'
+                    : '${Fmt.percent(totalFraction)} sobre o aplicado '
+                          '(${Fmt.money(performance.invested, currency)}); '
+                          'realizado + não realizado + proventos',
+              ),
+              _StatCard(
+                key: const Key('stat-day'),
+                big: true,
+                label: 'Variação do dia',
+                pnl: day?.amount,
+                value: day == null
+                    ? null
+                    : '${Fmt.signedMoney(day.amount, currency)} '
+                          '(${day.fraction == null ? '—' : Fmt.percent(day.fraction!)})',
+                unavailableReason:
+                    'Nenhum ativo com cotação de mercado e o fechamento '
+                    'anterior guardado.',
+                note: day == null
+                    ? 'Cotação atual × fechamento anterior'
+                    : 'Desde o fechamento de ${Fmt.date(day.since)}'
+                          '${day.partial ? ' · parcial: ${day.missing} '
+                                    '${day.missing == 1 ? 'ativo' : 'ativos'} sem a variação' : ''}',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: [
               _StatCard(
                 key: const Key('stat-invested'),
                 label: 'Valor investido',
@@ -214,18 +277,6 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                           '(retorno simples, sem proventos)',
               ),
               _StatCard(
-                key: const Key('stat-total-result'),
-                label: 'Resultado total',
-                pnl: performance.totalResult,
-                value: performance.totalResult == null
-                    ? null
-                    : Fmt.signedMoney(performance.totalResult!, currency),
-                unavailableReason: performance.gap?.label,
-                note:
-                    'Realizado + não realizado + proventos, líquido de '
-                    'custos e impostos',
-              ),
-              _StatCard(
                 key: const Key('stat-mwr'),
                 label: 'Rentabilidade (TIR)',
                 pnl: performance.net?.annual,
@@ -254,44 +305,90 @@ class _DashboardState extends ConsumerState<_Dashboard> {
             ],
           ),
           const SizedBox(height: 24),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 900;
-              final children = [
-                _AllocationCard(
-                  title: 'Alocação por classe',
-                  slices: summary.allocation(
-                    currency,
-                    (v) => v.asset?.assetClass.label ?? '?',
-                  ),
-                  currency: currency,
+          _ChartsGrid(
+            children: [
+              DonutCard(
+                key: const Key('dist-asset'),
+                title: 'Por ativo',
+                currency: currency,
+                slices: _slices([
+                  for (final h in holdings)
+                    if (h.currency == currency && h.marketValue != null)
+                      (h.asset?.symbol ?? '?', h.marketValue!),
+                ]),
+              ),
+              DonutCard(
+                key: const Key('dist-class'),
+                title: 'Por classe',
+                currency: currency,
+                slices: summary.allocation(
+                  currency,
+                  (v) => v.asset?.assetClass.label ?? '?',
                 ),
-                _AllocationCard(
-                  title: 'Alocação por instituição',
-                  slices: summary.allocation(
-                    currency,
-                    (v) =>
-                        widget.snap
-                            .institutionOfAccount(v.position.accountId)
-                            ?.name ??
-                        '?',
-                    includeCash: false,
-                  ),
-                  currency: currency,
+              ),
+              DonutCard(
+                key: const Key('dist-sector'),
+                title: 'Por setor',
+                subtitle: 'Setor do cadastro do ativo',
+                currency: currency,
+                slices: summary.allocation(
+                  currency,
+                  (v) => v.asset?.sector ?? 'Sem setor informado',
+                  includeCash: false,
                 ),
-              ];
-              return wide
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: children[0]),
-                        const SizedBox(width: 16),
-                        Expanded(child: children[1]),
-                      ],
-                    )
-                  : Column(children: children);
-            },
+              ),
+              DonutCard(
+                key: const Key('dist-institution'),
+                title: 'Por instituição',
+                currency: currency,
+                slices: summary.allocation(
+                  currency,
+                  (v) =>
+                      widget.snap
+                          .institutionOfAccount(v.position.accountId)
+                          ?.name ??
+                      '?',
+                  includeCash: false,
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 16),
+          _ChartsGrid(
+            children: [
+              DashCard(
+                key: const Key('dash-contributions'),
+                title: 'Aportes',
+                subtitle:
+                    'No mês ${Fmt.money(months.last.buys, currency)} · no ano '
+                    '${Fmt.money(DashboardMetrics.investedInYear(widget.snap.operations, currency: currency, asOf: widget.snap.asOf), currency)}'
+                    ' · compras com custos; o saldo inicial não conta',
+                child: MonthlyBars(
+                  months: months,
+                  currency: currency,
+                  series: [
+                    BarSeries('Compras e aportes', (m) => m.buys),
+                    BarSeries('Vendas e resgates', (m) => m.sells),
+                  ],
+                ),
+              ),
+              DashCard(
+                key: const Key('dash-income'),
+                title: 'Proventos',
+                subtitle:
+                    'Últimos 12 meses '
+                    '${Fmt.money(months.fold(Decimal.zero, (a, m) => a + m.income), currency)}'
+                    ' · líquidos, por mês de pagamento registrado',
+                child: MonthlyBars(
+                  months: months,
+                  currency: currency,
+                  series: [BarSeries('Proventos', (m) => m.income)],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _MoversCard(holdings: holdings, currency: currency),
           const SizedBox(height: 16),
           _TopPositionsCard(snap: widget.snap, currency: currency),
           if (summary.upcomingMaturities.isNotEmpty) ...[
@@ -302,9 +399,9 @@ class _DashboardState extends ConsumerState<_Dashboard> {
           const MarketOverviewCard(),
           const SizedBox(height: 16),
           Text(
-            'O TWR, a rentabilidade por mês e por ano, a evolução '
-            'patrimonial e a comparação com benchmarks usam o histórico de '
-            'cotações e entram com as análises e benchmarks (Fase 8).',
+            'A evolução do patrimônio, a rentabilidade no mês, no ano e '
+            'desde o início comparada com CDI e Ibovespa e o seletor de '
+            'período usam o histórico e os benchmarks e entram na Fase 8.',
             style: muted,
           ),
         ],
@@ -370,6 +467,7 @@ class _StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.note,
+    this.big = false,
     this.pnl,
     this.info,
     this.unavailableReason,
@@ -389,10 +487,15 @@ class _StatCard extends StatelessWidget {
   final String? info;
   final String? unavailableReason;
 
+  /// Destaque do topo (M-04): maior e mais largo.
+  final bool big;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = theme.textTheme.titleLarge;
+    final style = big
+        ? theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600)
+        : theme.textTheme.titleLarge;
     final muted = theme.colorScheme.onSurfaceVariant;
     final Widget valueWidget;
     if (value == null) {
@@ -413,7 +516,7 @@ class _StatCard extends StatelessWidget {
       );
     }
     return SizedBox(
-      width: 280,
+      width: big ? null : 280,
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -457,74 +560,6 @@ class _StatCard extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AllocationCard extends StatelessWidget {
-  const _AllocationCard({
-    required this.title,
-    required this.slices,
-    required this.currency,
-  });
-
-  final String title;
-  final List<AllocationSlice<String?>> slices;
-  final String currency;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: theme.textTheme.titleMedium),
-            Text(
-              'Pelo valor de mercado; posições sem preço ficam fora.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (slices.isEmpty)
-              const UnavailableText(
-                tooltip: 'Informe preços ou saldos para ver a alocação.',
-              ),
-            for (final s in slices)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(child: Text(s.key ?? 'Caixa')),
-                        Text(
-                          '${Fmt.percent(s.fraction, signed: false)} · '
-                          '${Fmt.money(s.value, currency)}',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        // Conversão para desenho apenas (regra 6, exceção).
-                        value: s.fraction.toDouble(),
-                        minHeight: 6,
-                        backgroundColor:
-                            theme.colorScheme.surfaceContainerHighest,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
         ),
       ),
     );
@@ -699,6 +734,182 @@ class _ConsolidatedCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Destaques do topo (M-04): patrimônio, resultado total e variação do dia,
+/// lado a lado (um embaixo do outro em janelas estreitas).
+class _HeroRow extends StatelessWidget {
+  const _HeroRow({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 760) return Column(children: children);
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final (i, c) in children.indexed) ...[
+                if (i > 0) const SizedBox(width: 16),
+                Expanded(child: c),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Cartões de gráfico em duas colunas (uma em janelas estreitas).
+class _ChartsGrid extends StatelessWidget {
+  const _ChartsGrid({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 900) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final c in children)
+                Padding(padding: const EdgeInsets.only(bottom: 16), child: c),
+            ],
+          );
+        }
+        return Column(
+          children: [
+            for (var i = 0; i < children.length; i += 2)
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: i + 2 < children.length ? 16 : 0,
+                ),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: children[i]),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: i + 1 < children.length
+                            ? children[i + 1]
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Fatias de uma distribuição por chave, do maior valor para o menor.
+List<AllocationSlice<String?>> _slices(List<(String, Decimal)> values) {
+  final total = values.fold(Decimal.zero, (a, v) => a + v.$2);
+  if (total <= Decimal.zero) return const [];
+  return [
+    for (final (key, value) in values)
+      if (value > Decimal.zero)
+        AllocationSlice<String?>(key, value, DecimalMath.divide(value, total)),
+  ]..sort((a, b) => b.value.compareTo(a.value));
+}
+
+/// Maiores altas e baixas da carteira, no dia ou no mês (M-04).
+class _MoversCard extends StatefulWidget {
+  const _MoversCard({required this.holdings, required this.currency});
+
+  final List<Holding> holdings;
+  final String currency;
+
+  @override
+  State<_MoversCard> createState() => _MoversCardState();
+}
+
+class _MoversCardState extends State<_MoversCard> {
+  bool _month = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    final movers = DashboardMetrics.movers([
+      for (final h in widget.holdings)
+        if (h.currency == widget.currency) h,
+    ], month: _month);
+    final ups = movers.where((m) => m.change.perUnit > Decimal.zero).take(3);
+    final downs = movers.reversed
+        .where((m) => m.change.perUnit < Decimal.zero)
+        .take(3);
+
+    Widget column(String title, Iterable<Mover> list) => Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: theme.textTheme.labelLarge),
+          const SizedBox(height: 4),
+          if (list.isEmpty) Text('Nenhuma', style: muted),
+          for (final m in list)
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              onTap: () => context.go(Routes.asset(m.holding.assetId)),
+              title: Text(m.holding.asset?.symbol ?? '?'),
+              subtitle: Text(
+                'desde ${Fmt.date(m.change.from.refDate)} · '
+                '${Fmt.money(m.change.to, widget.currency)}',
+              ),
+              trailing: PnlText(
+                value: m.change.perUnit,
+                text: Fmt.percent(m.change.fraction),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    return DashCard(
+      key: const Key('dash-movers'),
+      title: 'Maiores altas e baixas',
+      subtitle: _month
+          ? 'Cotação atual contra o fechamento do mês anterior'
+          : 'Cotação atual contra o fechamento anterior',
+      trailing: SegmentedButton<bool>(
+        showSelectedIcon: false,
+        style: const ButtonStyle(visualDensity: VisualDensity.compact),
+        segments: const [
+          ButtonSegment(value: false, label: Text('Dia')),
+          ButtonSegment(value: true, label: Text('Mês')),
+        ],
+        selected: {_month},
+        onSelectionChanged: (s) => setState(() => _month = s.single),
+      ),
+      child: movers.isEmpty
+          ? Text(
+              'Indisponível: nenhum ativo com cotação de mercado e o '
+              'fechamento de referência guardado. Use "Atualizar agora".',
+              style: muted,
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                column('Altas', ups),
+                const SizedBox(width: 24),
+                column('Baixas', downs),
+              ],
+            ),
     );
   }
 }

@@ -222,4 +222,88 @@ void main() {
       );
     });
   });
+
+  testWidgets('Painel (M-04): destaques, distribuição, aportes, proventos e '
+      'maiores altas e baixas, com valores que batem com a Carteira', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      await seed();
+      await f.add(
+        f.draft(
+          OperationType.dividend,
+          '2026-09-15',
+          asset: ids['ITSA4'],
+          gross: '25',
+        ),
+      );
+      await f.add(
+        f.draft(
+          OperationType.buy,
+          '2026-10-10',
+          asset: ids['ITSA4'],
+          qty: '10',
+          price: '9',
+          fees: '1',
+        ),
+      );
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(() async {
+      Finder inKey(String key, String text) => find.descendant(
+        of: find.byKey(Key(key)),
+        matching: find.textContaining(text),
+      );
+      final list = find
+          .descendant(
+            of: find.byKey(const Key('dashboard-list')),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      Future<void> show(String key) => tester.scrollUntilVisible(
+        find.byKey(Key(key)),
+        200,
+        scrollable: list,
+      );
+      // Patrimônio = soma dos valores da Carteira com preço:
+      // 2.392 + 400 + 3.500 + 210 × 9 = 8.182 (o WEGE3 sem preço fica fora).
+      expect(inKey('stat-equity', r'R$ 8.182,00'), findsOneWidget);
+      expect(
+        inKey('stat-equity', 'Parcial: 1 posição sem preço'),
+        findsOneWidget,
+      );
+      // Variação do dia: só o BBAS3 tem cotação e fechamento anterior.
+      expect(inKey('stat-day', r'-R$ 18,00 (-0,75%)'), findsOneWidget);
+      expect(
+        inKey('stat-day', 'parcial: 4 ativos sem a variação'),
+        findsOneWidget,
+      );
+      // Distribuição por ativo com os mesmos valores da Carteira.
+      expect(inKey('dist-asset', 'VALE3'), findsOneWidget);
+      expect(inKey('dist-asset', r'R$ 3.500,00'), findsOneWidget);
+      expect(inKey('dist-asset', r'R$ 2.392,00'), findsOneWidget);
+      expect(find.byKey(const Key('dist-sector')), findsOneWidget);
+      expect(inKey('dist-sector', 'Sem setor informado'), findsOneWidget);
+      await show('dash-contributions');
+      // Aportes: no mês, a compra de 10/10 (91); no ano, as cinco compras
+      // de janeiro (2.500 + 300 + 3.000 + 2.000 + 800) + 91.
+      expect(inKey('dash-contributions', r'No mês R$ 91,00'), findsOneWidget);
+      expect(
+        inKey('dash-contributions', r'no ano R$ 8.691,00'),
+        findsOneWidget,
+      );
+      expect(
+        inKey('dash-income', r'Últimos 12 meses R$ 25,00'),
+        findsOneWidget,
+      );
+      await show('dash-movers');
+      // Maiores altas e baixas: BBAS3 caiu 0,75% no dia; no mês, subiu
+      // contra o fechamento de 30/09.
+      expect(inKey('dash-movers', 'BBAS3'), findsOneWidget);
+      expect(inKey('dash-movers', '-0,75%'), findsOneWidget);
+      await tester.tap(find.text('Mês'));
+      await app.settle();
+      expect(inKey('dash-movers', 'desde 30/09/2026'), findsOneWidget);
+    });
+  });
 }

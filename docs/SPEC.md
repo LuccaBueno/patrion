@@ -183,6 +183,8 @@ Data, ativo, quantidade, preço, valor bruto, custos, impostos, moeda, câmbio, 
 
 ## 8. Dashboard (carteira real)
 
+**Painel (ajuste M-04, itens 1, 2, 3, 6 e 7; DECISIONS D-46).** A tela Início passou a se chamar Painel. Destaques no topo: patrimônio, resultado total (R$ e % sobre o aplicado) e variação do dia (R$ e %, desde o fechamento anterior; parcial quando algum ativo não tem a variação). Distribuição em rosca por ativo, classe, setor e instituição, com a legenda em texto (nome, % e valor). Aportes no mês e no ano e barras dos últimos 12 meses (compras e aportes × vendas e resgates; o saldo inicial do cadastro rápido não conta como aporte). Proventos por mês (barras) e total dos últimos 12 meses. Maiores altas e baixas da carteira no dia ou no mês. Sem dado, cada bloco mostra "indisponível" ou "nada registrado" com o motivo. Evolução, rentabilidade comparada e seletor de período ficam para a F8 (§21).
+
 **Indicadores exibidos**
 
 - Patrimônio, valor investido, valor de mercado e caixa. O **controle do saldo em caixa é opcional e vem desligado** (ajuste M-03, DECISIONS D-44; Configurações → Geral, vale em todos os computadores): desligado, compras e vendas não movimentam caixa, o card "Caixa" e o aviso de caixa negativo somem e o patrimônio é o valor de mercado das posições; ligado, vale o comportamento da 1.0.0 (depósitos, retiradas, caixa calculado e aviso de caixa negativo). Dinheiro parado pode entrar como um ativo da classe Caixa com saldo informado. A TIR não depende do caixa.
@@ -925,7 +927,7 @@ A numeração "F5B" indica que a fase depende da F5 (backup e save). Ela é a pr
 
 **F8. Classes, benchmarks, risco e renda passiva**
 
-§12.
+§12. Também os itens do Painel que dependem do histórico e dos benchmarks (ajuste M-04, `docs/MUDANCAS.md`): **evolução do patrimônio** (linha do valor da carteira com o total investido sobreposto), **rentabilidade** no mês, no ano e desde o início comparada com CDI e Ibovespa, e o **seletor de período** (1M, 6M, 1A, 5A, tudo) desses gráficos (itens 4, 5 e 9). O item 8 (câmbio e indicadores numa faixa compacta no rodapé do Painel) não fez parte do ajuste antes da F8 e entra junto com esses.
 
 **F9. Carteiras hipotéticas e backtest**
 

@@ -74,8 +74,7 @@ class QuickAddService {
   final OperationService _operations;
 
   /// Nota gravada na compra que representa o saldo inicial.
-  static const initialBalanceNote =
-      'Saldo inicial (posição informada pela corretora)';
+  static const initialBalanceNote = InitialBalance.note;
 
   Future<QuickAddResult> add(
     QuickAddInput input, {

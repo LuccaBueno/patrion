@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01, M-02, M-03 e M-05. Próximos: M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01 a M-05 (do M-04, os itens 1, 2, 3, 6 e 7). Próximos: a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -44,6 +44,15 @@ Itens de `docs/MUDANCAS.md`. Cada item tem um commit; o relatório completo sai 
 - Arquivos: `domain/portfolio/holdings.dart`, `domain/market/market_price.dart` (`PriceReference`, `PriceChange`, `withReferences`), `market_price_book.dart`, `market_repository.dart` (`closesSince`), `portfolio_query.dart`, `presentation/screens/portfolio/portfolio_screen.dart` (reescrita), `asset_panel.dart`, `trade_dialog.dart`; `fl_chart` 1.2.0 no `pubspec.yaml`.
 - Testes: `holdings_test.dart` (ordem, valorização, lucro, % da carteira, contas somadas, câmbio na ordem, variação do dia e do mês, sem fechamento), `portfolio_list_test.dart` (5 ativos: ordem, valorização −4,32%, painel com lucro, total aplicado, variação −R$ 18,00 (−0,75%), gráfico com a linha do PM em 25; sem histórico, indisponível; comprar pelo painel reordena; vender tudo leva ao fim, em cinza), `portfolio_width_test.dart` refeito para a lista (Segoe UI real, 1264 px úteis). Suíte inteira: 486 passando; analyze sem problemas.
 - **No app (release, 1280 × 800)**, carteira de teste com BBAS3, PETR4, VALE3, HGLG11 e ITUB4 adicionados pelo formulário rápido: lista na ordem dos valores, cotações da brapi com fonte e data; painel do PETR4 com lucro, variação do dia contra o fechamento de 21/10 (COTAHIST) e gráfico com a linha do preço médio. Corrigi depois da conferência os rótulos do eixo do gráfico (mínimo e máximo sobrepostos, última data cortada).
+
+
+**M-04 — Painel com gráficos, itens 1, 2, 3, 6 e 7 (concluído)** (DECISIONS D-46, SPEC §8 e §21, FORMULAS §3.1)
+
+- Início virou **Painel**. Destaques: patrimônio, resultado total (R$ e % sobre o aplicado) e variação do dia (R$ e %, parcial quando falta algum ativo). Roscas por ativo, classe, setor e instituição com legenda em texto. Aportes no mês e no ano, com barras de 12 meses (compras × vendas; o saldo inicial não conta). Proventos por mês e total de 12 meses. Maiores altas e baixas no dia ou no mês.
+- Itens 4, 5 e 9 registrados na F8 (SPEC §21), como pedido; o item 8 (faixa de câmbio no rodapé) não estava na lista pedida e também ficou registrado na F8.
+- Arquivos: `domain/portfolio/dashboard_metrics.dart`, `entities.dart` (`InitialBalance`), `presentation/screens/dashboard/dashboard_charts.dart` (rosca, barras, cores), `dashboard_screen.dart`.
+- Testes: `dashboard_metrics_test.dart` (meses, saldo inicial fora, moeda, ano, variação do dia parcial e indisponível, altas e baixas), teste de tela do Painel em `portfolio_list_test.dart` (5 ativos: patrimônio igual à soma da Carteira, variação −R$ 18,00 parcial, roscas com os valores da Carteira, aportes do mês e do ano, proventos de 12 meses, altas/baixas no dia e no mês), `chart_labels_test.dart`. Suíte inteira: 491 passando.
+- **No app (release, 1280 × 800):** destaques, quatro roscas (setores vindos da brapi), aportes e "nada registrado" nos proventos, altas e baixas. Corrigi depois da conferência os rótulos do eixo das barras (quebravam linha; agora "20 mil") e o mês atual sem rótulo.
 
 
 ### Ajustes antes da tag v1.0.0 (19/10/2026)

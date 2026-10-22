@@ -601,3 +601,16 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - **Comprar e Vender** no painel (`showTradeDialog`): conta (na venda, só as que têm o ativo; padrão, a de maior quantidade), quantidade, preço, data e custos; grava pelo `OperationService` (validações, duplicatas e posição negativa como antes). A lista se reordena sozinha.
 - Alternativas: manter a tabela e só reordenar (não resolvia o painel); painel lateral fixo (apertava a lista em 1280 px); gráfico próprio com `CustomPainter` (o `fl_chart` já estava aprovado).
 - Motivo: pedido do usuário (a tela mais usada).
+
+### 2026-10-22 — D-46: Painel com gráficos, itens 1, 2, 3, 6 e 7 do M-04
+
+- Contexto: o Início era uma grade de números. O M-04 pede um painel visual; os itens 4 (evolução), 5 (rentabilidade comparada com CDI e Ibovespa) e 9 (seletor de período) dependem do histórico e dos benchmarks da F8 e ficaram para ela, como pedido. O item 8 (câmbio e indicadores numa faixa no rodapé) não estava entre os itens pedidos agora: o painel "Câmbio e indicadores" continua como estava e o item foi registrado na F8 (SPEC §21).
+- Decisão:
+  - **Destaques no topo** (três cartões largos): patrimônio, resultado total (R$ e % sobre o dinheiro aplicado) e **variação do dia** da carteira, que soma só os ativos com cotação de mercado e fechamento anterior guardado e se declara **parcial** quando falta algum. Os outros cartões continuam embaixo.
+  - **Distribuição em rosca** (`fl_chart` `PieChart`) por ativo, classe, setor e instituição, sempre com a legenda em texto (nome, %, valor): a cor nunca é o único indicador. Cores: a paleta categórica validada do guia de visualização (azul, laranja, verde-água, amarelo, magenta, verde, violeta; tons próprios no tema escuro), em **ordem fixa**; da 8ª fatia em diante, "Outros" em cinza. O validador de paleta do guia não pôde ser executado neste PC (sem Node.js); a paleta usada é a documentada como aprovada nos dois temas, e a legenda em texto cobre a regra de alívio para os tons de menor contraste.
+  - **Aportes**: no mês e no ano, e barras dos últimos 12 meses com compras/aportes e vendas/resgates lado a lado (tooltip com o valor). O **saldo inicial** do cadastro rápido não conta como aporte (é uma posição antiga, numa data aproximada); para isso a nota do saldo inicial passou ao domínio (`InitialBalance`).
+  - **Proventos**: barras por mês e total de 12 meses, pela data registrada da operação. Sem nada registrado, o texto diz isso em vez de um gráfico vazio.
+  - **Maiores altas e baixas** no dia ou no mês (`MarketPrice.dayChange`/`monthChange`, D-45), até três de cada lado.
+  - Cálculos no domínio (`DashboardMetrics`), fórmulas em `FORMULAS.md` §3.1; nada é estimado. Eixos com rótulos curtos ("20 mil").
+- Alternativas: barras horizontais na distribuição (a rosca com legenda ocupa menos altura em quatro cartões); gráfico de aportes empilhado (compras e vendas não se somam).
+- Motivo: pedido do usuário (uso real); regras 1 e 6.

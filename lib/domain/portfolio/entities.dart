@@ -260,3 +260,13 @@ class ManualValuation {
   final String currency;
   final String? notes;
 }
+
+/// Compra que registra uma posição que o usuário já tinha (saldo inicial do
+/// cadastro rápido, M-01). Não é um aporte daquele mês (Painel, M-04).
+abstract final class InitialBalance {
+  /// Nota gravada na compra.
+  static const note = 'Saldo inicial (posição informada pela corretora)';
+
+  static bool isInitial(OperationDraft op) =>
+      op.type == OperationType.buy && op.notes == note;
+}
