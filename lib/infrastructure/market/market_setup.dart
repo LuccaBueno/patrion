@@ -6,6 +6,7 @@ import '../../domain/market/provider_catalog.dart';
 import 'market_http.dart';
 import 'providers/b3_cotahist_provider.dart';
 import 'providers/b3_events_provider.dart';
+import 'providers/b3_ticker_catalog.dart';
 import 'providers/bcb_providers.dart';
 import 'providers/brapi_provider.dart';
 import 'providers/global_providers.dart';
@@ -97,6 +98,14 @@ abstract final class MarketSetup {
       ],
       treasury: TesouroProvider(http, cacheDir: cacheDir, wallClock: wallClock),
       funds: CvmProvider(http, wallClock: wallClock),
+      tickers: [
+        B3TickerCatalog(http, cacheDir: cacheDir, wallClock: wallClock),
+        BrapiLookup(
+          http,
+          apiKey: () => key(ProviderCatalog.brapi.code),
+          wallClock: wallClock,
+        ),
+      ],
     );
   }
 }

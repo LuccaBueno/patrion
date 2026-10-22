@@ -4,9 +4,21 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 7 concluída** em 22/10/2026 (distribuição). Seu teste num PC limpo passou (critério de pronto). As notas da 1.0.0 ficaram sem os dois itens internos de "Alterado" (CI e especificação), e a tag `v1.0.0` foi criada e enviada; a Release v1.0.0 foi publicada no GitHub em 22/10/2026. Próxima: Fase 8. Pendência sua antiga: Windows Hello (F5B). A chave da brapi (F6) já está cadastrada e testada.
+**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01. Próximos: M-02, M-03, M-05, M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
+
+### Ajustes de uso real antes da F8 (desde 22/10/2026)
+
+Itens de `docs/MUDANCAS.md`. Cada item tem um commit; o relatório completo sai no fim (com a 1.1.0).
+
+**M-01 — Adição rápida pelo ticker (concluído)** (DECISIONS D-42, SPEC §7)
+
+- Formulário "Adicionar ativo" na Carteira (botão no topo) e em Cadastros ("Adicionar ativo" e "Cadastro completo"): ticker em maiúsculas, quantidade, preço, data e conta (última usada ou a única; sem conta, pede a corretora e cria a "Conta principal"). Modos "Posição que já tenho (saldo inicial)" (padrão na carteira vazia, com o aviso da TIR aproximada) e "Nova compra" (com custos opcionais). "Mais detalhes" recolhido.
+- Ao sair do ticker, consulta o catálogo da B3 (COTAHIST diário, no cache, funciona offline) e a brapi (lista sem chave; com chave, nome completo, setor e a cotação, que já é guardada). Ativo já cadastrado: só a compra. Não encontrado ou sem conexão: aviso e cadastro manual (nome e classe). Ativo, conta e compra numa transação só.
+- Arquivos: `application/portfolio/quick_add_service.dart`, `application/market/market_ports.dart` (`TickerInfo`), `market_data_service.dart` (`lookupTicker`), `infrastructure/market/providers/b3_ticker_catalog.dart`, `brapi_provider.dart` (`BrapiLookup`), `domain/market/tickers.dart`, `presentation/screens/portfolio/add_asset_dialog.dart`; `MessageCard` não estica mais na altura.
+- Testes: `ticker_lookup_test.dart` (catálogo com linhas reais do COTAHIST de 21/10, offline, arquivo não publicado; brapi com e sem chave, 404, nomes), `quick_add_service_test.dart`, `market_data_service_test.dart` (junção das fontes, cota, offline, fonte desligada), `tickers_test.dart`, `add_asset_dialog_test.dart` ("bbas3", 100, 25,00; inexistente; já cadastrado; offline). Suíte inteira: 474 testes passando antes dos ajustes finais; analyze sem problemas.
+- **No app real** (build release, pasta de dados de teste no scratchpad com a sua chave da brapi copiada; seus dados intocados), em 1280 × 800: "bbas3" virou BBAS3, "Banco do Brasil S.A." / Ação vieram da B3 e da brapi, e salvar criou o ativo e o saldo inicial numa tela só, já com cotação (R$ 23,92, brapi). HGLG11 veio como FII, com "Nova compra" e a conta preenchidas.
 
 ### Ajustes antes da tag v1.0.0 (19/10/2026)
 

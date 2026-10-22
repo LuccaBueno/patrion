@@ -12,6 +12,7 @@ import '../../format/labels.dart';
 import '../../format/market_labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import 'add_asset_dialog.dart';
 
 /// Carteira real: posições por conta e ativo (SPEC §16).
 class PortfolioScreen extends ConsumerWidget {
@@ -23,6 +24,14 @@ class PortfolioScreen extends ConsumerWidget {
     return PageScaffold(
       title: 'Carteira',
       subtitle: 'Posições calculadas a partir das operações',
+      actions: [
+        FilledButton.icon(
+          key: const Key('portfolio-add-asset'),
+          onPressed: () => showAddAssetDialog(context),
+          icon: const Icon(Icons.add),
+          label: const Text('Adicionar ativo'),
+        ),
+      ],
       child: AsyncBody(
         value: snapshot,
         builder: (snap) => PositionsTable(snap: snap),

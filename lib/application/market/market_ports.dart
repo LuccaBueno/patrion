@@ -132,3 +132,46 @@ abstract interface class BatchHistoryProvider implements HistoryProvider {
     required LocalDate to,
   });
 }
+
+/// Dados cadastrais de um ticker, para o cadastro rápido de ativos (M-01):
+/// nome, classe, ISIN, setor e segmento, e a cotação quando a consulta a
+/// traz. Campos nulos não vieram da fonte (nunca são inventados).
+class TickerInfo {
+  const TickerInfo({
+    required this.symbol,
+    required this.market,
+    required this.source,
+    this.name,
+    this.assetClass,
+    this.isin,
+    this.sector,
+    this.segment,
+    this.quote,
+  });
+
+  final String symbol;
+  final String market;
+
+  /// Código do provedor que respondeu.
+  final String source;
+  final String? name;
+
+  /// Código da classe (`stock_br`, `fii`, `etf_br`, `bdr`).
+  final String? assetClass;
+  final String? isin;
+  final String? sector;
+  final String? segment;
+  final MarketQuote? quote;
+}
+
+/// Consulta os dados cadastrais de um ticker.
+abstract interface class TickerInfoProvider {
+  String get code;
+
+  /// O provedor atende tickers do mercado [market] (`B3`).
+  bool supports(String market);
+
+  /// Nulo quando a fonte não conhece o ticker. Falha de rede lança
+  /// `NetworkError`.
+  Future<TickerInfo?> lookup(String symbol);
+}

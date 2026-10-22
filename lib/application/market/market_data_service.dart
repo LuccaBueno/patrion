@@ -76,6 +76,7 @@ class MarketProviders {
     this.fx = const [],
     this.treasury,
     this.funds,
+    this.tickers = const [],
   });
 
   final List<QuoteProvider> quotes;
@@ -88,6 +89,21 @@ class MarketProviders {
   final List<FxProvider> fx;
   final TreasuryProvider? treasury;
   final FundReportProvider? funds;
+
+  /// Dados cadastrais dos tickers (cadastro rápido), na ordem de consulta.
+  final List<TickerInfoProvider> tickers;
+}
+
+/// Resultado de [MarketDataService.lookupTicker].
+class TickerLookup {
+  const TickerLookup({required this.info, required this.result});
+
+  /// Dados juntados das fontes; nulo se nenhuma conhece o ticker.
+  final TickerInfo? info;
+  final RefreshResult result;
+
+  /// Nenhuma fonte respondeu por falta de conexão.
+  bool get offline => info == null && result.offline;
 }
 
 /// Atualiza os dados de mercado (SPEC §4 e §5): escolhe a fonte de cada
@@ -552,6 +568,83 @@ class MarketDataService {
       );
     }
     return result;
+  }
+
+  // -- Cadastro rápido --------------------------------------------------------
+
+  /// Consulta os dados cadastrais do ticker em todas as fontes (M-01): o
+  /// catálogo da B3 dá a classe e o ISIN; a brapi, o nome, o setor e o
+  /// segmento (e a cotação, com chave). A cotação e o ISIN encontrados são
+  /// guardados como qualquer dado de mercado.
+  Future<TickerLookup> lookupTicker(
+    String symbol, {
+    String market = 'B3',
+  }) async {
+    final result = RefreshResult();
+    final found = <TickerInfo>[];
+    for (final p in _providers.tickers) {
+      if (!p.supports(market)) continue;
+      final info = await _call(
+        p.code,
+        result,
+        () => p.lookup(symbol),
+        what: symbol,
+      );
+      if (info != null) found.add(info);
+    }
+    if (found.isEmpty) return TickerLookup(info: null, result: result);
+    final now = formatInstant(_clock.now());
+    for (final f in found) {
+      if (f.isin == null) continue;
+      await _repo.saveInstrument(
+        symbol: f.symbol,
+        market: f.market,
+        source: f.source,
+        isin: f.isin,
+        name: f.name,
+        collectedAt: now,
+      );
+    }
+    final info = mergeTickerInfo(found);
+    final quote = info.quote;
+    if (quote != null) {
+      await _repo.saveQuote(quote);
+      result.updated++;
+    }
+    return TickerLookup(info: info, result: result);
+  }
+
+  /// Junta as respostas na ordem das fontes: classe e ISIN da primeira que
+  /// informa (o catálogo oficial da B3); nome, setor, segmento e cotação da
+  /// última (a brapi, mais descritiva).
+  static TickerInfo mergeTickerInfo(List<TickerInfo> infos) {
+    T? first<T>(T? Function(TickerInfo) f) {
+      for (final i in infos) {
+        final v = f(i);
+        if (v != null) return v;
+      }
+      return null;
+    }
+
+    T? last<T>(T? Function(TickerInfo) f) {
+      for (final i in infos.reversed) {
+        final v = f(i);
+        if (v != null) return v;
+      }
+      return null;
+    }
+
+    return TickerInfo(
+      symbol: infos.first.symbol,
+      market: infos.first.market,
+      source: infos.map((i) => i.source).toSet().join('+'),
+      name: last((i) => i.name),
+      assetClass: first((i) => i.assetClass),
+      isin: first((i) => i.isin),
+      sector: last((i) => i.sector),
+      segment: last((i) => i.segment),
+      quote: last((i) => i.quote),
+    );
   }
 
   // -- Um ativo ---------------------------------------------------------------

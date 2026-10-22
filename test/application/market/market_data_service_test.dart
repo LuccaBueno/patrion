@@ -539,4 +539,112 @@ void main() {
       expect(brapi.asked, hasLength(1));
     });
   });
+
+  group('consulta de ticker (M-01)', () {
+    MarketDataService withTickers(List<TickerInfoProvider> tickers) =>
+        MarketDataService(
+          repo: repo,
+          states: states,
+          providers: MarketProviders(tickers: tickers),
+          preferences: MarketPreferences(DeviceSettingsRepository(f.t.db)),
+          wallClock: f.t.wall.clock,
+        );
+
+    test('junta as fontes: classe e ISIN do catálogo da B3, nome e setor da '
+        'brapi; guarda a cotação e o ISIN; conta a cota da brapi', () async {
+      final catalog = FakeTickers(
+        'b3_cotahist',
+        const TickerInfo(
+          symbol: 'BBAS3',
+          market: 'B3',
+          source: 'b3_cotahist',
+          name: 'BRASIL ON NM',
+          assetClass: 'stock_br',
+          isin: 'BRBBASACNOR3',
+        ),
+      );
+      final brapiInfo = FakeTickers(
+        'brapi',
+        TickerInfo(
+          symbol: 'BBAS3',
+          market: 'B3',
+          source: 'brapi',
+          name: 'Banco do Brasil S.A.',
+          assetClass: 'fii',
+          sector: 'Serviços Financeiros',
+          segment: 'Bancos Diversificados',
+          quote: MarketQuote(
+            symbol: 'BBAS3',
+            market: 'B3',
+            price: Decimal.parse('23.92'),
+            currency: 'BRL',
+            refAt: DateTime.utc(2026, 10, 16, 18),
+            source: 'brapi',
+            dataType: MarketDataType.intraday,
+            collectedAt: _collected,
+          ),
+        ),
+      );
+      final lookup = await withTickers([catalog, brapiInfo])
+          .lookupTicker('BBAS3');
+      final info = lookup.info!;
+      expect(info.name, 'Banco do Brasil S.A.');
+      expect(info.assetClass, 'stock_br', reason: 'a classe oficial da B3');
+      expect(info.isin, 'BRBBASACNOR3');
+      expect(info.sector, 'Serviços Financeiros');
+      expect(info.source, 'b3_cotahist+brapi');
+      expect(lookup.offline, isFalse);
+      expect(
+        (await repo.quotes('BBAS3', 'B3')).single.price,
+        Decimal.parse('23.92'),
+      );
+      expect(await repo.isinOf('BBAS3', 'B3'), 'BRBBASACNOR3');
+      expect(await states.quotaUsedIn('brapi', f.t.wall.now), 1);
+    });
+
+    test('nenhuma fonte conhece: nulo; sem rede: offline', () async {
+      final unknown = await withTickers([
+        FakeTickers('b3_cotahist', null),
+        FakeTickers('brapi', null),
+      ]).lookupTicker('XPTO3');
+      expect(unknown.info, isNull);
+      expect(unknown.offline, isFalse);
+
+      final offline = await withTickers([
+        FakeTickers('b3_cotahist', null, error: const NetworkError('sem rede')),
+        FakeTickers('brapi', null, error: const NetworkError('sem rede')),
+      ]).lookupTicker('BBAS3');
+      expect(offline.info, isNull);
+      expect(offline.offline, isTrue);
+    });
+
+    test('fonte desligada não é consultada', () async {
+      await states.setEnabled('brapi', false);
+      final brapiInfo = FakeTickers('brapi', null);
+      await withTickers([brapiInfo]).lookupTicker('BBAS3');
+      expect(brapiInfo.asked, isEmpty);
+    });
+  });
+}
+
+/// Consulta de ticker de mentira.
+class FakeTickers implements TickerInfoProvider {
+  FakeTickers(this.code, this.info, {this.error});
+
+  @override
+  final String code;
+  final TickerInfo? info;
+  final AppError? error;
+  final asked = <String>[];
+
+  @override
+  bool supports(String market) => market == 'B3';
+
+  @override
+  Future<TickerInfo?> lookup(String symbol) async {
+    asked.add(symbol);
+    final e = error;
+    if (e != null) throw e;
+    return info;
+  }
 }

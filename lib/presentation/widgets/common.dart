@@ -129,6 +129,7 @@ class MessageCard extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title, style: theme.textTheme.titleMedium),

@@ -12,6 +12,7 @@ import '../application/market/market_ports.dart';
 import '../application/settings/market_preferences.dart';
 import '../application/portfolio/operation_service.dart';
 import '../application/portfolio/portfolio_query.dart';
+import '../application/portfolio/quick_add_service.dart';
 import '../application/portfolio/registry_service.dart';
 import '../application/portfolio/valuation_service.dart';
 import '../application/settings/appearance_service.dart';
@@ -107,6 +108,15 @@ final operationServiceProvider = Provider<OperationService>(
 
 final valuationServiceProvider = Provider<ValuationService>(
   (ref) => ValuationService(ref.watch(portfolioRepositoriesProvider)),
+);
+
+/// Cadastro rápido pelo ticker (M-01).
+final quickAddServiceProvider = Provider<QuickAddService>(
+  (ref) => QuickAddService(
+    ref.watch(portfolioRepositoriesProvider),
+    ref.watch(registryServiceProvider),
+    ref.watch(operationServiceProvider),
+  ),
 );
 
 final portfolioQueryProvider = Provider<PortfolioQuery>(

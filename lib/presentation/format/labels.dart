@@ -38,6 +38,22 @@ extension AssetClassLabel on AssetClass {
     AssetClass.crypto => 'Cripto',
     AssetClass.cash => 'Caixa',
   };
+
+  /// Nome de um ativo da classe ("Ação", "FII").
+  String get singular => switch (this) {
+    AssetClass.stockBr => 'Ação',
+    AssetClass.fii => 'FII',
+    AssetClass.etfBr => 'ETF',
+    AssetClass.bdr => 'BDR',
+    AssetClass.fixedIncome => 'Renda fixa',
+    AssetClass.treasury => 'Tesouro Direto',
+    AssetClass.bankProduct => 'Produto bancário',
+    AssetClass.stockIntl => 'Ação internacional',
+    AssetClass.etfIntl => 'ETF internacional',
+    AssetClass.reit => 'REIT',
+    AssetClass.crypto => 'Cripto',
+    AssetClass.cash => 'Caixa',
+  };
 }
 
 extension MarketLabel on Market {

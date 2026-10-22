@@ -32,10 +32,23 @@ class CotahistRecord {
     required this.volume,
     required this.quoteFactor,
     required this.isin,
+    this.bdiCode = '',
+    this.shortName = '',
+    this.spec = '',
   });
 
   final LocalDate date;
   final String symbol;
+
+  /// `CODBDI`: `02` = lote padrão, `12` = FII, `13` e `14` = Fiagro, ETF e
+  /// outros fundos, `32` a `36` = BDR.
+  final String bdiCode;
+
+  /// `NOMRES`: nome resumido da empresa ou do fundo (12 caracteres).
+  final String shortName;
+
+  /// `ESPECI`: especificação do papel (ON, PN, UNT, CI, DRN…).
+  final String spec;
 
   /// `TPMERC`: `010` = à vista.
   final String marketType;
@@ -188,7 +201,7 @@ class B3CotahistProvider implements BatchHistoryProvider {
 
   /// Apaga o ZIP e o TXT extraído de [zipPath] (D-05).
   static void deleteRaw(String zipPath) {
-    for (final path in [zipPath, _txtPathOf(zipPath)]) {
+    for (final path in [zipPath, txtPathOf(zipPath)]) {
       try {
         final f = File(path);
         if (f.existsSync()) f.deleteSync();
@@ -211,7 +224,7 @@ class B3CotahistProvider implements BatchHistoryProvider {
     }
   }
 
-  static String _txtPathOf(String zipPath) => '$zipPath.txt';
+  static String txtPathOf(String zipPath) => '$zipPath.txt';
 
   /// Descompacta [zipPath] e separa os tickers de [symbols], num isolate.
   static Future<CotahistExtract> extractFile(
@@ -221,11 +234,11 @@ class B3CotahistProvider implements BatchHistoryProvider {
     required LocalDate to,
     required String collectedAt,
   }) {
-    final txt = _txtPathOf(zipPath);
+    final txt = txtPathOf(zipPath);
     final fromText = '$from';
     final toText = '$to';
     return Isolate.run(() async {
-      _unzipSingle(zipPath, txt);
+      unzipSingle(zipPath, txt);
       final bars = <String, List<PriceBar>>{};
       final isins = <String, String>{};
       final lines = File(txt)
@@ -245,7 +258,8 @@ class B3CotahistProvider implements BatchHistoryProvider {
     });
   }
 
-  static void _unzipSingle(String zipPath, String target) {
+  /// Extrai o único arquivo de [zipPath] para [target].
+  static void unzipSingle(String zipPath, String target) {
     final input = InputFileStream(zipPath);
     try {
       final archive = ZipDecoder().decodeStream(input);
@@ -300,6 +314,9 @@ class B3CotahistProvider implements BatchHistoryProvider {
         volume: _money(line.substring(170, 188)),
         quoteFactor: int.parse(line.substring(210, 217)),
         isin: line.substring(230, 242).trim(),
+        bdiCode: line.substring(10, 12),
+        shortName: line.substring(27, 39).trim(),
+        spec: line.substring(39, 49).trim(),
       );
     } on FormatException {
       return null;

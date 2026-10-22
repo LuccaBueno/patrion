@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../domain/market/market_price.dart';
+import '../../../domain/market/tickers.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
 import '../../format/formatters.dart';
@@ -323,7 +324,7 @@ class _AssetDialogState extends ConsumerState<_AssetDialog> {
     setState(() => _saving = true);
     final asset = Asset(
       id: _a?.id ?? '',
-      symbol: _symbol.text,
+      symbol: Tickers.normalize(_symbol.text, market: _market!),
       market: _market!,
       assetClass: _class!,
       name: _name.text,

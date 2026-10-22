@@ -8,6 +8,7 @@ import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import '../portfolio/add_asset_dialog.dart';
 import 'registry_dialogs.dart';
 
 /// Cadastros: instituições, contas e ativos (SPEC §6).
@@ -240,9 +241,16 @@ class _AssetsTabState extends ConsumerState<_AssetsTab> {
         Row(
           children: [
             FilledButton.icon(
-              onPressed: () => showAssetDialog(context),
+              key: const Key('registry-add-asset'),
+              onPressed: () => showAddAssetDialog(context),
               icon: const Icon(Icons.add),
-              label: const Text('Novo ativo'),
+              label: const Text('Adicionar ativo'),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: () => showAssetDialog(context),
+              icon: const Icon(Icons.tune),
+              label: const Text('Cadastro completo'),
             ),
             const SizedBox(width: 16),
             SizedBox(

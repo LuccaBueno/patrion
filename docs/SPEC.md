@@ -168,6 +168,13 @@ Data, ativo, quantidade, preço, valor bruto, custos, impostos, moeda, câmbio, 
 - Validações e detecção de duplicatas.
 - Editar uma operação antiga recalcula posições e métricas a partir dela.
 
+**Adição rápida de ativos da B3 (ajuste M-01, DECISIONS D-42)**
+
+- Formulário curto "Adicionar ativo" (Carteira e Cadastros): ticker (normalizado: maiúsculas; fracionário vira o lote padrão), quantidade, preço (unitário ou médio), data e conta (a última usada ou a única).
+- Ao sair do ticker, o app consulta o catálogo da B3 (COTAHIST diário, guardado no cache) e a brapi, e preenche nome, classe (ação, FII, ETF, BDR), mercado B3, BRL, BR, ISIN, setor, segmento e cotação automática. Nome e classe aparecem para conferir. Sem resultado ou sem internet, o usuário segue com o cadastro manual.
+- Ativo já cadastrado: só registra a compra. "Posição que já tenho (saldo inicial)" grava uma compra na data aproximada (padrão na carteira vazia), com o aviso de que a TIR fica aproximada.
+- Renda fixa, cripto e internacional continuam com o cadastro completo.
+
 **Tributação na v1**
 
 - Impostos e retenções são registrados pelo usuário.
