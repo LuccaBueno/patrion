@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 7 implementada** em 19/10/2026 (distribuição), com a v1.0.0 preparada e **sem tag nem Release** (aguardando sua autorização). Depois dela, dois ajustes entraram na 1.0.0 (falhas do SGS e preço atual na Carteira; ver "Ajustes antes da tag v1.0.0"), com o `dist\` regenerado. Falta, para o critério de pronto ("instalador testado em ambiente limpo"), o seu teste no Windows Sandbox ou num PC sem Flutter (roteiro abaixo); aqui o teste automático passou num PC com Flutter, em pastas isoladas. Próxima: Fase 8. Pendências suas antigas: chave da brapi (F6) e Windows Hello (F5B).
+**Fase 7 concluída** em 22/10/2026 (distribuição). Seu teste num PC limpo passou (critério de pronto). As notas da 1.0.0 ficaram sem os dois itens internos de "Alterado" (CI e especificação), e a tag `v1.0.0` foi criada e enviada; o workflow de release cria a Release em **rascunho**, que você revisa e publica no GitHub. Próxima: Fase 8. Pendências suas antigas: chave da brapi (F6) e Windows Hello (F5B).
 
 ## Concluído
 
