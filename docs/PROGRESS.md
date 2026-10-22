@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01 a M-05 (do M-04, os itens 1, 2, 3, 6 e 7). Próximos: a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01 a M-05 (do M-04, os itens 1, 2, 3, 6 e 7). Verificação do "Atualizar agora": problema encontrado e corrigido (D-47). Próximo: a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -53,6 +53,15 @@ Itens de `docs/MUDANCAS.md`. Cada item tem um commit; o relatório completo sai 
 - Arquivos: `domain/portfolio/dashboard_metrics.dart`, `entities.dart` (`InitialBalance`), `presentation/screens/dashboard/dashboard_charts.dart` (rosca, barras, cores), `dashboard_screen.dart`.
 - Testes: `dashboard_metrics_test.dart` (meses, saldo inicial fora, moeda, ano, variação do dia parcial e indisponível, altas e baixas), teste de tela do Painel em `portfolio_list_test.dart` (5 ativos: patrimônio igual à soma da Carteira, variação −R$ 18,00 parcial, roscas com os valores da Carteira, aportes do mês e do ano, proventos de 12 meses, altas/baixas no dia e no mês), `chart_labels_test.dart`. Suíte inteira: 491 passando.
 - **No app (release, 1280 × 800):** destaques, quatro roscas (setores vindos da brapi), aportes e "nada registrado" nos proventos, altas e baixas. Corrigi depois da conferência os rótulos do eixo das barras (quebravam linha; agora "20 mil") e o mês atual sem rótulo.
+
+
+**Verificação do "Atualizar agora" (pedido junto com os M-xx) — problema encontrado e corrigido** (DECISIONS D-47)
+
+- Reproduzido no app real: pasta de dados nova no scratchpad, chave da brapi copiada (o arquivo protegido pelo DPAPI da sua conta), TAEE11 cadastrado com "Cotação automática" pelo cadastro completo, sem operações. "Atualizar agora" registrava "Atualização da carteira: 0 ativos" e o ativo ficava sem preço.
+- Causa: a atualização só cobria ativos com posição aberta; e a página do ativo só procurava o preço entre as posições.
+- Correção: a atualização cobre também os ativos com preço de mercado ainda sem operações (posições encerradas continuam fora); o retrato guarda o preço de todos os ativos e a página do ativo o mostra. Depois: "1 ativos" no log e R$ 44,90 (brapi, 22/10/2026 18:30) na página do TAEE11.
+- Testes: `market_data_service_test.dart` (o ativo novo é consultado, o encerrado não; o teste falha no código antigo, conferido), `portfolio_screens_test.dart` (página do ativo sem operações mostra a cotação).
+- Observação: durante a atualização automática da abertura (numa pasta nova ela baixa cinco anos de indicadores e leva cerca de um minuto), o botão "Atualizar agora" fica desabilitado ("Atualizando…"); o clique nesse intervalo não faz nada.
 
 
 ### Ajustes antes da tag v1.0.0 (19/10/2026)

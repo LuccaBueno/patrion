@@ -614,3 +614,10 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Cálculos no domínio (`DashboardMetrics`), fórmulas em `FORMULAS.md` §3.1; nada é estimado. Eixos com rótulos curtos ("20 mil").
 - Alternativas: barras horizontais na distribuição (a rosca com legenda ocupa menos altura em quatro cartões); gráfico de aportes empilhado (compras e vendas não se somam).
 - Motivo: pedido do usuário (uso real); regras 1 e 6.
+
+### 2026-10-22 — D-47: "Atualizar agora" também cota ativos recém-cadastrados (pós-M-05)
+
+- Contexto: verificação pedida pelo usuário. Numa pasta de dados nova, com a chave da brapi, um ativo cadastrado com cotação automática (pelo cadastro completo, ainda sem operações) não recebia preço em "Atualizar agora": o log mostrava "Atualização da carteira: 0 ativos". A atualização só cobria ativos com posição aberta (D-35). Além disso, a página do ativo procurava o preço só entre as posições e mostrava "indisponível" mesmo com a cotação guardada.
+- Decisão: a atualização da carteira cobre os ativos com preço de mercado e **posição aberta ou nenhuma operação ainda**; posições encerradas continuam de fora (poupa a cota da brapi). O retrato da carteira passa a carregar o preço de mercado de todos os ativos (`PortfolioSnapshot.marketPrices`), e a página do ativo usa esse preço quando não há posição. No cadastro rápido (M-01), a consulta do ticker já guarda a cotação da brapi (com chave).
+- Verificado no app real: pasta nova, chave copiada, TAEE11 cadastrado sem operações; depois da correção, "1 ativos" no log e R$ 44,90 (brapi) na página do ativo.
+- Motivo: regra 1 (o dado existe e deve aparecer, com fonte e data) e pedido do usuário.

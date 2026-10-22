@@ -29,6 +29,7 @@ class PortfolioSnapshot {
     required this.state,
     required this.valued,
     required this.summary,
+    this.marketPrices = const {},
   }) : institutions = {for (final i in institutions) i.id: i},
        accounts = {for (final a in accounts) a.id: a},
        assets = {for (final a in assets) a.id: a},
@@ -76,6 +77,7 @@ class PortfolioSnapshot {
       state: state,
       valued: valued,
       summary: summary,
+      marketPrices: marketPrices,
     );
   }
 
@@ -96,6 +98,10 @@ class PortfolioSnapshot {
   /// Todas as posições (inclusive encerradas), com valor de mercado.
   final List<ValuedPosition> valued;
   final PortfolioSummary summary;
+
+  /// Preço de mercado de cada ativo com preço automático, com ou sem
+  /// posição (ativo recém-cadastrado também mostra a cotação).
+  final Map<String, MarketPrice> marketPrices;
 
   /// O controle de caixa está ligado (M-03).
   bool get trackCash => summary.trackCash;

@@ -555,11 +555,15 @@ class _MarketCard extends ConsumerWidget {
           _assetMarketProvider((asset.symbol.toUpperCase(), asset.market.code)),
         )
         .value;
-    final used = snap.valued
-        .map((v) => v.marketPrice)
-        .whereType<MarketPrice>()
-        .where((p) => p.assetId == asset.id)
-        .firstOrNull;
+    final used =
+        snap.valued
+            .map((v) => v.marketPrice)
+            .whereType<MarketPrice>()
+            .where((p) => p.assetId == asset.id)
+            .firstOrNull ??
+        (asset.priceSource == PriceSource.market
+            ? snap.marketPrices[asset.id]
+            : null);
     final manual = asset.priceSource != PriceSource.market;
     final stale =
         used != null &&

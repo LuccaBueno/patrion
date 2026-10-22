@@ -256,6 +256,67 @@ void main() {
 
   tearDown(() => f.t.close());
 
+  test(
+    'ativo recém-cadastrado com cotação automática, ainda sem operações, '
+    'recebe a cotação no "Atualizar agora"; posição encerrada fica de fora',
+    () async {
+      final fresh = await f.registry.createAsset(
+        const Asset(
+          id: '',
+          symbol: 'TAEE11',
+          market: Market.b3,
+          assetClass: AssetClass.stockBr,
+          name: 'Taesa',
+          currency: 'BRL',
+          country: 'BR',
+          priceSource: PriceSource.market,
+        ),
+      );
+      brapi.prices['TAEE11'] = '44.90';
+      // VALE3 comprada e vendida: posição encerrada.
+      final vale = await f.registry.createAsset(
+        const Asset(
+          id: '',
+          symbol: 'VALE3',
+          market: Market.b3,
+          assetClass: AssetClass.stockBr,
+          name: 'Vale',
+          currency: 'BRL',
+          country: 'BR',
+          priceSource: PriceSource.market,
+        ),
+      );
+      brapi.prices['VALE3'] = '61.49';
+      await f.add(
+        f.draft(
+          OperationType.buy,
+          '2026-02-02',
+          asset: vale,
+          qty: '1',
+          price: '60',
+        ),
+      );
+      await f.add(
+        f.draft(
+          OperationType.sell,
+          '2026-03-02',
+          asset: vale,
+          qty: '1',
+          price: '62',
+        ),
+      );
+
+      await service.refreshPortfolio();
+      final asked = {for (final i in brapi.asked) i.symbol};
+      expect(asked, containsAll(['PETR4', 'TAEE11']));
+      expect(asked, isNot(contains('VALE3')));
+      final quote = (await repo.quotes('TAEE11', 'B3')).single;
+      expect(quote.price, Decimal.parse('44.90'));
+      final snap = await query.load();
+      expect(snap.assets[fresh]!.symbol, 'TAEE11');
+    },
+  );
+
   test('atualiza a carteira: cotação com fonte e data entra na avaliação; '
       'só o código do ativo vai ao provedor', () async {
     final result = await service.refreshPortfolio();

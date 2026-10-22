@@ -279,14 +279,19 @@ class MarketDataService {
     return result;
   }
 
-  /// Ativos com posição aberta e preço de mercado.
+  /// Ativos com preço de mercado e posição aberta, mais os recém-cadastrados
+  /// (ainda sem operações), que também precisam da cotação. Ativos com a
+  /// posição encerrada ficam de fora (poupa a cota da brapi).
   Future<List<Asset>> _portfolioAssets() async {
     final portfolio = _portfolio;
     if (portfolio == null) return const [];
     final snap = await portfolio.load();
+    final traded = {for (final p in snap.state.positions) p.assetId};
     final ids = {
       for (final p in snap.state.positions)
         if (p.isOpen) p.assetId,
+      for (final id in snap.assets.keys)
+        if (!traded.contains(id)) id,
     };
     return [
       for (final id in ids)

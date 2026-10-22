@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/data/repositories/market_repository.dart';
+import 'package:patrion/domain/market/market_data.dart';
+import 'package:patrion/domain/portfolio/codes.dart';
+import 'package:patrion/domain/portfolio/entities.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
 import 'package:go_router/go_router.dart';
@@ -431,6 +435,47 @@ void main() {
         find.descendant(
           of: find.byKey(const Key('stat-equity')),
           matching: find.text(r'R$ 0,00'),
+        ),
+        findsOneWidget,
+      );
+    });
+  });
+
+  testWidgets('ativo recém-cadastrado, sem operações, mostra a cotação '
+      'guardada na página do ativo', (tester) async {
+    late String id;
+    await tester.runAsync(() async {
+      id = await f.registry.createAsset(
+        const Asset(
+          id: '',
+          symbol: 'TAEE11',
+          market: Market.b3,
+          assetClass: AssetClass.stockBr,
+          name: 'Taesa',
+          currency: 'BRL',
+          country: 'BR',
+          priceSource: PriceSource.market,
+        ),
+      );
+      await MarketRepository(f.t.db).saveQuote(
+        MarketQuote(
+          symbol: 'TAEE11',
+          market: 'B3',
+          price: dec('44.90'),
+          currency: 'BRL',
+          refAt: DateTime.utc(2026, 10, 22, 18),
+          source: 'brapi',
+          dataType: MarketDataType.intraday,
+          collectedAt: '2026-10-22T18:01:00.000Z',
+        ),
+      );
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(location: '/carteira/ativo/$id', () async {
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('asset-market')),
+          matching: find.text(r'R$ 44,90'),
         ),
         findsOneWidget,
       );
