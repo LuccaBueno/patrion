@@ -45,7 +45,7 @@ void main() {
   tearDown(() => f.t.close());
 
   testWidgets(
-    'na janela de 1280 px, a coluna "Resultado" aparece sem rolar para o lado',
+    'na janela de 1280 px, a lista da Carteira cabe sem rolar para o lado',
     (tester) async {
       final hasFont = await tester.runAsync(_loadSegoeUi);
       if (hasFont != true) {
@@ -126,24 +126,38 @@ void main() {
       try {
         final app = AppHarness(tester, f.t);
         await app.run(location: '/carteira', size: _window1280, () async {
-          final visible = tester.getRect(find.byType(TableCard));
-          final header = tester.getRect(find.text('Resultado'));
-          expect(header.right, lessThanOrEqualTo(visible.right));
-          final cells = find.byWidgetPredicate(
-            (w) => w is PnlText,
-            description: 'célula de resultado',
+          // Sem tabela larga: a lista divide a largura e nada passa da
+          // borda do cartão (nem precisa de rolagem lateral).
+          final card = tester.getRect(
+            find.ancestor(
+              of: find.text('Valorização'),
+              matching: find.byType(Card),
+            ),
           );
-          expect(cells, findsNWidgets(2));
-          for (final element in cells.evaluate()) {
-            final box = element.renderObject! as RenderBox;
-            final right = box.localToGlobal(Offset(box.size.width, 0)).dx;
-            expect(right, lessThanOrEqualTo(visible.right));
+          expect(find.byType(TableCard), findsNothing);
+          for (final finder in [
+            find.text('Valorização'),
+            find.byKey(const Key('details-PETR4')),
+            find.byKey(const Key('details-CDB-EXEMPLO-2026')),
+            find.byKey(const Key('holding-appreciation')),
+            find.byKey(const Key('current-price')),
+          ]) {
+            for (final element in finder.evaluate()) {
+              final box = element.renderObject! as RenderBox;
+              final right = box.localToGlobal(Offset(box.size.width, 0)).dx;
+              expect(right, lessThanOrEqualTo(card.right), reason: '$finder');
+            }
           }
-          // Preço médio e atual lado a lado: o PETR4 com a cotação, com a
-          // fonte e a data no tooltip; o CDB, avaliado por saldo, sem preço
-          // unitário.
-          expect(find.text('Preço médio /\nAtual'), findsOneWidget);
-          expect(find.text(r'R$ 38,27'), findsOneWidget);
+          // Maior valor primeiro: PETR4 (123.456 × 31,84) antes do CDB.
+          final petrY = tester.getTopLeft(
+            find.byKey(const Key('holding-PETR4')),
+          );
+          final cdbY = tester.getTopLeft(
+            find.byKey(const Key('holding-CDB-EXEMPLO-2026')),
+          );
+          expect(petrY.dy, lessThan(cdbY.dy));
+          // Cotação atual com fonte e data no tooltip; o CDB, avaliado por
+          // saldo, sem preço unitário.
           final current = find.byKey(const Key('current-price'));
           expect(tester.widget<Text>(current).data, r'R$ 31,84');
           final tip = tester.widget<Tooltip>(
@@ -154,8 +168,12 @@ void main() {
           expect(tip.message, contains('Desatualizado'));
           expect(find.byIcon(Icons.history), findsWidgets);
           expect(find.text('indisponível'), findsOneWidget);
-          final price = tester.getRect(current);
-          expect(price.right, lessThanOrEqualTo(visible.right));
+
+          // O painel de detalhes abre por cima, dentro da janela.
+          await app.tap(find.byKey(const Key('details-PETR4')));
+          final panel = tester.getRect(find.byKey(const Key('asset-panel')));
+          expect(panel.right, lessThanOrEqualTo(_window1280.width));
+          expect(panel.width, greaterThan(400));
         });
       } finally {
         debugDefaultTargetPlatformOverride = null;

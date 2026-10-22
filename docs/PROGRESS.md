@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01, M-02 e M-03. Próximos: M-05, M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01, M-02, M-03 e M-05. Próximos: M-04 (itens 1, 2, 3, 6 e 7), a verificação do "Atualizar agora" e a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -35,6 +35,15 @@ Itens de `docs/MUDANCAS.md`. Cada item tem um commit; o relatório completo sai 
 - Arquivos: `domain/portfolio/portfolio_summary.dart` (`trackCash`), `application/settings/portfolio_preferences.dart`, `portfolio_query.dart`, `portfolio_repositories.dart` (recalcula quando a preferência muda), `providers.dart`, `settings_screen.dart`, `dashboard_screen.dart`, `add_asset_dialog.dart`. A lista de seções das Configurações passou a destacar só a seção escolhida.
 - Testes: compra de R$ 3.729,60 sem depósito (patrimônio = posição, sem aviso; ligando, volta o caixa −3.729,60 com aviso), TIR igual com e sem o controle, retrato com o caixa ligado e desligado; os testes antigos de caixa do Painel rodam com a opção ligada e passam; teste de tela do padrão e do botão em Configurações. Suíte inteira: 479 passando.
 - **No app (release, 1280 × 800):** a carteira de teste que mostrava patrimônio −R$ 108,00 e caixa −R$ 2.500,00 passou a mostrar patrimônio R$ 2.392,00 (o valor da posição), sem card de caixa nem aviso.
+
+
+**M-05 — Carteira como lista por ativo, com painel de detalhes (concluído)** (DECISIONS D-45, SPEC §16, FORMULAS §2.4)
+
+- Lista com um item por ativo (contas somadas), do maior valor da posição para o menor: ativo (código, nome, "100 cotas"), valor da posição em destaque, preço médio, cotação atual (fonte e data embaixo, detalhe no tooltip), valorização % com cor, sinal e ícone, e "Detalhes". Sem cotação, "indisponível" e ordem pelo total aplicado; zero cotas no fim, em cinza. Cabe em 1280 px.
+- Painel por cima da lista: lucro em R$ (não realizado + realizado), total aplicado, preço médio, cotação, variação do dia (R$ e %, desde o fechamento anterior guardado), % da carteira, proventos, gráfico (1S a Tudo) com a linha tracejada do preço médio, operações e "Comprar"/"Vender". Sem histórico, "indisponível" com o motivo e "Baixar histórico".
+- Arquivos: `domain/portfolio/holdings.dart`, `domain/market/market_price.dart` (`PriceReference`, `PriceChange`, `withReferences`), `market_price_book.dart`, `market_repository.dart` (`closesSince`), `portfolio_query.dart`, `presentation/screens/portfolio/portfolio_screen.dart` (reescrita), `asset_panel.dart`, `trade_dialog.dart`; `fl_chart` 1.2.0 no `pubspec.yaml`.
+- Testes: `holdings_test.dart` (ordem, valorização, lucro, % da carteira, contas somadas, câmbio na ordem, variação do dia e do mês, sem fechamento), `portfolio_list_test.dart` (5 ativos: ordem, valorização −4,32%, painel com lucro, total aplicado, variação −R$ 18,00 (−0,75%), gráfico com a linha do PM em 25; sem histórico, indisponível; comprar pelo painel reordena; vender tudo leva ao fim, em cinza), `portfolio_width_test.dart` refeito para a lista (Segoe UI real, 1264 px úteis). Suíte inteira: 486 passando; analyze sem problemas.
+- **No app (release, 1280 × 800)**, carteira de teste com BBAS3, PETR4, VALE3, HGLG11 e ITUB4 adicionados pelo formulário rápido: lista na ordem dos valores, cotações da brapi com fonte e data; painel do PETR4 com lucro, variação do dia contra o fechamento de 21/10 (COTAHIST) e gráfico com a linha do preço médio. Corrigi depois da conferência os rótulos do eixo do gráfico (mínimo e máximo sobrepostos, última data cortada).
 
 
 ### Ajustes antes da tag v1.0.0 (19/10/2026)

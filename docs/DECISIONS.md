@@ -588,3 +588,16 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Os retratos da carteira passam a ser recalculados quando `shared_settings` muda (`PortfolioRepositories.watchChanges`).
 - Alternativas: ajustar o caixa automaticamente com depósitos fictícios (inventaria operações); esconder só o aviso (o patrimônio continuaria negativo).
 - Motivo: pedido do usuário (uso real); regra 1 (nada inventado).
+
+### 2026-10-22 — D-45: Carteira como lista por ativo, com painel de detalhes (M-05)
+
+- Contexto: a tabela da Carteira tinha colunas técnicas (classe, conta, preço médio em duas linhas) e não destacava onde está o dinheiro; lucro em R$, total aplicado, variação do dia e gráfico não estavam a um clique, e comprar ou vender exigia outra tela.
+- Decisão:
+  - **Um item por ativo**, somando as contas (`Holdings`, domínio puro; fórmulas em `FORMULAS.md` §2.4). A divisão por conta continua na página do ativo e em Operações. Ordem pelo valor da posição (sem cotação, pelo total aplicado; outras moedas convertidas pelo câmbio guardado só para ordenar); zero cotas no fim, em cinza, sem esconder (o filtro "Mostrar encerradas" saiu).
+  - Linhas com `Row`/`Expanded` (não `DataTable`): as colunas dividem a largura, então a lista sempre cabe em 1280 px; números encolhem (`FittedBox`) em janelas estreitas. A cotação mostra fonte e data embaixo (regra 1: dado antigo com a data à vista), além do ícone de desatualizado.
+  - **Painel de detalhes por cima da lista** (560 px à direita, com fundo escurecido; clicar fora ou no X fecha). Ao lado da lista não cabia em 1280 px junto das seis colunas.
+  - **Variação do dia e do mês**: `MarketPrice` ganhou o fechamento anterior e o do fim do mês anterior (`PriceReference`), calculados por `MarketPricing.withReferences` a partir dos fechamentos guardados dos últimos 45 dias (`MarketRepository.closesSince`). Não foi gravado o "fechamento anterior" da brapi: seria mais um campo no schema, e o COTAHIST do último pregão já é baixado na atualização.
+  - **Gráfico** com o `fl_chart` 1.2.0 (já aprovado na D-02, agora adicionado): fechamentos guardados (preço bruto, por unidade) mais a cotação atual, linha horizontal tracejada no preço médio. Menos de dois pontos no período: "indisponível" com o motivo e o botão "Baixar histórico". `Decimal` vira `double` só para desenhar (regra 6, exceção).
+  - **Comprar e Vender** no painel (`showTradeDialog`): conta (na venda, só as que têm o ativo; padrão, a de maior quantidade), quantidade, preço, data e custos; grava pelo `OperationService` (validações, duplicatas e posição negativa como antes). A lista se reordena sozinha.
+- Alternativas: manter a tabela e só reordenar (não resolvia o painel); painel lateral fixo (apertava a lista em 1280 px); gráfico próprio com `CustomPainter` (o `fl_chart` já estava aprovado).
+- Motivo: pedido do usuário (a tela mais usada).

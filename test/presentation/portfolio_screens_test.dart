@@ -159,9 +159,10 @@ void main() {
     );
     final app = AppHarness(tester, f.t);
     await app.run(location: '/carteira', () async {
-      expect(find.text('PETR4'), findsOneWidget);
-      // Valor de mercado e preço atual; o preço médio continua visível.
-      expect(find.text('indisponível'), findsNWidgets(2));
+      expect(find.byKey(const Key('holding-PETR4')), findsOneWidget);
+      // Valor da posição, cotação e valorização; o preço médio continua
+      // visível.
+      expect(find.text('indisponível'), findsNWidgets(3));
       expect(find.text(r'R$ 30,00'), findsOneWidget);
     });
   });
@@ -188,7 +189,10 @@ void main() {
       );
       expect(tip.message, 'Preço informado em 31/05/2024');
 
-      await app.tap(find.text('PETR4'));
+      // Detalhes abre o painel; dele, a página do ativo.
+      await app.tap(find.byKey(const Key('details-PETR4')));
+      expect(find.byKey(const Key('asset-panel')), findsOneWidget);
+      await app.tap(find.text('Página do ativo'));
       final detail = find.byKey(const Key('asset-current-price'));
       expect(detail, findsOneWidget);
       expect(

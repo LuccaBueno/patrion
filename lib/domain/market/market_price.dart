@@ -20,6 +20,8 @@ class MarketPrice {
     required this.collectedAt,
     this.refAt,
     this.delayNote,
+    this.previousClose,
+    this.previousMonthClose,
   });
 
   final String assetId;
@@ -35,6 +37,73 @@ class MarketPrice {
   final MarketDataType dataType;
   final String collectedAt;
   final String? delayNote;
+
+  /// Último fechamento antes da data do preço (variação do dia, M-05).
+  final PriceReference? previousClose;
+
+  /// Último fechamento do mês anterior ao do preço (variação no mês).
+  final PriceReference? previousMonthClose;
+
+  /// Variação desde o fechamento anterior; nula sem esse fechamento.
+  PriceChange? get dayChange => PriceChange.of(price, refDate, previousClose);
+
+  /// Variação desde o fechamento do mês anterior.
+  PriceChange? get monthChange =>
+      PriceChange.of(price, refDate, previousMonthClose);
+
+  MarketPrice withReferences({
+    PriceReference? previousClose,
+    PriceReference? previousMonthClose,
+  }) => MarketPrice(
+    assetId: assetId,
+    price: price,
+    currency: currency,
+    refDate: refDate,
+    source: source,
+    dataType: dataType,
+    collectedAt: collectedAt,
+    refAt: refAt,
+    delayNote: delayNote,
+    previousClose: previousClose,
+    previousMonthClose: previousMonthClose,
+  );
+}
+
+/// Preço de referência (um fechamento guardado), com fonte e data.
+class PriceReference {
+  const PriceReference({
+    required this.price,
+    required this.refDate,
+    required this.source,
+  });
+
+  final Decimal price;
+  final LocalDate refDate;
+  final String source;
+}
+
+/// Variação de um preço contra uma referência (`docs/FORMULAS.md` §2.4).
+class PriceChange {
+  const PriceChange({
+    required this.from,
+    required this.to,
+    required this.toDate,
+  });
+
+  final PriceReference from;
+  final Decimal to;
+  final LocalDate toDate;
+
+  static PriceChange? of(Decimal to, LocalDate toDate, PriceReference? from) {
+    if (from == null || from.price <= Decimal.zero) return null;
+    return PriceChange(from: from, to: to, toDate: toDate);
+  }
+
+  /// Diferença por unidade.
+  Decimal get perUnit => to - from.price;
+
+  /// Fração (0,01 = 1%).
+  Decimal get fraction => DecimalMath.divide(perUnit, from.price);
 }
 
 /// Regras dos preços de mercado (`docs/FORMULAS.md` §2.1).
@@ -72,6 +141,44 @@ abstract final class MarketPricing {
       }
     }
     return best;
+  }
+
+  /// Liga a [price] os fechamentos de referência tirados de [closes] (do
+  /// mesmo ativo, preço bruto): o último antes da data do preço e o último
+  /// do mês anterior. Sem fechamento guardado, a referência fica nula
+  /// (regra 1: a variação aparece como indisponível).
+  static MarketPrice withReferences(
+    MarketPrice price,
+    Iterable<PriceBar> closes,
+  ) {
+    final monthEnd = LocalDate(
+      price.refDate.year,
+      price.refDate.month,
+      1,
+    ).addDays(-1);
+    PriceBar? previous;
+    PriceBar? month;
+    for (final c in closes) {
+      if (c.refDate.isBefore(price.refDate) &&
+          (previous == null || c.refDate.isAfter(previous.refDate))) {
+        previous = c;
+      }
+      if (!c.refDate.isAfter(monthEnd) &&
+          (month == null || c.refDate.isAfter(month.refDate))) {
+        month = c;
+      }
+    }
+    PriceReference? ref(PriceBar? b) => b == null
+        ? null
+        : PriceReference(
+            price: unitClose(b),
+            refDate: b.refDate,
+            source: b.source,
+          );
+    return price.withReferences(
+      previousClose: ref(previous),
+      previousMonthClose: ref(month),
+    );
   }
 
   /// Preço unitário de um fechamento do COTAHIST: o preço é por lote de

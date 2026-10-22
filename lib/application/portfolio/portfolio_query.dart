@@ -176,12 +176,13 @@ class PortfolioQuery {
     final assets = results[2].cast<Asset>();
     final fixedIncome = results[3].cast<FixedIncomeTerms>();
     final market = _market;
+    final asOf = LocalDate.fromDateTime(_clock.now());
     final trackCash =
         await _preferences?.trackCash() ??
         PortfolioPreferences.defaultTrackCash;
     return PortfolioSnapshot.compute(
       trackCash: trackCash,
-      asOf: LocalDate.fromDateTime(_clock.now()),
+      asOf: asOf,
       institutions: results[0].cast<Institution>(),
       accounts: results[1].cast<Account>(),
       assets: assets,
@@ -193,6 +194,7 @@ class PortfolioQuery {
           : await MarketPriceBook.load(
               market,
               assets: assets,
+              asOf: asOf,
               termsByAsset: {for (final t in fixedIncome) t.assetId: t},
             ),
     );

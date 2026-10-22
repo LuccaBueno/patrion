@@ -93,6 +93,16 @@ Montado só com o que está guardado no banco (sem rede):
 
 `Σ patrimônio(moeda) × câmbio(moeda)`, com o patrimônio em reais somado sem conversão e o câmbio mais recente guardado de cada moeda contra o real (PTAX de fechamento; na mesma data, a PTAX antes da referência do BCE), pelo valor de venda (ou de compra, se faltar o de venda). Arredondado a 2 casas, meio para cima. Se faltar o câmbio de alguma moeda, o total fica **indisponível**; é **parcial** se algum patrimônio somado for parcial. Os totais por moeda (§3) continuam sem conversão.
 
+### 2.4 Carteira por ativo e variação do preço (`Holdings`, `lib/domain/portfolio/holdings.dart`; `MarketPricing.withReferences`)
+
+- Cada ativo soma as posições de todas as contas: quantidade, **total aplicado** (custo da posição atual, com custos de compra), **valor da posição** (soma dos valores de mercado; **indisponível** se alguma conta não tem preço nem saldo), lucro realizado e proventos.
+- **Preço médio** = total aplicado ÷ quantidade (20 casas, half-even).
+- **Valorização** = (cotação atual − preço médio) ÷ preço médio. Sem preço unitário (avaliação por saldo): valor da posição ÷ total aplicado − 1. Não inclui proventos.
+- **Lucro em R$** = (valor da posição − total aplicado) + lucro realizado.
+- **% da carteira** = valor da posição ÷ soma dos valores das posições com preço na mesma moeda.
+- **Variação do dia**: por unidade, cotação atual − último fechamento guardado **antes** da data da cotação; na posição, quantidade × essa diferença; em %, a diferença ÷ o fechamento. **Variação no mês**: o mesmo contra o último fechamento até o fim do mês anterior. Os fechamentos são os brutos guardados (COTAHIST e outros), por unidade (`unitClose`), dos últimos 45 dias. Sem o fechamento de referência, a variação é **indisponível** (nunca estimada).
+- **Ordem da lista**: com posição, pelo valor da posição, decrescente (sem cotação, pelo total aplicado; outras moedas convertidas pelo câmbio mais recente guardado, só para ordenar); ativos com zero cotas no fim, pelo código.
+
 ## 3. Totais do dashboard (`PortfolioSummary`)
 
 Calculados separadamente para cada moeda (o total em reais está em §2.3):

@@ -12,9 +12,14 @@ abstract final class MarketPriceBook {
     MarketRepository repo, {
     required Iterable<Asset> assets,
     required Map<String, FixedIncomeTerms> termsByAsset,
+    LocalDate? asOf,
   }) async {
     final quotes = await repo.allQuotes();
     final closes = await repo.latestCloses();
+    // 45 dias cobrem o fechamento anterior e o do fim do mês anterior.
+    final recent = asOf == null
+        ? const <PriceBar>[]
+        : await repo.closesSince(asOf.addDays(-45));
     final hasTreasury = assets.any((a) => a.assetClass == AssetClass.treasury);
     final treasury = hasTreasury
         ? await repo.latestTreasury()
@@ -25,6 +30,7 @@ abstract final class MarketPriceBook {
       quotes: quotes,
       closes: closes,
       treasury: treasury,
+      recent: recent,
     );
   }
 
@@ -34,6 +40,7 @@ abstract final class MarketPriceBook {
     required Iterable<MarketQuote> quotes,
     required Iterable<PriceBar> closes,
     required Iterable<TreasuryPrice> treasury,
+    Iterable<PriceBar> recent = const [],
   }) {
     final quotesByKey = <(String, String), List<MarketQuote>>{};
     for (final q in quotes) {
@@ -42,6 +49,10 @@ abstract final class MarketPriceBook {
     final closesByKey = <(String, String), List<PriceBar>>{};
     for (final c in closes) {
       (closesByKey[(c.symbol.toUpperCase(), c.market)] ??= []).add(c);
+    }
+    final recentByKey = <(String, String), List<PriceBar>>{};
+    for (final c in recent) {
+      (recentByKey[(c.symbol.toUpperCase(), c.market)] ??= []).add(c);
     }
     final result = <String, MarketPrice>{};
     for (final a in assets) {
@@ -80,7 +91,12 @@ abstract final class MarketPriceBook {
           ),
       ];
       final best = MarketPricing.best(candidates);
-      if (best != null) result[a.id] = best;
+      if (best != null) {
+        result[a.id] = MarketPricing.withReferences(
+          best,
+          recentByKey[key] ?? const [],
+        );
+      }
     }
     return result;
   }

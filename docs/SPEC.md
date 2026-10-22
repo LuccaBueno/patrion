@@ -659,6 +659,7 @@ Cada indicador traz fórmula, unidade, período, fonte e limitações.
 **Telas**
 
 - Dashboard, Carteira e Detalhe do ativo.
+- **Carteira (ajuste M-05, DECISIONS D-45):** lista principal com um item por ativo (todas as contas somadas), do maior valor da posição para o menor; cada linha mostra ativo (código, nome e quantidade de cotas), valor da posição em destaque, preço médio, cotação atual (fonte e data embaixo; tipo e coleta no tooltip), valorização % com cor, sinal e ícone, e o botão "Detalhes". Sem cotação, "indisponível" e ordem pelo total aplicado; com zero cotas, no fim e em cinza. Cabe em 1280 px sem rolagem lateral. O **painel de detalhes** abre por cima da lista, sem trocar de tela: lucro em R$ (não realizado + realizado), total aplicado, variação do dia (R$ e %, com a data do fechamento de referência), gráfico da cotação (1S, 1M, 6M, 1A, 5A, Tudo) com a linha do preço médio, % da carteira, proventos, operações e os botões "Comprar" e "Vender" (pedem conta, quantidade, preço, data e custos). Sem histórico, o gráfico mostra "indisponível" com o motivo e o botão "Baixar histórico". A página do ativo continua para editar o cadastro e informar preços.
 - Operações.
 - Renda fixa, FIIs, Cripto e Internacional.
 - Renda passiva, Benchmarks e Risco.

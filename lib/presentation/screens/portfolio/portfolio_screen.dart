@@ -1,29 +1,41 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../core/time/local_date.dart';
+import '../../../domain/market/market_data.dart';
 import '../../../domain/portfolio/codes.dart';
-import '../../../domain/portfolio/portfolio_valuation.dart';
+import '../../../domain/portfolio/holdings.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../format/market_labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
 import 'add_asset_dialog.dart';
+import 'asset_panel.dart';
 
-/// Carteira real: posições por conta e ativo (SPEC §16).
-class PortfolioScreen extends ConsumerWidget {
+/// Carteira real: um item por ativo, onde há mais dinheiro primeiro, com o
+/// painel de detalhes por cima da lista (M-05; SPEC §16).
+class PortfolioScreen extends ConsumerStatefulWidget {
   const PortfolioScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PortfolioScreen> createState() => _PortfolioScreenState();
+}
+
+class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
+  String? _selected;
+
+  @override
+  Widget build(BuildContext context) {
     final snapshot = ref.watch(portfolioSnapshotProvider);
-    return PageScaffold(
+    final fx = ref.watch(marketOverviewProvider).value?.fx ?? const {};
+    final snap = snapshot.value;
+    final holdings = snap == null ? const <Holding>[] : _holdings(snap, fx);
+    final page = PageScaffold(
       title: 'Carteira',
-      subtitle: 'Posições calculadas a partir das operações',
+      subtitle: 'Onde está o seu dinheiro, do maior valor para o menor',
       actions: [
         FilledButton.icon(
           key: const Key('portfolio-add-asset'),
@@ -34,80 +46,81 @@ class PortfolioScreen extends ConsumerWidget {
       ],
       child: AsyncBody(
         value: snapshot,
-        builder: (snap) => PositionsTable(snap: snap),
+        builder: (snap) => HoldingsList(
+          snap: snap,
+          holdings: holdings,
+          selected: _selected,
+          onSelect: (id) => setState(() => _selected = id),
+        ),
       ),
     );
+    final selected = holdings.where((h) => h.assetId == _selected).firstOrNull;
+    if (snap == null || selected == null) return page;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth < 640 ? constraints.maxWidth : 560.0;
+        return Stack(
+          children: [
+            page,
+            Positioned.fill(
+              child: GestureDetector(
+                key: const Key('asset-panel-scrim'),
+                onTap: () => setState(() => _selected = null),
+                child: ColoredBox(color: Colors.black.withValues(alpha: 0.18)),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              bottom: 0,
+              right: 0,
+              width: width,
+              child: AssetPanel(
+                snap: snap,
+                holding: selected,
+                all: holdings,
+                onClose: () => setState(() => _selected = null),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
+
+  static List<Holding> _holdings(
+    PortfolioSnapshot snap,
+    Map<String, FxRate> fx,
+  ) => Holdings.build(
+    snap.valued,
+    toBrl: {
+      for (final MapEntry(:key, :value) in fx.entries)
+        if (value.mid != null) key: value.mid!,
+    },
+  );
 }
 
-/// Colunas da tabela. A classe fica embaixo do ativo, o preço atual embaixo
-/// do preço médio e o percentual embaixo do resultado, para a tabela inteira
-/// caber numa janela de 1280 px sem rolar para o lado.
-enum _Col { asset, account, quantity, price, cost, value, pnl }
-
-/// Tabela de posições, ordenável, com busca e opção de mostrar encerradas.
-class PositionsTable extends StatefulWidget {
-  const PositionsTable({required this.snap, super.key});
+/// Lista da Carteira, com busca. Cabe em 1280 px sem rolagem lateral: as
+/// colunas dividem a largura disponível.
+class HoldingsList extends StatefulWidget {
+  const HoldingsList({
+    required this.snap,
+    required this.holdings,
+    required this.selected,
+    required this.onSelect,
+    super.key,
+  });
 
   final PortfolioSnapshot snap;
+  final List<Holding> holdings;
+  final String? selected;
+  final ValueChanged<String> onSelect;
 
   @override
-  State<PositionsTable> createState() => _PositionsTableState();
+  State<HoldingsList> createState() => _HoldingsListState();
 }
 
-class _PositionsTableState extends State<PositionsTable> {
+class _HoldingsListState extends State<HoldingsList> {
   String _search = '';
-  bool _showClosed = false;
-  _Col _sort = _Col.value;
-  bool _ascending = false;
-
-  List<ValuedPosition> _rows() {
-    final snap = widget.snap;
-    final s = _search.toLowerCase();
-    final rows = snap.valued.where((v) {
-      if (!_showClosed && !v.position.isOpen) return false;
-      if (s.isEmpty) return true;
-      return [
-        v.asset?.symbol ?? '',
-        v.asset?.name ?? '',
-        snap.accountLabel(v.position.accountId),
-      ].any((t) => t.toLowerCase().contains(s));
-    }).toList();
-
-    int compare(ValuedPosition a, ValuedPosition b) => switch (_sort) {
-      _Col.asset => (a.asset?.symbol ?? '').compareTo(b.asset?.symbol ?? ''),
-      _Col.account =>
-        snap
-            .accountLabel(a.position.accountId)
-            .compareTo(snap.accountLabel(b.position.accountId)),
-      _Col.quantity => a.position.quantity.compareTo(b.position.quantity),
-      _Col.price => _cmp(a.unitPrice, b.unitPrice),
-      _Col.cost => a.position.totalCost.compareTo(b.position.totalCost),
-      _Col.value => _cmp(a.marketValue, b.marketValue),
-      _Col.pnl => _cmp(a.unrealizedPnl, b.unrealizedPnl),
-    };
-    rows.sort((a, b) => _ascending ? compare(a, b) : compare(b, a));
-    return rows;
-  }
-
-  DataColumn _column(
-    String label,
-    _Col column, {
-    bool numeric = false,
-    String? tooltip,
-  }) => DataColumn(
-    label: Text(label, textAlign: numeric ? TextAlign.end : null),
-    tooltip: tooltip,
-    numeric: numeric,
-    onSort: (_, _) => setState(() {
-      if (_sort == column) {
-        _ascending = !_ascending;
-      } else {
-        _sort = column;
-        _ascending = !numeric;
-      }
-    }),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -124,325 +137,285 @@ class _PositionsTableState extends State<PositionsTable> {
         ),
       );
     }
-    final rows = _rows();
+    final s = _search.toLowerCase();
+    final rows = [
+      for (final h in widget.holdings)
+        if (s.isEmpty ||
+            (h.asset?.symbol ?? '').toLowerCase().contains(s) ||
+            (h.asset?.name ?? '').toLowerCase().contains(s))
+          h,
+    ];
     final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        Wrap(
-          spacing: 16,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            SizedBox(
-              width: 260,
-              child: TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: 'Buscar ativo ou conta',
-                  isDense: true,
-                ),
-                onChanged: (v) => setState(() => _search = v.trim()),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: 320,
+            child: TextField(
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Buscar ativo',
+                isDense: true,
               ),
+              onChanged: (v) => setState(() => _search = v.trim()),
             ),
-            FilterChip(
-              label: const Text('Mostrar encerradas'),
-              selected: _showClosed,
-              onSelected: (v) => setState(() => _showClosed = v),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 12),
-        TableCard(
-          child: DataTable(
-            showCheckboxColumn: false,
-            columnSpacing: 16,
-            horizontalMargin: 12,
-            dataRowMinHeight: 52,
-            dataRowMaxHeight: 60,
-            sortColumnIndex: _Col.values.indexOf(_sort),
-            sortAscending: _ascending,
-            columns: [
-              _column('Ativo', _Col.asset),
-              _column('Conta', _Col.account),
-              _column(
-                'Qtd.',
-                _Col.quantity,
-                numeric: true,
-                tooltip: 'Quantidade',
-              ),
-              // Duas linhas, como as células: preço médio em cima, atual
-              // embaixo.
-              _column(
-                'Preço médio /\nAtual',
-                _Col.price,
-                numeric: true,
-                tooltip:
-                    'Preço médio de compra e, embaixo, o preço unitário '
-                    'atual. Ordena pelo atual.',
-              ),
-              _column('Custo', _Col.cost, numeric: true),
-              _column('Valor de mercado', _Col.value, numeric: true),
-              _column('Resultado', _Col.pnl, numeric: true),
-            ],
-            rows: [
-              for (final v in rows)
-                DataRow(
-                  onSelectChanged: (_) =>
-                      context.go('/carteira/ativo/${v.position.assetId}'),
-                  cells: [
-                    DataCell(
-                      _TwoLines(
-                        alignEnd: false,
-                        top: Text(
-                          v.asset?.symbol ?? '?',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        bottom: v.asset?.assetClass.label,
-                      ),
-                    ),
-                    DataCell(_AccountCell(snap: snap, v: v)),
-                    DataCell(
-                      Text(
-                        v.position.quantity == Decimal.zero
-                            ? '—'
-                            : Fmt.number(v.position.quantity),
-                      ),
-                    ),
-                    DataCell(_PriceCell(v: v, today: snap.asOf)),
-                    DataCell(
-                      Text(
-                        Fmt.money(v.position.totalCost, v.position.currency),
-                      ),
-                    ),
-                    DataCell(_MarketValueCell(v: v, today: snap.asOf)),
-                    DataCell(
-                      v.unrealizedPnl == null
-                          ? const Text('—')
-                          : _TwoLines(
-                              top: PnlText(
-                                value: v.unrealizedPnl!,
-                                singleLine: true,
-                                text: Fmt.signedMoney(
-                                  v.unrealizedPnl!,
-                                  v.position.currency,
-                                ),
-                              ),
-                              bottom: v.simpleReturn == null
-                                  ? null
-                                  : Fmt.percent(v.simpleReturn!),
-                            ),
-                    ),
-                  ],
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              const _HeaderRow(),
+              const Divider(height: 1),
+              for (final (i, h) in rows.indexed) ...[
+                if (i > 0) const Divider(height: 1),
+                _HoldingRow(
+                  holding: h,
+                  today: snap.asOf,
+                  selected: h.assetId == widget.selected,
+                  onTap: () => widget.onSelect(h.assetId),
                 ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Resultado = valor de mercado − custo; embaixo, o retorno simples '
-          'sobre o custo, sem proventos. Abaixo do preço médio, o preço '
-          'unitário atual; abaixo do valor, a fonte e a data do preço. O '
-          'tipo, a coleta e o atraso aparecem ao passar o mouse.',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          'Valor da posição = quantidade × cotação atual. Valorização = '
+          '(cotação − preço médio) ÷ preço médio, sem proventos. Sem cotação, '
+          'o ativo é ordenado pelo total aplicado. Abaixo da cotação, a fonte '
+          'e a data; o tipo, a coleta e o atraso aparecem ao passar o mouse. '
+          'Ativos sem cotas ficam no fim.',
+          style: muted,
         ),
       ],
     );
   }
 }
 
-class _MarketValueCell extends StatelessWidget {
-  const _MarketValueCell({required this.v, required this.today});
+/// Larguras relativas das colunas.
+const _flex = [5, 3, 3, 3, 3];
+const _buttonWidth = 104.0;
 
-  final ValuedPosition v;
-  final LocalDate today;
+class _HeaderRow extends StatelessWidget {
+  const _HeaderRow();
 
   @override
   Widget build(BuildContext context) {
-    if (!v.position.isOpen) return const Text('—');
-    if (v.marketValue == null) {
-      return UnavailableText(
-        tooltip: v.asset?.priceSource == PriceSource.market
-            ? 'Sem cotação guardada. Use "Atualizar agora" em Fontes de '
-                  'dados ou informe o preço no detalhe do ativo.'
-            : 'Sem preço ou saldo informado. Informe no detalhe do ativo.',
-      );
-    }
-    final note = MarketLabels.valuation(v, today)!;
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
-    return Tooltip(
-      message: note.message,
+    final theme = Theme.of(context);
+    final style = theme.textTheme.labelMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+    );
+    Widget cell(int i, String text, {bool end = true}) => Expanded(
+      flex: _flex[i],
+      child: Text(text, style: style, textAlign: end ? TextAlign.end : null),
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          if (note.stale) _StaleIcon(color: muted),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(Fmt.money(v.marketValue!, v.position.currency)),
-              Text(
-                note.short,
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(color: muted),
-              ),
-            ],
-          ),
+          cell(0, 'Ativo', end: false),
+          cell(1, 'Valor da posição'),
+          cell(2, 'Preço médio'),
+          cell(3, 'Cotação atual'),
+          cell(4, 'Valorização'),
+          const SizedBox(width: _buttonWidth),
         ],
       ),
     );
   }
 }
 
-/// Instituição em cima e conta embaixo (em uma linha, o nome completo
-/// alargava a tabela além de 1280 px); nomes longos são cortados, com o
-/// nome inteiro no tooltip.
-class _AccountCell extends StatelessWidget {
-  const _AccountCell({required this.snap, required this.v});
+class _HoldingRow extends StatelessWidget {
+  const _HoldingRow({
+    required this.holding,
+    required this.today,
+    required this.selected,
+    required this.onTap,
+  });
 
-  final PortfolioSnapshot snap;
-  final ValuedPosition v;
+  final Holding holding;
+  final LocalDate today;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final account = snap.accounts[v.position.accountId];
-    final institution = account == null
-        ? null
-        : snap.institutions[account.institutionId];
     final theme = Theme.of(context);
-    return Tooltip(
-      message: snap.accountLabel(v.position.accountId),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 150),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              institution?.name ?? account?.name ?? '—',
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (institution != null)
-              Text(
-                account!.name,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-          ],
-        ),
+    final h = holding;
+    final c = h.currency;
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final closed = !h.isOpen;
+    final asset = h.asset;
+    final priced = h.priced;
+    final note = priced == null ? null : MarketLabels.valuation(priced, today);
+    final unavailable = asset?.priceSource == PriceSource.market
+        ? 'Sem cotação guardada. Use "Atualizar agora" ou informe o preço na '
+              'página do ativo.'
+        : 'Sem preço ou saldo informado. Informe na página do ativo.';
+
+    // Em janelas estreitas, o número encolhe em vez de cortar.
+    Widget end(Widget child) => Align(
+      alignment: Alignment.centerRight,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerRight,
+        child: child,
       ),
     );
-  }
-}
 
-/// Preço médio em cima e preço unitário atual embaixo, alinhados para
-/// comparar. A fonte e a data do preço atual ficam no tooltip; sem preço,
-/// "indisponível".
-class _PriceCell extends StatelessWidget {
-  const _PriceCell({required this.v, required this.today});
-
-  final ValuedPosition v;
-  final LocalDate today;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!v.position.isOpen) return const Text('—');
-    final currency = v.position.currency;
-    final average = v.position.averagePrice;
-    final price = v.unitPrice;
-    final note = MarketLabels.valuation(v, today);
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
-    final Widget current;
-    if (price == null || note == null) {
-      current = UnavailableText(
-        tooltip: v.valuationKind == ValuationKind.balance
-            ? 'Avaliado por saldo informado: não há preço unitário.'
-            : v.asset?.priceSource == PriceSource.market
-            ? 'Sem cotação guardada. Use "Atualizar agora" em Fontes de '
-                  'dados ou informe o preço no detalhe do ativo.'
-            : 'Sem preço informado. Informe no detalhe do ativo.',
-      );
-    } else {
-      current = Tooltip(
-        message: note.message,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (note.stale) _StaleIcon(color: muted),
-            Text(
-              Fmt.money(price, currency),
-              key: const Key('current-price'),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ],
+    final value = h.marketValue;
+    final appreciation = h.appreciation;
+    final row = Row(
+      children: [
+        Expanded(
+          flex: _flex[0],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: asset?.symbol ?? '?',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    if (asset != null)
+                      TextSpan(
+                        text: '  ${asset.name}',
+                        style: TextStyle(color: muted),
+                      ),
+                  ],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                closed
+                    ? 'sem cotas'
+                    : h.quantity > Decimal.zero
+                    ? '${Fmt.number(h.quantity)} '
+                          '${h.quantity == Decimal.one ? 'cota' : 'cotas'}'
+                    : asset?.assetClass.singular ?? '',
+                style: theme.textTheme.labelSmall?.copyWith(color: muted),
+              ),
+            ],
+          ),
         ),
-      );
-    }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(average == null ? '—' : Fmt.money(average, currency)),
-        current,
-      ],
-    );
-  }
-}
-
-class _StaleIcon extends StatelessWidget {
-  const _StaleIcon({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(right: 4),
-    child: Icon(
-      Icons.history,
-      size: 16,
-      color: color,
-      semanticLabel: 'Valor desatualizado',
-    ),
-  );
-}
-
-/// Célula com o valor e uma nota menor embaixo.
-class _TwoLines extends StatelessWidget {
-  const _TwoLines({required this.top, this.bottom, this.alignEnd = true});
-
-  final Widget top;
-  final String? bottom;
-  final bool alignEnd;
-
-  @override
-  Widget build(BuildContext context) {
-    final note = bottom;
-    if (note == null) return top;
-    final theme = Theme.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: alignEnd
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        top,
-        Text(
-          note,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+        Expanded(
+          flex: _flex[1],
+          child: end(
+            closed
+                ? const Text('—')
+                : value == null
+                ? UnavailableText(tooltip: unavailable)
+                : Text(
+                    Fmt.money(value, c),
+                    key: const Key('holding-value'),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          ),
+        ),
+        Expanded(
+          flex: _flex[2],
+          child: end(
+            Text(h.averagePrice == null ? '—' : Fmt.money(h.averagePrice!, c)),
+          ),
+        ),
+        Expanded(
+          flex: _flex[3],
+          child: end(
+            closed
+                ? const Text('—')
+                : h.unitPrice == null || note == null
+                ? UnavailableText(
+                    tooltip: priced == null && value != null
+                        ? 'Avaliado por saldo informado: não há preço unitário.'
+                        : unavailable,
+                  )
+                : Tooltip(
+                    message: note.message,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (note.stale)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Icon(
+                              Icons.history,
+                              size: 16,
+                              color: muted,
+                              semanticLabel: 'Valor desatualizado',
+                            ),
+                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              Fmt.money(h.unitPrice!, c),
+                              key: const Key('current-price'),
+                            ),
+                            Text(
+                              note.short,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: muted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ),
+        Expanded(
+          flex: _flex[4],
+          child: end(
+            closed
+                ? const Text('—')
+                : appreciation == null
+                ? UnavailableText(tooltip: unavailable)
+                : PnlText(
+                    key: const Key('holding-appreciation'),
+                    value: appreciation,
+                    text: Fmt.percent(appreciation),
+                    singleLine: true,
+                  ),
+          ),
+        ),
+        SizedBox(
+          width: _buttonWidth,
+          child: end(
+            TextButton(
+              key: Key('details-${asset?.symbol ?? h.assetId}'),
+              onPressed: onTap,
+              child: const Text('Detalhes'),
+            ),
           ),
         ),
       ],
     );
+    return Material(
+      color: selected
+          ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.5)
+          : Colors.transparent,
+      child: InkWell(
+        key: Key('holding-${asset?.symbol ?? h.assetId}'),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          child: Opacity(opacity: closed ? 0.5 : 1, child: row),
+        ),
+      ),
+    );
   }
-}
-
-/// Compara valores opcionais; ausentes ficam antes de todos.
-int _cmp(Decimal? a, Decimal? b) {
-  if (a == null) return b == null ? 0 : -1;
-  if (b == null) return 1;
-  return a.compareTo(b);
 }

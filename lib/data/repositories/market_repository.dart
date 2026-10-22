@@ -222,6 +222,19 @@ class MarketRepository {
     return [for (final r in rows) _price(_db.mktPrices.map(r.data))];
   }
 
+  /// Fechamentos de todos os ativos a partir de [from] (variação do dia e
+  /// do mês).
+  Future<List<PriceBar>> closesSince(LocalDate from) async {
+    final rows =
+        await (_db.select(_db.mktPrices)..where(
+              (t) =>
+                  t.dataType.equals(MarketDataType.close.code) &
+                  t.refDate.isBiggerOrEqualValue('$from'),
+            ))
+            .get();
+    return rows.map(_price).toList();
+  }
+
   Future<List<PriceBar>> prices(
     String symbol,
     String market, {
