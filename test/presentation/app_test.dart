@@ -105,7 +105,7 @@ void main() {
       expect(
         [for (final d in rail.destinations) (d.label as Text).data],
         // Cadastros saiu do menu (M-06): está em Configurações.
-        ['Painel', 'Carteira', 'Desempenho', 'Operações'],
+        ['Painel', 'Carteira', 'Desempenho', 'Renda passiva', 'Operações'],
       );
       final sync = tester.getCenter(find.byKey(const Key('nav-Sincronizar')));
       final settings = tester.getCenter(

@@ -20,6 +20,7 @@ import '../application/portfolio/portfolio_query.dart';
 import '../application/portfolio/quick_add_service.dart';
 import '../application/portfolio/registry_service.dart';
 import '../application/portfolio/valuation_service.dart';
+import '../application/portfolio/passive_income_service.dart';
 import '../application/portfolio/risk_service.dart';
 import '../application/portfolio/wealth_service.dart';
 import '../core/time/local_date.dart';
@@ -456,3 +457,22 @@ final brokerFilterProvider = StreamProvider<String?>(
 final groupByBrokerProvider = StreamProvider<bool>(
   (ref) => ref.watch(portfolioViewPreferencesProvider).watchGroup(),
 );
+
+// -- Renda passiva (F8) -------------------------------------------------------
+
+final passiveIncomeServiceProvider = Provider<PassiveIncomeService>(
+  (ref) => PassiveIncomeService(
+    ref.watch(portfolioRepositoriesProvider),
+    ref.watch(marketRepositoryProvider),
+  ),
+);
+
+/// Proventos registrados e os da B3, recalculados quando a carteira ou os
+/// dados de mercado mudam.
+final passiveIncomeProvider = FutureProvider<PassiveIncomeOverview>((
+  ref,
+) async {
+  ref.watch(marketTickProvider);
+  final snap = await ref.watch(portfolioSnapshotProvider.future);
+  return ref.watch(passiveIncomeServiceProvider).load(snap);
+});

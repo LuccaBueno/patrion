@@ -305,3 +305,14 @@ Séries de nível: a carteira pelo índice do TWR (§3.2), cada ativo pelo preç
 - **Exposição cambial** e **liquidez**: peso de cada moeda e de cada liquidez do cadastro (sem ela, a padrão da classe: diária para bolsa, cripto, Tesouro e caixa; "não informada" para renda fixa e produtos bancários).
 - **Alocação-alvo**: para cada classe, `peso − alvo` em p.p. e `patrimônio × alvo − valor da classe` em reais (quanto falta, +, ou sobra, −). Informação, não recomendação.
 - Exemplos (testes): ±1% em 20 dias corridos dão 19,61% a.a.; níveis 100, 120, 90, 100, 125 dão queda de 25% recuperada no último dia; retornos 1,5 × os do mercado dão beta 1,5; CDI + 0,1% ± 1% ao dia dá Sharpe 1,9088; pesos 50/30/20 dão HHI 0,38 (2,63 posições efetivas).
+
+## 12. Renda passiva (`IncomeTotals`, `IncomeEventMatch`, `lib/domain/portfolio/passive_income.dart`; F8)
+
+- **Recebido**: as operações de dividendo, JCP, rendimento de FII e juros, líquidas (`valor − custos − impostos`), em reais (outras moedas à parte). Por tipo, ano e ativo; **12 meses** = do dia 1 do mês de 11 meses atrás até hoje (os mesmos meses das barras do Painel); **média mensal** = 12 meses ÷ 12.
+- **Renda sobre o patrimônio** = 12 meses ÷ valor de mercado das posições em reais hoje; **sobre o custo** = 12 meses ÷ custo das posições abertas em reais.
+- **Anunciado** (proventos da B3 com pagamento depois de hoje): `quantidade × valor por cota`, bruto; a quantidade é a do fim da data-com, pelas operações (ou a de hoje, se a data-com ainda não chegou).
+- **Projetado** = média mensal × 12. Hipotético (regra 3).
+- **Proventos pagos não registrados** (pagamento até hoje; dividendo, JCP, rendimento e "outros" em dinheiro; amortização e eventos em ações ficam de fora): para cada conta com quantidade positiva no fim da data-com (motor de posições até a data, §1), sugere `quantidade × valor por cota` (bruto, arredondado a 2 casas), a menos que a conta já tenha uma operação do mesmo tipo e ativo com a nota daquela data-com ou com data entre a data-com e 10 dias depois do pagamento.
+- **Saldo inicial depois da data-com** (cadastro rápido, `InitialBalance`): a quantidade naquela data não é conhecida, então o provento não é sugerido; a tela agrupa esses casos por ativo e explica (decisão do usuário em 23/10/2026).
+- **Lançamento** (depois da prévia e da confirmação): uma operação por conta, na data de pagamento, com o bruto da B3 e, no JCP, o IR retido = bruto × a alíquota informada na prévia (padrão 15%, arredondado a 2 casas).
+- Exemplos (testes): 100 cotas na conta A e 40 na B na data-com, dividendo de R$ 0,50: R$ 50,00 e R$ 20,00; JCP de R$ 0,30 × 100 com 15%: bruto R$ 30,00, IR R$ 4,50, líquido R$ 25,50.

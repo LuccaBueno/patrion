@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/dashboard/dashboard_screen.dart';
+import '../screens/income/income_screen.dart';
 import '../screens/operations/operations_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/portfolio/asset_detail_screen.dart';
@@ -14,6 +15,7 @@ abstract final class Routes {
   static const dashboard = '/';
   static const portfolio = '/carteira';
   static const performance = '/desempenho';
+  static const income = '/renda';
   static const operations = '/operacoes';
   static const registry = '/configuracoes/corretoras';
   static const settings = '/configuracoes';
@@ -61,6 +63,12 @@ const navDestinations = [
     label: 'Desempenho',
     icon: Icons.query_stats_outlined,
     selectedIcon: Icons.query_stats,
+  ),
+  NavDestination(
+    path: Routes.income,
+    label: 'Renda passiva',
+    icon: Icons.payments_outlined,
+    selectedIcon: Icons.payments,
   ),
   NavDestination(
     path: Routes.operations,
@@ -122,6 +130,10 @@ GoRouter createRouter({String initialLocation = Routes.dashboard}) {
           GoRoute(
             path: Routes.performance,
             pageBuilder: (context, state) => _page(const PerformanceScreen()),
+          ),
+          GoRoute(
+            path: Routes.income,
+            pageBuilder: (context, state) => _page(const IncomeScreen()),
           ),
           GoRoute(
             path: Routes.operations,

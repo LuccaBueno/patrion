@@ -721,3 +721,15 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Corrigido junto: qualquer gravação em `shared_settings` recalculava o retrato da carteira e a evolução de 10 anos; agora só o controle de caixa (D-44) recalcula.
 - Alternativas: volatilidade com 252 fixo (erra em cripto e em séries com lacunas); risco pelo preço bruto (desdobramentos viram quedas); alvos numa tabela sincronizável nova (mudança de schema sem necessidade).
 - Motivo: SPEC §12.6 e §21 (F8); regras 1, 3 e 10 (`FORMULAS.md` §11).
+
+### 2026-10-23 — D-56: Renda passiva e lançamento dos proventos pagos da B3 (F8, parte 4)
+
+- Decisão:
+  - **Tela Renda passiva** no menu (`/renda`, entre Desempenho e Operações): recebido em 12 meses, média mensal, renda sobre o patrimônio e sobre o custo; recebido, anunciado e projetado (hipotético) lado a lado; proventos por mês (24 meses); próximos pagamentos; por ano (por tipo) e por ativo.
+  - **Recebido = operações registradas**, sempre. Os proventos da B3 (D-35, D-48) servem para o anunciado, o calendário e a sugestão; nunca entram nos totais sem virar operação.
+  - **Lançar proventos pagos** (aprovado em 23/10/2026): quantidade no fim da data-com pelas operações, por conta; prévia com cada provento (conta, quantidade × valor por cota, data-com) para marcar ou desmarcar; grava numa transação, como operações comuns (origem manual, editáveis) com a nota "Lançado dos proventos da B3 (data-com dd/mm/aaaa)", que também evita sugerir de novo. Sem um tipo de origem novo: um PC com a 1.2.0 importa o save sem estranhar.
+  - **Saldo inicial depois da data-com:** não sugere e explica, agrupado por ativo (regra pedida pelo usuário). A posição lançada como saldo inicial é a primeira notícia dela; a quantidade antes disso não é conhecida.
+  - **JCP:** o valor da B3 é bruto; a prévia pede a alíquota do IR retido (padrão 15%, "confira no informe da corretora") e grava o imposto na operação (SPEC §7: impostos registrados pelo usuário, aqui confirmados por ele).
+  - Já registrado = mesma conta, ativo e tipo, com a nota da data-com ou com data entre a data-com e 10 dias depois do pagamento (quem lançou à mão perto da data não recebe a sugestão de novo).
+- Alternativas: lançar automaticamente (proibido gravar sem confirmação); quantidade pela posição de hoje (erra quem comprou ou vendeu depois); estimar a quantidade antes do saldo inicial (seria inventar).
+- Motivo: SPEC §12.7 e §21 (F8); regras 1, 3 e 10 (`FORMULAS.md` §12).
