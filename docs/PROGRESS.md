@@ -4,9 +4,25 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`) concluídos** em 23/10/2026, como versão 1.2.0 (sem tag nem Release; só quando você pedir). Parte da F8 foi antecipada no M-09 (SPEC §21). Próximo: o restante da Fase 8; o escopo foi reescrito na SPEC §21 e aguarda a sua aprovação. A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Fase 8 em andamento** (desde 23/10/2026; escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos). Parte 1 (Desempenho → Rentabilidade) concluída; próximas: 2 (Benchmarks), 3 (Risco), 4 (Renda passiva), 5 (visões por classe) e 6 (Painel e acabamento), depois a versão 1.3.0. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
+
+### Fase 8 — Classes, benchmarks, risco e renda passiva (desde 23/10/2026)
+
+Cada parte tem um commit; o relatório completo sai no fim (com a 1.3.0).
+
+**Parte 1 — Desempenho → Rentabilidade (concluída)** (DECISIONS D-53; SPEC §8, §16 e §21; FORMULAS §3.4)
+
+- Tela **Desempenho** no menu (`/desempenho`, entre Carteira e Operações), com a aba Rentabilidade.
+- Períodos 1M, 3M, 6M, YTD, 1A (padrão), 3A, 5A, 10A, Tudo e Personalizado (datas "De" e "Até"); só aparecem os que os dados sustentam.
+- Cartões do período: rentabilidade (TWR), CDI do mesmo intervalo com "% do CDI" e a diferença em p.p., retorno real (descontado o IPCA, com o mês até onde ele foi publicado), taxa anual equivalente (CAGR, só acima de um ano) e TIR do período (o equivalente do período em menos de um ano).
+- Tabela mês × ano (o ano mais recente em cima): TWR de cada mês, do ano (em destaque) e acumulado; CDI do ano e % do CDI; anos parciais marcados com "*". Numa janela estreita, a célula reduz um pouco a fonte em vez de cortar.
+- Uma fonte só: o índice do TWR da evolução patrimonial do Painel (D-51). O cartão de número do Painel virou o widget comum `StatCard`.
+- Arquivos: `domain/portfolio/performance_report.dart` (novo), `domain/finance/benchmark.dart` (`levelOn`, `growth`), `presentation/screens/performance/performance_screen.dart` e `returns_tab.dart` (novos), `widgets/stat_card.dart` (novo, saiu do Painel), `router/app_router.dart`, `dashboard_screen.dart`; testes `test/helpers/fonts.dart` (Segoe UI, saiu do teste de largura da Carteira).
+- Testes: `performance_report_test.dart` (meses, ano, acumulado, CDI e % do CDI; ano parcial e ano que termina em 29/12; período com IPCA até o último mês publicado e retorno real; CAGR e TIR iguais sem aportes; TWR −1,00% × TIR −3,7093% a.a. de `CASOS_DE_TESTE.md` §6; períodos sustentados), `performance_screen_test.dart` (tabela com +33,33% em jun/2025 e acumulado +46,67%; 1A com +10,00%, CDI e retorno real indisponível sem IPCA; 3A e 10A ocultos; Tudo com CAGR; personalizado de 01/05 a 30/06/2025 com +33,33%; tabela em 1264 px com a Segoe UI sem cortes; sem operações, indisponível com o motivo), `app_test.dart` (menu com Desempenho). Suíte inteira: 539 passando.
+- **Conferência visual (1280 × 800, cópia do banco de teste com 10 anos de dados reais):** 1A com +30,58% (215% do CDI), retorno real +24,95% com IPCA até 09/2026, TIR +30,42% a.a.; tabela de 2017 a 2026 inteira na largura. Corrigido depois da conferência: 2022 e 2023 marcados como parciais (o último pregão foi 29 e 30/12) e o recuo das abas.
+
 
 ### Ajustes M-06 a M-09 (desde 23/10/2026)
 

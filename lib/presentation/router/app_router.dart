@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/operations/operations_screen.dart';
+import '../screens/performance/performance_screen.dart';
 import '../screens/portfolio/asset_detail_screen.dart';
 import '../screens/portfolio/portfolio_screen.dart';
 import '../screens/settings_screen.dart';
@@ -12,6 +13,7 @@ import '../shell/app_shell.dart';
 abstract final class Routes {
   static const dashboard = '/';
   static const portfolio = '/carteira';
+  static const performance = '/desempenho';
   static const operations = '/operacoes';
   static const registry = '/configuracoes/corretoras';
   static const settings = '/configuracoes';
@@ -40,7 +42,7 @@ class NavDestination {
 }
 
 /// Telas de uso diário, na parte de cima do menu (M-02). As das próximas
-/// fases (renda passiva, benchmarks, hipotéticas, simuladores) entram aqui.
+/// fases (hipotéticas, simuladores) entram aqui, antes de Operações.
 const navDestinations = [
   NavDestination(
     path: Routes.dashboard,
@@ -53,6 +55,12 @@ const navDestinations = [
     label: 'Carteira',
     icon: Icons.pie_chart_outline,
     selectedIcon: Icons.pie_chart,
+  ),
+  NavDestination(
+    path: Routes.performance,
+    label: 'Desempenho',
+    icon: Icons.query_stats_outlined,
+    selectedIcon: Icons.query_stats,
   ),
   NavDestination(
     path: Routes.operations,
@@ -110,6 +118,10 @@ GoRouter createRouter({String initialLocation = Routes.dashboard}) {
                 ),
               ),
             ],
+          ),
+          GoRoute(
+            path: Routes.performance,
+            pageBuilder: (context, state) => _page(const PerformanceScreen()),
           ),
           GoRoute(
             path: Routes.operations,

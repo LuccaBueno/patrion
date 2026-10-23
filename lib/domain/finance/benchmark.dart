@@ -22,6 +22,33 @@ class IndexLevels {
   LocalDate? get first => levels.isEmpty ? null : levels.first.$1;
   LocalDate? get last => levels.isEmpty ? null : levels.last.$1;
 
+  /// Nível no fim de [d] (o último até a data); nulo antes do primeiro dado.
+  Decimal? levelOn(LocalDate d) {
+    var lo = 0;
+    var hi = levels.length - 1;
+    var found = -1;
+    while (lo <= hi) {
+      final mid = (lo + hi) >> 1;
+      if (levels[mid].$1.isAfter(d)) {
+        hi = mid - 1;
+      } else {
+        found = mid;
+        lo = mid + 1;
+      }
+    }
+    return found < 0 ? null : levels[found].$2;
+  }
+
+  /// Crescimento entre o fim de [from] e o fim de [to] (fração); nulo se o
+  /// índice não tem dado até [from] ou se [to] não é depois de [from].
+  Decimal? growth(LocalDate from, LocalDate to) {
+    if (!to.isAfter(from)) return null;
+    final start = levelOn(from);
+    final end = levelOn(to);
+    if (start == null || end == null || start <= Decimal.zero) return null;
+    return DecimalMath.divide(end, start) - Decimal.one;
+  }
+
   /// CDI (taxa diária em %): nível = produto de `1 + taxa ÷ 100` dos dias.
   static IndexLevels cdi(List<IndicatorPoint> daily) {
     var level = Decimal.one;

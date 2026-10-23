@@ -18,6 +18,7 @@ import '../../providers.dart';
 import '../market/data_sources_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
+import '../../widgets/stat_card.dart';
 import 'dashboard_charts.dart';
 import '../../../domain/portfolio/dashboard_metrics.dart';
 import '../../../domain/portfolio/holdings.dart';
@@ -200,7 +201,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
           // rendeu e a rentabilidade no ano.
           _HeroRow(
             children: [
-              _StatCard(
+              StatCard(
                 key: const Key('stat-equity'),
                 big: true,
                 label: 'Patrimônio',
@@ -215,7 +216,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                     : 'Valor de mercado das posições',
                 footer: _DayChange(day: day, currency: currency),
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-applied'),
                 big: true,
                 label: 'Total aplicado',
@@ -233,7 +234,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                     '(vendas, líquidas de custos), dos ativos com preço.',
                 note: 'Aportes − resgates',
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-gain'),
                 big: true,
                 label: 'Ganho',
@@ -250,7 +251,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                     'recebidos ficam de fora (estão em Proventos).',
                 note: 'Patrimônio − aplicado',
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-ytd'),
                 big: true,
                 label: 'Rentabilidade no ano',
@@ -375,7 +376,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
             spacing: 16,
             runSpacing: 16,
             children: [
-              _StatCard(
+              StatCard(
                 key: const Key('stat-total-result'),
                 label: 'Resultado total',
                 pnl: performance.totalResult,
@@ -390,26 +391,26 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                           '(${Fmt.money(performance.invested, currency)}); '
                           'realizado + não realizado + proventos',
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-invested'),
                 label: 'Valor investido',
                 value: Fmt.money(totals.invested, currency),
                 note: 'Custo das posições abertas, com custos de compra',
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-market'),
                 label: 'Valor de mercado',
                 value: Fmt.money(totals.marketValue, currency),
                 note: 'Só posições com preço, cotação ou saldo',
               ),
               if (summary.trackCash)
-                _StatCard(
+                StatCard(
                   key: const Key('stat-cash'),
                   label: 'Caixa',
                   value: Fmt.money(totals.cash, currency),
                   note: 'Depósitos, vendas e proventos menos compras e saídas',
                 ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-unrealized'),
                 label: 'Resultado não realizado',
                 pnl: totals.unrealizedPnl,
@@ -420,7 +421,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                     : '${Fmt.percent(totals.simpleReturn!)} sobre o custo '
                           '(retorno simples, sem proventos)',
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-mwr'),
                 label: 'Rentabilidade (TIR)',
                 pnl: performance.net?.annual,
@@ -432,14 +433,14 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                     : 'MWR dos investimentos ${performance.net!.range}, '
                           'líquida de custos, com proventos; sem o caixa',
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-realized'),
                 label: 'Lucro realizado',
                 pnl: totals.realizedPnl,
                 value: Fmt.signedMoney(totals.realizedPnl, currency),
                 note: 'Vendas, resgates e vencimentos, líquidos de custos',
               ),
-              _StatCard(
+              StatCard(
                 key: const Key('stat-income'),
                 label: 'Proventos recebidos',
                 value: Fmt.money(totals.incomeNet, currency),
@@ -515,115 +516,6 @@ class _Warning extends StatelessWidget {
             semanticLabel: 'Aviso',
           ),
           title: Text(text, style: theme.textTheme.bodyMedium),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.note,
-    this.big = false,
-    this.pnl,
-    this.info,
-    this.unavailableReason,
-    this.footer,
-    super.key,
-  });
-
-  final String label;
-
-  /// Linha extra embaixo da nota (a variação do dia, no patrimônio).
-  final Widget? footer;
-
-  /// Nulo mostra "indisponível" com [unavailableReason].
-  final String? value;
-  final String note;
-
-  /// Quando informado, o valor é mostrado como ganho ou perda.
-  final Decimal? pnl;
-
-  /// Explicação da metodologia, num ícone com tooltip ao lado do rótulo.
-  final String? info;
-  final String? unavailableReason;
-
-  /// Destaque do topo (M-04): maior e mais largo.
-  final bool big;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = big
-        ? theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600)
-        : theme.textTheme.titleLarge;
-    final muted = theme.colorScheme.onSurfaceVariant;
-    final Widget valueWidget;
-    if (value == null) {
-      valueWidget = UnavailableText(tooltip: unavailableReason);
-    } else {
-      // O valor nunca quebra linha: se não couber, a fonte diminui.
-      valueWidget = FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: pnl == null
-            ? Text(value!, maxLines: 1, softWrap: false, style: style)
-            : PnlText(
-                value: pnl!,
-                text: value!,
-                style: style,
-                singleLine: true,
-              ),
-      );
-    }
-    return SizedBox(
-      width: big ? null : 280,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: theme.textTheme.labelLarge?.copyWith(color: muted),
-                    ),
-                  ),
-                  if (info != null) ...[
-                    const SizedBox(width: 4),
-                    Tooltip(
-                      message: info,
-                      child: Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: muted,
-                        semanticLabel: 'Sobre a métrica',
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: valueWidget,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                note,
-                style: theme.textTheme.bodySmall?.copyWith(color: muted),
-              ),
-              if (footer != null) ...[const SizedBox(height: 6), footer!],
-            ],
-          ),
         ),
       ),
     );

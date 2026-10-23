@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart' as p;
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/market_repository.dart';
 import 'package:patrion/domain/market/market_data.dart';
@@ -14,29 +10,11 @@ import 'package:patrion/domain/portfolio/operation_type.dart';
 import 'package:patrion/presentation/widgets/common.dart';
 
 import '../helpers/app_harness.dart';
+import '../helpers/fonts.dart';
 import '../helpers/portfolio_fixture.dart';
 
 /// Área útil de uma janela de 1280 px no Windows (sem as bordas).
 const _window1280 = Size(1264, 681);
-
-/// Carrega a Segoe UI do Windows, a fonte que o app usa de verdade. Com a
-/// fonte de teste padrão (cada letra é um quadrado), a largura não confere.
-Future<bool> _loadSegoeUi() async {
-  const dir = r'C:\Windows\Fonts';
-  final files = [
-    'segoeui.ttf',
-    'seguisb.ttf',
-    'segoeuib.ttf',
-  ].map((f) => File(p.join(dir, f))).where((f) => f.existsSync()).toList();
-  if (files.isEmpty) return false;
-  final loader = FontLoader('Segoe UI');
-  for (final f in files) {
-    final bytes = f.readAsBytesSync();
-    loader.addFont(Future.value(ByteData.sublistView(bytes)));
-  }
-  await loader.load();
-  return true;
-}
 
 void main() {
   late PortfolioFixture f;
@@ -47,7 +25,7 @@ void main() {
   testWidgets(
     'na janela de 1280 px, a lista da Carteira cabe sem rolar para o lado',
     (tester) async {
-      final hasFont = await tester.runAsync(_loadSegoeUi);
+      final hasFont = await tester.runAsync(loadSegoeUi);
       if (hasFont != true) {
         markTestSkipped('Segoe UI indisponível (fora do Windows)');
         return;

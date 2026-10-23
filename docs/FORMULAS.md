@@ -150,6 +150,18 @@ Calculados separadamente para cada moeda (o total em reais está em §2.3):
 - **Em %**: carteira = TWR do período; índice = nível(fim) ÷ nível(início) − 1; os dois começam em 0% no início do período. A diferença aparece em pontos percentuais.
 - Exemplo (teste): aportes de 1.000 no dia 1 e 1.200 no dia 3, CDI fictício de 1% ao dia: 1.000; 1.010; 2.220,10; 2.242,301.
 
+### 3.4 Rentabilidade por período e mês a mês (`ReturnTable`, `PeriodPerformance`, `lib/domain/portfolio/performance_report.dart`; F8)
+
+Tudo sai do índice do TWR da evolução patrimonial (§3.2), com os proventos como retorno.
+
+- **Mês e ano** (§8.4): `índice no último ponto do mês (ou do ano) ÷ índice no último ponto antes dele − 1`. Mês sem nenhum ponto fica em branco. O primeiro mês e o primeiro ano começam no primeiro ponto (parciais); o ano corrente vai até o último ponto. **Acumulado** do ano = `índice no fim do ano ÷ índice no primeiro ponto − 1`.
+- **CDI do ano**: crescimento do nível do CDI (§3.3) entre a mesma base e o mesmo fim do retorno do ano (o último ponto do ano anterior, ou o primeiro ponto, até o último ponto do ano). **% do CDI** = `TWR do ano ÷ CDI do ano` (só com CDI positivo).
+- **Período** (1M a 10A, YTD, Tudo, personalizado): dia-base = hoje menos o período (YTD: 31/12 do ano anterior; personalizado: a véspera do primeiro dia escolhido); o retorno conta do fim do dia-base (o último ponto até ele) até o último ponto. Um período só aparece se a carteira já existia no dia-base.
+- **CDI e IPCA do período**: `nível(fim) ÷ nível(base) − 1`, com o nível de cada data sendo o último publicado até ela (o IPCA para no último mês publicado, e a tela diz até quando). **Retorno real** = `(1 + TWR) ÷ (1 + IPCA) − 1` (§8.1).
+- **CAGR** (só em períodos de mais de 366 dias): `(1 + TWR)^(365 ÷ dias) − 1`.
+- **TIR do período** (§7): fluxos = `−patrimônio` no fim do dia-base, `proventos − (aportes − resgates)` em cada dia seguinte e `+patrimônio` no último dia. Em menos de 365 dias, mostrada como o equivalente do período (`(1 + taxa)^(dias ÷ 365) − 1`), porque anualizar prazos curtos exagera o resultado.
+- Exemplos (testes): +10% em jan, fev e dez de 2025 dão 33,1% no ano e, com CDI de 10%, 331% do CDI; o caso de `CASOS_DE_TESTE.md` §6 dá TWR −1,00% e TIR −3,7093% a.a.
+
 ## 4. Potências, logaritmos e exponenciais (`DecimalMath`, DECISIONS D-26)
 
 - `ln x`, `e^x` e `b^e` com expoente fracionário são calculados sem ponto flutuante: ponto fixo com 60 casas internas, resultado com 20 casas, meio para o par.

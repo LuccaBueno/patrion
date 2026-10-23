@@ -684,3 +684,15 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - A tela Operações continua escolhendo a conta pela lista (é o lugar das correções e dos tipos menos comuns).
 - Alternativas: corretora como lista fixa (obrigaria a cadastrar antes); filtro sincronizado no save (é preferência de vista, não dado da carteira).
 - Motivo: MUDANCAS M-06.
+
+### 2026-10-23 — D-53: Tela Desempenho e rentabilidade mês a mês (F8, parte 1)
+
+- Contexto: o escopo restante da F8 foi aprovado em 23/10/2026 (SPEC §21), com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos da B3 (quantidade na data-com pelas operações; sem sugestão quando a posição foi lançada como saldo inicial depois da data-com).
+- Decisão:
+  - **Tela Desempenho** no menu, entre Carteira e Operações (`/desempenho`), com abas; a parte 1 traz a aba Rentabilidade. Benchmarks e Risco entram nas partes 2 e 3, como abas da mesma tela.
+  - **Uma fonte só para a rentabilidade:** o índice do TWR da evolução patrimonial do Painel (D-51), já calculado num isolate. A tabela mês × ano, os cartões do período e o Painel usam os mesmos números; nada é recalculado por outro caminho.
+  - **Períodos** 1M, 3M, 6M, YTD, 1A, 3A, 5A, 10A, Tudo e personalizado; aparecem só os que os dados sustentam (a carteira já existia no dia-base), como pede a SPEC §8. O padrão é 1A (ou Tudo, se a carteira for mais nova).
+  - **CDI do ano e do período** no mesmo intervalo exato do retorno da carteira, para o "% do CDI" ser comparável; **retorno real** pelo IPCA publicado, com a data até onde ele vai; **CAGR** só acima de um ano; **TIR do período** ao lado, para comparar a metodologia (em menos de um ano, o equivalente do período).
+  - O cartão de número do Painel virou o widget comum `StatCard`, usado também pelo Desempenho.
+- Alternativas: tabela por ativo (fica para a página do ativo, se pedido); rentabilidade a partir do custo (não neutraliza aportes; o TWR é o padrão de mercado para comparar com o CDI).
+- Motivo: SPEC §8, §9 e §21 (F8); regras 1 (sem dados, "indisponível") e 10 (`FORMULAS.md` §3.4).
