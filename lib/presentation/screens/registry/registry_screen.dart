@@ -11,7 +11,8 @@ import '../../widgets/common.dart';
 import '../portfolio/add_asset_dialog.dart';
 import 'registry_dialogs.dart';
 
-/// Cadastros: instituições, contas e ativos (SPEC §6).
+/// Corretoras e ativos (antes "Cadastros"; em Configurações desde o M-06):
+/// instituições, contas e ativos (SPEC §6).
 class RegistryScreen extends ConsumerWidget {
   const RegistryScreen({super.key});
 
@@ -21,8 +22,11 @@ class RegistryScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: PageScaffold(
-        title: 'Cadastros',
-        subtitle: 'Instituições, contas e ativos da carteira real',
+        title: 'Corretoras e ativos',
+        subtitle:
+            'Para corrigir: renomear corretora ou conta, arquivar conta, '
+            'editar ativo (fonte da cotação, renda fixa) e excluir cadastro '
+            'sem uso. No dia a dia, a corretora é escolhida nos formulários.',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -238,7 +242,10 @@ class _AssetsTabState extends ConsumerState<_AssetsTab> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             FilledButton.icon(
               key: const Key('registry-add-asset'),
@@ -246,13 +253,11 @@ class _AssetsTabState extends ConsumerState<_AssetsTab> {
               icon: const Icon(Icons.add),
               label: const Text('Adicionar ativo'),
             ),
-            const SizedBox(width: 8),
             OutlinedButton.icon(
               onPressed: () => showAssetDialog(context),
               icon: const Icon(Icons.tune),
               label: const Text('Cadastro completo'),
             ),
-            const SizedBox(width: 16),
             SizedBox(
               width: 280,
               child: TextField(

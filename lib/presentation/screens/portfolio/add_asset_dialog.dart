@@ -17,6 +17,7 @@ import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import 'broker_field.dart';
 import '../registry/registry_dialogs.dart';
 
 /// Adição rápida de ações, FIIs, ETFs e BDRs da B3 pelo ticker (M-01).
@@ -47,7 +48,10 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
   final _quantity = TextEditingController();
   final _price = TextEditingController();
   final _fees = TextEditingController();
-  final _institution = TextEditingController();
+
+  /// Corretora / custodiante (M-06): a última usada vem preenchida.
+  final _broker = TextEditingController();
+  bool _brokerFilled = false;
   final _date = TextEditingController(
     text: Fmt.date(LocalDate.fromDateTime(DateTime.now())),
   );
@@ -57,8 +61,6 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
   final _notes = TextEditingController();
 
   AddMode? _mode;
-  String? _accountId;
-  bool _accountChosen = false;
   AssetClass? _class;
   Liquidity? _liquidity = Liquidity.daily;
   PriceSource _priceSource = PriceSource.market;
@@ -86,7 +88,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
       _quantity,
       _price,
       _fees,
-      _institution,
+      _broker,
       _date,
       _sector,
       _segment,
@@ -111,14 +113,13 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
     return null;
   }
 
-  /// A conta da operação mais recente; senão, a única ativa.
-  String? _defaultAccount(PortfolioSnapshot snap) {
-    for (final op in snap.operations) {
-      final account = snap.accounts[op.accountId];
-      if (account != null && !account.archived) return account.id;
-    }
-    final active = snap.accounts.values.where((a) => !a.archived).toList();
-    return active.length == 1 ? active.single.id : null;
+  /// Preenche a corretora com a última usada, uma vez.
+  void _fillBroker(PortfolioSnapshot snap) {
+    if (_brokerFilled) return;
+    _brokerFilled = true;
+    final options = Brokers.options(snap);
+    final label = Brokers.labelOf(options, Brokers.lastUsed(snap));
+    if (label != null) _broker.text = label;
   }
 
   Future<void> _runLookup() {
@@ -197,7 +198,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
     final mode = _mode ?? _defaultMode(snap);
     final existing = _existing(snap);
     final symbol = _symbol;
-    final accountId = _accountChosen ? _accountId : _defaultAccount(snap);
+    final accountId = Brokers.match(Brokers.options(snap), _broker.text);
     if (existing == null && (_class == null || _name.text.trim().isEmpty)) {
       // Os campos de nome e classe aparecem depois da consulta: valida de
       // novo quando estiverem na tela.
@@ -227,8 +228,8 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
               liquidity: _liquidity,
               notes: textOrNull(_notes),
             ),
-      accountId: snap.accounts.isEmpty ? null : accountId,
-      newInstitutionName: snap.accounts.isEmpty ? _institution.text : null,
+      accountId: accountId,
+      brokerName: accountId == null ? _broker.text.trim() : null,
       quantity: decimalOf(_quantity)!,
       price: decimalOf(_price)!,
       date: dateOf(_date)!,
@@ -315,11 +316,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
     );
     final mode = _mode ?? _defaultMode(snap);
     final existing = _existing(snap);
-    final accountId = _accountChosen ? _accountId : _defaultAccount(snap);
-    final accounts = snap.accounts.values.where((a) => !a.archived).toList()
-      ..sort(
-        (a, b) => snap.accountLabel(a.id).compareTo(snap.accountLabel(b.id)),
-      );
+    _fillBroker(snap);
     final initial = mode == AddMode.initialBalance;
     final newAsset =
         existing == null &&
@@ -481,30 +478,11 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
           children: [
             Expanded(
               flex: 2,
-              child: accounts.isEmpty
-                  ? TextFormField(
-                      key: const Key('add-institution'),
-                      controller: _institution,
-                      decoration: const InputDecoration(
-                        labelText: 'Corretora ou banco *',
-                        helperText:
-                            'Cria a instituição com uma "Conta principal".',
-                      ),
-                      validator: (v) =>
-                          (v ?? '').trim().isEmpty ? 'Obrigatório' : null,
-                    )
-                  : Choice<String>(
-                      key: ValueKey(accountId),
-                      fieldKey: const Key('add-account'),
-                      label: 'Conta',
-                      value: accountId,
-                      items: [for (final a in accounts) a.id],
-                      labelOf: snap.accountLabel,
-                      onChanged: (v) => setState(() {
-                        _accountId = v;
-                        _accountChosen = true;
-                      }),
-                    ),
+              child: BrokerField(
+                fieldKey: const Key('add-broker'),
+                controller: _broker,
+                options: Brokers.options(snap),
+              ),
             ),
             if (!initial) ...[
               const SizedBox(width: 12),

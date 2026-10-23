@@ -5,7 +5,6 @@ import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/operations/operations_screen.dart';
 import '../screens/portfolio/asset_detail_screen.dart';
 import '../screens/portfolio/portfolio_screen.dart';
-import '../screens/registry/registry_screen.dart';
 import '../screens/settings_screen.dart';
 import '../shell/app_shell.dart';
 
@@ -14,7 +13,7 @@ abstract final class Routes {
   static const dashboard = '/';
   static const portfolio = '/carteira';
   static const operations = '/operacoes';
-  static const registry = '/cadastros';
+  static const registry = '/configuracoes/corretoras';
   static const settings = '/configuracoes';
   static const security = '/configuracoes/seguranca';
   static const dataSources = '/configuracoes/fontes';
@@ -61,12 +60,6 @@ const navDestinations = [
     icon: Icons.receipt_long_outlined,
     selectedIcon: Icons.receipt_long,
   ),
-  NavDestination(
-    path: Routes.registry,
-    label: 'Cadastros',
-    icon: Icons.account_balance_outlined,
-    selectedIcon: Icons.account_balance,
-  ),
 ];
 
 /// Rodapé do menu, depois de um divisor: Sincronizar e, sempre por último,
@@ -96,6 +89,8 @@ GoRouter createRouter({String initialLocation = Routes.dashboard}) {
       GoRoute(path: '/fontes', redirect: (_, _) => Routes.dataSources),
       GoRoute(path: '/backup', redirect: (_, _) => Routes.backup),
       GoRoute(path: '/sincronizacao', redirect: (_, _) => Routes.sync),
+      // Cadastros saiu do menu (M-06): agora em Configurações.
+      GoRoute(path: '/cadastros', redirect: (_, _) => Routes.registry),
       ShellRoute(
         builder: (context, state, child) =>
             AppShell(location: state.uri.path, child: child),
@@ -119,10 +114,6 @@ GoRouter createRouter({String initialLocation = Routes.dashboard}) {
           GoRoute(
             path: Routes.operations,
             pageBuilder: (context, state) => _page(const OperationsScreen()),
-          ),
-          GoRoute(
-            path: Routes.registry,
-            pageBuilder: (context, state) => _page(const RegistryScreen()),
           ),
           GoRoute(
             path: Routes.settings,

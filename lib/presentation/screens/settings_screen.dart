@@ -10,6 +10,7 @@ import '../services/native_licenses.dart';
 import '../widgets/common.dart';
 import 'backup/backup_screen.dart';
 import 'market/data_sources_screen.dart';
+import 'registry/registry_screen.dart';
 import 'security/lock_settings_section.dart';
 import 'sync/sync_screen.dart';
 import 'updates/update_widgets.dart';
@@ -17,6 +18,7 @@ import 'updates/update_widgets.dart';
 /// Seções das Configurações (M-02), cada uma com o próprio endereço.
 enum SettingsSection {
   general('geral', 'Geral', Icons.tune),
+  registry('corretoras', 'Corretoras e ativos', Icons.account_balance_outlined),
   security('seguranca', 'Segurança', Icons.lock_outline),
   dataSources('fontes', 'Fontes de dados', Icons.cloud_download_outlined),
   backup('backup', 'Backup', Icons.backup_outlined),
@@ -73,6 +75,7 @@ class SettingsScreen extends StatelessWidget {
         Expanded(
           child: switch (section) {
             SettingsSection.general => const _GeneralSection(),
+            SettingsSection.registry => const RegistryScreen(),
             SettingsSection.security => const _SecuritySection(),
             SettingsSection.dataSources => const DataSourcesScreen(),
             SettingsSection.backup => const BackupScreen(),

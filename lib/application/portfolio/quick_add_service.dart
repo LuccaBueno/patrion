@@ -3,7 +3,6 @@ import 'package:decimal/decimal.dart';
 import '../../core/errors/app_error.dart';
 import '../../core/time/local_date.dart';
 import '../../data/repositories/portfolio_repositories.dart';
-import '../../domain/portfolio/codes.dart';
 import '../../domain/portfolio/entities.dart';
 import '../../domain/portfolio/operation_type.dart';
 import 'operation_service.dart';
@@ -19,7 +18,7 @@ class QuickAddInput {
     this.assetId,
     this.newAsset,
     this.accountId,
-    this.newInstitutionName,
+    this.brokerName,
     this.initialBalance = false,
     this.offsetCash = false,
     Decimal? fees,
@@ -29,10 +28,10 @@ class QuickAddInput {
   final String? assetId;
   final Asset? newAsset;
 
-  /// Conta existente, ou [newInstitutionName] para criar a instituição e
-  /// uma conta "Conta principal" em reais.
+  /// Conta existente, ou [brokerName]: a corretora com esse nome (criada,
+  /// com a conta "Principal", se ainda não existir; M-06).
   final String? accountId;
-  final String? newInstitutionName;
+  final String? brokerName;
   final Decimal quantity;
 
   /// Preço unitário da compra, ou o preço médio no saldo inicial.
@@ -86,7 +85,9 @@ class QuickAddService {
     if (input.price <= Decimal.zero) {
       throw const DataError('Informe um preço maior que zero.');
     }
-    final accountId = input.accountId ?? await _createAccount(input);
+    final accountId =
+        input.accountId ??
+        await _registry.accountForBroker(input.brokerName ?? '');
     final String assetId;
     final String currency;
     final existing = input.assetId;
@@ -136,28 +137,4 @@ class QuickAddService {
       outcome: outcome,
     );
   });
-
-  Future<String> _createAccount(QuickAddInput input) async {
-    final name = input.newInstitutionName?.trim() ?? '';
-    if (name.isEmpty) {
-      throw const DataError('Informe a corretora ou o banco.');
-    }
-    final institutionId = await _registry.createInstitution(
-      Institution(
-        id: '',
-        name: name,
-        kind: InstitutionKind.broker,
-        country: 'BR',
-      ),
-    );
-    return _registry.createAccount(
-      Account(
-        id: '',
-        institutionId: institutionId,
-        name: 'Conta principal',
-        kind: AccountKind.brokerage,
-        currency: 'BRL',
-      ),
-    );
-  }
 }

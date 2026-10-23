@@ -4,6 +4,7 @@ import '../../core/errors/app_error.dart';
 import '../../core/time/instant_format.dart';
 import '../../data/repositories/portfolio_repositories.dart';
 import '../../domain/portfolio/entities.dart';
+import '../../domain/portfolio/codes.dart';
 
 /// Cadastros da carteira real: instituições, contas e ativos (SPEC §6).
 ///
@@ -55,6 +56,52 @@ class RegistryService {
       throw const DataError('Já existe uma instituição com esse nome.');
     }
   }
+
+  /// Nome da conta criada junto com uma corretora nova (M-06).
+  static const defaultAccountName = 'Principal';
+
+  /// Conta da corretora [name] (M-06; DECISIONS D-52): a instituição com
+  /// esse nome (sem diferença de maiúsculas, acentos e espaços) e a conta
+  /// ativa dela ("Principal" primeiro); sem conta ativa, cria a
+  /// "Principal"; sem a instituição, cria a corretora e a conta.
+  Future<String> accountForBroker(String name) => _repos.transaction(() async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      throw const DataError('Informe a corretora ou o custodiante.');
+    }
+    final found = await _repos.institutions.findByNameKey(
+      normalizeNameKey(trimmed),
+    );
+    final institutionId = found.isNotEmpty
+        ? found.first.id
+        : await createInstitution(
+            Institution(
+              id: '',
+              name: trimmed,
+              kind: InstitutionKind.broker,
+              country: 'BR',
+            ),
+          );
+    final accounts =
+        [
+          for (final a in await _repos.accounts.ofInstitution(institutionId))
+            if (!a.archived) a,
+        ]..sort(
+          (a, b) => (a.name == defaultAccountName ? 0 : 1).compareTo(
+            b.name == defaultAccountName ? 0 : 1,
+          ),
+        );
+    if (accounts.isNotEmpty) return accounts.first.id;
+    return createAccount(
+      Account(
+        id: '',
+        institutionId: institutionId,
+        name: defaultAccountName,
+        kind: AccountKind.brokerage,
+        currency: 'BRL',
+      ),
+    );
+  });
 
   // -- Contas ---------------------------------------------------------------
 

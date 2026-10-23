@@ -151,8 +151,9 @@ class _OperationsTableState extends ConsumerState<OperationsTable> {
           icon: Icons.receipt_long_outlined,
           title: 'Nenhuma operação registrada',
           message: snap.accounts.isEmpty
-              ? 'Cadastre uma instituição e uma conta em Cadastros para '
-                    'começar.'
+              ? 'Use "Adicionar ativo" na Carteira (basta informar a '
+                    'corretora) ou cadastre a corretora em Configurações → '
+                    'Corretoras e ativos.'
               : 'Registre compras, vendas, aportes, proventos e eventos. '
                     'As posições são calculadas a partir delas.',
         ),

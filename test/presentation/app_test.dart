@@ -104,14 +104,15 @@ void main() {
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
       expect(
         [for (final d in rail.destinations) (d.label as Text).data],
-        ['Painel', 'Carteira', 'Operações', 'Cadastros'],
+        // Cadastros saiu do menu (M-06): está em Configurações.
+        ['Painel', 'Carteira', 'Operações'],
       );
       final sync = tester.getCenter(find.byKey(const Key('nav-Sincronizar')));
       final settings = tester.getCenter(
         find.byKey(const Key('nav-Configurações')),
       );
-      final cadastros = tester.getCenter(find.text('Cadastros'));
-      expect(sync.dy, greaterThan(cadastros.dy + 100), reason: 'no rodapé');
+      final operations = tester.getCenter(find.text('Operações'));
+      expect(sync.dy, greaterThan(operations.dy + 100), reason: 'no rodapé');
       expect(settings.dy, greaterThan(sync.dy), reason: 'sempre por último');
 
       // Exportar o save: dois cliques a partir de qualquer tela.
@@ -122,6 +123,7 @@ void main() {
 
       for (final (key, text) in [
         ('settings-geral', 'Tema'),
+        ('settings-corretoras', 'Instituições e contas'),
         ('settings-seguranca', 'Bloqueio do app'),
         ('settings-fontes', 'Atualizar agora'),
         ('settings-backup', 'Fazer backup agora'),
@@ -144,6 +146,7 @@ void main() {
         ('/fontes', Routes.dataSources),
         ('/backup', Routes.backup),
         ('/sincronizacao', Routes.sync),
+        ('/cadastros', Routes.registry),
       ]) {
         router.go(old);
         await settleDb(tester);

@@ -80,10 +80,7 @@ void main() {
         expect(find.text('Ação'), findsOneWidget);
         await app.type(find.byKey(const Key('add-quantity')), '100');
         await app.type(find.byKey(const Key('add-price')), '25,00');
-        await app.type(
-          find.byKey(const Key('add-institution')),
-          'Corretora Teste',
-        );
+        await app.type(find.byKey(const Key('add-broker')), 'Corretora Teste');
         await app.tap(find.text('Salvar'));
         await app.pumpUntil(find.textContaining('compra de 100 registrado'));
 
@@ -126,7 +123,7 @@ void main() {
         await app.choose(find.byKey(const Key('add-class')), 'Ação');
         await app.type(find.byKey(const Key('add-quantity')), '10');
         await app.type(find.byKey(const Key('add-price')), '5');
-        await app.type(find.byKey(const Key('add-institution')), 'Banco');
+        await app.type(find.byKey(const Key('add-broker')), 'Banco');
         await app.tap(find.text('Salvar'));
         await app.pumpUntil(find.textContaining('saldo inicial de 10'));
         final asset = (await tester.runAsync(t.db.select(t.db.assets).get))!

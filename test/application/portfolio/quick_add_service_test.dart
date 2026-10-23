@@ -152,16 +152,52 @@ void main() {
     final result = await empty.add(
       QuickAddInput(
         newAsset: _bbas3(),
-        newInstitutionName: 'Minha Corretora',
+        brokerName: 'Minha Corretora',
         quantity: dec('1'),
         price: dec('10'),
         date: LocalDate(2026, 10, 22),
       ),
     );
     final account = (await repos.accounts.byId(result.accountId))!;
-    expect(account.name, 'Conta principal');
+    expect(account.name, 'Principal');
     expect(account.currency, 'BRL');
     final institutions = await repos.institutions.all();
     expect(institutions.single.name, 'Minha Corretora');
   });
+
+  test(
+    'corretora pelo nome (M-06): acha a existente sem diferença de '
+    'maiúsculas e acentos; nova cria a instituição e a conta "Principal"',
+    () async {
+      final t = await TestDb.open();
+      addTearDown(t.close);
+      final repos = PortfolioRepositories(t.db, t.sync);
+      final registry = RegistryService(repos);
+      final nubank = await registry.accountForBroker('Nubank');
+      expect(await registry.accountForBroker('  nubank '), nubank);
+      final xp = await registry.accountForBroker('XP');
+      expect(xp, isNot(nubank));
+      final institutions = await repos.institutions.all();
+      expect(
+        institutions.map((i) => i.name),
+        unorderedEquals(['Nubank', 'XP']),
+      );
+      expect((await repos.accounts.byId(xp))!.name, 'Principal');
+      // Conta arquivada não serve: cria outra "Principal".
+      final account = (await repos.accounts.byId(xp))!;
+      await registry.updateAccount(
+        Account(
+          id: account.id,
+          institutionId: account.institutionId,
+          name: 'Antiga',
+          kind: account.kind,
+          currency: account.currency,
+          archived: true,
+        ),
+      );
+      final again = await registry.accountForBroker('xp');
+      expect(again, isNot(xp));
+      expect(() => registry.accountForBroker('  '), throwsA(isA<DataError>()));
+    },
+  );
 }

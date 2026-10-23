@@ -64,8 +64,9 @@ class _Welcome extends StatelessWidget {
             'Nenhum investimento registrado',
             'Adicione as ações, FIIs, ETFs e BDRs que você já tem: digite o '
                 'ticker, a quantidade e o preço médio da corretora. Renda '
-                'fixa, cripto e internacional ficam em Cadastros.',
-            'Ir para Cadastros',
+                'fixa, cripto e internacional ficam em Configurações → Corretoras e '
+                'ativos.',
+            'Corretoras e ativos',
             Routes.registry,
           )
         : (

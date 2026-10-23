@@ -672,3 +672,15 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - **Desempenho:** `DecimalMath.divide` passou a dividir só com inteiros e `rescale` a devolver a forma compacta. Antes, numa cadeia de multiplicações (o índice do TWR de 10 anos), a representação interna crescia a cada passo e o cálculo levava minutos; agora, 10 anos levam frações de segundo. Os resultados não mudaram (todos os testes de cálculo passam iguais).
 - Alternativas: aplicado como custo das posições (não responde "quanto coloquei" quando há vendas com lucro); preencher dias sem preço pelo custo (proibido); comparação como gráfico separado (pedido para ser opção do gráfico principal).
 - Motivo: MUDANCAS M-09; regras 1, 2, 3 e 10.
+
+### 2026-10-23 — D-52: Corretora escolhida na hora; Cadastros em Configurações (M-06; altera D-42 e D-43)
+
+- Contexto: antes do primeiro ativo era preciso criar instituição e conta em Cadastros, que depois quase não era usado mas ocupava o menu; os ativos precisam continuar separados por corretora.
+- Decisão:
+  - **Campo "Corretora / custodiante"** no "Adicionar ativo" e no Comprar: as corretoras usadas como sugestões (o nome da instituição; com mais de uma conta ativa, "XP · Conta"), a última usada (ou a do ativo, na compra) já preenchida. Um nome que não está na lista é procurado entre as instituições sem diferença de maiúsculas, acentos e espaços (`normalizeNameKey`); se não existir, a instituição (tipo corretora) e a conta **"Principal"** são criadas ao salvar (`RegistryService.accountForBroker`). A conta criada pelo cadastro rápido deixa de se chamar "Conta principal". Na venda, só as corretoras com o ativo.
+  - **Carteira**: filtro por corretora (instituição), lembrado em `dev_settings` (`portfolio.broker_filter`, só deste PC, como a vista); o mesmo ticker em várias corretoras continua numa linha (D-45), com a quebra na página do ativo (D-49); "Agrupar por corretora" mostra uma seção por instituição com o subtotal em reais (`portfolio.group_by_broker`).
+  - **Transferência de custódia** pela página do ativo, com as operações de transferência que já existiam (saída e entrada ligadas; custo e preço médio mantidos, sem lucro). O destino aceita corretora nova.
+  - **Cadastros sai do menu** e vira Configurações → "Corretoras e ativos" (`/configuracoes/corretoras`; `/cadastros` redireciona), com as mesmas funções. O menu de cima fica com Painel, Carteira e Operações.
+  - A tela Operações continua escolhendo a conta pela lista (é o lugar das correções e dos tipos menos comuns).
+- Alternativas: corretora como lista fixa (obrigaria a cadastrar antes); filtro sincronizado no save (é preferência de vista, não dado da carteira).
+- Motivo: MUDANCAS M-06.

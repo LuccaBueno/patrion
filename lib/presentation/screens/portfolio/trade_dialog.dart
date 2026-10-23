@@ -10,6 +10,7 @@ import '../../../domain/portfolio/operation_type.dart';
 import '../../format/formatters.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import 'broker_field.dart';
 
 /// Compra ou venda rápida de um ativo já cadastrado (painel da Carteira,
 /// M-05): pede só conta, quantidade, preço, data e custos opcionais.
@@ -46,7 +47,16 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
   final _date = TextEditingController(
     text: Fmt.date(LocalDate.fromDateTime(DateTime.now())),
   );
-  late String? _accountId = _defaultAccount();
+  late final _options = Brokers.options(
+    widget.snap,
+    only: widget.sell ? _held.keys.toSet() : null,
+  );
+
+  /// Corretora / custodiante (M-06): na compra, a do ativo, a última usada
+  /// ou uma nova; na venda, uma das que têm o ativo.
+  late final _broker = TextEditingController(
+    text: Brokers.labelOf(_options, _defaultAccount()) ?? '',
+  );
   bool _saving = false;
 
   /// Quantidade do ativo em cada conta.
@@ -76,7 +86,7 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
 
   @override
   void dispose() {
-    for (final c in [_quantity, _price, _fees, _date]) {
+    for (final c in [_quantity, _price, _fees, _date, _broker]) {
       c.dispose();
     }
     super.dispose();
@@ -85,8 +95,22 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
   Future<void> _save({bool allowDuplicate = false}) async {
     if (!_form.currentState!.validate()) return;
     setState(() => _saving = true);
+    final String accountId;
+    try {
+      accountId = await Brokers.resolve(
+        ref.read(registryServiceProvider),
+        _options,
+        _broker.text,
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        showError(context, e);
+      }
+      return;
+    }
     final draft = OperationDraft(
-      accountId: _accountId!,
+      accountId: accountId,
       assetId: widget.asset.id,
       type: widget.sell ? OperationType.sell : OperationType.buy,
       tradeDate: dateOf(_date)!,
@@ -135,13 +159,9 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final snap = widget.snap;
     final held = _held;
-    final accounts = [
-      for (final a in snap.accounts.values)
-        if (widget.sell ? held.containsKey(a.id) : !a.archived) a.id,
-    ]..sort((a, b) => snap.accountLabel(a).compareTo(snap.accountLabel(b)));
-    final available = _accountId == null ? null : held[_accountId];
+    final chosen = Brokers.match(_options, _broker.text);
+    final available = chosen == null ? null : held[chosen];
     final currency = widget.asset.currency;
     return FormDialog(
       title: '${widget.sell ? 'Vender' : 'Comprar'} ${widget.asset.symbol}',
@@ -150,13 +170,12 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
       onSave: _save,
       width: 520,
       children: [
-        Choice<String>(
-          fieldKey: const Key('trade-account'),
-          label: 'Conta',
-          value: _accountId,
-          items: accounts,
-          labelOf: snap.accountLabel,
-          onChanged: (v) => setState(() => _accountId = v),
+        BrokerField(
+          fieldKey: const Key('trade-broker'),
+          controller: _broker,
+          options: _options,
+          allowNew: !widget.sell,
+          onChanged: (_) => setState(() {}),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,

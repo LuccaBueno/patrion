@@ -30,6 +30,7 @@ import '../operations/operation_dialogs.dart';
 import '../operations/operations_screen.dart';
 import '../registry/registry_dialogs.dart';
 import 'asset_price_chart.dart';
+import 'custody_dialog.dart';
 import 'trade_dialog.dart';
 
 /// Página do ativo em tela cheia (M-07; SPEC §16): cabeçalho com a posição,
@@ -655,30 +656,66 @@ class _BrokersCard extends StatelessWidget {
                     '${snap.accountLabel(v.position.accountId)}: '
                     '${Fmt.number(v.position.quantity)} × preço médio '
                     '${v.position.averagePrice == null ? '—' : Fmt.money(v.position.averagePrice!, c)}',
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        snap.institutionOfAccount(v.position.accountId)?.name ??
-                            '?',
+                child: Padding(
+                  key: Key(
+                    'broker-row-'
+                    '${snap.institutionOfAccount(v.position.accountId)?.name}',
+                  ),
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              snap
+                                      .institutionOfAccount(
+                                        v.position.accountId,
+                                      )
+                                      ?.name ??
+                                  '?',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            v.marketValue == null
+                                ? 'indisponível'
+                                : Fmt.money(v.marketValue!, c),
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${Fmt.number(v.position.quantity)} '
+                        '${v.position.quantity == Decimal.one ? 'cota' : 'cotas'}'
+                        '${v.position.averagePrice == null ? '' : ' · PM ${Fmt.money(v.position.averagePrice!, c)}'}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: muted,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        '${Fmt.number(v.position.quantity)} · '
-                        '${v.marketValue == null ? 'indisponível' : Fmt.money(v.marketValue!, c)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+              ),
+            if (open.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const Key('custody-transfer'),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () => showCustodyDialog(context, snap, asset),
+                  icon: const Icon(Icons.swap_horiz, size: 18),
+                  label: const Text('Transferir de corretora'),
                 ),
               ),
           ],

@@ -13,6 +13,7 @@ import '../application/market/market_overview.dart';
 import '../application/market/market_ports.dart';
 import '../application/settings/market_preferences.dart';
 import '../application/settings/portfolio_preferences.dart';
+import '../application/settings/portfolio_view_preferences.dart';
 import '../application/portfolio/operation_service.dart';
 import '../application/portfolio/portfolio_query.dart';
 import '../application/portfolio/quick_add_service.dart';
@@ -417,3 +418,19 @@ final wealthOverviewProvider = FutureProvider<WealthOverview>((ref) async {
   final snap = await ref.watch(portfolioSnapshotProvider.future);
   return ref.watch(wealthServiceProvider).load(snap);
 });
+
+// -- Vista da Carteira (M-06) -------------------------------------------------
+
+final portfolioViewPreferencesProvider = Provider<PortfolioViewPreferences>(
+  (ref) =>
+      PortfolioViewPreferences(ref.watch(deviceSettingsRepositoryProvider)),
+);
+
+/// Corretora escolhida no filtro da Carteira (nulo = todas).
+final brokerFilterProvider = StreamProvider<String?>(
+  (ref) => ref.watch(portfolioViewPreferencesProvider).watchBroker(),
+);
+
+final groupByBrokerProvider = StreamProvider<bool>(
+  (ref) => ref.watch(portfolioViewPreferencesProvider).watchGroup(),
+);

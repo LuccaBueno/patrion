@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`), versão 1.2.0, em andamento** desde 23/10/2026, na ordem pedida: M-08 (histórico) → M-07 (página do ativo) → M-09 (Painel) → M-06 (corretoras). Feitos: **M-08**, **M-07** e **M-09**. A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`), versão 1.2.0, em andamento** desde 23/10/2026, na ordem pedida: M-08 (histórico) → M-07 (página do ativo) → M-09 (Painel) → M-06 (corretoras). Feitos: **M-08**, **M-07**, **M-09** e **M-06**; falta fechar a versão (CHANGELOG, build, push e CI). A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -42,6 +42,17 @@ Cada item tem um commit; o relatório completo sai no fim (com a 1.2.0).
 - Arquivos: `domain/portfolio/wealth_history.dart`, `domain/finance/benchmark.dart`, `application/portfolio/wealth_service.dart`, `infrastructure/market/providers/b3_index_provider.dart` (novos); `presentation/screens/dashboard/wealth_chart.dart` (novo), `dashboard_screen.dart`, `dashboard_charts.dart`; `core/money/decimal_math.dart`; `domain/market/market_data.dart` (`ibovespa`), `provider_catalog.dart`, `market_setup.dart`, `market_repository.dart` (`fxHistory`), `providers.dart`, `format/formatters.dart` (`signedNumber`).
 - Testes: `wealth_history_test.dart` (patrimônio, aplicado e TWR com compra, segunda compra e venda total; proventos; custos; ativo comprado antes do histórico; ativo sem preço e valores da Carteira no último dia; dólar; CDI, IPCA e Ibovespa), `providers_test.dart` (Ibovespa com a resposta real da B3), `dashboard_wealth_test.dart` (faixa 6.600 / 4.500 / +2.100 (+46,67%) / +10,00% no ano; título "cresceu R$ 600,00 em 1 ano"; último ponto igual à Carteira; tooltip; CDI em R$ e em %; Ibovespa sem dados desabilitado; histórico curto explicado), testes do Painel do M-04 adaptados (aplicado R$ 7.891,00 e ganho +R$ 291,00 com um ativo sem preço fora). Suíte inteira: 527 passando.
 - **Conferência visual (1280 × 800, dados reais: 10 anos de COTAHIST, CDI, IPCA e Ibovespa reais):** patrimônio R$ 41.099,20, aplicado R$ 23.299,70, ganho +R$ 17.799,50 (+76,39%), +23,77% no ano; em Tudo, "cresceu R$ 37.680,20 desde 15/03/2017"; comparação em % de 03/2017 a 10/2026 com CDI ≈ +130%, Ibovespa ≈ +219% e IPCA ≈ +60% (ordem de grandeza conferida). Corrigido depois da conferência: rótulos do eixo em R$ quebrando linha, eixo forçado a começar em zero, linhas dos índices pouco distinguíveis (agora tons e tracejados diferentes, também na legenda), título da distribuição espremido pelo seletor e um corte de 8 a 24 px nos cartões de gráfico (altura intrínseca).
+
+
+**M-06 — Corretora escolhida na hora; Cadastros em Configurações (concluído)** (DECISIONS D-52, altera D-42 e D-43; SPEC §7 e §16)
+
+- Campo "Corretora / custodiante" no "Adicionar ativo" e no Comprar: sugestões das corretoras usadas, a última (ou a do ativo) preenchida; nome novo cria a instituição e a conta "Principal" ao salvar ("Nova: cria "XP · Principal" ao salvar."). Na venda, só as corretoras com o ativo. Num banco vazio, ticker, quantidade, preço e "Nubank" bastam.
+- Carteira: filtro Todas / Nubank / XP… (lembrado neste PC), linha única por ativo com a quebra por corretora (quantidade, PM e valor) na página do ativo, "Agrupar por corretora" com subtotais. Painel: a distribuição "Corretora" (M-09).
+- Transferência de custódia na página do ativo ("Transferir de corretora"), mantendo custo e preço médio.
+- Cadastros saiu do menu: Configurações → "Corretoras e ativos" (`/cadastros` redireciona); a barra da aba de ativos passou a quebrar linha na área mais estreita.
+- Arquivos: `application/portfolio/registry_service.dart` (`accountForBroker`), `quick_add_service.dart` (`brokerName`), `application/settings/portfolio_view_preferences.dart` (novo), `presentation/screens/portfolio/broker_field.dart` e `custody_dialog.dart` (novos), `add_asset_dialog.dart`, `trade_dialog.dart`, `portfolio_screen.dart`, `asset_detail_screen.dart`, `router/app_router.dart`, `settings_screen.dart`, `registry/registry_screen.dart`, `operations_screen.dart`, `dashboard_screen.dart`, `providers.dart`.
+- Testes: `brokers_test.dart` (Nubank e "xp" só pelo nome; compra de BBAS3 na XP pela página com a corretora pré-preenchida; linha única com 150 cotas e quebra 100 × R$ 25,00 / 50 × R$ 26,00; filtro e a preferência gravada; subtotais R$ 2.400,00 e R$ 1.600,00; "Rico" novo; transferência com PM R$ 25,33), `quick_add_service_test.dart` (corretora pelo nome, sem diferença de maiúsculas, conta arquivada, nome vazio), `app_test.dart` (menu com 3 itens, seção nova, `/cadastros`), `add_asset_dialog_test.dart`. Suíte inteira: 529 passando.
+- **Conferência visual (1280 × 800, dados reais):** filtro e agrupamento (Nubank R$ 30.702,00; XP R$ 10.397,20), quebra do BBAS3 (Nubank 800 cotas, PM R$ 18,55; XP 50 cotas, PM R$ 28,07) com "Transferir de corretora", os diálogos de compra (corretora nova) e de transferência, e a seção em Configurações. Corrigido depois da conferência: os dois campos da transferência com o mesmo rótulo (agora "De" e "Para").
 
 
 ### Ajustes de uso real antes da F8 (desde 22/10/2026)
