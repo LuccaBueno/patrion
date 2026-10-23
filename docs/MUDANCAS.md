@@ -24,7 +24,7 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 - **Onde:** menu lateral e tela de Configurações
 - **Problema:** Sincronização, Backup e Fontes de dados ficam no mesmo nível de Início, Carteira e Operações, misturando uso diário com manutenção. Configurações fica no meio da lista, e o menu vai crescer com as próximas fases.
 - **Mudança:**
-  1. **Parte de cima do menu** (uso diário): Painel (M-04), Carteira (M-05), Operações e Cadastros. As telas das próximas fases (Renda passiva, Benchmarks, Hipotéticas, Simuladores) entram aqui.
+  1. **Parte de cima do menu** (uso diário): Painel (M-04), Carteira (M-05) e Operações (Cadastros sai do menu no M-06). As telas das próximas fases (Renda passiva, Benchmarks, Hipotéticas, Simuladores) entram aqui.
   2. **Rodapé do menu, separado por um divisor:**
      - **Sincronizar**: atalho direto para exportar e importar o save, com indicador quando a última sincronização tiver 7 dias ou mais;
      - **Configurações**: sempre a última posição.
@@ -98,6 +98,25 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 - **Critério de pronto:** com 5 ativos, a ordem segue o valor da posição; a valorização % bate com (cotação − PM) ÷ PM; o painel mostra lucro em R$, total aplicado, variação do dia e o gráfico com a linha do PM; vender todas as cotas leva o ativo ao fim da lista; "Comprar" pelo painel registra a compra sem sair da Carteira e a lista se reordena. Sem histórico de cotações, o gráfico mostra "indisponível" com o motivo (nunca inventa pontos).
 - **Prioridade:** alta (é a tela mais usada)
 - **Fase:** ajuste avulso antes da F8 (o histórico de cotações já existe desde a F6)
+
+### M-06 — Corretora escolhida na hora; Cadastros sai do menu principal
+- **Onde:** formulário "Adicionar ativo" (M-01), Comprar/Vender (M-05), Carteira, menu lateral, Configurações
+- **Problema:** antes de registrar o primeiro ativo é preciso ir a Cadastros criar instituição e conta. Depois disso, a tela Cadastros quase não é usada, mas ocupa espaço no menu diário. Ao mesmo tempo, os ativos **precisam continuar separados por corretora/custodiante**.
+- **Mudança:**
+  1. **Campo "Corretora / custodiante"** no "Adicionar ativo" e no Comprar/Vender:
+     - lista as corretoras já usadas, com a última usada pré-selecionada;
+     - permite digitar uma nova (ex.: "XP"): o app cria a instituição e uma conta padrão ("XP · Principal") na hora, sem sair do formulário;
+     - na primeira vez que o app é usado, é o único dado de cadastro que o usuário precisa informar.
+  2. **Separação por corretora na Carteira:**
+     - **filtro por corretora** no topo da lista (Todas / Nubank / XP / …), lembrado entre aberturas do app;
+     - o **mesmo ticker em duas corretoras** aparece em **uma linha consolidada** (quantidade, valor e preço médio somados); o painel de Detalhes mostra a **quebra por corretora** (quantidade, preço médio e valor em cada uma);
+     - opção **"Agrupar por corretora"**: a lista ganha seções por corretora, com o subtotal de cada uma.
+  3. No Painel (M-04), o gráfico **"Por corretora"** continua mostrando quanto está em cada custodiante.
+  4. **Transferência de custódia** (mudar ações de uma corretora para outra) fica acessível no painel de Detalhes do ativo, mantendo o preço médio.
+  5. **Cadastros sai do menu principal** e vira a seção **"Corretoras e ativos"** em Configurações, usada só para corrigir: renomear corretora ou conta, arquivar conta, editar ativo (fonte de cotação, renda fixa), excluir cadastro sem uso.
+- **Critério de pronto:** num banco vazio, adicionar o primeiro ativo informando só ticker, quantidade, preço e "Nubank" cria tudo sem passar por Cadastros. Comprar o mesmo ticker na XP mostra uma linha consolidada, com a quebra Nubank/XP nos Detalhes. O filtro "XP" mostra só o que está na XP. O menu principal não tem mais Cadastros, e todas as funções dele estão em Configurações → Corretoras e ativos.
+- **Prioridade:** média
+- **Fase:** ajuste avulso, depois do M-01 a M-05
 
 ---
 
