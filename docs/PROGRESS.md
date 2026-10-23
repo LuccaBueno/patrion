@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`), versão 1.2.0, em andamento** desde 23/10/2026, na ordem pedida: M-08 (histórico) → M-07 (página do ativo) → M-09 (Painel) → M-06 (corretoras). Feitos: **M-08**, **M-07**, **M-09** e **M-06**; falta fechar a versão (CHANGELOG, build, push e CI). A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`) concluídos** em 23/10/2026, como versão 1.2.0 (sem tag nem Release; só quando você pedir). Parte da F8 foi antecipada no M-09 (SPEC §21). Próximo: o restante da Fase 8, quando você pedir. A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -53,6 +53,21 @@ Cada item tem um commit; o relatório completo sai no fim (com a 1.2.0).
 - Arquivos: `application/portfolio/registry_service.dart` (`accountForBroker`), `quick_add_service.dart` (`brokerName`), `application/settings/portfolio_view_preferences.dart` (novo), `presentation/screens/portfolio/broker_field.dart` e `custody_dialog.dart` (novos), `add_asset_dialog.dart`, `trade_dialog.dart`, `portfolio_screen.dart`, `asset_detail_screen.dart`, `router/app_router.dart`, `settings_screen.dart`, `registry/registry_screen.dart`, `operations_screen.dart`, `dashboard_screen.dart`, `providers.dart`.
 - Testes: `brokers_test.dart` (Nubank e "xp" só pelo nome; compra de BBAS3 na XP pela página com a corretora pré-preenchida; linha única com 150 cotas e quebra 100 × R$ 25,00 / 50 × R$ 26,00; filtro e a preferência gravada; subtotais R$ 2.400,00 e R$ 1.600,00; "Rico" novo; transferência com PM R$ 25,33), `quick_add_service_test.dart` (corretora pelo nome, sem diferença de maiúsculas, conta arquivada, nome vazio), `app_test.dart` (menu com 3 itens, seção nova, `/cadastros`), `add_asset_dialog_test.dart`. Suíte inteira: 529 passando.
 - **Conferência visual (1280 × 800, dados reais):** filtro e agrupamento (Nubank R$ 30.702,00; XP R$ 10.397,20), quebra do BBAS3 (Nubank 800 cotas, PM R$ 18,55; XP 50 cotas, PM R$ 28,07) com "Transferir de corretora", os diálogos de compra (corretora nova) e de transferência, e a seção em Configurações. Corrigido depois da conferência: os dois campos da transferência com o mesmo rótulo (agora "De" e "Para").
+
+
+**Versão 1.2.0 — relatório final dos ajustes M-06 a M-09 (23/10/2026)**
+
+1. **Implementado:** M-08 (histórico de 10 anos em segundo plano, retomável), M-07 (página do ativo em tela cheia com gráfico só de mercado e preço ajustado calculado), M-09 (Painel com faixa de números, evolução patrimonial, TWR e comparação com CDI, Ibovespa e IPCA; Ibovespa pela B3) e M-06 (corretora escolhida na hora, filtro e grupos por corretora, transferência de custódia, Cadastros em Configurações). Detalhes em cada item acima. A antecipação de parte da F8 está registrada na SPEC §21.
+2. **Arquivos (resumo):** os de cada item; na versão, `pubspec.yaml` (1.2.0+3), `core/config/app_info.dart`, `CHANGELOG.md` (seção 1.2.0), `docs/MUDANCAS.md` (situação), `docs/DISTRIBUICAO.md`. Decisões D-48 a D-52.
+3. **Testes (resultados reais):** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com **527 testes do repositório passando** (as capturas manuais ficam fora do repositório e pulam sem as variáveis); `flutter build windows --release` compilou e o `patrion.exe` tem a versão 1.2.0+3; o release abriu numa pasta de dados de teste ("Iniciando Patrion 1.2.0" no log, processo respondendo). O CI fica registrado abaixo depois do push.
+4. **Problemas e limitações:**
+   - Conferência visual: o app real foi visto na abertura e no download do histórico (capturas da janela do Patrion de teste); as telas novas foram conferidas renderizando o próprio app (mesmos widgets) com a Segoe UI e os ícones reais sobre uma cópia do banco com dados reais, em 1280 × 800. Não cliquei no app real porque o Flutter não aceita cliques enviados a uma janela em segundo plano e eu não uso o seu mouse. O tooltip com o mouse foi conferido nessas renderizações e nos testes; vale passar o mouse você mesmo.
+   - Evento suspeito (salto sem desdobramento registrado na B3): o gráfico avisa, mas a confirmação manual do evento ainda não existe (fica para quando houver o cadastro de eventos do usuário, F11).
+   - Ibovespa e proventos vêm de endereços internos do site da B3 (não documentados): se mudarem, a comparação fica com o que já está guardado ou indisponível.
+   - Na evolução, ativos comprados antes do primeiro preço guardado entram no primeiro preço (com nota no gráfico); os proventos não entram nas linhas em R$ (entram no TWR).
+   - O seu Patrion estava aberto a partir de `build\windows\x64\runner\Release` (sem `--data-dir`) quando o primeiro build desta sessão rodou; não mexi nele, mas os builds substituíram arquivos dessa pasta. Ao abrir de novo por ali, roda a 1.2.0 (e baixa o histórico de 10 anos dos seus ativos, alguns minutos na primeira vez).
+5. **Pendências:** tag e Release v1.2.0 (só quando você pedir); confirmação manual de eventos suspeitos (F11); restante da F8; Windows Hello (F5B), antiga.
+6. **Como testar (roteiro por item):** veja a resposta desta sessão; o resumo: Fontes de dados → "Histórico de cotações" (M-08); clique num ativo da Carteira (M-07); Painel (M-09); "Adicionar ativo" com uma corretora nova, compra em outra corretora, filtro e agrupamento, "Transferir de corretora" e Configurações → Corretoras e ativos (M-06).
 
 
 ### Ajustes de uso real antes da F8 (desde 22/10/2026)

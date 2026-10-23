@@ -4,6 +4,29 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.2.0] - 2026-10-23
+
+Histórico de 10 anos, página do ativo em tela cheia, Painel com a evolução do patrimônio e corretora escolhida na hora.
+
+### Adicionado
+
+- **Histórico completo de cotações em segundo plano:** ao adicionar um ativo e ao abrir o app, os fechamentos diários dos últimos 10 anos (ou desde a listagem) de todos os ativos com cotação automática, com os proventos e eventos. Na B3, um arquivo anual do COTAHIST serve a todos os ativos e é apagado depois de lido. O andamento aparece no rodapé do menu; se o app for fechado, continua na próxima abertura. Em Configurações > Fontes de dados, cada ativo mostra desde quando há histórico, com o botão "Baixar histórico completo".
+- **Página do ativo em tela cheia** (clique na linha da Carteira): valor da posição, lucro e variação do dia no topo, com Comprar e Vender; gráfico grande só com o desempenho do ativo no mercado (1M, 6M, 1A, 5A, 10A e Tudo), com a variação do período, máxima e mínima, tooltip e a opção "Preço ajustado por proventos" (calculado, sem as quedas falsas das datas ex e dos desdobramentos); cartões com os números da posição e a divisão por corretora; abas Operações, Proventos e Dados do ativo.
+- **Evolução patrimonial no Painel:** o patrimônio dia a dia com o total aplicado em degraus (o espaço entre os dois é o ganho), períodos 6M, 1A, 5A e Tudo e a opção "Comparar com" CDI, Ibovespa e IPCA: em R$, quanto você teria com os mesmos aportes no índice (simulação hipotética); em %, a rentabilidade da carteira (TWR) contra os índices.
+- Faixa no topo do Painel: patrimônio, total aplicado, ganho e rentabilidade no ano.
+- **Ibovespa** diário, pela B3, atualizado com os demais indicadores.
+- **Corretora / custodiante** no "Adicionar ativo" e no Comprar: escolha uma das usadas ou digite uma nova (o app cria a corretora e a conta "Principal" ao salvar).
+- **Carteira por corretora:** filtro (lembrado entre aberturas) e "Agrupar por corretora", com subtotais; o mesmo ativo em duas corretoras continua numa linha só.
+- **Transferir de corretora** na página do ativo, mantendo o preço médio.
+
+### Alterado
+
+- O histórico, o câmbio e os indicadores passam a começar 10 anos antes (eram 5), salvo se você escolheu outro ano em Fontes de dados.
+- O painel lateral de detalhes da Carteira foi substituído pela página do ativo.
+- Painel: distribuição numa rosca só, com seletor (ativo, classe, setor, corretora) e o total no centro; aportes com compras em verde e vendas em cinza; os demais números ficam em "Mais números".
+- **Cadastros saiu do menu:** agora é Configurações > Corretoras e ativos, para corrigir cadastros.
+- Cálculos com muitas multiplicações em sequência (como a rentabilidade de 10 anos) ficaram muito mais rápidos, com os mesmos resultados.
+
 ## [1.1.0] - 2026-10-22
 
 Ajustes de uso real: adição rápida pelo ticker, menu reorganizado, caixa opcional, Carteira com painel de detalhes e Painel com gráficos.

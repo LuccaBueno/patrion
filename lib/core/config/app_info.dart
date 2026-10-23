@@ -4,7 +4,7 @@
 abstract final class AppInfo {
   static const name = 'Patrion';
   static const subtitle = 'Investimentos e Patrimônio';
-  static const version = '1.1.0';
+  static const version = '1.2.0';
 
   /// Repositório do GitHub com as Releases, no formato `dono/nome`. É o
   /// único lugar do código com o repositório (SPEC §19; DECISIONS D-07).

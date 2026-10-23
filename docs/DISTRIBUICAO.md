@@ -96,7 +96,7 @@ Gera `dist\` com o instalador, o ZIP, `SHA256SUMS.txt` e `RELEASE_NOTES.md`. Usa
 
 Feito no Windows Sandbox ou num PC sem Flutter, depois do teste automático ou no lugar dele:
 
-1. **Instalar e abrir.** Execute `Patrion-1.1.0-instalador.exe` com dois cliques. Confira o aviso do SmartScreen ("Mais informações" > "Executar assim mesmo"), a instalação sem pedido de administrador, o atalho no Menu Iniciar e o app abrindo no fim.
+1. **Instalar e abrir.** Execute `Patrion-1.2.0-instalador.exe` com dois cliques. Confira o aviso do SmartScreen ("Mais informações" > "Executar assim mesmo"), a instalação sem pedido de administrador, o atalho no Menu Iniciar e o app abrindo no fim.
 2. **Registrar uma operação.** Carteira > "Adicionar ativo": um ticker (ex.: "bbas3"), a quantidade e o preço. O ativo aparece na lista; na janela padrão (1280 px), a valorização e "Detalhes" aparecem sem rolar para o lado.
 3. **Carteira hipotética:** chega na Fase 9 (SPEC §21); pule por enquanto.
 4. **Fechar e reabrir.** Os dados continuam.
