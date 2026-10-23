@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) em andamento** desde 22/10/2026. Concluídos: M-01 a M-05 (do M-04, os itens 1, 2, 3, 6 e 7). Verificação do "Atualizar agora": problema encontrado e corrigido (D-47). Próximo: a versão 1.1.0. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) concluídos** em 23/10/2026, como versão 1.1.0 (sem tag nem Release; só quando você pedir). Do M-04 entraram os itens 1, 2, 3, 6 e 7; os itens 4, 5, 8 e 9 estão na F8. Verificação do "Atualizar agora": problema encontrado e corrigido (D-47). Próximo: Fase 8, quando você pedir. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -62,6 +62,15 @@ Itens de `docs/MUDANCAS.md`. Cada item tem um commit; o relatório completo sai 
 - Correção: a atualização cobre também os ativos com preço de mercado ainda sem operações (posições encerradas continuam fora); o retrato guarda o preço de todos os ativos e a página do ativo o mostra. Depois: "1 ativos" no log e R$ 44,90 (brapi, 22/10/2026 18:30) na página do TAEE11.
 - Testes: `market_data_service_test.dart` (o ativo novo é consultado, o encerrado não; o teste falha no código antigo, conferido), `portfolio_screens_test.dart` (página do ativo sem operações mostra a cotação).
 - Observação: durante a atualização automática da abertura (numa pasta nova ela baixa cinco anos de indicadores e leva cerca de um minuto), o botão "Atualizar agora" fica desabilitado ("Atualizando…"); o clique nesse intervalo não faz nada.
+
+**Versão 1.1.0 — relatório final dos ajustes (23/10/2026)**
+
+1. **Implementado:** M-01 (adição rápida pelo ticker), M-02 (menu e Configurações por seções), M-03 (caixa opcional, desligado por padrão), M-04 itens 1, 2, 3, 6 e 7 (Painel com destaques, roscas, aportes, proventos, altas e baixas), M-05 (Carteira como lista por ativo com painel de detalhes) e a correção do "Atualizar agora" (D-47). Detalhes de cada item acima.
+2. **Arquivos (resumo):** os listados em cada item; na versão: `pubspec.yaml` (1.1.0+2), `core/config/app_info.dart`, `CHANGELOG.md` (seção 1.1.0), `README.md`, `docs/DISTRIBUICAO.md` (roteiro manual com o formulário rápido e o Sincronizar do rodapé), `docs/SOLUCAO_DE_PROBLEMAS.md` e `docs/ARQUITETURA.md` (telas e caminhos novos de Configurações).
+3. **Testes (resultados reais):** `dart format .` sem mudanças; `flutter analyze` sem problemas; `flutter test` com **493 testes passando**; `flutter build windows --release` compilou, e o `patrion.exe` tem versão 1.1.0+2. O release abriu numa pasta de dados de teste e registrou "Iniciando Patrion 1.1.0" no log. As conferências visuais de cada item estão acima.
+4. **Problemas e limitações:** do M-04, evolução do patrimônio, rentabilidade comparada, seletor de período e faixa de câmbio ficam para a F8. O dinheiro parado (M-03, item 4) entra como ativo da classe Caixa com saldo informado, que já existia (D-44); o controle de caixa é geral, não por conta. Durante a atualização automática da abertura, "Atualizar agora" fica desabilitado.
+5. **Pendências:** tag e Release v1.1.0 (só quando você pedir); Windows Hello (F5B), antiga.
+6. **Como testar:** `flutter run -d windows` ou o instalador gerado por `tool\release\build_release.ps1`. Confira: Carteira > "Adicionar ativo" com "bbas3", 100 e 25,00; a ordem da lista e o painel de "Detalhes" (gráfico com a linha do preço médio, Comprar e Vender); o Painel batendo com a Carteira; o patrimônio sem caixa negativo e, ligando Configurações > Geral > "Controlar saldo em caixa", o caixa de volta; o Sincronizar no rodapé até "Salvar arquivo de save"; e "Atualizar agora" com um ativo recém-cadastrado.
 
 
 ### Ajustes antes da tag v1.0.0 (19/10/2026)

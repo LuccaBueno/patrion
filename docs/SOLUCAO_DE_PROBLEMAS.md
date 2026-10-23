@@ -24,7 +24,7 @@
 
 **"O GitHub limitou as consultas deste computador".** A API pública permite 60 consultas por hora por endereço IP (somadas a outros programas na mesma rede). Espere e tente mais tarde.
 
-**Ignorei uma versão por engano.** Configurações > Atualizações > "Voltar a avisar".
+**Ignorei uma versão por engano.** Configurações > Sobre > Atualizações > "Voltar a avisar".
 
 ## Dados
 

@@ -4,6 +4,30 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.1.0] - 2026-10-22
+
+Ajustes de uso real: adição rápida pelo ticker, menu reorganizado, caixa opcional, Carteira com painel de detalhes e Painel com gráficos.
+
+### Adicionado
+
+- **Adicionar ativo pelo ticker** (Carteira e Cadastros): digite o ticker (ex.: "bbas3"), a quantidade e o preço; o app busca nome, classe, ISIN, setor e segmento na B3 e na brapi e registra o ativo e a compra numa tela só. Ativo já cadastrado: só a compra. Opção "Posição que já tenho (saldo inicial)" para copiar quantidade e preço médio da corretora (padrão na carteira vazia). Ticker não encontrado ou sem internet: aviso e cadastro manual. Funciona sem internet com os dados já baixados. Renda fixa, cripto e internacional continuam no "Cadastro completo".
+- **Painel de detalhes do ativo** na Carteira, sem trocar de tela: lucro em R$, total aplicado, variação do dia, gráfico da cotação (1S a Tudo) com a linha do preço médio, % da carteira, proventos, operações e os botões Comprar e Vender.
+- **Painel com gráficos:** patrimônio, resultado total e variação do dia em destaque; distribuição por ativo, classe, setor e instituição; aportes do mês e do ano com barras dos últimos 12 meses; proventos por mês; maiores altas e baixas do dia ou do mês.
+- Opção **"Controlar saldo em caixa"** em Configurações > Geral (vale nos computadores sincronizados).
+
+### Alterado
+
+- **Caixa opcional, desligado por padrão:** compras e vendas não movimentam caixa e o patrimônio é o valor de mercado das posições, sem patrimônio negativo por falta de depósitos. Ligando a opção, volta o comportamento da 1.0.0. A rentabilidade (TIR) não muda.
+- **Menu:** Painel (antigo Início), Carteira, Operações e Cadastros em cima; Sincronizar e Configurações no rodapé. Sincronizar leva direto ao save e avisa quando a última sincronização tem 7 dias ou mais.
+- **Configurações** em seções: Geral, Segurança, Fontes de dados, Backup, Sincronização e Sobre (as telas de Backup, Fontes de dados e Sincronização passaram para cá).
+- **Carteira:** um item por ativo (somando as contas), do maior valor para o menor, com valor da posição, preço médio, cotação atual (com fonte e data) e valorização; ativos sem cotas ficam no fim, em cinza.
+- Tickers digitados em minúsculas são gravados em maiúsculas; o código do fracionário ("BBAS3F") vira o do lote padrão.
+
+### Corrigido
+
+- "Atualizar agora" passou a buscar a cotação de um ativo recém-cadastrado com cotação automática que ainda não tem operações, e a página do ativo mostra essa cotação.
+- Cartões de aviso vazios (como "Nenhuma posição") não ocupam mais a altura toda da tela.
+
 ## [1.0.0] - 2026-10-22
 
 Primeira versão utilizável: carteira real, motor financeiro, backup e sincronização por arquivo, bloqueio opcional, dados de mercado e instalador.

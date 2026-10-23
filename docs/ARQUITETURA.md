@@ -131,9 +131,9 @@ Detalhes em `BLOQUEIO.md`; decisões em D-24, D-32 e D-33.
 ## Interface
 
 - `presentation/app.dart`: `MaterialApp.router`, pt-BR, temas claro e escuro (D-18).
-- `presentation/router/app_router.dart`: rotas e itens da navegação lateral. Uma tela nova entra na lista `navDestinations` e ganha uma rota.
+- `presentation/router/app_router.dart`: rotas (`Routes`) e itens da navegação lateral. Uma tela de uso diário entra na lista `navDestinations` e ganha uma rota; o rodapé (`footerDestinations`) tem só Sincronizar e Configurações (D-43).
 - `presentation/providers.dart`: provedores do Riverpod. Banco, contexto de sincronização, ambiente e controlador da sessão são sobrescritos pelo `SessionHost` (e nos testes, com banco em memória e diálogos de arquivo simulados).
-- Telas atuais (`presentation/screens/`): Início (dashboard, com o aviso de sincronização antiga), Carteira, Detalhe do ativo (`/carteira/ativo/:id`), Operações, Cadastros (instituições, contas e ativos), Sincronização, Backup e Configurações.
+- Telas atuais (`presentation/screens/`): Painel (`dashboard/`, com gráficos e o aviso de sincronização antiga; D-46), Carteira (lista por ativo com o painel de detalhes e o formulário "Adicionar ativo"; D-42, D-45), Detalhe do ativo (`/carteira/ativo/:id`), Operações, Cadastros (instituições, contas e ativos) e Configurações em seções (Geral, Segurança, Fontes de dados, Backup, Sincronização e Sobre, cada uma com endereço próprio em `/configuracoes/...`).
 - `presentation/format/`: formatação e leitura de números e datas em pt-BR direto do `Decimal` (D-23) e rótulos em português das enumerações.
 - `presentation/widgets/common.dart`: estrutura de página, estados de carregamento e erro, "indisponível", ganho/perda com cor, sinal e ícone, campos de número e data, diálogos de formulário.
 
@@ -170,6 +170,6 @@ O `PortfolioQuery` lê o preço de mercado do banco e recalcula a carteira quand
 | `application/updates/` | `update_checker.dart` | Verificador de atualizações: comparação SemVer, pré-lançamentos, versão ignorada, frequência e estado em `dev_settings` (D-40) |
 | `infrastructure/updates/` | `github_release_feed.dart` | Adaptador das Releases do GitHub (sem token) |
 | `infrastructure/system/` | `single_instance.dart`, `window_setup.dart` | Uma instância por pasta de dados, encaminhamento de arquivos e janela para a frente (D-39) |
-| `presentation/` | `services/open_requests.dart`, `screens/updates/update_widgets.dart` | Fila dos `.invsave` recebidos; seção "Atualizações", aviso no Início e consulta automática |
+| `presentation/` | `services/open_requests.dart`, `screens/updates/update_widgets.dart` | Fila dos `.invsave` recebidos; seção "Atualizações" (em Configurações > Sobre), aviso no Painel e consulta automática |
 | `windows/runner/main.cpp` | — | Mutex `PatrionAppMutex`, que o instalador usa para saber se o app está aberto |
 | `installer/`, `tool/release/` | `patrion.iss`, `*.ps1` | Instalador, ZIP portátil, notas e testes de instalação (`DISTRIBUICAO.md`) |

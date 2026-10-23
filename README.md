@@ -46,7 +46,7 @@ flutter build windows --release
 ## Onde ficam os dados
 
 - Banco, backups e logs: `%APPDATA%\Patrion\` (logs em `logs\patrion.log`)
-- Backups em `%APPDATA%\Patrion\backups\`: automáticos antes de atualizar o formato do banco, de importar um save e de restaurar, e manuais pela tela Backup (`docs/BACKUP.md`)
+- Backups em `%APPDATA%\Patrion\backups\`: automáticos antes de atualizar o formato do banco, de importar um save e de restaurar, e manuais em Configurações > Backup (`docs/BACKUP.md`)
 - Sincronização entre computadores pelo arquivo de save `.invsave`, sem servidor, com senha opcional (`docs/SINCRONIZACAO.md`)
 - Bloqueio opcional (Configurações): banco criptografado com SQLCipher, senha, Windows Hello, bloqueio por inatividade e chave de recuperação (`docs/BLOQUEIO.md`)
 - Cache descartável (arquivos baixados): `%LOCALAPPDATA%\Patrion\cache\`

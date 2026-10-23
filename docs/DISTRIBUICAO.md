@@ -41,15 +41,15 @@ O ZIP tem a pasta `Patrion\` com o app e um `LEIA-ME.txt`. Não instala nada: se
 
 ## `.invsave` e instância única
 
-- Duplo clique num `.invsave` abre o Patrion na tela Sincronização com a prévia da importação. Nada é aplicado sem "Aplicar". Com o bloqueio ativo, a prévia aparece depois do desbloqueio.
+- Duplo clique num `.invsave` abre o Patrion em Configurações > Sincronização com a prévia da importação. Nada é aplicado sem "Aplicar". Com o bloqueio ativo, a prévia aparece depois do desbloqueio.
 - Uma instância por pasta de dados: a primeira trava `instance\patrion.lock`; a segunda grava o pedido em `instance\inbox\`, autoriza a primeira a tomar o foco e sai. A primeira lê o pedido, traz a janela para a frente e abre o arquivo. Pastas diferentes (`--data-dir`) abrem ao mesmo tempo.
 - Se outro programa já tiver sido escolhido no Windows para `.invsave`, o Windows mantém a escolha do usuário: use "Abrir com" > Patrion > "Sempre".
 
 ## Verificador de atualizações
 
-- Configurações > Atualizações: "Verificar ao abrir o app" (ligado; no máximo uma vez a cada 24 horas), "Incluir versões de teste (beta e rc)" (desligado) e "Verificar agora" (no máximo uma vez por minuto).
+- Configurações > Sobre > Atualizações: "Verificar ao abrir o app" (ligado; no máximo uma vez a cada 24 horas), "Incluir versões de teste (beta e rc)" (desligado) e "Verificar agora" (no máximo uma vez por minuto).
 - Consulta `https://api.github.com/repos/LuccaBueno/patrion/releases/latest` (ou `/releases`, com as versões de teste), sem token. A requisição leva só `User-Agent: Patrion/<versão>`; nada da carteira. O repositório fica só em `AppInfo.releasesRepository`.
-- Compara pelo SemVer (`pub_semver`). Uma versão mais nova aparece com as notas, a data e o botão "Abrir página de download" (só abre páginas do próprio repositório no GitHub); "Ignorar esta versão" tira o aviso do Início até sair outra.
+- Compara pelo SemVer (`pub_semver`). Uma versão mais nova aparece com as notas, a data e o botão "Abrir página de download" (só abre páginas do próprio repositório no GitHub); "Ignorar esta versão" tira o aviso do Painel até sair outra.
 - Sem internet, a consulta automática falha em silêncio e tenta na próxima abertura; "Verificar agora" mostra "Sem conexão".
 - **Não há atualização automática** (Fase 15, SPEC §19 e §21): o usuário baixa e executa o instalador.
 
@@ -96,11 +96,11 @@ Gera `dist\` com o instalador, o ZIP, `SHA256SUMS.txt` e `RELEASE_NOTES.md`. Usa
 
 Feito no Windows Sandbox ou num PC sem Flutter, depois do teste automático ou no lugar dele:
 
-1. **Instalar e abrir.** Execute `Patrion-1.0.0-instalador.exe` com dois cliques. Confira o aviso do SmartScreen ("Mais informações" > "Executar assim mesmo"), a instalação sem pedido de administrador, o atalho no Menu Iniciar e o app abrindo no fim.
-2. **Registrar uma operação.** Cadastros: instituição e conta. Operações: um depósito e uma compra. Carteira: a posição aparece; na janela padrão (1280 px), a coluna "Resultado" aparece sem rolar para o lado.
+1. **Instalar e abrir.** Execute `Patrion-1.1.0-instalador.exe` com dois cliques. Confira o aviso do SmartScreen ("Mais informações" > "Executar assim mesmo"), a instalação sem pedido de administrador, o atalho no Menu Iniciar e o app abrindo no fim.
+2. **Registrar uma operação.** Carteira > "Adicionar ativo": um ticker (ex.: "bbas3"), a quantidade e o preço. O ativo aparece na lista; na janela padrão (1280 px), a valorização e "Detalhes" aparecem sem rolar para o lado.
 3. **Carteira hipotética:** chega na Fase 9 (SPEC §21); pule por enquanto.
 4. **Fechar e reabrir.** Os dados continuam.
-5. **Usar offline.** Desligue a rede (no Sandbox: `<Networking>Disable</Networking>` no `.wsb`, ou desconecte o adaptador). Abra o app: aviso "Sem conexão", dados guardados com as datas; Configurações > Atualizações > "Verificar agora" mostra "Sem conexão" sem travar.
-6. **Save entre duas instalações.** Sincronização > "Salvar arquivo de save". Leve o arquivo para outra instalação (outro PC, outro Sandbox ou `--data-dir` diferente) e dê **dois cliques** nele: o Patrion abre na Sincronização com a prévia; "Aplicar" importa. Com o app já aberto, dois cliques no arquivo trazem a janela existente para a frente com a prévia.
+5. **Usar offline.** Desligue a rede (no Sandbox: `<Networking>Disable</Networking>` no `.wsb`, ou desconecte o adaptador). Abra o app: aviso "Sem conexão", dados guardados com as datas; Configurações > Sobre > Atualizações > "Verificar agora" mostra "Sem conexão" sem travar.
+6. **Save entre duas instalações.** Sincronizar (rodapé do menu) > "Salvar arquivo de save". Leve o arquivo para outra instalação (outro PC, outro Sandbox ou `--data-dir` diferente) e dê **dois cliques** nele: o Patrion abre em Configurações > Sincronização com a prévia; "Aplicar" importa. Com o app já aberto, dois cliques no arquivo trazem a janela existente para a frente com a prévia.
 7. **Atualizar de versão.** Com o app aberto, execute o instalador de novo (ou o de uma versão mais nova): ele pede para fechar o app. Feche e continue. Os dados, as configurações e os backups continuam; Configurações > Sobre mostra a versão nova.
 8. **Desinstalar sem perder dados.** "Aplicativos instalados" > Patrion > Desinstalar. A mensagem final mostra a pasta dos dados. Confira que `%APPDATA%\Patrion` continua com `patrion.db`, `backups\` e `logs\`, que o atalho sumiu e que o `.invsave` deixou de abrir com o Patrion. Reinstale: a carteira volta como estava.
