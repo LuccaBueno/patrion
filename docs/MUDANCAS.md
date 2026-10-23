@@ -3,6 +3,13 @@
 Itens observados no uso da v1.0.0. Cada item traz o problema, a mudança, o critério de pronto e a prioridade.
 Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: "Implemente os itens M-xx antes de começar a fase; atualize a SPEC e o DECISIONS.md quando a mudança alterar uma regra."
 
+## Situação
+
+| Item | Situação |
+|---|---|
+| M-01 a M-05 | **Feitos** na versão 1.1.0 (exceto M-04 itens 4, 5 e 9, que passaram para o M-09) |
+| M-06 a M-09 | **Pendentes** |
+
 ---
 
 ### M-01 — Adição rápida de ações e FIIs pelo ticker
@@ -118,18 +125,89 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 - **Prioridade:** média
 - **Fase:** ajuste avulso, depois do M-01 a M-05
 
+### M-07 — Página do ativo em tela cheia no lugar do painel lateral
+- **Onde:** Carteira (clique na linha) e "Página do ativo"
+- **Problema:** o painel lateral de Detalhes (M-05) é estreito: o gráfico fica pequeno, os números ficam espremidos e o painel cobre as colunas da lista (cotação e valorização somem). Não dá para analisar a evolução do ativo ao longo dos anos.
+- **Mudança:**
+  1. **Clicar na linha abre a página do ativo em tela cheia**, com botão "Voltar" para a Carteira (que mantém filtro e posição de rolagem). O painel lateral deixa de existir.
+  2. **Cabeçalho:** ticker, nome, classe e corretora; à direita, valor da posição em destaque, lucro em R$ e % e variação do dia; botões **Comprar** e **Vender**.
+  3. **Gráfico principal grande** (ocupa a largura da página, ~45% da altura), mostrando **só o desempenho da ação no mercado**, independente da minha carteira e de quando eu comprei:
+     - **cotação da ação** ao longo do tempo (fechamento diário);
+     - seletor de período: 1M, 6M, **1A**, 5A, 10A e Tudo (períodos do mercado, não "desde a minha compra");
+     - **variação do período em destaque** (ex.: "+18,4% em 1 ano") e máxima/mínima do período;
+     - **cursor com tooltip** ao passar o mouse: data, cotação e variação desde o início do período;
+     - eixo de valores com escala legível (sem começar em zero quando isso esconder a variação);
+     - opção **"Preço ajustado por proventos"** (calculado, rotulado como tal) para não mostrar quedas falsas em datas "ex";
+     - **sem comparação com índices** neste gráfico (a comparação fica só na evolução patrimonial do Painel, M-09);
+     - **Nada da carteira no gráfico** (sem linha de preço médio, sem marcadores de compra/venda, sem valor da posição). Esses dados ficam nos cartões e na aba Operações.
+  4. **Cartões abaixo do gráfico**, em grade larga: total aplicado, preço médio, cotação atual, lucro não realizado, lucro realizado, proventos recebidos, % da carteira, quebra por corretora (M-06).
+  5. **Abas inferiores:** Operações (tabela com edição), Proventos (por mês), Dados do ativo (setor, segmento, ISIN, fonte da cotação).
+  6. Sem dados para o período escolhido, o botão do período aparece desabilitado com o motivo no tooltip (ex.: "histórico disponível desde 03/2019").
+- **Critério de pronto:** clicando em BBAS3 abre a página em tela cheia; o gráfico em 5A mostra cinco anos de fechamentos da ação com a variação do período em destaque, sem nenhum dado da carteira desenhado; o tooltip funciona com o mouse; em 1280 px nada fica cortado.
+- **Prioridade:** alta
+- **Fase:** ajuste avulso (depende do M-08 para ter anos de histórico)
+
+### M-08 — Histórico completo de cotações baixado automaticamente
+- **Onde:** Adicionar ativo (M-01), atualização de dados, Configurações → Fontes de dados
+- **Problema:** o gráfico de 1A mostra só ~9 dias (14/10 a 22/10/2026): o app guardou apenas os fechamentos recentes. Para ver a evolução ao longo dos anos é preciso o histórico longo de cada ativo.
+- **Mudança:**
+  1. Ao **adicionar um ativo** (ou na primeira atualização depois desta versão, para os já cadastrados), o app **baixa o histórico de fechamentos em segundo plano** desde o ano inicial configurado (padrão: **10 anos**, ou desde a listagem do ativo), usando o COTAHIST anual (já implementado) e apagando os arquivos brutos depois (D-05).
+  2. Progresso visível e discreto ("Baixando histórico de BBAS3… 2019/2026"), sem travar o app; pode continuar na próxima abertura se o app for fechado.
+  3. Um único download anual serve a **todos os ativos** da B3 (o COTAHIST traz todos de uma vez): ao adicionar um ativo novo, os anos já processados são relidos só se o arquivo ainda estiver em cache; caso contrário, baixa de novo só o necessário.
+  4. **Proventos e eventos** (desdobramentos, grupamentos) do ativo baixados junto, para o preço ajustado do M-07 e a evolução do M-09; eventos suspeitos seguem a regra já existente (aviso, confirmação manual).
+  5. Configurações → Fontes de dados mostra, por ativo, desde quando há histórico e um botão "Baixar histórico completo".
+- **Critério de pronto:** adicionar BBAS3 num banco novo resulta, alguns minutos depois, em fechamentos diários dos últimos 10 anos; o gráfico 5A do M-07 aparece completo; a pasta de cache fica vazia ao final; com o app fechado no meio, o download continua na próxima abertura.
+- **Prioridade:** alta (sem ele, M-07 e M-09 ficam vazios)
+- **Fase:** ajuste avulso, **antes** do M-07 e do M-09
+
+### M-09 — Painel: evolução patrimonial em destaque e gráficos mais claros
+- **Onde:** tela Painel
+- **Problema:** não existe gráfico de evolução patrimonial, e os gráficos atuais não são fáceis de ler nem respondem às perguntas principais ("quanto eu tenho?", "quanto eu coloquei?", "quanto rendeu?", "como está dividido?").
+- **Mudança:** (absorve os itens 4, 5 e 9 do M-04)
+  1. **Gráfico principal e em destaque: Evolução patrimonial.** É o elemento mais importante do app por enquanto: fica no topo do Painel, ocupando toda a largura e cerca de metade da altura da tela.
+     - área preenchida com o **patrimônio** dia a dia (quantidade de cada ativo em cada dia × fechamento do dia);
+     - linha em degraus com o **total aplicado** (aportes acumulados menos resgates), de modo que o espaço entre as duas é o **ganho**;
+     - seletor de período (6M, 1A, 5A, Tudo) e tooltip com data, patrimônio, aplicado e ganho (R$ e %);
+     - marcadores discretos nos meses com aportes;
+     - **opção "Comparar com"** (desligada por padrão), com caixas para **CDI**, **Ibovespa** e **IPCA**:
+       - em **R$**: desenha, para cada índice marcado, a linha de **"quanto eu teria se os mesmos aportes, nas mesmas datas, tivessem ido para o índice"** (linha fina, cor neutra, rotulada como simulação);
+       - alternância **R$ / %**: em %, mostra a rentabilidade da carteira (TWR) contra os índices, todos começando em 0% no início do período, explicado no ícone de informação;
+       - o tooltip mostra a diferença da carteira para cada índice marcado (ex.: "Carteira R$ 52.300 · CDI R$ 49.800 · +R$ 2.500").
+  2. **Faixa de números acima do gráfico**, grande e simples: Patrimônio · Total aplicado · Ganho (R$ e %) · Rentabilidade no ano.
+  3. *(Removido: a comparação com índices passa a ser a opção "Comparar com" do gráfico principal, não um gráfico separado.)*
+  4. **Distribuição:** um único gráfico de rosca com seletor (por ativo / por classe / por setor / por corretora), com o total no centro e a lista de percentuais ao lado (ordenada, com valor em R$).
+  5. **Aportes por mês:** barras dos últimos 12 meses (compras em verde, vendas em cinza), com o total do mês e do ano.
+  6. **Proventos por mês:** barras dos últimos 12 meses, com o total.
+  7. **Princípios visuais** para todos os gráficos:
+     - no máximo **uma ideia por gráfico**, título em forma de resposta (ex.: "Seu patrimônio cresceu R$ X em 1 ano");
+     - cores consistentes (marca = carteira, cinza = referências, verde/vermelho só para ganho/perda);
+     - tooltip em todos os gráficos, valores em R$ formatados, datas em pt-BR;
+     - sem dados suficientes: o gráfico mostra "indisponível" com o motivo, nunca pontos inventados.
+- **Observação importante sobre os dados:** a evolução patrimonial só pode começar na **data das operações registradas**. Posições lançadas como "saldo inicial" com a data de hoje fazem o gráfico começar hoje. Para ver anos de evolução, registre as compras com as **datas reais** (ou aproximadas) — o app deve explicar isso no próprio gráfico quando o histórico for curto.
+- **Critério de pronto:** com compras registradas em datas espalhadas por 2+ anos e histórico baixado (M-08), o Painel mostra em destaque a curva do patrimônio acima da linha do total aplicado; ligando "Comparar com CDI", aparece a linha simulada com os mesmos aportes no CDI (em R$) e, em %, a comparação de rentabilidade; a distribuição com seletor funciona; os valores do dia final batem com a Carteira; o tooltip funciona em todos os gráficos.
+- **Prioridade:** alta
+- **Fase:** ajuste avulso (equivale a antecipar parte da F8: evolução patrimonial, TWR e benchmarks); depende do M-08
+
 ---
 
-## Prompt sugerido para enviar ao Claude Code
+## Prompt sugerido para enviar ao Claude Code (M-06 a M-09)
+
+Salve este arquivo em `C:\dev\patrion\docs\MUDANCAS.md`, abra uma conversa nova (`/clear`) e cole:
 
 ```
-Leia CLAUDE.md e docs/PROGRESS.md. Antes da Fase 8, implemente os ajustes
-de uso real abaixo (M-01 a M-05). Atualize a SPEC e o DECISIONS.md quando
-uma mudança alterar uma regra, inclua testes e confira visualmente no app.
-O item M-04 entra só nos itens 1, 2, 3, 6 e 7; os itens 4, 5 e 9 ficam para
-a Fase 8. Ao final, rode format, analyze, test e build, atualize PROGRESS.md
-e CHANGELOG (versão 1.1.0), faça push e confirme que o CI ficou verde.
-Não crie tag nem Release sem eu pedir.
+Leia CLAUDE.md, docs/PROGRESS.md e docs/MUDANCAS.md. Implemente os itens
+pendentes M-06 a M-09, nesta ordem: M-08 (histórico), M-07 (página do
+ativo), M-09 (Painel) e M-06 (corretoras). M-09 antecipa parte da Fase 8
+(evolução patrimonial, TWR e benchmarks): registre isso na SPEC §21.
 
-[cole aqui os itens M-01 a M-05]
+- Atualize SPEC e DECISIONS.md quando uma mudança alterar uma regra.
+- Faça commit e atualize o PROGRESS.md ao fim de cada item, para não perder
+  o andamento se o limite de uso acabar.
+- Inclua testes e confira cada tela visualmente no app em 1280 px, com uma
+  carteira de exemplo com compras espalhadas por vários anos.
+
+Ao final, rode format, analyze, test e build, atualize CHANGELOG (1.2.0) e
+faça push (se o push for bloqueado, me avise para eu rodar). Confirme que o
+CI ficou verde. Não crie tag nem Release. No relatório, inclua um roteiro
+para eu testar cada item.
 ```
