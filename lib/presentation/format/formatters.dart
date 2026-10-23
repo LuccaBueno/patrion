@@ -45,6 +45,29 @@ abstract final class Fmt {
   static String date(LocalDate d) =>
       '${_two(d.day)}/${_two(d.month)}/${d.year.toString().padLeft(4, '0')}';
 
+  /// `03/2019`.
+  static String monthYear(LocalDate d) =>
+      '${_two(d.month)}/${d.year.toString().padLeft(4, '0')}';
+
+  static const _months = [
+    'jan',
+    'fev',
+    'mar',
+    'abr',
+    'mai',
+    'jun',
+    'jul',
+    'ago',
+    'set',
+    'out',
+    'nov',
+    'dez',
+  ];
+
+  /// `out/25`.
+  static String monthShort(LocalDate d) =>
+      '${_months[d.month - 1]}/${_two(d.year % 100)}';
+
   static String _two(int v) => v.toString().padLeft(2, '0');
 
   /// Agrupa milhares com `.` e usa `,` decimal, com [decimals] casas fixas.

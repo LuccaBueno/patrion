@@ -1,3 +1,4 @@
+import '../../domain/market/market_data.dart';
 import '../../domain/finance/returns.dart';
 import '../../domain/portfolio/codes.dart';
 import '../../domain/portfolio/operation_type.dart';
@@ -202,5 +203,18 @@ extension PriceSourceLabel on PriceSource {
   String get label => switch (this) {
     PriceSource.market => 'Cotação automática (Fontes de dados)',
     PriceSource.manual => 'Preço ou saldo informado por mim',
+  };
+}
+
+extension CorporateEventKindLabel on CorporateEventKind {
+  String get label => switch (this) {
+    CorporateEventKind.split => 'Desdobramento',
+    CorporateEventKind.reverseSplit => 'Grupamento',
+    CorporateEventKind.bonusShares => 'Bonificação',
+    CorporateEventKind.cashDividend => 'Dividendo',
+    CorporateEventKind.jcp => 'JCP',
+    CorporateEventKind.fiiIncome => 'Rendimento',
+    CorporateEventKind.amortization => 'Amortização',
+    CorporateEventKind.otherCash => 'Outro provento',
   };
 }

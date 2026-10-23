@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -11,7 +12,7 @@ import 'package:patrion/domain/portfolio/operation_type.dart';
 import '../helpers/app_harness.dart';
 import '../helpers/portfolio_fixture.dart';
 
-/// Carteira como lista principal, com o painel de detalhes (M-05).
+/// Carteira como lista principal (M-05) e a página do ativo (M-07).
 void main() {
   late PortfolioFixture f;
   final ids = <String, String>{};
@@ -123,8 +124,8 @@ void main() {
   }
 
   testWidgets('ordem pelo valor da posição; valorização (cotação − PM) ÷ PM; '
-      'painel com lucro, total aplicado, variação do dia e gráfico com a '
-      'linha do PM', (tester) async {
+      'a página do ativo em tela cheia mostra lucro, total aplicado, variação '
+      'do dia e o gráfico só do mercado (M-07)', (tester) async {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
     await app.run(location: '/carteira', () async {
@@ -150,62 +151,127 @@ void main() {
         findsOneWidget,
       );
 
-      await app.tap(find.byKey(const Key('details-BBAS3')));
-      final panel = find.byKey(const Key('asset-panel'));
-      expect(panel, findsOneWidget);
-      Finder inPanel(String text) =>
-          find.descendant(of: panel, matching: find.textContaining(text));
+      // O clique na linha abre a página em tela cheia (sem painel lateral).
+      await app.tap(find.byKey(const Key('holding-BBAS3')));
+      final page = find.byKey(const Key('asset-page'));
+      expect(page, findsOneWidget);
+      expect(find.byKey(const Key('holding-BBAS3')), findsNothing);
+      Finder inPage(String text) =>
+          find.descendant(of: page, matching: find.textContaining(text));
       expect(
-        find.descendant(of: panel, matching: find.text(r'-R$ 108,00')),
-        findsOneWidget,
-      ); // lucro
-      expect(inPanel(r'R$ 2.500,00'), findsOneWidget); // total aplicado
-      // 100 × (23,92 − 24,10) = −18; −0,75%.
-      expect(inPanel(r'-R$ 18,00 (-0,75%)'), findsOneWidget);
-      expect(inPanel('Desde o fechamento de 21/10/2026'), findsOneWidget);
-      // 2.392 ÷ (2.392 + 400 + 3.500 + 1.800).
-      expect(inPanel('29,56%'), findsOneWidget);
-      final chart = tester.widget<LineChart>(find.byType(LineChart));
-      final avg = chart.data.extraLinesData.horizontalLines.single;
-      expect(avg.y, 25);
-      expect(chart.data.lineBarsData.single.spots.last.y, 23.92);
-
-      // Fechar e abrir o PETR4 (sem histórico): gráfico indisponível.
-      await app.tap(find.byKey(const Key('asset-panel-close')));
-      await app.tap(find.byKey(const Key('details-PETR4')));
-      expect(find.byKey(const Key('price-chart-unavailable')), findsOneWidget);
+        tester
+            .widget<SelectableText>(find.byKey(const Key('header-value')))
+            .data,
+        r'R$ 2.392,00',
+      );
+      // Lucro no cabeçalho (e no cartão do não realizado: não houve venda).
       expect(
-        find.text('Nenhum histórico de cotações guardado para este ativo.'),
+        find.descendant(
+          of: find.byKey(const Key('header-profit')),
+          matching: find.text(r'-R$ 108,00 (-4,32%)'),
+        ),
         findsOneWidget,
       );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('card-Total aplicado')),
+          matching: find.text(r'R$ 2.500,00'),
+        ),
+        findsOneWidget,
+      );
+      // 100 × (23,92 − 24,10) = −18; −0,75%.
+      expect(inPage(r'-R$ 18,00 (-0,75%)'), findsOneWidget);
+      // 2.392 ÷ (2.392 + 400 + 3.500 + 1.800).
+      expect(inPage('29,56%'), findsOneWidget);
+      expect(inPage('Corretora Exemplo'), findsWidgets);
+
+      // Gráfico: só os fechamentos, nada da carteira (sem linha do PM).
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      expect(chart.data.extraLinesData.horizontalLines, isEmpty);
+      expect(chart.data.lineBarsData, hasLength(1));
+      expect(chart.data.lineBarsData.single.spots.map((s) => s.y), [
+        22.5,
+        23.8,
+        24.1,
+      ]);
+      // Histórico desde 30/09: 1A desabilitado com o motivo; vale 1M.
+      final periods = tester.widget<SegmentedButton<Object>>(
+        find.byKey(const Key('market-periods')),
+      );
+      final year = periods.segments.firstWhere(
+        (s) => (s.label! as Text).data == '1A',
+      );
+      expect(year.enabled, isFalse);
+      expect(year.tooltip, 'Histórico disponível desde 09/2026');
+      // 24,10 ÷ 22,50 − 1.
+      expect(inPage('+7,11%'), findsOneWidget);
+      expect(inPage('em 1 mês'), findsOneWidget);
+      expect(inPage('Máx. R\$ 24,10 (21/10/2026)'), findsOneWidget);
+
+      // Tooltip com o mouse (desenhado no canvas): data, cotação e variação
+      // desde o início do período; o toque do mouse é atendido.
+      final touch = chart.data.lineTouchData;
+      expect(touch.enabled, isTrue);
+      final bar = chart.data.lineBarsData.single;
+      final items = touch.touchTooltipData.getTooltipItems([
+        LineBarSpot(bar, 0, bar.spots.last),
+      ]);
+      expect(
+        items.single!.text,
+        '21/10/2026\nR\$ 24,10\n+7,11% desde 30/09/2026',
+      );
+      final box = tester.getRect(find.byType(LineChart));
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: box.center);
+      await gesture.moveTo(Offset(box.right - 4, box.center.dy));
+      await app.settle();
+      await gesture.removePointer();
+
+      // Preço ajustado (sem proventos guardados, a série não muda).
+      await app.tap(find.byKey(const Key('adjusted-switch')));
+      expect(inPage('Cotação ajustada por proventos'), findsOneWidget);
+
+      // Voltar: a Carteira está como antes.
+      await app.tap(find.byKey(const Key('asset-back')));
+      expect(order(tester), ['VALE3', 'BBAS3', 'ITSA4', 'WEGE3', 'PETR4']);
+
+      // PETR4 usa preço informado: sem gráfico de mercado, com o motivo.
+      await app.tap(find.byKey(const Key('details-PETR4')));
       expect(find.byType(LineChart), findsNothing);
+      expect(
+        find.textContaining('usa preço ou saldo informado por você'),
+        findsOneWidget,
+      );
     });
   });
 
-  testWidgets('"Comprar" pelo painel registra sem sair da Carteira e a lista '
-      'se reordena; vender tudo leva o ativo ao fim', (tester) async {
+  testWidgets('"Comprar" pela página do ativo registra e a Carteira se '
+      'reordena; vender tudo leva o ativo ao fim', (tester) async {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
     await app.run(location: '/carteira', () async {
       await app.tap(find.byKey(const Key('details-PETR4')));
-      // Sem ensureVisible: ele rolaria o painel até o botão.
-      await tester.tap(find.byKey(const Key('panel-buy')));
-      await app.settle();
+      await app.tap(find.byKey(const Key('asset-buy')));
       await app.type(find.byKey(const Key('trade-quantity')), '200');
       await app.type(find.byKey(const Key('trade-price')), '40');
       await app.tap(find.text('Salvar'));
-      // 210 × 40 = 8.400: PETR4 passa a ser o maior.
-      expect(find.byKey(const Key('asset-panel')), findsOneWidget);
+      // 210 × 40 = 8.400, na própria página.
+      expect(
+        tester
+            .widget<SelectableText>(find.byKey(const Key('header-value')))
+            .data,
+        r'R$ 8.400,00',
+      );
+      await app.tap(find.byKey(const Key('asset-back')));
       expect(order(tester).first, 'PETR4');
 
-      await app.tap(find.byKey(const Key('asset-panel-close')));
       await app.tap(find.byKey(const Key('details-VALE3')));
-      await tester.tap(find.byKey(const Key('panel-sell')));
-      await app.settle();
+      await app.tap(find.byKey(const Key('asset-sell')));
       expect(find.textContaining('Disponível: 50'), findsOneWidget);
       await app.type(find.byKey(const Key('trade-quantity')), '50');
       await app.type(find.byKey(const Key('trade-price')), '72');
       await app.tap(find.text('Salvar'));
+      await app.tap(find.byKey(const Key('asset-back')));
       expect(order(tester).last, 'VALE3');
       final vale = find.byKey(const Key('holding-VALE3'));
       expect(
@@ -220,6 +286,24 @@ void main() {
             .opacity,
         lessThan(1),
       );
+    });
+  });
+
+  testWidgets('voltar da página do ativo mantém a busca da Carteira', (
+    tester,
+  ) async {
+    await tester.runAsync(seed);
+    final app = AppHarness(tester, f.t);
+    await app.run(location: '/carteira', () async {
+      await app.type(find.byType(TextField).first, 'bb');
+      await app.settle();
+      expect(order(tester), ['BBAS3']);
+      await app.tap(find.byKey(const Key('holding-BBAS3')));
+      expect(find.byKey(const Key('asset-page')), findsOneWidget);
+      await app.tap(find.byKey(const Key('asset-back')));
+      expect(order(tester), ['BBAS3']);
+      // O campo de busca continua com o texto digitado.
+      expect(find.text('bb'), findsOneWidget);
     });
   });
 

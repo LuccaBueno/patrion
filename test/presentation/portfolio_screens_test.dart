@@ -148,6 +148,8 @@ void main() {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
     await app.run(location: '/carteira/ativo/${f.petr}', () async {
+      // O desempenho (TIR) fica na aba "Dados do ativo" (M-07).
+      await app.tap(find.byKey(const Key('tab-data')));
       final card = find.byKey(const Key('asset-performance'));
       expect(card, findsOneWidget);
       // −3.005 em 10/01 e +3.500 em 31/05/2024.
@@ -207,23 +209,13 @@ void main() {
       );
       expect(tip.message, 'Preço informado em 31/05/2024');
 
-      // Detalhes abre o painel; dele, a página do ativo.
+      // Detalhes abre a página do ativo: a cotação em destaque num cartão.
       await app.tap(find.byKey(const Key('details-PETR4')));
-      expect(find.byKey(const Key('asset-panel')), findsOneWidget);
-      await app.tap(find.text('Página do ativo'));
-      final detail = find.byKey(const Key('asset-current-price'));
-      expect(detail, findsOneWidget);
       expect(
-        find.descendant(of: detail, matching: find.text(r'R$ 31,84')),
-        findsOneWidget,
+        tester.widget<Text>(find.byKey(const Key('card-price'))).data,
+        r'R$ 31,84',
       );
-      expect(
-        find.descendant(
-          of: detail,
-          matching: find.text('informado · 31/05/2024'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('informado · 31/05/2024'), findsOneWidget);
     });
   });
 
@@ -327,13 +319,20 @@ void main() {
     final app = AppHarness(tester, f.t);
     await app.run(location: '/carteira/ativo/${f.petr}', () async {
       expect(find.text('PETR4'), findsWidgets);
+      await app.tap(find.byKey(const Key('asset-more')));
       await app.tap(find.byKey(const Key('inform-price')));
       await app.type(find.byKey(const Key('val-date')), '31/05/2024');
       await app.type(find.byKey(const Key('val-value')), '35,50');
       await app.tap(find.text('Salvar'));
 
+      expect(
+        tester
+            .widget<SelectableText>(find.byKey(const Key('header-value')))
+            .data,
+        r'R$ 3.550,00',
+      );
+      await app.tap(find.byKey(const Key('tab-data')));
       expect(find.text(r'R$ 35,50 em 31/05/2024'), findsOneWidget);
-      expect(find.text(r'R$ 3.550,00 (31/05/2024)'), findsOneWidget);
     });
   });
 
@@ -472,6 +471,11 @@ void main() {
     });
     final app = AppHarness(tester, f.t);
     await app.run(location: '/carteira/ativo/$id', () async {
+      expect(
+        tester.widget<Text>(find.byKey(const Key('card-price'))).data,
+        r'R$ 44,90',
+      );
+      await app.tap(find.byKey(const Key('tab-data')));
       expect(
         find.descendant(
           of: find.byKey(const Key('asset-market')),

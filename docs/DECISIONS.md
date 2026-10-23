@@ -591,6 +591,8 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
 
 ### 2026-10-22 — D-45: Carteira como lista por ativo, com painel de detalhes (M-05)
 
+> Desde a D-49 (M-07), o painel de detalhes foi substituído pela página do ativo em tela cheia.
+
 - Contexto: a tabela da Carteira tinha colunas técnicas (classe, conta, preço médio em duas linhas) e não destacava onde está o dinheiro; lucro em R$, total aplicado, variação do dia e gráfico não estavam a um clique, e comprar ou vender exigia outra tela.
 - Decisão:
   - **Um item por ativo**, somando as contas (`Holdings`, domínio puro; fórmulas em `FORMULAS.md` §2.4). A divisão por conta continua na página do ativo e em Operações. Ordem pelo valor da posição (sem cotação, pelo total aplicado; outras moedas convertidas pelo câmbio guardado só para ordenar); zero cotas no fim, em cinza, sem esconder (o filtro "Mostrar encerradas" saiu).
@@ -636,3 +638,17 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - **Progresso discreto** no rodapé do menu ("Baixando histórico de BBAS3… 2019", com barra) e na seção de Fontes de dados, que mostra também, por ativo, desde quando há fechamentos.
 - Alternativas: baixar tudo de uma vez ao cadastrar (trava o cadastro por minutos); guardar os arquivos anuais para reler (centenas de MB no disco, contra D-05); brapi paga (histórico ajustado, mas pago e com a mesma lacuna de eventos, `FONTES_DE_DADOS.md` §1).
 - Motivo: MUDANCAS M-08; regras 1 e 2 (só fechamentos oficiais, com fonte e datas).
+
+### 2026-10-23 — D-49: Página do ativo em tela cheia no lugar do painel lateral (M-07; altera D-45)
+
+- Contexto: o painel lateral do M-05 era estreito, cobria as colunas da lista e o gráfico ficava pequeno; com o histórico de 10 anos (D-48), dá para analisar o ativo ao longo dos anos.
+- Decisão:
+  - O clique na linha da Carteira abre `/carteira/ativo/:id` em tela cheia. A rota é filha da Carteira: a lista continua montada por baixo e mantém a busca e a rolagem ao voltar. O painel lateral (`asset_panel.dart`) foi removido.
+  - **Cabeçalho fixo** (Voltar, Comprar, Vender sempre visíveis); o resto da página rola.
+  - **O gráfico mostra só o mercado**: fechamentos diários, sem preço médio, compras, vendas ou valor da posição, e sem índices (a comparação fica no Painel, M-09). Períodos de mercado (1M a 10A e Tudo), não "desde a minha compra"; o padrão é 1A, e, sem histórico para ele, o maior período coberto. Período sem dados fica desabilitado com o motivo.
+  - **Preço ajustado por proventos e eventos** calculado pelo app, a partir dos fechamentos brutos e dos eventos da B3 (`FORMULAS.md` §2.5), rotulado como calculado. Desligado por padrão (a cotação publicada é o que o usuário vê na corretora); quando há desdobramento, grupamento ou bonificação no período, o gráfico bruto avisa que a mudança de preço não é ganho nem perda.
+  - **Saltos sem evento** (a partir de −40% ou +66,7%) viram aviso, nunca ajuste automático (regra da `FONTES_DE_DADOS.md` §1). A confirmação manual de um evento suspeito (com fonte "manual") fica para quando houver o cadastro de eventos do usuário (F11).
+  - Cartões com os números da carteira (total aplicado, preço médio, cotação, lucros, proventos, % da carteira, por corretora) e abas Operações, Proventos e Dados do ativo; editar, informar preço e atualizar ficam num menu do cabeçalho e na aba de dados.
+  - O eixo de datas dos gráficos (`DateAxis`) põe os rótulos no início de cada ano ou mês.
+- Alternativas: painel mais largo (continuaria cobrindo a lista); marcar compras e vendas no gráfico (pedido explícito de não misturar a carteira com o mercado); ajuste automático por saltos de preço (proibido sem evento confirmado).
+- Motivo: MUDANCAS M-07; regras 1 (nada inventado: sem histórico, "indisponível") e 2 (fonte e tipo do dado, inclusive "calculado").

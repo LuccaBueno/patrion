@@ -150,6 +150,7 @@ void main() {
       location: '/carteira/ativo/${f.petr}',
       marketHttp: fakeMarketHttp(http),
       () async {
+        await app.tap(find.byKey(const Key('tab-data')));
         await app.press(find.byKey(const Key('asset-refresh')));
         await app.pumpUntil(find.text(r'R$ 59,68'));
         await app.settle();

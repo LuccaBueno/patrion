@@ -169,11 +169,21 @@ void main() {
           expect(find.byIcon(Icons.history), findsWidgets);
           expect(find.text('indisponível'), findsOneWidget);
 
-          // O painel de detalhes abre por cima, dentro da janela.
+          // A página do ativo em tela cheia (M-07): cabeçalho, botões e
+          // cartões dentro da janela (um corte vira erro de layout no teste).
           await app.tap(find.byKey(const Key('details-PETR4')));
-          final panel = tester.getRect(find.byKey(const Key('asset-panel')));
-          expect(panel.right, lessThanOrEqualTo(_window1280.width));
-          expect(panel.width, greaterThan(400));
+          expect(find.byKey(const Key('asset-page')), findsOneWidget);
+          for (final key in [
+            'header-value',
+            'asset-buy',
+            'asset-sell',
+            'asset-more',
+            'card-Por corretora',
+            'card-% da carteira',
+          ]) {
+            final r = tester.getRect(find.byKey(Key(key)));
+            expect(r.right, lessThanOrEqualTo(_window1280.width), reason: key);
+          }
         });
       } finally {
         debugDefaultTargetPlatformOverride = null;

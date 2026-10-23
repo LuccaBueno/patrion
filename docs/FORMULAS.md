@@ -103,6 +103,17 @@ Montado só com o que está guardado no banco (sem rede):
 - **Variação do dia**: por unidade, cotação atual − último fechamento guardado **antes** da data da cotação; na posição, quantidade × essa diferença; em %, a diferença ÷ o fechamento. **Variação no mês**: o mesmo contra o último fechamento até o fim do mês anterior. Os fechamentos são os brutos guardados (COTAHIST e outros), por unidade (`unitClose`), dos últimos 45 dias. Sem o fechamento de referência, a variação é **indisponível** (nunca estimada).
 - **Ordem da lista**: com posição, pelo valor da posição, decrescente (sem cotação, pelo total aplicado; outras moedas convertidas pelo câmbio mais recente guardado, só para ordenar); ativos com zero cotas no fim, pelo código.
 
+### 2.5 Gráfico do ativo e preço ajustado (`PriceSeries`, `lib/domain/market/price_series.dart`; M-07)
+
+- **Fechamentos**: o preço publicado de cada pregão, por unidade (`unitClose`, que divide pelo fator de cotação), um por data.
+- **Preço ajustado por proventos e eventos** (tipo "calculado"; nunca é o preço negociado): para trás, cada preço anterior à data ex de um evento é multiplicado pelo fator do evento; os fatores se acumulam, e o último preço não muda.
+  - provento em dinheiro (dividendo, JCP, rendimento de FII, amortização, outros) de valor `D` por ação: `1 − D ÷ P`, com `P` o último fechamento antes da data ex (a data com). JCP pelo valor bruto;
+  - desdobramento, grupamento ou bonificação de multiplicador `q` (2 num 1:2; 0,1 num grupamento 10:1; 1,1 numa bonificação de 10%): `1 ÷ q`;
+  - ficam de fora: eventos suspeitos, sem valor ou fator, fora da série e proventos com `D ≥ P`.
+  - Exemplo real (BBAS3, desdobramento 1:2 em 16/04/2024): 56,46 em 15/04 vira 28,23; 27,91 em 16/04 fica igual. Sem o ajuste, a queda de −50,6% aparece no gráfico com um aviso.
+- **Saltos suspeitos**: variação de pregão para pregão a partir de −40% ou +66,7% sem evento em ações com data ex entre o dia seguinte ao primeiro pregão e três dias depois do segundo. O gráfico avisa; o ajuste não corrige (`FONTES_DE_DADOS.md` §1).
+- **Período**: a partir de hoje menos 31, 183, 366, 1.827 ou 3.653 dias (1M a 10A), ou a série toda; disponível se o primeiro fechamento for até 10 dias depois do início. **Variação do período** = último ÷ primeiro − 1; máxima e mínima com as datas.
+
 ## 3. Totais do dashboard (`PortfolioSummary`)
 
 Calculados separadamente para cada moeda (o total em reais está em §2.3):

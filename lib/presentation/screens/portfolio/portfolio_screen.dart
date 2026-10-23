@@ -1,6 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../core/time/local_date.dart';
@@ -11,29 +12,21 @@ import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../format/market_labels.dart';
 import '../../providers.dart';
+import '../../router/app_router.dart';
 import '../../widgets/common.dart';
 import 'add_asset_dialog.dart';
-import 'asset_panel.dart';
 
-/// Carteira real: um item por ativo, onde há mais dinheiro primeiro, com o
-/// painel de detalhes por cima da lista (M-05; SPEC §16).
-class PortfolioScreen extends ConsumerStatefulWidget {
+/// Carteira real: um item por ativo, onde há mais dinheiro primeiro (M-05;
+/// SPEC §16). O clique na linha abre a página do ativo em tela cheia
+/// (M-07); a Carteira fica montada por baixo, com a busca e a rolagem.
+class PortfolioScreen extends ConsumerWidget {
   const PortfolioScreen({super.key});
 
   @override
-  ConsumerState<PortfolioScreen> createState() => _PortfolioScreenState();
-}
-
-class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
-  String? _selected;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final snapshot = ref.watch(portfolioSnapshotProvider);
     final fx = ref.watch(marketOverviewProvider).value?.fx ?? const {};
-    final snap = snapshot.value;
-    final holdings = snap == null ? const <Holding>[] : _holdings(snap, fx);
-    final page = PageScaffold(
+    return PageScaffold(
       title: 'Carteira',
       subtitle: 'Onde está o seu dinheiro, do maior valor para o menor',
       actions: [
@@ -48,42 +41,10 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
         value: snapshot,
         builder: (snap) => HoldingsList(
           snap: snap,
-          holdings: holdings,
-          selected: _selected,
-          onSelect: (id) => setState(() => _selected = id),
+          holdings: _holdings(snap, fx),
+          onSelect: (id) => context.go(Routes.asset(id)),
         ),
       ),
-    );
-    final selected = holdings.where((h) => h.assetId == _selected).firstOrNull;
-    if (snap == null || selected == null) return page;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth < 640 ? constraints.maxWidth : 560.0;
-        return Stack(
-          children: [
-            page,
-            Positioned.fill(
-              child: GestureDetector(
-                key: const Key('asset-panel-scrim'),
-                onTap: () => setState(() => _selected = null),
-                child: ColoredBox(color: Colors.black.withValues(alpha: 0.18)),
-              ),
-            ),
-            Positioned(
-              top: 0,
-              bottom: 0,
-              right: 0,
-              width: width,
-              child: AssetPanel(
-                snap: snap,
-                holding: selected,
-                all: holdings,
-                onClose: () => setState(() => _selected = null),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -105,14 +66,12 @@ class HoldingsList extends StatefulWidget {
   const HoldingsList({
     required this.snap,
     required this.holdings,
-    required this.selected,
     required this.onSelect,
     super.key,
   });
 
   final PortfolioSnapshot snap;
   final List<Holding> holdings;
-  final String? selected;
   final ValueChanged<String> onSelect;
 
   @override
@@ -178,7 +137,6 @@ class _HoldingsListState extends State<HoldingsList> {
                 _HoldingRow(
                   holding: h,
                   today: snap.asOf,
-                  selected: h.assetId == widget.selected,
                   onTap: () => widget.onSelect(h.assetId),
                 ),
               ],
@@ -237,13 +195,11 @@ class _HoldingRow extends StatelessWidget {
   const _HoldingRow({
     required this.holding,
     required this.today,
-    required this.selected,
     required this.onTap,
   });
 
   final Holding holding;
   final LocalDate today;
-  final bool selected;
   final VoidCallback onTap;
 
   @override
@@ -405,9 +361,7 @@ class _HoldingRow extends StatelessWidget {
       ],
     );
     return Material(
-      color: selected
-          ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.5)
-          : Colors.transparent,
+      color: Colors.transparent,
       child: InkWell(
         key: Key('holding-${asset?.symbol ?? h.assetId}'),
         onTap: onTap,
