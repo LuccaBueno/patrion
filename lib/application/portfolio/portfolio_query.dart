@@ -233,6 +233,13 @@ class PortfolioQuery {
         subscriptions.addAll([
           _repos.watchChanges().listen((_) => refresh()),
           ?_market?.watchChanges().listen((_) => refresh()),
+          // Só o controle de caixa muda o retrato (M-03); as outras
+          // preferências (alvos, F8) não recalculam a carteira.
+          ?_preferences
+              ?.watchTrackCash()
+              .distinct()
+              .skip(1)
+              .listen((_) => refresh()),
         ]);
       },
       onCancel: () {

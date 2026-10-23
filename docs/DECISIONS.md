@@ -709,3 +709,15 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Corrigido junto: o adaptador do Yahoo codificava o "^" dos índices duas vezes (`%255E`), e a consulta de `^GSPC` falharia.
 - Alternativas: BTC/BRL da Binance (curto) emendado ao BTC/USDT (salto na emenda); BOVA11/XFIX11 no lugar dos índices (ETFs, com taxa e erro de acompanhamento); S&P 500 com dividendos (sem fonte gratuita).
 - Motivo: SPEC §12.5 e §21 (F8); regras 1, 2, 3 e 10 (`FORMULAS.md` §3.5).
+
+### 2026-10-23 — D-55: Risco na tela Desempenho (F8, parte 3)
+
+- Decisão:
+  - **Aba Risco**, no período escolhido acima das abas: volatilidade, queda máxima, Sharpe (contra o CDI) e beta (contra o Ibovespa) da carteira, pelo índice do TWR; por ativo, volatilidade e queda máxima pelo **preço ajustado** (sem as quedas falsas dos desdobramentos); correlação entre os 10 maiores ativos. Calculado num isolate (`RiskService`), recalculado quando o período ou os dados mudam.
+  - **Anualização pela frequência observada** (`n × 365,25 ÷ dias`), e não por 252 fixo: vale para pregões da B3 e para cripto, que negocia todo dia.
+  - **Mínimos** para não mostrar número sem base: 20 retornos (volatilidade), 60 em comum (correlação), 12 meses (Sharpe e beta). Abaixo disso, "indisponível" com o motivo (regra 1).
+  - **Posição de hoje** com os valores em reais da Carteira (os mesmos do Painel): concentração com seletor, HHI e número efetivo; exposição cambial; liquidez (do cadastro ou, sem ela, a padrão da classe, rotulada assim).
+  - **Alocação-alvo por classe** em `shared_settings` (`portfolio.allocation_targets`, frações em texto; vale em todos os PCs e vai no save, sem tabela nova). A soma precisa ser 100%; esvaziar apaga. A tabela mostra o desvio em p.p. e em reais, como informação.
+  - Corrigido junto: qualquer gravação em `shared_settings` recalculava o retrato da carteira e a evolução de 10 anos; agora só o controle de caixa (D-44) recalcula.
+- Alternativas: volatilidade com 252 fixo (erra em cripto e em séries com lacunas); risco pelo preço bruto (desdobramentos viram quedas); alvos numa tabela sincronizável nova (mudança de schema sem necessidade).
+- Motivo: SPEC §12.6 e §21 (F8); regras 1, 3 e 10 (`FORMULAS.md` §11).

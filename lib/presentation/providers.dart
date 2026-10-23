@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -19,7 +20,10 @@ import '../application/portfolio/portfolio_query.dart';
 import '../application/portfolio/quick_add_service.dart';
 import '../application/portfolio/registry_service.dart';
 import '../application/portfolio/valuation_service.dart';
+import '../application/portfolio/risk_service.dart';
 import '../application/portfolio/wealth_service.dart';
+import '../core/time/local_date.dart';
+import '../domain/portfolio/codes.dart';
 import '../application/settings/appearance_service.dart';
 import '../application/settings/lock_preferences.dart';
 import '../application/sync/save_service.dart';
@@ -132,6 +136,11 @@ final portfolioPreferencesProvider = Provider<PortfolioPreferences>(
 
 final trackCashProvider = StreamProvider<bool>(
   (ref) => ref.watch(portfolioPreferencesProvider).watchTrackCash(),
+);
+
+/// Alocação-alvo por classe (F8, Desempenho → Risco).
+final allocationTargetsProvider = StreamProvider<Map<AssetClass, Decimal>>(
+  (ref) => ref.watch(portfolioPreferencesProvider).watchTargets(),
 );
 
 final portfolioQueryProvider = Provider<PortfolioQuery>(
@@ -418,6 +427,19 @@ final wealthOverviewProvider = FutureProvider<WealthOverview>((ref) async {
   final snap = await ref.watch(portfolioSnapshotProvider.future);
   return ref.watch(wealthServiceProvider).load(snap);
 });
+
+/// Risco da carteira no período (F8), calculado num isolate como a
+/// evolução.
+final riskReportProvider =
+    FutureProvider.family<RiskReport, (LocalDate, LocalDate)>((
+      ref,
+      range,
+    ) async {
+      final overview = await ref.watch(wealthOverviewProvider.future);
+      return RiskService(
+        useIsolate: ref.watch(wealthServiceProvider).useIsolate,
+      ).compute(overview, from: range.$1, to: range.$2);
+    });
 
 // -- Vista da Carteira (M-06) -------------------------------------------------
 

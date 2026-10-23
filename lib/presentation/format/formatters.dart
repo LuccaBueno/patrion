@@ -42,6 +42,13 @@ abstract final class Fmt {
     return '$sign${_group(rounded.abs(), 2)}';
   }
 
+  /// Número com 2 casas fixas, sem sinal de mais: `0,10`, `-0,04`, `1,00`
+  /// (coeficientes como correlação, Sharpe e beta).
+  static String fixed2(Decimal value) {
+    final rounded = DecimalMath.roundHalfUp(value);
+    return '${rounded < Decimal.zero ? '-' : ''}${_group(rounded.abs(), 2)}';
+  }
+
   /// Fração como percentual com 2 casas e sinal: 0,1234 → `+12,34%`.
   static String percent(Decimal fraction, {bool signed = true}) {
     final pct = DecimalMath.roundHalfUp(fraction * Decimal.fromInt(100));

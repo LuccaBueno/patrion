@@ -290,3 +290,18 @@ Fluxos do investidor por ativo (somando todas as contas) ou por moeda (todos os 
 - Resultado total = valor final + Σ fluxos líquidos (vendas + proventos − aplicações − custos). Sem proventos: o mesmo sem os proventos.
 - MWR = XIRR dos fluxos (§7). Com menos de 365 dias, a tela mostra o equivalente no período: `(1 + TIR)^(dias ÷ 365) − 1`.
 - O caixa parado nas contas não entra: é a TIR dos investimentos.
+
+## 11. Risco (`Risk`, `Concentration`, `lib/domain/finance/risk.dart`; `RiskService`; F8)
+
+Séries de nível: a carteira pelo índice do TWR (§3.2), cada ativo pelo preço ajustado por proventos e eventos (§2.5), os índices pelos níveis de §3.3. A janela do período começa no último nível até o dia-base (§3.4).
+
+- **Retornos**: `rᵢ = nívelᵢ ÷ nívelᵢ₋₁ − 1`, entre níveis consecutivos.
+- **Retornos por ano** observados: `n × 365,25 ÷ (dias corridos da amostra)` (≈ 252 em pregões da B3, 365 em cripto); usados para anualizar.
+- **Volatilidade** = desvio padrão amostral (n − 1) dos retornos × √(retornos por ano). Mínimo de 20 retornos.
+- **Queda máxima (drawdown)** = mín(`nível ÷ maior nível anterior − 1`), com o pico, o fundo e a **recuperação** (primeiro dia, depois do fundo, em que o nível volta ao do pico; sem recuperação até o fim do período, diz isso).
+- **Correlação** (Pearson) dos retornos entre as datas que as duas séries têm em comum; mínimo de 60 retornos em comum. Os 10 maiores ativos da carteira.
+- **Beta** = `cov(r_carteira, r_Ibovespa) ÷ var(r_Ibovespa)`, nas datas em comum. **Sharpe** = média ÷ desvio dos retornos em excesso ao CDI do mesmo intervalo (`rᵢ − CDI(dᵢ₋₁, dᵢ)`), × √(retornos por ano). Os dois só com 12 meses (365 dias e mais de 200 retornos); sem o índice, indisponíveis.
+- **Concentração** (por ativo, classe, setor, país ou moeda; valores em reais da Carteira): maior peso, soma dos cinco maiores, **HHI** = Σ pesoᵢ² (de 1/n a 1) e o número efetivo `1 ÷ HHI`.
+- **Exposição cambial** e **liquidez**: peso de cada moeda e de cada liquidez do cadastro (sem ela, a padrão da classe: diária para bolsa, cripto, Tesouro e caixa; "não informada" para renda fixa e produtos bancários).
+- **Alocação-alvo**: para cada classe, `peso − alvo` em p.p. e `patrimônio × alvo − valor da classe` em reais (quanto falta, +, ou sobra, −). Informação, não recomendação.
+- Exemplos (testes): ±1% em 20 dias corridos dão 19,61% a.a.; níveis 100, 120, 90, 100, 125 dão queda de 25% recuperada no último dia; retornos 1,5 × os do mercado dão beta 1,5; CDI + 0,1% ± 1% ao dia dá Sharpe 1,9088; pesos 50/30/20 dão HHI 0,38 (2,63 posições efetivas).

@@ -10,6 +10,7 @@ import '../../providers.dart';
 import '../../widgets/common.dart';
 import 'benchmarks_tab.dart';
 import 'returns_tab.dart';
+import 'risk_tab.dart';
 
 /// Desempenho da carteira real (F8): rentabilidade e benchmarks, no mesmo
 /// período, escolhido acima das abas.
@@ -27,6 +28,7 @@ class _PerformanceScreenState extends ConsumerState<PerformanceScreen> {
   static const _tabs = [
     Tab(key: Key('perf-tab-returns'), text: 'Rentabilidade'),
     Tab(key: Key('perf-tab-benchmarks'), text: 'Benchmarks'),
+    Tab(key: Key('perf-tab-risk'), text: 'Risco'),
   ];
 
   @override
@@ -41,7 +43,7 @@ class _PerformanceScreenState extends ConsumerState<PerformanceScreen> {
       subtitle: 'Carteira real: rentabilidade, comparações e risco',
       child: AsyncBody(
         value: overview,
-        builder: (o) => _body(context, o, names),
+        builder: (o) => _body(context, o, names, assets ?? const {}),
       ),
     );
   }
@@ -50,6 +52,7 @@ class _PerformanceScreenState extends ConsumerState<PerformanceScreen> {
     BuildContext context,
     WealthOverview o,
     Map<String, String> names,
+    Map<String, Asset> assets,
   ) {
     final today = o.asOf;
     final available = PerformancePeriod.available(o.series, today);
@@ -111,6 +114,7 @@ class _PerformanceScreenState extends ConsumerState<PerformanceScreen> {
                   to: to,
                 ),
                 BenchmarksTab(overview: o, period: period, from: from, to: to),
+                RiskTab(overview: o, assets: assets, from: from, to: to),
               ],
             ),
           ),

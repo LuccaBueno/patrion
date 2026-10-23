@@ -19,6 +19,8 @@ class WealthOverview {
     required this.benchmarks,
     required this.asOf,
     this.usdToBrl = const [],
+    this.currentValues = const {},
+    this.adjusted = const {},
   });
 
   final WealthSeries series;
@@ -29,6 +31,14 @@ class WealthOverview {
 
   /// PTAX do dólar, para converter as séries em dólares (Benchmarks).
   final List<(LocalDate, Decimal)> usdToBrl;
+
+  /// Valor de cada ativo com posição aberta no retrato da Carteira, em
+  /// reais (sem os que estão sem preço ou sem câmbio).
+  final Map<String, Decimal> currentValues;
+
+  /// Fechamentos de cada ativo com cotação automática, ajustados por
+  /// proventos e eventos (`FORMULAS.md` §2.5), para o risco por ativo.
+  final Map<String, List<PricePoint>> adjusted;
 
   /// "Os mesmos aportes no índice", para cada índice que cobre a carteira
   /// desde o primeiro dia (hipotético, regra 3).
@@ -79,10 +89,16 @@ class WealthService {
   Future<WealthOverview> load(PortfolioSnapshot snap) async {
     final assets = snap.assets;
     final closes = <String, List<PricePoint>>{};
+    final events = <String, List<CorporateEvent>>{};
     for (final a in assets.values) {
       if (a.priceSource != PriceSource.market) continue;
       final bars = await _market.prices(a.symbol.toUpperCase(), a.market.code);
-      if (bars.isNotEmpty) closes[a.id] = PriceSeries.closes(bars);
+      if (bars.isEmpty) continue;
+      closes[a.id] = PriceSeries.closes(bars);
+      events[a.id] = await _market.events(
+        a.symbol.toUpperCase(),
+        a.market.code,
+      );
     }
     final fx = <String, List<(LocalDate, Decimal)>>{};
     for (final c in {for (final a in assets.values) a.currency}) {
@@ -150,6 +166,11 @@ class WealthService {
         },
         asOf: asOf,
         usdToBrl: usd,
+        currentValues: finalValues,
+        adjusted: {
+          for (final MapEntry(:key, :value) in closes.entries)
+            key: PriceSeries.adjusted(value, events[key] ?? const []),
+        },
       );
     }
 

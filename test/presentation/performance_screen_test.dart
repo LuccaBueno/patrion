@@ -4,7 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/application/settings/portfolio_preferences.dart';
 import 'package:patrion/core/time/local_date.dart';
+import 'package:patrion/data/repositories/shared_settings_repository.dart';
 import 'package:patrion/data/repositories/market_repository.dart';
 import 'package:patrion/domain/finance/business_calendar.dart';
 import 'package:patrion/domain/market/market_data.dart';
@@ -268,6 +270,63 @@ void main() {
               .lineBarsData,
           hasLength(1),
         );
+      },
+    );
+  });
+
+  testWidgets('risco: volatilidade, Sharpe com CDI, beta indisponível sem '
+      'Ibovespa, concentração e alocação-alvo', (tester) async {
+    await tester.runAsync(() async {
+      await seed();
+      await PortfolioPreferences(SharedSettingsRepository(f.t.db, f.t.sync))
+          .setTargets({
+            AssetClass.stockBr: Decimal.parse('0.8'),
+            AssetClass.fii: Decimal.parse('0.2'),
+          });
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(
+      location: '/desempenho',
+      size: const Size(1280, 2400),
+      () async {
+        await app.pumpUntil(find.byKey(const Key('returns-table')));
+        await app.tap(find.byKey(const Key('perf-tab-risk')));
+        await app.pumpUntil(find.byKey(const Key('risk-assets')));
+        // 1 ano: um salto de 40 para 44 (sem queda), com o CDI guardado.
+        expect(inKey('risk-vol', 'a.a.'), findsOneWidget);
+        expect(inKey('risk-dd', 'Sem queda no período'), findsOneWidget);
+        expect(inKey('risk-sharpe', 'indisponível'), findsNothing);
+        expect(inKey('risk-beta', 'indisponível'), findsOneWidget);
+        expect(cellOf(tester, 'risk-vol-PETR4'), endsWith('a.a.'));
+        // Um ativo só: concentração total.
+        expect(inKey('risk-largest', '100,00%'), findsOneWidget);
+        expect(inKey('risk-largest', 'PETR4'), findsOneWidget);
+        expect(inKey('risk-hhi', '1'), findsWidgets);
+        expect(cellOf(tester, 'risk-fx-BRL'), '100,00%');
+        expect(
+          cellOf(tester, 'risk-liquidity-Diária (padrão da classe)'),
+          '100,00%',
+        );
+        // Alvo 80% em ações e 20% em FIIs; hoje tudo em ações (R$ 6.600).
+        expect(cellOf(tester, 'target-now-stock_br'), '100,00%');
+        expect(cellOf(tester, 'target-diff-stock_br'), '+20,00 p.p.');
+        expect(cellOf(tester, 'target-gap-stock_br'), r'−R$ 1.320,00');
+        expect(cellOf(tester, 'target-gap-fii'), r'+R$ 1.320,00');
+
+        // Soma diferente de 100%: não grava.
+        await app.tap(find.byKey(const Key('risk-targets-edit')));
+        await tester.enterText(
+          find.byKey(const Key('target-field-stock_br')),
+          '90',
+        );
+        await app.tap(find.text('Salvar'));
+        expect(find.textContaining('está em 110,00%'), findsOneWidget);
+        expect(find.byType(AlertDialog), findsOneWidget);
+        await tester.enterText(find.byKey(const Key('target-field-fii')), '10');
+        await app.tap(find.text('Salvar'));
+        expect(find.byType(AlertDialog), findsNothing);
+        await app.pumpUntil(find.text(r'−R$ 660,00'));
+        expect(cellOf(tester, 'target-gap-stock_br'), r'−R$ 660,00');
       },
     );
   });
