@@ -84,7 +84,10 @@ abstract final class MarketLabels {
       IndicatorUnit.pctDay => '$v% ao dia',
       IndicatorUnit.pctMonth => '$v% no mês',
       IndicatorUnit.pctYear => '$v% ao ano',
-      IndicatorUnit.indexNumber => v,
+      IndicatorUnit.indexNumber when p.series == IndicatorSeries.btcUsd =>
+        'US\$ ${Fmt.number(p.value, maxDecimals: 2)}',
+      IndicatorUnit.indexNumber =>
+        '${Fmt.number(p.value, maxDecimals: 2)} pontos',
     };
   }
 

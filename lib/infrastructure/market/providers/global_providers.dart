@@ -194,8 +194,16 @@ class BinanceProvider implements HistoryProvider {
     MarketInstrument i, {
     required LocalDate from,
     required LocalDate to,
+  }) => pairHistory('${i.symbol.toUpperCase()}BRL', i, from: from, to: to);
+
+  /// Candles diários de um par qualquer (o preço vem na moeda de cotação do
+  /// par: BRL em BTCBRL, USDT em BTCUSDT).
+  Future<List<PriceBar>> pairHistory(
+    String pair,
+    MarketInstrument i, {
+    required LocalDate from,
+    required LocalDate to,
   }) async {
-    final pair = '${i.symbol.toUpperCase()}BRL';
     final result = <PriceBar>[];
     var start = DateTime.utc(from.year, from.month, from.day);
     final end = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
@@ -225,6 +233,11 @@ class BinanceProvider implements HistoryProvider {
       start = DateTime.utc(last.year, last.month, last.day + 1);
       if (bars.length < 1000) break;
     }
+    // O candle do dia UTC em andamento ainda não fechou: não é fechamento
+    // (regra 2).
+    final now = _clock.now().toUtc();
+    final today = LocalDate(now.year, now.month, now.day);
+    result.removeWhere((b) => !b.refDate.isBefore(today));
     return result;
   }
 
@@ -507,7 +520,8 @@ class YahooProvider implements HistoryProvider, QuoteProvider {
         code,
         Uri.https(
           'query1.finance.yahoo.com',
-          '/v8/finance/chart/${Uri.encodeComponent(i.symbol.toUpperCase())}',
+          // O Uri já codifica o caminho (o "^" dos índices vira %5E).
+          '/v8/finance/chart/${i.symbol.toUpperCase()}',
           query,
         ),
         headers: const {'User-Agent': 'Mozilla/5.0'},
@@ -628,4 +642,91 @@ class YahooProvider implements HistoryProvider, QuoteProvider {
       delayNote: 'fonte não oficial; atraso não informado',
     );
   }
+}
+
+/// Bitcoin em dólares para os benchmarks (F8): fechamento diário do par
+/// BTC/USDT na Binance (desde 17/08/2017). O app converte para reais pela
+/// PTAX (calculado, `FORMULAS.md` §3.5).
+class BinanceIndexProvider implements IndicatorProvider {
+  BinanceIndexProvider(this._binance);
+
+  final BinanceProvider _binance;
+
+  static const _instrument = MarketInstrument(
+    symbol: 'BTCUSDT',
+    market: 'CRYPTO',
+    assetClass: 'crypto',
+    currency: 'USD',
+  );
+
+  @override
+  String get code => _binance.code;
+
+  @override
+  bool supports(IndicatorSeries series) => series == IndicatorSeries.btcUsd;
+
+  @override
+  Future<List<IndicatorPoint>> indicator(
+    IndicatorSeries series, {
+    required LocalDate from,
+    required LocalDate to,
+  }) async => [
+    for (final b in await _binance.pairHistory(
+      'BTCUSDT',
+      _instrument,
+      from: from,
+      to: to,
+    ))
+      IndicatorPoint(
+        series: series,
+        refDate: b.refDate,
+        value: b.close,
+        source: b.source,
+        collectedAt: b.collectedAt,
+      ),
+  ];
+}
+
+/// S&P 500 e Nasdaq Composite pelo Yahoo (não oficial, desligado por
+/// padrão; F8): fechamento diário em pontos.
+class YahooIndexProvider implements IndicatorProvider {
+  YahooIndexProvider(this._yahoo);
+
+  final YahooProvider _yahoo;
+
+  static const _symbols = {
+    IndicatorSeries.sp500: '^GSPC',
+    IndicatorSeries.nasdaq: '^IXIC',
+  };
+
+  @override
+  String get code => _yahoo.code;
+
+  @override
+  bool supports(IndicatorSeries series) => _symbols.containsKey(series);
+
+  @override
+  Future<List<IndicatorPoint>> indicator(
+    IndicatorSeries series, {
+    required LocalDate from,
+    required LocalDate to,
+  }) async => [
+    for (final b in await _yahoo.history(
+      MarketInstrument(
+        symbol: _symbols[series]!,
+        market: 'INDEX',
+        assetClass: 'index',
+        currency: 'USD',
+      ),
+      from: from,
+      to: to,
+    ))
+      IndicatorPoint(
+        series: series,
+        refDate: b.refDate,
+        value: b.close,
+        source: b.source,
+        collectedAt: b.collectedAt,
+      ),
+  ];
 }

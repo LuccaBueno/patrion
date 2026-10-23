@@ -194,7 +194,19 @@ enum IndicatorSeries implements Coded {
   igpm('igpm', 'IGP-M', IndicatorUnit.pctMonth),
 
   /// Ibovespa, em pontos (fechamento diário; B3, M-09).
-  ibovespa('ibov', 'Ibovespa', IndicatorUnit.indexNumber);
+  ibovespa('ibov', 'Ibovespa', IndicatorUnit.indexNumber),
+
+  /// IFIX, em pontos (fechamento diário; B3, F8).
+  ifix('ifix', 'IFIX', IndicatorUnit.indexNumber),
+
+  /// Bitcoin em dólares: fechamento diário do par BTC/USDT (Binance, F8).
+  btcUsd('btc_usd', 'Bitcoin (US\$)', IndicatorUnit.indexNumber),
+
+  /// S&P 500, em pontos (Yahoo, opcional; F8).
+  sp500('sp500', 'S&P 500', IndicatorUnit.indexNumber),
+
+  /// Nasdaq Composite, em pontos (Yahoo, opcional; F8).
+  nasdaq('nasdaq', 'Nasdaq', IndicatorUnit.indexNumber);
 
   const IndicatorSeries(this.code, this.label, this.unit);
 

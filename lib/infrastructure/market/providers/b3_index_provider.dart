@@ -10,8 +10,8 @@ import '../../../domain/market/provider_catalog.dart';
 import '../market_http.dart';
 import 'parse.dart';
 
-/// B3 — estatísticas de índices: fechamento diário do Ibovespa, um ano por
-/// requisição (`FONTES_DE_DADOS.md` §2.5d; DECISIONS D-50). Endereço
+/// B3 — estatísticas de índices: fechamento diário do Ibovespa e do IFIX
+/// (F8), um ano por requisição (`FONTES_DE_DADOS.md` §2.5d; DECISIONS D-50). Endereço
 /// interno do site da B3, o mesmo serviço dos proventos.
 ///
 /// A resposta é uma tabela com uma linha por dia do mês (`day`) e uma
@@ -25,7 +25,10 @@ class B3IndexProvider implements IndicatorProvider {
   final Clock _clock;
 
   static const _host = 'sistemaswebb3-listados.b3.com.br';
-  static const _codes = {IndicatorSeries.ibovespa: 'IBOV'};
+  static const _codes = {
+    IndicatorSeries.ibovespa: 'IBOV',
+    IndicatorSeries.ifix: 'IFIX',
+  };
 
   @override
   String get code => ProviderCatalog.b3Indices.code;

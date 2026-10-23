@@ -13,76 +13,44 @@ import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/stat_card.dart';
 
-/// Desempenho → Rentabilidade (F8, parte 1; `docs/FORMULAS.md` §3.4).
-class ReturnsTab extends StatefulWidget {
-  const ReturnsTab({required this.overview, required this.names, super.key});
+/// Desempenho → Rentabilidade (F8, parte 1; `docs/FORMULAS.md` §3.4), no
+/// período escolhido acima das abas.
+class ReturnsTab extends StatelessWidget {
+  const ReturnsTab({
+    required this.overview,
+    required this.names,
+    required this.period,
+    required this.from,
+    required this.to,
+    super.key,
+  });
 
   final WealthOverview overview;
 
   /// Código de cada ativo, para as notas.
   final Map<String, String> names;
+  final PerformancePeriod period;
 
-  @override
-  State<ReturnsTab> createState() => _ReturnsTabState();
-}
-
-class _ReturnsTabState extends State<ReturnsTab> {
-  PerformancePeriod? _period;
-  (LocalDate, LocalDate)? _custom;
+  /// Dia-base (o retorno conta do fim dele) e último dia.
+  final LocalDate from;
+  final LocalDate to;
 
   @override
   Widget build(BuildContext context) {
-    final o = widget.overview;
-    final series = o.series;
-    final today = o.asOf;
-    final available = PerformancePeriod.available(series, today);
-    if (available.isEmpty) {
-      return const Align(
-        alignment: Alignment.topLeft,
-        child: MessageCard(
-          key: Key('returns-unavailable'),
-          icon: Icons.query_stats,
-          title: 'Rentabilidade indisponível',
-          message:
-              'A rentabilidade precisa de pelo menos dois dias de carteira '
-              'com preço. Ela começa na data das operações registradas: '
-              'registre as compras com as datas reais (ou aproximadas) e '
-              'aguarde o histórico de cotações (Configurações → Fontes de '
-              'dados).',
-        ),
-      );
-    }
-    var period =
-        _period ??
-        (available.contains(PerformancePeriod.y1)
-            ? PerformancePeriod.y1
-            : PerformancePeriod.all);
-    if (!available.contains(period)) period = PerformancePeriod.all;
-    final first = series.points.first.date;
-    final (from, to) = switch (period) {
-      PerformancePeriod.all => (first, today),
-      PerformancePeriod.custom when _custom != null => (
-        _custom!.$1.addDays(-1),
-        _custom!.$2,
-      ),
-      PerformancePeriod.custom => (first, today),
-      _ => (period.baseDate(today)!, today),
-    };
-    final cdi = o.indices[IndicatorSeries.cdi];
+    final series = overview.series;
+    final cdi = overview.indices[IndicatorSeries.cdi];
     final perf = PeriodPerformance.compute(
       series,
       from: from,
       to: to,
       cdi: cdi,
-      ipca: o.indices[IndicatorSeries.ipca],
+      ipca: overview.indices[IndicatorSeries.ipca],
     );
     final rows = ReturnTable.build(series, cdi: cdi).reversed.toList();
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 32),
       children: [
-        _periodBar(context, available, period),
-        const SizedBox(height: 12),
         if (perf == null)
           const MessageCard(
             key: Key('returns-period-unavailable'),
@@ -102,96 +70,10 @@ class _ReturnsTabState extends State<ReturnsTab> {
     );
   }
 
-  Widget _periodBar(
-    BuildContext context,
-    List<PerformancePeriod> available,
-    PerformancePeriod selected,
-  ) {
-    return Wrap(
-      key: const Key('returns-periods'),
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final p in available)
-          ChoiceChip(
-            key: Key('returns-period-${p.label}'),
-            label: Text(
-              p == PerformancePeriod.custom && _custom != null
-                  ? '${Fmt.date(_custom!.$1)} a ${Fmt.date(_custom!.$2)}'
-                  : p.label,
-            ),
-            selected: p == selected,
-            onSelected: (_) async {
-              if (p == PerformancePeriod.custom) {
-                final range = await _pickRange(context);
-                if (range == null) return;
-                setState(() {
-                  _custom = range;
-                  _period = p;
-                });
-              } else {
-                setState(() => _period = p);
-              }
-            },
-          ),
-      ],
-    );
-  }
-
-  Future<(LocalDate, LocalDate)?> _pickRange(BuildContext context) {
-    final series = widget.overview.series;
-    final start = TextEditingController(
-      text: Fmt.date(_custom?.$1 ?? series.points.first.date),
-    );
-    final end = TextEditingController(
-      text: Fmt.date(_custom?.$2 ?? widget.overview.asOf),
-    );
-    final formKey = GlobalKey<FormState>();
-    return showDialog<(LocalDate, LocalDate)>(
-      context: context,
-      builder: (context) => FormDialog(
-        title: 'Período personalizado',
-        formKey: formKey,
-        width: 420,
-        onSave: () {
-          if (!formKey.currentState!.validate()) return;
-          Navigator.pop(context, (dateOf(start)!, dateOf(end)!));
-        },
-        children: [
-          DateField(
-            controller: start,
-            label: 'De',
-            fieldKey: const Key('returns-custom-from'),
-          ),
-          TextFormField(
-            key: const Key('returns-custom-to'),
-            controller: end,
-            decoration: const InputDecoration(
-              labelText: 'Até *',
-              hintText: 'dd/mm/aaaa',
-            ),
-            validator: (text) {
-              final LocalDate a;
-              final LocalDate b;
-              try {
-                a = Fmt.parseDate(start.text);
-                b = Fmt.parseDate(text ?? '');
-              } on FormatException {
-                return 'Data inválida';
-              }
-              return b.isAfter(a) ? null : 'Escolha uma data depois do início';
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   List<Widget> _notes(BuildContext context) {
-    final theme = Theme.of(context);
-    final series = widget.overview.series;
-    String name(String id) => widget.names[id] ?? id;
-    final notes = [
+    final series = overview.series;
+    String name(String id) => names[id] ?? id;
+    return notesOf(context, [
       'TWR (ponderado pelo tempo): mede o desempenho dos ativos, sem o efeito '
           'de quando você aportou ou resgatou. Os proventos contam como '
           'retorno. Calculado com os fechamentos guardados, dia a dia, desde '
@@ -203,20 +85,25 @@ class _ReturnsTabState extends State<ReturnsTab> {
       if (series.excluded.isNotEmpty)
         'Fora do cálculo, sem nenhum preço ou saldo: '
             '${series.excluded.map(name).join(', ')}.',
-    ];
-    return [
-      for (final n in notes)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Text(
-            n,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+    ]);
+  }
+}
+
+/// Notas em texto pequeno, uma por linha.
+List<Widget> notesOf(BuildContext context, List<String> notes) {
+  final theme = Theme.of(context);
+  return [
+    for (final n in notes)
+      Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Text(
+          n,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-    ];
-  }
+      ),
+  ];
 }
 
 /// Cartões do período: TWR, CDI, retorno real, CAGR e TIR.

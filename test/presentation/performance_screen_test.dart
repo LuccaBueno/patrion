@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -94,6 +95,8 @@ void main() {
   String cellText(WidgetTester tester, String key) =>
       tester.widget<Text>(find.byKey(Key(key))).data!;
 
+  String cellOf(WidgetTester tester, String key) => cellText(tester, key);
+
   testWidgets('tabela mês a mês, períodos, CDI e período personalizado', (
     tester,
   ) async {
@@ -125,23 +128,23 @@ void main() {
         expect(inKey('returns-real', 'indisponível'), findsOneWidget);
         expect(find.byKey(const Key('returns-cagr')), findsNothing);
         // Períodos que os dados não sustentam não aparecem.
-        expect(find.byKey(const Key('returns-period-3A')), findsNothing);
-        expect(find.byKey(const Key('returns-period-10A')), findsNothing);
+        expect(find.byKey(const Key('perf-period-3A')), findsNothing);
+        expect(find.byKey(const Key('perf-period-10A')), findsNothing);
 
         // Tudo: acumulado de 46,67% em mais de um ano, com CAGR.
-        await app.tap(find.byKey(const Key('returns-period-Tudo')));
+        await app.tap(find.byKey(const Key('perf-period-Tudo')));
         expect(inKey('returns-twr', '+46,67%'), findsOneWidget);
         expect(inKey('returns-twr', 'de 10/01/2024'), findsOneWidget);
         expect(find.byKey(const Key('returns-cagr')), findsOneWidget);
 
         // Personalizado: maio e junho de 2025.
-        await app.tap(find.byKey(const Key('returns-period-Personalizado')));
+        await app.tap(find.byKey(const Key('perf-period-Personalizado')));
         await tester.enterText(
-          find.byKey(const Key('returns-custom-from')),
+          find.byKey(const Key('perf-custom-from')),
           '01/05/2025',
         );
         await tester.enterText(
-          find.byKey(const Key('returns-custom-to')),
+          find.byKey(const Key('perf-custom-to')),
           '30/06/2025',
         );
         await app.tap(find.text('Salvar'));
@@ -203,6 +206,70 @@ void main() {
     } finally {
       debugDefaultTargetPlatformOverride = null;
     }
+  });
+
+  testWidgets('benchmarks: CDI contra a carteira no mesmo período; os '
+      'indisponíveis com o motivo', (tester) async {
+    await tester.runAsync(seed);
+    final app = AppHarness(tester, f.t);
+    await app.run(
+      location: '/desempenho',
+      size: const Size(1280, 1400),
+      () async {
+        await app.pumpUntil(find.byKey(const Key('returns-table')));
+        await app.tap(find.byKey(const Key('perf-tab-benchmarks')));
+        await app.pumpUntil(find.byKey(const Key('bench-table')));
+        // 1 ano: carteira +10,00%; CDI de 0,04% ao dia útil, ~+10,5%.
+        expect(cellOf(tester, 'bench-carteira-acc'), '+10,00%');
+        expect(cellOf(tester, 'bench-cdi-acc'), startsWith('+10,'));
+        expect(cellOf(tester, 'bench-cdi-diff'), endsWith('p.p.'));
+        for (final (index, reason) in [
+          ('ibovespa', 'Sem dados guardados'),
+          ('ima', 'ANBIMA'),
+          ('idka', 'ANBIMA'),
+          ('sp500', 'ative o Yahoo'),
+        ]) {
+          expect(
+            find.byKey(Key('bench-$index-unavailable')),
+            findsOneWidget,
+            reason: index,
+          );
+          expect(cellOf(tester, 'bench-$index-reason'), contains(reason));
+        }
+        // Gráfico em base 100: a carteira e o CDI (o Ibovespa não tem dados).
+        final chart = tester.widget<LineChart>(
+          find.descendant(
+            of: find.byKey(const Key('bench-chart')),
+            matching: find.byType(LineChart),
+          ),
+        );
+        expect(chart.data.lineBarsData, hasLength(2));
+        expect(chart.data.lineBarsData.first.spots.first.y, 100);
+        expect(chart.data.lineBarsData.first.spots.last.y, closeTo(110, 1e-9));
+        expect(find.byKey(const Key('bench-show-ibovespa')), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('bench-legend')),
+            matching: find.text('CDI'),
+          ),
+          findsOneWidget,
+        );
+        // Desmarcar o CDI tira a linha.
+        await app.tap(find.byKey(const Key('bench-show-cdi')));
+        expect(
+          tester
+              .widget<LineChart>(
+                find.descendant(
+                  of: find.byKey(const Key('bench-chart')),
+                  matching: find.byType(LineChart),
+                ),
+              )
+              .data
+              .lineBarsData,
+          hasLength(1),
+        );
+      },
+    );
   });
 
   testWidgets('sem operações: indisponível com o motivo', (tester) async {

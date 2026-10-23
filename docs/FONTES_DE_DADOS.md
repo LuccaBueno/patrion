@@ -23,8 +23,9 @@ Preços, limites e condições mudam. Esta matriz foi revisada na Fase 6 e deve 
 | Fundos (cotas diárias) e FIIs (informe mensal) | CVM Dados Abertos | — | Arquivos mensais/anuais em ZIP |
 | Internacional (ações, ETFs, REITs) | Finnhub (cotação) + Yahoo (histórico, não oficial) | Twelve Data, Alpha Vantage (limitados) | Não há fonte gratuita, oficial e completa |
 | Cripto | CoinGecko Demo (cotação) + Binance (histórico) | CoinGecko pago | Demo só tem 1 ano de histórico |
-| IMA, IDkA | ANBIMA (site: últimos 5 dias úteis) | — | Histórico só pelo ANBIMA Feed (pago); fica como "indisponível" |
-| Ibovespa (fechamento diário) | B3 — estatísticas de índices (§2.5d, não documentado) | — | Desde o M-09; um ano por requisição |
+| IMA, IDkA | ANBIMA (site: últimos 5 dias úteis) | — | Histórico só pelo ANBIMA Feed (pago); **indisponível na aba Benchmarks** (decisão aprovada em 23/10/2026, F8) |
+| Ibovespa e IFIX (fechamento diário) | B3 — estatísticas de índices (§2.5d, não documentado) | — | Ibovespa desde o M-09, IFIX desde a F8 (testado em 23/10/2026); um ano por requisição |
+| Bitcoin (benchmark) | Binance, par BTC/USDT (§2.13), convertido pela PTAX | — | Desde 17/08/2017; preço de uma corretora, convertido pelo app (calculado) |
 | S&P 500, Nasdaq | Yahoo (não oficial, desligado por padrão) | — (Finnhub e Twelve Data gratuitos não têm os índices) | Benchmarks internacionais são o ponto mais frágil |
 
 ### Ponto crítico: backtest de retorno total BR
@@ -145,19 +146,19 @@ Por isso, a proposta é:
 | Limitações e falha | Podem mudar sem aviso. **Lista de eventos incompleta** (§1). Em falha: brapi ou CSV manual. |
 | Verificado | Testado (PETR e HGLG) |
 
-**d) Índices (estatísticas do site da B3)** — usado desde o M-09 (DECISIONS D-50)
+**d) Índices (estatísticas do site da B3)** — Ibovespa desde o M-09 (DECISIONS D-50), IFIX desde a F8 (D-54)
 
 | Item | Detalhe |
 |---|---|
-| Dados | Fechamento diário do Ibovespa (pontos), um ano por requisição: tabela dia × mês |
-| Endpoint | `https://sistemaswebb3-listados.b3.com.br/indexStatisticsProxy/IndexCall/GetPortfolioDay/{base64}` com `{"index":"IBOV","language":"pt-br","year":"aaaa"}` |
+| Dados | Fechamento diário do Ibovespa e do IFIX (pontos), um ano por requisição: tabela dia × mês |
+| Endpoint | `https://sistemaswebb3-listados.b3.com.br/indexStatisticsProxy/IndexCall/GetPortfolioDay/{base64}` com `{"index":"IBOV" (ou "IFIX"),"language":"pt-br","year":"aaaa"}` |
 | Limites e custo | Gratuito; sem limite publicado; o app espera 1 s entre requisições |
 | Chave | Não |
 | Atualização | Diária (a resposta de 23/10/2026 trazia até o pregão de 22/10) |
 | Histórico | Desde 2016 conferido (2.685 pregões até 22/10/2026, os mesmos dias do COTAHIST) |
 | Licença | Endereço interno do site, **não documentado como API pública** |
 | Limitações e falha | Pode mudar sem aviso; em falha, a comparação usa o que já está guardado ou fica indisponível |
-| Verificado | Testado em 23/10/2026 (2024 e 2026) |
+| Verificado | Testado em 23/10/2026 (Ibovespa 2024 e 2026; IFIX 2025: 02/01/2025 = 3.117,34 pontos) |
 
 **c) Market data oficial (UP2DATA, feeds)**: pago e voltado a empresas; fora do escopo.
 

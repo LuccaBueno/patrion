@@ -18,23 +18,50 @@ class WealthOverview {
     required this.indices,
     required this.benchmarks,
     required this.asOf,
+    this.usdToBrl = const [],
   });
 
   final WealthSeries series;
 
-  /// CDI, Ibovespa e IPCA com os dados guardados (pode faltar algum).
+  /// Níveis de cada série de [loaded] com dados guardados (pode faltar
+  /// alguma). Bitcoin, S&P 500 e Nasdaq em dólares.
   final Map<IndicatorSeries, IndexLevels> indices;
+
+  /// PTAX do dólar, para converter as séries em dólares (Benchmarks).
+  final List<(LocalDate, Decimal)> usdToBrl;
 
   /// "Os mesmos aportes no índice", para cada índice que cobre a carteira
   /// desde o primeiro dia (hipotético, regra 3).
   final Map<IndicatorSeries, List<BenchmarkPoint>> benchmarks;
   final LocalDate asOf;
 
+  /// Índices do "Comparar com" do Painel.
   static const compared = [
     IndicatorSeries.cdi,
     IndicatorSeries.ibovespa,
     IndicatorSeries.ipca,
+    IndicatorSeries.ifix,
   ];
+
+  /// Séries carregadas para o Painel e o Desempenho (F8).
+  static const loaded = [
+    IndicatorSeries.cdi,
+    IndicatorSeries.selic,
+    IndicatorSeries.ipca,
+    IndicatorSeries.igpm,
+    IndicatorSeries.ibovespa,
+    IndicatorSeries.ifix,
+    IndicatorSeries.btcUsd,
+    IndicatorSeries.sp500,
+    IndicatorSeries.nasdaq,
+  ];
+
+  /// Séries cotadas em dólares.
+  static const inUsd = {
+    IndicatorSeries.btcUsd,
+    IndicatorSeries.sp500,
+    IndicatorSeries.nasdaq,
+  };
 }
 
 /// Junta operações, fechamentos guardados, câmbio e índices e calcula a
@@ -88,9 +115,11 @@ class WealthService {
               .map((o) => o.tradeDate)
               .reduce((a, b) => a.isBefore(b) ? a : b);
     final since = LocalDate(first.year, first.month, 1).addDays(-10);
-    final cdi = await _market.indicator(IndicatorSeries.cdi, from: since);
-    final ipca = await _market.indicator(IndicatorSeries.ipca, from: since);
-    final ibov = await _market.indicator(IndicatorSeries.ibovespa, from: since);
+    final raw = <IndicatorSeries, List<IndicatorPoint>>{
+      for (final s in WealthOverview.loaded)
+        s: await _market.indicator(s, from: since),
+    };
+    final usd = fx['USD'] ?? await _market.fxHistory('USD');
 
     final operations = snap.operations;
     final valuations = snap.valuations;
@@ -106,13 +135,8 @@ class WealthService {
         finalValues: finalValues,
       );
       final indices = {
-        if (cdi.isNotEmpty) IndicatorSeries.cdi: IndexLevels.cdi(cdi),
-        if (ipca.isNotEmpty) IndicatorSeries.ipca: IndexLevels.ipca(ipca),
-        if (ibov.isNotEmpty)
-          IndicatorSeries.ibovespa: IndexLevels.points(
-            IndicatorSeries.ibovespa,
-            ibov,
-          ),
+        for (final MapEntry(:key, :value) in raw.entries)
+          if (value.isNotEmpty) key: ?IndexLevels.of(key, value),
       };
       // O TWR fica calculado aqui, fora da interface.
       series.twrIndex();
@@ -120,10 +144,12 @@ class WealthService {
         series: series,
         indices: indices,
         benchmarks: {
-          for (final MapEntry(:key, :value) in indices.entries)
-            key: ?Benchmark.simulate(series.points, value),
+          for (final s in WealthOverview.compared)
+            if (indices[s] case final levels?)
+              s: ?Benchmark.simulate(series.points, levels),
         },
         asOf: asOf,
+        usdToBrl: usd,
       );
     }
 

@@ -23,7 +23,10 @@ class IndexLevels {
   LocalDate? get last => levels.isEmpty ? null : levels.last.$1;
 
   /// Nível no fim de [d] (o último até a data); nulo antes do primeiro dado.
-  Decimal? levelOn(LocalDate d) {
+  Decimal? levelOn(LocalDate d) => levelIn(levels, d);
+
+  /// O último nível até [d] numa sequência em ordem de data.
+  static Decimal? levelIn(List<(LocalDate, Decimal)> levels, LocalDate d) {
     var lo = 0;
     var hi = levels.length - 1;
     var found = -1;
@@ -92,6 +95,49 @@ class IndexLevels {
   /// Índice publicado em pontos (Ibovespa): o próprio valor é o nível.
   static IndexLevels points(IndicatorSeries series, List<IndicatorPoint> p) =>
       IndexLevels(series, [for (final x in _sorted(p)) (x.refDate, x.value)]);
+
+  /// Níveis de qualquer série pela unidade: taxa diária como o CDI, variação
+  /// mensal como o IPCA, pontos como o Ibovespa. Nulo para taxa ao ano (a
+  /// meta Selic não é um índice de retorno).
+  static IndexLevels? of(IndicatorSeries series, List<IndicatorPoint> p) =>
+      switch (series.unit) {
+        IndicatorUnit.pctDay => IndexLevels(series, cdi(p).levels),
+        IndicatorUnit.pctMonth => IndexLevels(series, ipca(p).levels),
+        IndicatorUnit.indexNumber => points(series, p),
+        IndicatorUnit.pctYear => null,
+      };
+
+  /// Série em outra moeda convertida para reais (calculado): nível × câmbio
+  /// do dia (o último publicado até a data). Datas antes do primeiro câmbio
+  /// ficam de fora.
+  IndexLevels inBrl(List<(LocalDate, Decimal)> fxToBrl) {
+    return IndexLevels(series, [
+      for (final (d, v) in levels)
+        if (levelIn(fxToBrl, d) case final rate?)
+          (d, DecimalMath.rescale(v * rate)),
+    ]);
+  }
+
+  /// Série em base 100 no fim de [from], até [to] (a primeira data é [from]).
+  /// Vazia se o índice não tem dado até [from].
+  List<(LocalDate, Decimal)> normalized(LocalDate from, LocalDate to) =>
+      normalize(levels, from, to);
+
+  /// Base 100 para qualquer sequência de níveis (o índice do TWR, inclusive).
+  static List<(LocalDate, Decimal)> normalize(
+    List<(LocalDate, Decimal)> levels,
+    LocalDate from,
+    LocalDate to,
+  ) {
+    final base = levelIn(levels, from);
+    if (base == null || base <= Decimal.zero) return const [];
+    return [
+      (from, _hundred),
+      for (final (d, v) in levels)
+        if (d.isAfter(from) && !d.isAfter(to))
+          (d, DecimalMath.rescale(DecimalMath.divide(v * _hundred, base))),
+    ];
+  }
 
   static final _hundred = Decimal.fromInt(100);
 

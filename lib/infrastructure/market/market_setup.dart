@@ -79,13 +79,10 @@ abstract final class MarketSetup {
       wallClock: wallClock,
     );
     final yahoo = YahooProvider(http, wallClock: wallClock);
+    final binance = BinanceProvider(http, wallClock: wallClock);
     return MarketProviders(
       quotes: [brapi, coingecko, finnhub, twelve, yahoo],
-      history: [
-        BinanceProvider(http, wallClock: wallClock),
-        twelve,
-        yahoo,
-      ],
+      history: [binance, twelve, yahoo],
       batchHistory: B3CotahistProvider(
         http,
         cacheDir: cacheDir,
@@ -96,6 +93,8 @@ abstract final class MarketSetup {
         BcbSgsProvider(http, wallClock: wallClock),
         IbgeSidraProvider(http, wallClock: wallClock),
         B3IndexProvider(http, wallClock: wallClock),
+        BinanceIndexProvider(binance),
+        YahooIndexProvider(yahoo),
       ],
       fx: [
         BcbPtaxProvider(http, wallClock: wallClock),

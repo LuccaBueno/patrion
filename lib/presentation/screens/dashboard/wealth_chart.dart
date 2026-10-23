@@ -64,6 +64,7 @@ class _WealthChartCardState extends State<WealthChartCard> {
     IndicatorSeries.cdi: 'CDI',
     IndicatorSeries.ibovespa: 'Ibovespa',
     IndicatorSeries.ipca: 'IPCA',
+    IndicatorSeries.ifix: 'IFIX',
   };
 
   @override
@@ -455,7 +456,7 @@ class _Legend extends StatelessWidget {
       children: [
         CustomPaint(
           size: const Size(22, 3),
-          painter: _SwatchPainter(color, dash),
+          painter: SwatchPainter(color, dash),
         ),
         const SizedBox(width: 6),
         Text(label, style: theme.textTheme.bodySmall),
@@ -502,12 +503,13 @@ Color _investedColor(BuildContext context) =>
     Theme.of(context).colorScheme.onSurfaceVariant;
 
 /// Referências em tons de cinza (nunca a cor da carteira nem verde/vermelho),
-/// cada uma com um tracejado: CDI, Ibovespa e IPCA, nessa ordem.
+/// cada uma com um tracejado: CDI, Ibovespa, IPCA e IFIX, nessa ordem.
 Color _indexColor(BuildContext context, IndicatorSeries s) {
   final scheme = Theme.of(context).colorScheme;
   return switch (s) {
     IndicatorSeries.ibovespa => scheme.onSurface.withValues(alpha: 0.8),
     IndicatorSeries.ipca => scheme.outline,
+    IndicatorSeries.ifix => scheme.onSurface.withValues(alpha: 0.6),
     _ => scheme.onSurfaceVariant,
   };
 }
@@ -515,6 +517,7 @@ Color _indexColor(BuildContext context, IndicatorSeries s) {
 List<int> _indexDash(IndicatorSeries s) => switch (s) {
   IndicatorSeries.ibovespa => const [2, 3],
   IndicatorSeries.ipca => const [10, 4],
+  IndicatorSeries.ifix => const [1, 2],
   _ => const [5, 3],
 };
 
@@ -825,9 +828,9 @@ Color gainColor(BuildContext context, Decimal v) {
       : Theme.of(context).colorScheme.onSurfaceVariant;
 }
 
-/// Amostra da linha na legenda (contínua ou tracejada).
-class _SwatchPainter extends CustomPainter {
-  const _SwatchPainter(this.color, this.dash);
+/// Amostra da linha na legenda (contínua ou tracejada; Painel e Benchmarks).
+class SwatchPainter extends CustomPainter {
+  const SwatchPainter(this.color, this.dash);
 
   final Color color;
   final List<int>? dash;
@@ -860,6 +863,6 @@ class _SwatchPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SwatchPainter old) =>
+  bool shouldRepaint(SwatchPainter old) =>
       old.color != color || old.dash != dash;
 }

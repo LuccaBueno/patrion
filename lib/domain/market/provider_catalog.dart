@@ -174,8 +174,8 @@ abstract final class ProviderCatalog {
     shortName: 'B3',
     name: 'B3 — Índices',
     site: 'https://www.b3.com.br',
-    role: 'Fechamento diário do Ibovespa (comparação no Painel)',
-    sends: 'Só o código do índice (IBOV) e o ano.',
+    role: 'Fechamento diário do Ibovespa e do IFIX (Painel e Benchmarks)',
+    sends: 'Só o código do índice (IBOV ou IFIX) e o ano.',
     license: 'Endereços internos do site da B3, não documentados como API',
     limits: 'Gratuito, sem chave. Uma requisição por ano de histórico.',
     warning: 'Não é uma API oficial: se mudar, o app avisa e usa o que já tem.',
@@ -225,8 +225,8 @@ abstract final class ProviderCatalog {
     code: 'binance',
     name: 'Binance (dados públicos)',
     site: 'https://www.binance.com',
-    role: 'Histórico diário de criptomoedas',
-    sends: 'Só o par negociado (por exemplo, BTCBRL).',
+    role: 'Histórico diário de criptomoedas e o Bitcoin dos benchmarks',
+    sends: 'Só o par negociado (por exemplo, BTCBRL ou BTCUSDT).',
     license: 'API pública de mercado; termos da Binance',
     limits:
         'Gratuito, sem chave, com limite por peso das requisições. Preço da '

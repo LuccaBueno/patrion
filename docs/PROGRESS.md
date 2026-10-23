@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 8 em andamento** (desde 23/10/2026; escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos). Parte 1 (Desempenho → Rentabilidade) concluída; próximas: 2 (Benchmarks), 3 (Risco), 4 (Renda passiva), 5 (visões por classe) e 6 (Painel e acabamento), depois a versão 1.3.0. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Fase 8 em andamento** (desde 23/10/2026; escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos). Partes 1 (Rentabilidade) e 2 (Benchmarks) concluídas; próximas: 3 (Risco), 4 (Renda passiva), 5 (visões por classe) e 6 (Painel e acabamento), depois a versão 1.3.0. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -23,6 +23,17 @@ Cada parte tem um commit; o relatório completo sai no fim (com a 1.3.0).
 - Testes: `performance_report_test.dart` (meses, ano, acumulado, CDI e % do CDI; ano parcial e ano que termina em 29/12; período com IPCA até o último mês publicado e retorno real; CAGR e TIR iguais sem aportes; TWR −1,00% × TIR −3,7093% a.a. de `CASOS_DE_TESTE.md` §6; períodos sustentados), `performance_screen_test.dart` (tabela com +33,33% em jun/2025 e acumulado +46,67%; 1A com +10,00%, CDI e retorno real indisponível sem IPCA; 3A e 10A ocultos; Tudo com CAGR; personalizado de 01/05 a 30/06/2025 com +33,33%; tabela em 1264 px com a Segoe UI sem cortes; sem operações, indisponível com o motivo), `app_test.dart` (menu com Desempenho). Suíte inteira: 539 passando.
 - **Conferência visual (1280 × 800, cópia do banco de teste com 10 anos de dados reais):** 1A com +30,58% (215% do CDI), retorno real +24,95% com IPCA até 09/2026, TIR +30,42% a.a.; tabela de 2017 a 2026 inteira na largura. Corrigido depois da conferência: 2022 e 2023 marcados como parciais (o último pregão foi 29 e 30/12) e o recuo das abas.
 
+
+**Parte 2 — Desempenho → Benchmarks (concluída)** (DECISIONS D-54; SPEC §12.5; FORMULAS §3.5; FONTES_DE_DADOS §1 e §2.5d)
+
+- Aba **Benchmarks** no mesmo período da Rentabilidade (o seletor subiu para cima das abas e vale para as duas).
+- Índices: CDI, Selic, IPCA, IGP-M, Ibovespa, **IFIX** (B3, novo), **Bitcoin** (Binance BTC/USDT × PTAX, novo, calculado), **S&P 500 e Nasdaq** (Yahoo, novos; a fonte continua desligada por padrão e a linha diz como ativar), **IMA e IDkA** indisponíveis com o motivo (ANBIMA).
+- Tabela: fonte, moeda, período coberto, acumulado (em dólar embaixo, nos índices em dólar), ao ano (acima de um ano) e carteira − índice em p.p.; metodologia no ícone de cada índice; indisponível com o motivo embaixo. Gráfico em base 100 com a carteira e até 4 índices (cinzas e tracejados fixos, legenda, tooltip com o retorno de cada linha desde o início).
+- Painel: "Comparar com" ganhou o IFIX.
+- Corrigido junto: o Yahoo codificava o "^" dos índices duas vezes (a consulta de `^GSPC` falharia); e o Bitcoin não grava mais o candle do dia UTC em andamento como fechamento (regra 2; vale também para o histórico de cripto da Binance).
+- Arquivos: `domain/finance/benchmark_comparison.dart` (novo), `benchmark.dart` (`of`, `inBrl`, `normalize`, `levelIn`), `domain/market/market_data.dart` (séries `ifix`, `btc_usd`, `sp500`, `nasdaq`), `provider_catalog.dart`, `infrastructure/market/providers/b3_index_provider.dart` (IFIX), `global_providers.dart` (`BinanceIndexProvider`, `YahooIndexProvider`, `pairHistory`), `market_setup.dart`, `application/portfolio/wealth_service.dart` (todas as séries e a PTAX do dólar), `presentation/screens/performance/benchmarks_tab.dart` (novo), `performance_screen.dart` (período compartilhado), `returns_tab.dart`, `dashboard/wealth_chart.dart`, `format/market_labels.dart` (pontos e US$); fixture `b3_ifix_2025.json` (resposta real).
+- Testes: `benchmark_comparison_test.dart` (níveis pela unidade; conversão pela PTAX do dia; base 100; mesmo intervalo da carteira com +10 p.p.; IPCA que para antes; Bitcoin +21% em reais e +10% em dólar, CASOS §7; índice que começa depois, indisponível; ao ano), `providers_test.dart` (IFIX real de 2025; BTCUSDT; candle do dia fora; `^GSPC` codificado uma vez), `performance_screen_test.dart` (CDI contra a carteira; Ibovespa sem dados, IMA, IDkA e S&P 500 com o motivo; gráfico base 100 com carteira e CDI; desmarcar tira a linha). Suíte inteira: 552 passando.
+- **No app real** (release numa pasta de dados de teste, cópia do banco com 10 anos; seus dados intocados): a atualização da abertura baixou o IFIX (2.685 pregões de 04/01/2016 a 22/10/2026, os mesmos dias do Ibovespa) e o Bitcoin (desde 17/08/2017). **Conferência visual (1280 × 800):** em 5A, carteira +62,98% contra CDI +82,00%, Ibovespa +92,03%, IFIX +46,50% e Bitcoin +19,09% em reais (+35,01% em dólar); tooltip no gráfico. Selic igual ao CDI: conferido na API do Banco Central, as duas séries publicam a mesma taxa diária no período (não é erro). Corrigido depois da conferência: o candle do dia do Bitcoin, o motivo de "indisponível" espremido na última coluna e o tooltip da linha da carteira.
 
 ### Ajustes M-06 a M-09 (desde 23/10/2026)
 

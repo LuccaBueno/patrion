@@ -696,3 +696,16 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - O cartão de número do Painel virou o widget comum `StatCard`, usado também pelo Desempenho.
 - Alternativas: tabela por ativo (fica para a página do ativo, se pedido); rentabilidade a partir do custo (não neutraliza aportes; o TWR é o padrão de mercado para comparar com o CDI).
 - Motivo: SPEC §8, §9 e §21 (F8); regras 1 (sem dados, "indisponível") e 10 (`FORMULAS.md` §3.4).
+
+### 2026-10-23 — D-54: Benchmarks na tela Desempenho (F8, parte 2)
+
+- Decisão:
+  - **Aba Benchmarks**, no mesmo período da Rentabilidade (o seletor fica acima das abas e vale para as duas).
+  - **Índices:** CDI, Selic, IPCA e IGP-M (BCB, já guardados), Ibovespa e **IFIX** (B3, a mesma fonte, D-50), **Bitcoin** (Binance, par BTC/USDT, desde 17/08/2017), **S&P 500 e Nasdaq** (Yahoo, `^GSPC` e `^IXIC`; a fonte continua desligada por padrão, D-08). Os novos ficam em `mkt_indicators` (séries `ifix`, `btc_usd`, `sp500`, `nasdaq`, em pontos ou US$), com fonte e datas, atualizados com os demais indicadores. **IMA e IDkA** aparecem como indisponíveis, com o motivo (histórico pago na ANBIMA; aprovado em 23/10/2026).
+  - **Bitcoin em reais pelo par em dólar × PTAX**, e não pelo BTC/BRL da Binance: o BTC/BRL só existe desde 10/2020, e juntar as duas séries criaria um salto artificial. É uma série calculada, rotulada como tal; o retorno em dólar aparece ao lado. O mesmo para S&P 500 e Nasdaq (índices de preço, sem dividendos, como está na metodologia).
+  - **Comparação justa:** cada índice contra o TWR da carteira no mesmo intervalo, que termina no último dia com dado do índice (o IPCA para no último mês publicado). Índice sem dado no dia-base fica indisponível, com a data desde quando há dados; nunca se completa com estimativa.
+  - **Tabela** com todos os índices (fonte, moeda, período coberto, acumulado, ao ano acima de um ano e carteira − índice em p.p.), a metodologia no ícone de cada um; **gráfico em base 100** com a carteira e até 4 índices escolhidos (cinzas e tracejados fixos por índice, legenda sempre visível; acima de 4 as linhas não se distinguem).
+  - O "Comparar com" do Painel ganhou o IFIX.
+  - Corrigido junto: o adaptador do Yahoo codificava o "^" dos índices duas vezes (`%255E`), e a consulta de `^GSPC` falharia.
+- Alternativas: BTC/BRL da Binance (curto) emendado ao BTC/USDT (salto na emenda); BOVA11/XFIX11 no lugar dos índices (ETFs, com taxa e erro de acompanhamento); S&P 500 com dividendos (sem fonte gratuita).
+- Motivo: SPEC §12.5 e §21 (F8); regras 1, 2, 3 e 10 (`FORMULAS.md` §3.5).

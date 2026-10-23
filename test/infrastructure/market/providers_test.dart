@@ -664,4 +664,92 @@ void main() {
       expect(bars.map((b) => b.refDate).toSet(), hasLength(bars.length));
     });
   });
+
+  group('Índices dos benchmarks (F8)', () {
+    test('IFIX pela B3, resposta real de 2025', () async {
+      adapter.on(
+        'indexStatisticsProxy',
+        FakeReply.file(fixture('b3_ifix_2025.json')),
+      );
+      final provider = B3IndexProvider(
+        fakeMarketHttp(adapter),
+        wallClock: clock,
+      );
+      expect(provider.supports(IndicatorSeries.ifix), isTrue);
+      final points = await provider.indicator(
+        IndicatorSeries.ifix,
+        from: day('2025-01-01'),
+        to: day('2025-12-31'),
+      );
+      expect(
+        points.firstWhere((p) => p.refDate == day('2025-01-02')).value,
+        d('3117.34'),
+      );
+      expect(
+        points.firstWhere((p) => p.refDate == day('2025-12-15')).value,
+        d('3690.27'),
+      );
+      expect(points.every((p) => p.series == IndicatorSeries.ifix), isTrue);
+      final param = adapter.urls.single.split('/').last;
+      expect(
+        utf8.decode(base64.decode(Uri.decodeComponent(param))),
+        '{"index":"IFIX","language":"pt-br","year":"2025"}',
+      );
+    });
+
+    test('Bitcoin em dólares: só o par BTCUSDT vai na requisição', () async {
+      adapter.on('klines', FakeReply.file(fixture('binance_btcbrl.json')));
+      final provider = BinanceIndexProvider(
+        BinanceProvider(fakeMarketHttp(adapter), wallClock: clock),
+      );
+      expect(provider.supports(IndicatorSeries.btcUsd), isTrue);
+      expect(provider.supports(IndicatorSeries.cdi), isFalse);
+      final points = await provider.indicator(
+        IndicatorSeries.btcUsd,
+        from: day('2026-10-01'),
+        to: day('2026-10-22'),
+      );
+      expect(points, isNotEmpty);
+      expect(points.first.value, d('420708'));
+      expect(points.first.source, 'binance');
+      expect(adapter.urls.first, contains('symbol=BTCUSDT'));
+    });
+
+    test(
+      'o candle do dia UTC em andamento não entra como fechamento',
+      () async {
+        adapter.on('klines', FakeReply.file(fixture('binance_btcbrl.json')));
+        // A resposta tem 11, 12 e 13/10; às 12h de 12/10 só 11/10 fechou.
+        final provider = BinanceIndexProvider(
+          BinanceProvider(
+            fakeMarketHttp(adapter),
+            wallClock: Clock.fixed(DateTime.utc(2026, 10, 12, 12)),
+          ),
+        );
+        final points = await provider.indicator(
+          IndicatorSeries.btcUsd,
+          from: day('2026-10-01'),
+          to: day('2026-10-12'),
+        );
+        expect(points.map((p) => p.refDate), [day('2026-10-11')]);
+      },
+    );
+
+    test('S&P 500 e Nasdaq pelo Yahoo, com o código do índice', () async {
+      adapter.on('chart', FakeReply.file(fixture('yahoo_aapl.json')));
+      final provider = YahooIndexProvider(
+        YahooProvider(fakeMarketHttp(adapter), wallClock: clock),
+      );
+      expect(provider.supports(IndicatorSeries.sp500), isTrue);
+      expect(provider.supports(IndicatorSeries.nasdaq), isTrue);
+      final points = await provider.indicator(
+        IndicatorSeries.sp500,
+        from: day('2026-01-01'),
+        to: day('2026-10-22'),
+      );
+      expect(points, isNotEmpty);
+      expect(points.every((p) => p.series == IndicatorSeries.sp500), isTrue);
+      expect(Uri.decodeComponent(adapter.urls.single), contains('/^GSPC'));
+    });
+  });
 }

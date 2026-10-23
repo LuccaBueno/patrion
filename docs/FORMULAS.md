@@ -162,6 +162,15 @@ Tudo sai do índice do TWR da evolução patrimonial (§3.2), com os proventos c
 - **TIR do período** (§7): fluxos = `−patrimônio` no fim do dia-base, `proventos − (aportes − resgates)` em cada dia seguinte e `+patrimônio` no último dia. Em menos de 365 dias, mostrada como o equivalente do período (`(1 + taxa)^(dias ÷ 365) − 1`), porque anualizar prazos curtos exagera o resultado.
 - Exemplos (testes): +10% em jan, fev e dez de 2025 dão 33,1% no ano e, com CDI de 10%, 331% do CDI; o caso de `CASOS_DE_TESTE.md` §6 dá TWR −1,00% e TIR −3,7093% a.a.
 
+### 3.5 Benchmarks (`BenchmarkComparison`, `IndexLevels`; `lib/domain/finance/benchmark_comparison.dart` e `benchmark.dart`; F8)
+
+- **Nível de cada índice** pela unidade publicada (§3.3): taxa diária (CDI, Selic) = Π(1 + taxa ÷ 100); variação mensal (IPCA, IGP-M) = Π(1 + v ÷ 100), distribuída pelos dias do mês e parada no último mês publicado; pontos (Ibovespa, IFIX, S&P 500, Nasdaq) e preço (Bitcoin em US$) = o próprio valor. Sem dado num dia, vale o último até a data.
+- **Índices em dólar** (Bitcoin, S&P 500, Nasdaq) em reais, calculado: `nível_R$(d) = nível_US$(d) × PTAX(d)`, com a PTAX de venda do último dia útil até `d`. Datas antes da primeira PTAX ficam de fora. O retorno em dólar aparece ao lado, e `(1 + r_R$) = (1 + r_US$) × (1 + r_câmbio)` (§9).
+- **Intervalo**: do fim do dia-base do período (o mesmo da Rentabilidade, §3.4) até `fim = mín(último dia do período, último dia com dado do índice)`. O índice precisa ter dado até o dia-base; senão fica indisponível, com a data desde quando há dados.
+- **Retorno acumulado** = `nível(fim) ÷ nível(base) − 1`; **ao ano** (só acima de 366 dias) = `(1 + acumulado)^(365 ÷ dias) − 1`; **carteira** = TWR do mesmo intervalo (base até `fim`); **diferença** = carteira − índice, em pontos percentuais.
+- **Série normalizada** (gráfico): `100 × nível(d) ÷ nível(base)`, com 100 no dia-base; a carteira usa o índice do TWR.
+- Exemplos (testes): Ibovespa de 100 a 110 com a carteira de 1.000 a 1.200: índice +10%, carteira +20%, diferença +10 p.p.; Bitcoin de US$ 100 a 110 com a PTAX de 5,00 a 5,50: +21% em reais e +10% em dólar; CDI de 21% em 731 dias: 9,99% ao ano.
+
 ## 4. Potências, logaritmos e exponenciais (`DecimalMath`, DECISIONS D-26)
 
 - `ln x`, `e^x` e `b^e` com expoente fracionário são calculados sem ponto flutuante: ponto fixo com 60 casas internas, resultado com 20 casas, meio para o par.
