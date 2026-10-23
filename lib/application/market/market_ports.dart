@@ -123,13 +123,15 @@ abstract interface class ApiKeyStore {
 }
 
 /// Histórico de vários ativos de uma vez (um arquivo do COTAHIST serve a
-/// todos), com o ISIN de cada um quando a fonte informa.
+/// todos), com o ISIN de cada um quando a fonte informa. [onProgress] recebe
+/// o percentual baixado do arquivo em andamento (o histórico completo, M-08).
 abstract interface class BatchHistoryProvider implements HistoryProvider {
   Future<({Map<String, List<PriceBar>> bars, Map<String, String> isins})>
   historyBatch(
     Set<String> symbols, {
     required LocalDate from,
     required LocalDate to,
+    void Function(int percent)? onProgress,
   });
 }
 

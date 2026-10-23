@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/market/history_backfill.dart';
 import '../../application/market/market_data_service.dart';
 import '../../application/settings/market_preferences.dart';
 import '../providers.dart';
@@ -115,11 +116,17 @@ class _MarketAutoRefreshState extends ConsumerState<MarketAutoRefresh> {
         _minutes ??
         MarketPreferences.defaultRefreshMinutes;
     if (minutes == 0) return;
-    unawaited(
-      ref
+    unawaited(() async {
+      await ref
           .read(marketRefreshProvider.notifier)
-          .refreshPortfolio(automatic: true),
-    );
+          .refreshPortfolio(automatic: true);
+      // Depois da atualização, o histórico que falta (M-08): na primeira
+      // abertura desta versão, o dos ativos já cadastrados; depois, só o
+      // que ficou pela metade ou é novo.
+      if (mounted) {
+        await ref.read(historyBackfillProvider.notifier).start();
+      }
+    }());
   }
 
   void _schedule(int minutes) {
@@ -143,5 +150,66 @@ class _MarketAutoRefreshState extends ConsumerState<MarketAutoRefresh> {
     final minutes = ref.watch(marketRefreshMinutesProvider).value;
     if (minutes != null) _schedule(minutes);
     return widget.child;
+  }
+}
+
+/// Andamento do histórico completo (M-08) nesta sessão.
+class HistoryBackfillUiState {
+  const HistoryBackfillUiState({this.progress, this.lastResult});
+
+  /// Passo em andamento; nulo quando parado.
+  final BackfillProgress? progress;
+  final RefreshResult? lastResult;
+
+  bool get running => progress != null;
+}
+
+/// Roda o histórico completo em segundo plano, sem travar o app nem a fila
+/// das atualizações (o COTAHIST anual tem fila própria no HTTP).
+class HistoryBackfillController extends Notifier<HistoryBackfillUiState> {
+  @override
+  HistoryBackfillUiState build() => const HistoryBackfillUiState();
+
+  /// Começa (ou, se já está rodando, pede uma volta a mais no fim, para
+  /// pegar um ativo novo).
+  Future<RefreshResult> start() async {
+    final service = ref.read(historyBackfillServiceProvider);
+    if (!service.running) {
+      state = const HistoryBackfillUiState(
+        progress: BackfillProgress(symbols: [], step: '', done: 0, total: 0),
+      );
+    }
+    RefreshResult result;
+    try {
+      result = await service.run(onProgress: _onProgress);
+    } on Object catch (error) {
+      result = RefreshResult()
+        ..failures.add(ProviderFailure('patrion', '$error'));
+    }
+    if (ref.mounted && !service.running) {
+      state = HistoryBackfillUiState(lastResult: result);
+    }
+    return result;
+  }
+
+  void _onProgress(BackfillProgress p) {
+    if (!ref.mounted) return;
+    final current = state.progress;
+    // O download avisa a cada pedaço: só redesenha quando o % muda.
+    if (current != null &&
+        current.step == p.step &&
+        p.percent != null &&
+        current.percent != null &&
+        p.percent == current.percent) {
+      return;
+    }
+    state = HistoryBackfillUiState(progress: p);
+  }
+
+  /// "Baixar histórico completo" de um ativo: esquece o que foi lido dele
+  /// e roda de novo.
+  Future<RefreshResult> redo(String symbol) async {
+    await ref.read(historyBackfillServiceProvider).forget(symbol);
+    return start();
   }
 }

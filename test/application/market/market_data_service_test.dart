@@ -82,6 +82,7 @@ class FakeBatch implements BatchHistoryProvider {
     Set<String> symbols, {
     required LocalDate from,
     required LocalDate to,
+    void Function(int percent)? onProgress,
   }) async {
     calls.add((symbols, from, to));
     final bars = <String, List<PriceBar>>{};
@@ -462,7 +463,8 @@ void main() {
     await service.refreshIndicators();
     await service.refreshIndicators();
     expect(sgs.asked, hasLength(2));
-    expect(sgs.asked[0].$2, LocalDate(2021, 1, 1));
+    // Dez anos antes (M-08; eram cinco até a 1.1.0).
+    expect(sgs.asked[0].$2, LocalDate(2016, 1, 1));
     expect(sgs.asked[1].$2, LocalDate(2026, 10, 15));
   });
 

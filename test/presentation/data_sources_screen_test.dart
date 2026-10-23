@@ -163,6 +163,37 @@ void main() {
     );
   });
 
+  testWidgets('histórico por ativo (M-08): desde quando há fechamentos e o '
+      'botão "Baixar histórico completo"', (tester) async {
+    await tester.runAsync(() async {
+      await useMarketPrice();
+      await MarketRepository(f.t.db).savePrices([
+        for (final d in [LocalDate(2016, 1, 11), LocalDate(2026, 10, 22)])
+          PriceBar(
+            symbol: 'PETR4',
+            market: 'B3',
+            refDate: d,
+            close: Decimal.parse('30'),
+            currency: 'BRL',
+            source: 'b3_cotahist',
+            dataType: MarketDataType.close,
+            collectedAt: '2026-10-23T12:00:00.000Z',
+          ),
+      ]);
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(location: '/fontes', () async {
+      await app.pumpUntil(find.byKey(const Key('history-PETR4')));
+      expect(
+        find.text('Desde 11/01/2016 · até 22/10/2026 · 2 pregões'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('history-redo-PETR4')), findsOneWidget);
+      // O CDB (preço informado) não entra.
+      expect(find.byKey(const Key('history-CDB-EXEMPLO-2026')), findsNothing);
+    });
+  });
+
   testWidgets('ativos antigos com preço informado podem passar para a '
       'cotação automática', (tester) async {
     await tester.runAsync(seed);

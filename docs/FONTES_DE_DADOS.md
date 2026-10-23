@@ -48,7 +48,7 @@ Por isso, a proposta é:
 **Riscos dessa escolha:**
 
 - Os endpoints JSON do site da B3 **não são uma API documentada**. Funcionam hoje, sem chave, mas podem mudar sem aviso. O adaptador deve falhar de forma clara e o app continua com o que já tem em cache.
-- O COTAHIST anual é grande (2005: TXT de 44,8 MB descompactado; 2025: ZIP de 89 MB). Por isso ele é baixado **sob demanda**, só os anos necessários, a partir de um ano inicial configurável, para o cache descartável em `%LOCALAPPDATA%\Patrion\cache\` (DECISIONS D-05). O app guarda no banco só os tickers de interesse. Depois, a atualização usa os arquivos diários, que são pequenos.
+- O COTAHIST anual é grande (2005: TXT de 44,8 MB descompactado; 2025: ZIP de 89 MB). Por isso ele é baixado **sob demanda**, só os anos necessários, a partir de um ano inicial configurável (padrão: 10 anos; em segundo plano, um arquivo por ano para todos os ativos, DECISIONS D-48), para o cache descartável em `%LOCALAPPDATA%\Patrion\cache\` (DECISIONS D-05). O app guarda no banco só os tickers de interesse. Depois, a atualização usa os arquivos diários, que são pequenos.
 - Ativos deslistados existem no COTAHIST (bom para viés de sobrevivência), mas seus eventos podem não estar mais no site da B3.
 
 **Alternativa paga:** brapi Pro (R$ 1.399,90/ano) entrega histórico de 10+ anos, `adjustedClose` (proventos + desdobramentos + grupamentos), preços brutos (`includeRaw`) e proventos completos. Mesmo assim, ela sofre da mesma lacuna de eventos verificada acima, porque `stockDividends` também não trouxe o desdobramento de 2005.

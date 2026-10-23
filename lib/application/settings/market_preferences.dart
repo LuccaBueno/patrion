@@ -25,11 +25,11 @@ class MarketPreferences {
       _settings.put(refreshKey, jsonEncode(minutes));
 
   /// Ano inicial do histórico (COTAHIST, indicadores, câmbio). Padrão:
-  /// cinco anos antes de [currentYear].
+  /// dez anos antes de [currentYear] (M-08; era cinco até a 1.1.0).
   Future<int> historyStartYear(int currentYear) async =>
       _int(await _settings.get(startYearKey)) ?? defaultStartYear(currentYear);
 
-  static int defaultStartYear(int currentYear) => currentYear - 5;
+  static int defaultStartYear(int currentYear) => currentYear - 10;
 
   Stream<int?> watchHistoryStartYear() =>
       _settings.watch(startYearKey).map(_int);

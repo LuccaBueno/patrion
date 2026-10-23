@@ -9,6 +9,7 @@ import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
+import '../market/history_widgets.dart';
 
 /// Cria ([initial] nulo) ou edita uma instituição.
 Future<void> showInstitutionDialog(
@@ -361,6 +362,9 @@ class _AssetDialogState extends ConsumerState<_AssetDialog> {
       } else {
         await service.updateAsset(asset, terms: terms);
       }
+      // Ativo novo ou que passou a usar cotações: o histórico que falta,
+      // em segundo plano (M-08).
+      if (asset.priceSource == PriceSource.market) startHistoryBackfill(ref);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {

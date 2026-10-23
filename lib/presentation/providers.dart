@@ -6,6 +6,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../application/backup/backup_service.dart';
+import '../application/market/history_backfill.dart';
 import '../application/market/market_data_service.dart';
 import '../application/market/market_overview.dart';
 import '../application/market/market_ports.dart';
@@ -37,6 +38,7 @@ import '../domain/security/key_file.dart';
 import '../infrastructure/backup/local_backup_file_system.dart';
 import '../infrastructure/market/market_http.dart';
 import '../infrastructure/market/market_setup.dart';
+import '../infrastructure/market/providers/b3_cotahist_provider.dart';
 import '../infrastructure/security/api_key_store.dart';
 import '../infrastructure/updates/github_release_feed.dart';
 import 'services/file_dialogs.dart';
@@ -334,6 +336,23 @@ final marketOverviewProvider = StreamProvider<MarketOverview>((ref) {
 final marketRefreshProvider =
     NotifierProvider<MarketRefreshController, MarketRefreshState>(
       MarketRefreshController.new,
+    );
+
+/// Histórico completo em segundo plano (M-08).
+final historyBackfillServiceProvider = Provider<HistoryBackfillService>((ref) {
+  final cacheDir = ref.watch(appEnvironmentProvider).paths.cacheDir;
+  return HistoryBackfillService(
+    market: ref.watch(marketDataServiceProvider),
+    settings: ref.watch(deviceSettingsRepositoryProvider),
+    preferences: ref.watch(marketPreferencesProvider),
+    portfolio: ref.watch(portfolioQueryProvider),
+    cleanCache: () => B3CotahistProvider.cleanAnnual(cacheDir),
+  );
+});
+
+final historyBackfillProvider =
+    NotifierProvider<HistoryBackfillController, HistoryBackfillUiState>(
+      HistoryBackfillController.new,
     );
 
 // Atualizações (SPEC §19; DECISIONS D-40)

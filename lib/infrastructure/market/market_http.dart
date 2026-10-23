@@ -120,19 +120,30 @@ class MarketHttp {
 
   /// Baixa [uri] direto para o arquivo [target] (arquivos grandes, como o
   /// COTAHIST). Em falha, o arquivo parcial é apagado.
+  ///
+  /// [lane] separa a fila do provedor: o download longo de um arquivo anual
+  /// não faz a atualização diária esperar (M-08). [onProgress] recebe o
+  /// percentual já baixado, quando o servidor informa o tamanho.
   Future<void> download(
     String provider,
     Uri uri,
     String target, {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(minutes: 10),
-  }) => _queued(provider, () async {
+    String? lane,
+    void Function(int percent)? onProgress,
+  }) => _queued(lane == null ? provider : '$provider/$lane', () async {
     final policy = policyOf(provider);
     await _retrying(provider, policy, uri, () async {
       try {
         final response = await _dio.download(
           uri.toString(),
           target,
+          onReceiveProgress: onProgress == null
+              ? null
+              : (received, total) {
+                  if (total > 0) onProgress((received * 100) ~/ total);
+                },
           options: Options(
             headers: headers,
             receiveTimeout: timeout,

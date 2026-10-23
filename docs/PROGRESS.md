@@ -4,9 +4,23 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes de uso real antes da Fase 8 (M-01 a M-05, `docs/MUDANCAS.md`) concluídos** em 23/10/2026, como versão 1.1.0 (sem tag nem Release; só quando você pedir). Do M-04 entraram os itens 1, 2, 3, 6 e 7; os itens 4, 5, 8 e 9 estão na F8. Verificação do "Atualizar agora": problema encontrado e corrigido (D-47). Próximo: Fase 8, quando você pedir. A F7 terminou em 22/10/2026 com a Release v1.0.0 publicada. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`), versão 1.2.0, em andamento** desde 23/10/2026, na ordem pedida: M-08 (histórico) → M-07 (página do ativo) → M-09 (Painel) → M-06 (corretoras). Feito: **M-08**. A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
+
+### Ajustes M-06 a M-09 (desde 23/10/2026)
+
+Cada item tem um commit; o relatório completo sai no fim (com a 1.2.0).
+
+**M-08 — Histórico completo de cotações em segundo plano (concluído)** (DECISIONS D-48, altera D-35; SPEC §5; FONTES_DE_DADOS §1)
+
+- Ano inicial padrão de 10 anos (era 5). `HistoryBackfillService` baixa o COTAHIST anual do ano mais recente ao mais antigo, um arquivo por ano para todos os ativos da B3 com cotação automática (inclusive posições encerradas), com os proventos e eventos (renovados a cada 30 dias) e o histórico dos ativos de fora da B3. Cada ano lido fica registrado por ticker em `dev_settings`: fechar o app no meio perde só o ano em andamento. Roda depois da atualização automática da abertura, depois de cadastrar um ativo (rápido ou completo) e pelo botão "Baixar histórico completo".
+- Arquivos anuais numa fila própria do HTTP (`lane`), com progresso do download: a atualização diária e o "Atualizar agora" não esperam. Sobras de downloads interrompidos são apagadas no início e no fim.
+- Progresso no rodapé do menu ("Baixando histórico de BBAS3… 2019", com barra) e, em Fontes de dados, a seção "Histórico de cotações" com, por ativo, desde quando há fechamentos e o botão "Baixar histórico completo".
+- Arquivos: `application/market/history_backfill.dart` (novo), `market_data_service.dart` (`downloadCotahistYear`, `usesBatchHistory`, `hasHistorySource`, `hasEventsSource`), `market_ports.dart`, `settings/market_preferences.dart`, `infrastructure/market/market_http.dart`, `providers/b3_cotahist_provider.dart` (`cleanAnnual`), `presentation/services/market_refresh.dart` (`HistoryBackfillController` e o gatilho da abertura), `screens/market/history_widgets.dart` (novo), `data_sources_screen.dart`, `shell/app_shell.dart`, `add_asset_dialog.dart`, `registry_dialogs.dart`, `providers.dart`.
+- Testes: `history_backfill_test.dart` (10 anos do mais recente ao mais antigo e uma vez só; sem rede no meio para e continua de onde parou; ano corrente relido depois de 10 dias; ano lido antes de terminar é relido; ativo novo com um arquivo para os dois; ano inicial escolhido; "Baixar histórico completo"; chamada durante a execução; sem ativos), `data_sources_screen_test.dart` (seção por ativo), `market_data_service_test.dart` (indicadores desde 10 anos).
+- **No app real** (build release copiado para o scratchpad, pasta de dados de teste; seus dados intocados), carteira de exemplo com BBAS3, PETR4, TAEE11, VALE3 e HGLG11: em cerca de um minuto, 2.685 pregões de 04/01/2016 a 22/10/2026 para cada um, os eventos (inclusive o desdobramento 1:2 do BBAS3 em 16/04/2024) e a pasta de cache vazia no fim. O rodapé do menu mostrou "Baixando proventos e eventos de BBAS3, HGLG11, PETR4 e mais 2…" com a barra. **Retomada:** com 2016 a 2018 esquecidos no estado, matei o app no meio do download de 2017 (ZIP parcial no cache); na reabertura o log disse "2 anos", baixou 2017 e 2016 e o cache terminou vazio.
+- Observação: o seu Patrion estava aberto a partir de `build\windows\x64\runner\Release` (sem `--data-dir`, com os seus dados). Não mexi nele, mas o `flutter build` substituiu o `data\app.so` dessa pasta: ao reabrir esse executável, ele já roda o código novo (e baixa o histórico de 10 anos dos seus ativos).
 
 ### Ajustes de uso real antes da F8 (desde 22/10/2026)
 

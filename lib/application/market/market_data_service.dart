@@ -740,6 +740,54 @@ class MarketDataService {
     return result;
   }
 
+  /// O histórico do ativo vem do COTAHIST (B3 em lote).
+  bool usesBatchHistory(Asset asset) =>
+      _providers.batchHistory?.supports(instrumentOf(asset)) ?? false;
+
+  /// Algum provedor traz os proventos e eventos do ativo.
+  bool hasEventsSource(Asset asset) {
+    final i = instrumentOf(asset);
+    return _providers.events.any((p) => p.supports(i));
+  }
+
+  /// O ativo tem alguma fonte de histórico diário (lote ou individual).
+  bool hasHistorySource(Asset asset) {
+    final i = instrumentOf(asset);
+    return usesBatchHistory(asset) ||
+        _providers.history.any((p) => p.supports(i));
+  }
+
+  /// Um ano inteiro do COTAHIST para [symbols] (histórico completo, M-08):
+  /// um arquivo serve a todos. `ok` é falso se o arquivo não foi lido
+  /// (fonte desligada, sem rede, erro), e o ano fica para a próxima vez.
+  Future<({bool ok, RefreshResult result})> downloadCotahistYear(
+    Set<String> symbols,
+    int year, {
+    void Function(int percent)? onProgress,
+  }) async {
+    final result = RefreshResult();
+    final cotahist = _providers.batchHistory;
+    if (cotahist == null || symbols.isEmpty) return (ok: false, result: result);
+    final yearEnd = LocalDate(year, 12, 31);
+    final to = yearEnd.isAfter(_lastSession) ? _lastSession : yearEnd;
+    final from = LocalDate(year, 1, 1);
+    if (to.isBefore(from)) return (ok: true, result: result);
+    final batch = await _call(
+      cotahist.code,
+      result,
+      () => cotahist.historyBatch(
+        symbols,
+        from: from,
+        to: to,
+        onProgress: onProgress,
+      ),
+      what: '$year',
+    );
+    if (batch == null) return (ok: false, result: result);
+    result.updated += await _saveBatch(batch);
+    return (ok: true, result: result);
+  }
+
   /// Faz uma consulta pequena ao provedor, para conferir chave e conexão.
   Future<RefreshResult> testProvider(String code) async {
     final result = RefreshResult();

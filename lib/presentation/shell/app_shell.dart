@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/config/app_info.dart';
 import '../providers.dart';
 import '../router/app_router.dart';
+import '../screens/market/history_widgets.dart';
 import '../screens/sync/sync_screen.dart';
 import '../theme/app_theme.dart';
 
@@ -71,6 +72,7 @@ class AppShell extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  HistoryBackfillIndicator(extended: extended),
                   SizedBox(
                     width: extended ? 196 : 56,
                     child: const Divider(height: 24),

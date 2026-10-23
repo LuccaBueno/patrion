@@ -18,6 +18,7 @@ import '../../format/sync_labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
 import '../../router/app_router.dart';
+import 'history_widgets.dart';
 
 /// Fontes de dados (SPEC §3 e §16): o que cada provedor fornece, o que é
 /// enviado a ele, licença e limites, chave de API, estado e atualização.
@@ -41,6 +42,7 @@ class DataSourcesScreen extends ConsumerWidget {
             const RefreshStatusBanner(),
             const _ManualAssetsCard(),
             const _UpdateSettingsCard(),
+            const HistoryCoverageCard(),
             const MarketOverviewCard(),
             const SizedBox(height: 8),
             Text('Provedores', style: Theme.of(context).textTheme.titleMedium),

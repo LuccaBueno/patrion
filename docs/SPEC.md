@@ -119,6 +119,7 @@ O backtest de retorno total depende de histórico de ativos brasileiros com prov
 - Respeito aos limites das APIs.
 - Registro da última atualização.
 - Sinalização de dados desatualizados e de erros.
+- **Histórico completo em segundo plano** (ajuste M-08, DECISIONS D-48): ao cadastrar um ativo e ao abrir o app, os fechamentos diários desde o ano inicial (padrão: 10 anos, ou desde a listagem) de todos os ativos com cotação automática, inclusive os de posição encerrada, com os proventos e eventos. Na B3, um arquivo anual do COTAHIST por vez, para todos os ativos, apagado depois de lido. Progresso discreto no menu; continua de onde parou na próxima abertura. Fontes de dados mostra, por ativo, desde quando há histórico e o botão "Baixar histórico completo".
 
 **Manual**
 

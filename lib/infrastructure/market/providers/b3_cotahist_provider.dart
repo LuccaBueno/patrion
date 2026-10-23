@@ -124,8 +124,14 @@ class B3CotahistProvider implements BatchHistoryProvider {
     Set<String> symbols, {
     required LocalDate from,
     required LocalDate to,
+    void Function(int percent)? onProgress,
   }) async {
-    final r = await historyFor(symbols, from: from, to: to);
+    final r = await historyFor(
+      symbols,
+      from: from,
+      to: to,
+      onProgress: onProgress,
+    );
     return (bars: r.bars, isins: r.isins);
   }
 
@@ -135,6 +141,7 @@ class B3CotahistProvider implements BatchHistoryProvider {
     required LocalDate from,
     required LocalDate to,
     void Function(String step)? onStep,
+    void Function(int percent)? onProgress,
   }) async {
     final wanted = {for (final s in symbols) s.toUpperCase()};
     final today = LocalDate.fromDateTime(_clock.now().toLocal());
@@ -164,7 +171,15 @@ class B3CotahistProvider implements BatchHistoryProvider {
       onStep?.call(name);
       try {
         try {
-          await _http.download(code, uri, zip);
+          // Os anuais (dezenas de MB) vão numa fila própria: a atualização
+          // diária não espera por eles.
+          await _http.download(
+            code,
+            uri,
+            zip,
+            lane: name.contains('_A') ? 'anual' : null,
+            onProgress: onProgress,
+          );
         } on HttpStatusError catch (e) {
           // Arquivo diário ainda não publicado (ou feriado não previsto).
           if (e.statusCode == 404 && name.contains('_D')) {
@@ -216,6 +231,21 @@ class B3CotahistProvider implements BatchHistoryProvider {
     final dir = Directory(p.join(cacheDir, folderName));
     if (!dir.existsSync()) return;
     for (final f in dir.listSync().whereType<File>()) {
+      try {
+        f.deleteSync();
+      } on FileSystemException {
+        // Em uso por outra instância; fica para a próxima.
+      }
+    }
+  }
+
+  /// Apaga sobras dos arquivos anuais (download interrompido pelo fechamento
+  /// do app). Os diários ficam: podem estar em uso pela atualização.
+  static void cleanAnnual(String cacheDir) {
+    final dir = Directory(p.join(cacheDir, folderName));
+    if (!dir.existsSync()) return;
+    for (final f in dir.listSync().whereType<File>()) {
+      if (!p.basename(f.path).startsWith('COTAHIST_A')) continue;
       try {
         f.deleteSync();
       } on FileSystemException {

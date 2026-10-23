@@ -281,6 +281,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
   /// já guarda a da brapi, com chave; esta traz o fechamento da B3).
   void _fetchPrice(String assetId) {
     final controller = ref.read(marketRefreshProvider.notifier);
+    final backfill = ref.read(historyBackfillProvider.notifier);
     final repos = ref.read(portfolioRepositoriesProvider);
     unawaited(() async {
       final asset = await repos.assets.byId(assetId);
@@ -289,6 +290,8 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
         'Cotação de ${asset.symbol}',
         (s) => s.refreshAsset(asset),
       );
+      // E o histórico de dez anos, em segundo plano (M-08).
+      await backfill.start();
     }());
   }
 
