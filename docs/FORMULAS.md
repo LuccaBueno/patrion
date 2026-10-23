@@ -7,7 +7,7 @@ Toda fórmula daqui tem teste. Os casos de referência estão em `CASOS_DE_TESTE
 ## 0. Precisão e arredondamento (DECISIONS D-03)
 
 - Valores, quantidades, preços, taxas e câmbio usam `Decimal`, nunca ponto flutuante.
-- Divisões internas: 20 casas decimais, meio para o par (`DecimalMath.divide`, `lib/core/money/decimal_math.dart`).
+- Divisões internas: 20 casas decimais, meio para o par (`DecimalMath.divide`, `lib/core/money/decimal_math.dart`). A divisão é feita só com inteiros (o resultado é o mesmo da fração exata arredondada), e `rescale` devolve a forma compacta do número, para cadeias longas de multiplicações (o índice do TWR de 10 anos) não crescerem a cada passo.
 - Exibição: 2 casas para moeda, meio para cima (`Fmt.money`). Percentuais com 2 casas na tela.
 - Somas, subtrações e multiplicações são exatas.
 
@@ -134,6 +134,21 @@ Calculados separadamente para cada moeda (o total em reais está em §2.3):
 - **Aportes do mês** = Σ (valor + custos) das compras, aportes e reinvestimentos com data no mês, na moeda; **no ano**, do 1º de janeiro até hoje. A compra de **saldo inicial** (cadastro rápido) não conta. **Vendas** = Σ (valor − custos) de vendas e resgates. **Proventos** = Σ (valor − custos) de dividendos, JCP, rendimentos e juros, pela data registrada.
 - **Distribuição** = §3 (alocação), por ativo, classe, setor (do cadastro; sem setor, "Sem setor informado") e instituição. Até 7 fatias; o resto vira "Outros".
 - **Maiores altas e baixas** = ativos com a variação do dia (ou do mês, §2.4) calculada, ordenados pela variação %.
+
+### 3.2 Evolução patrimonial (`WealthHistory`, `lib/domain/portfolio/wealth_history.dart`; M-09)
+
+- Um ponto por dia útil (e por dia com operação), da primeira operação até hoje, em reais.
+- **Patrimônio do dia** = soma, por ativo, da quantidade no fim do dia (o motor de posições até a data, §1) × o último fechamento até a data (`unitClose`), ou o preço ou saldo informado mais recente, pelas mesmas regras da Carteira (§2 e §2.1); outras moedas pelo câmbio do dia (último até a data; PTAX antes da referência do BCE). O último dia usa os valores do retrato da Carteira: os números finais são os mesmos.
+- **Total aplicado** = Σ compras, aportes, reinvestimentos e ajustes manuais (valor + custos) − Σ vendas, resgates, amortizações e vencimentos (valor − custos), acumulados. Proventos não entram (saem da carteira; o patrimônio não inclui o caixa). **Ganho** = patrimônio − aplicado; em % sobre o aplicado.
+- **Ativo sem preço num dia** (comprado antes do primeiro fechamento guardado, ou com preço informado só depois): fica fora do patrimônio e do aplicado até o primeiro preço; então entra com o aplicado acumulado até ali e, no TWR, como um aporte do próprio valor (sem retorno inventado). **Sem nenhum preço até hoje**: fora da evolução (o gráfico diz quais).
+- **TWR** (§8.3) com os fluxos do dia no fim do dia: `antes = patrimônio − (aportes − resgates) + proventos`, fator `antes ÷ patrimônio da véspera`. Os proventos contam como retorno (saem como retirada). Dia que começa com a carteira vazia não tem retorno. **Rentabilidade no ano** = TWR de 31/12 do ano anterior até hoje.
+
+### 3.3 Comparação com índices (`IndexLevels`, `Benchmark`, `lib/domain/finance/benchmark.dart`; M-09)
+
+- **Nível do índice** por data: CDI = Π(1 + taxa diária ÷ 100) dos dias úteis publicados; IPCA = Π(1 + variação mensal ÷ 100), com cada mês distribuído de forma geométrica pelos dias corridos (`(1 + v)^(1/dias)` por dia; o último dia do mês fica exato) e parado depois do último mês publicado; Ibovespa = os próprios pontos de fechamento. Sem dado num dia, vale o nível anterior.
+- **Em R$, "os mesmos aportes no índice"** (hipotético): `S(d) = S(d−1) × nível(d) ÷ nível(d−1) + (aplicado(d) − aplicado(d−1))`. Só existe se o índice cobre o primeiro dia da carteira. Os proventos não entram (como no patrimônio).
+- **Em %**: carteira = TWR do período; índice = nível(fim) ÷ nível(início) − 1; os dois começam em 0% no início do período. A diferença aparece em pontos percentuais.
+- Exemplo (teste): aportes de 1.000 no dia 1 e 1.200 no dia 3, CDI fictício de 1% ao dia: 1.000; 1.010; 2.220,10; 2.242,301.
 
 ## 4. Potências, logaritmos e exponenciais (`DecimalMath`, DECISIONS D-26)
 

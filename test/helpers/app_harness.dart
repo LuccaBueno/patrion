@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/application/portfolio/wealth_service.dart';
 import 'package:patrion/application/updates/update_checker.dart';
 import 'package:patrion/core/config/app_info.dart';
 import 'package:patrion/core/config/app_paths.dart';
@@ -57,6 +58,13 @@ class AppHarness {
             marketHttp ?? fakeMarketHttp(FakeHttpAdapter()..offline = true),
           ),
           apiKeyStoreProvider.overrideWithValue(keys),
+          // Sem isolate: o teste roda com relógio falso.
+          wealthServiceProvider.overrideWith(
+            (ref) => WealthService(
+              ref.watch(marketRepositoryProvider),
+              useIsolate: false,
+            ),
+          ),
           releaseFeedProvider.overrideWithValue(
             releaseFeed ?? const OfflineReleaseFeed(),
           ),

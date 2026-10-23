@@ -14,10 +14,24 @@ abstract final class DecimalMath {
     if (b == Decimal.zero) {
       throw ArgumentError.value(b, 'b', 'divisão por zero');
     }
-    // Fração exata (a × 10^scale) / b, arredondada para um inteiro.
-    final exact = (a * Decimal.fromBigInt(_ten.pow(scale))) / b;
-    final rounded = _roundHalfEven(exact.numerator, exact.denominator);
-    return Decimal.fromBigInt(rounded).shift(-scale);
+    // a = A × 10^−sa e b = B × 10^−sb, com A e B inteiros: a ÷ b × 10^scale
+    // = A × 10^(scale − sa + sb) ÷ B, arredondado para um inteiro. Só com
+    // inteiros (sem frações reduzidas, que custam um MDC a cada divisão).
+    final sa = a.scale;
+    final sb = b.scale;
+    var n = a.shift(sa).toBigInt();
+    var d = b.shift(sb).toBigInt();
+    final e = scale - sa + sb;
+    if (e >= 0) {
+      n *= _ten.pow(e);
+    } else {
+      d *= _ten.pow(-e);
+    }
+    if (d.isNegative) {
+      n = -n;
+      d = -d;
+    }
+    return Decimal.fromBigInt(_roundHalfEven(n, d)).shift(-scale);
   }
 
   /// Arredonda meio para cima (comercial), usado na exibição: 2 casas para
@@ -29,8 +43,16 @@ abstract final class DecimalMath {
   static Decimal max(Decimal a, Decimal b) => a >= b ? a : b;
 
   /// [value] com [scale] casas, meio para o par.
-  static Decimal rescale(Decimal value, {int scale = divisionScale}) =>
-      value.scale <= scale ? value : divide(value, Decimal.one, scale: scale);
+  ///
+  /// Quando já cabe, devolve o mesmo número em forma compacta (sem zeros à
+  /// direita na representação interna): numa cadeia de multiplicações, a
+  /// forma não compacta cresceria a cada passo (um produto de fatores iguais
+  /// a 1 com 20 casas viraria 10^5200 depois de 260 passos).
+  static Decimal rescale(Decimal value, {int scale = divisionScale}) {
+    final s = value.scale;
+    if (s > scale) return divide(value, Decimal.one, scale: scale);
+    return Decimal.fromBigInt(value.shift(s).toBigInt()).shift(-s);
+  }
 
   // Funções transcendentes (DECISIONS D-26). Calculadas em ponto fixo sobre
   // BigInt com [_workScale] casas e devolvidas com [scale] casas, meio para o

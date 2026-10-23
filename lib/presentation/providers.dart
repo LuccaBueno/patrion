@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -17,6 +18,7 @@ import '../application/portfolio/portfolio_query.dart';
 import '../application/portfolio/quick_add_service.dart';
 import '../application/portfolio/registry_service.dart';
 import '../application/portfolio/valuation_service.dart';
+import '../application/portfolio/wealth_service.dart';
 import '../application/settings/appearance_service.dart';
 import '../application/settings/lock_preferences.dart';
 import '../application/sync/save_service.dart';
@@ -377,3 +379,41 @@ final linkOpenerProvider = Provider<Future<bool> Function(Uri)>(
   (ref) =>
       (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
 );
+
+// -- Evolução patrimonial (M-09) ---------------------------------------------
+
+final wealthServiceProvider = Provider<WealthService>(
+  (ref) => WealthService(ref.watch(marketRepositoryProvider)),
+);
+
+/// Conta as mudanças nos dados de mercado, no máximo uma a cada
+/// [marketTickInterval] (o histórico completo grava muitas vezes seguidas).
+final marketTickProvider = StreamProvider<int>((ref) {
+  final repo = ref.watch(marketRepositoryProvider);
+  final controller = StreamController<int>();
+  var count = 0;
+  Timer? pending;
+  final sub = repo.watchChanges().listen((_) {
+    pending ??= Timer(marketTickInterval, () {
+      pending = null;
+      if (!controller.isClosed) controller.add(++count);
+    });
+  });
+  controller.add(count);
+  ref.onDispose(() {
+    pending?.cancel();
+    unawaited(sub.cancel());
+    unawaited(controller.close());
+  });
+  return controller.stream;
+});
+
+const marketTickInterval = Duration(seconds: 3);
+
+/// Evolução patrimonial e índices, recalculados quando a carteira ou os
+/// dados de mercado mudam.
+final wealthOverviewProvider = FutureProvider<WealthOverview>((ref) async {
+  ref.watch(marketTickProvider);
+  final snap = await ref.watch(portfolioSnapshotProvider.future);
+  return ref.watch(wealthServiceProvider).load(snap);
+});

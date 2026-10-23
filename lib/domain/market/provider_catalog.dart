@@ -169,6 +169,18 @@ abstract final class ProviderCatalog {
     warning: 'Não é uma API oficial: se mudar, o app avisa e usa o que já tem.',
   );
 
+  static const b3Indices = ProviderInfo(
+    code: 'b3_indices',
+    shortName: 'B3',
+    name: 'B3 — Índices',
+    site: 'https://www.b3.com.br',
+    role: 'Fechamento diário do Ibovespa (comparação no Painel)',
+    sends: 'Só o código do índice (IBOV) e o ano.',
+    license: 'Endereços internos do site da B3, não documentados como API',
+    limits: 'Gratuito, sem chave. Uma requisição por ano de histórico.',
+    warning: 'Não é uma API oficial: se mudar, o app avisa e usa o que já tem.',
+  );
+
   static const tesouro = ProviderInfo(
     code: 'tesouro',
     shortName: 'Tesouro',
@@ -277,6 +289,7 @@ abstract final class ProviderCatalog {
     brapi,
     b3Cotahist,
     b3Events,
+    b3Indices,
     tesouro,
     cvm,
     coingecko,

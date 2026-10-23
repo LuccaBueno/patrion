@@ -60,38 +60,54 @@ void main() {
   testWidgets('dashboard mostra totais, resultado e alocação', (tester) async {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
-    await app.run(() async {
-      expect(find.text('Painel'), findsWidgets);
-      // Caixa 10.000 − 3.005 − 2.000; mercado 3.500 + 2.100.
-      expect(find.text(r'R$ 10.595,00'), findsOneWidget);
-      expect(find.text(r'R$ 5.005,00'), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('stat-market')),
-          matching: find.text(r'R$ 5.600,00'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text(r'R$ 4.995,00'), findsWidgets);
-      // Resultado não realizado e resultado total (sem vendas nem proventos).
-      expect(find.text(r'+R$ 595,00'), findsNWidgets(2));
-      expect(find.textContaining('+11,89% sobre o custo'), findsOneWidget);
-      // TIR: −5.005 em 10/01 e +5.600 em 31/05/2024; menos de um ano, então
-      // mostra o retorno do período.
-      expect(find.text('+11,89% no período'), findsOneWidget);
-      expect(find.textContaining('de 10/01/2024 a 31/05/2024'), findsOneWidget);
-      expect(find.text('Por classe'), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('dist-class')),
-          matching: find.text('Ações BR'),
-        ),
-        findsOneWidget,
-      );
-      // Resultado total sobre o aplicado: 595 ÷ 5.005.
-      expect(find.textContaining('+11,89% sobre o aplicado'), findsOneWidget);
-      expect(find.textContaining('saldos até 31/05/2024'), findsOneWidget);
-    });
+    await app.run(
+      // Janela alta: a lista do Painel constrói todos os cartões.
+      size: const Size(1280, 2600),
+      () async {
+        expect(find.text('Painel'), findsWidgets);
+        // Caixa 10.000 − 3.005 − 2.000; mercado 3.500 + 2.100.
+        expect(find.text(r'R$ 10.595,00'), findsOneWidget);
+        // Investido (custo) e aplicado (aportes − resgates) coincidem aqui.
+        expect(find.text(r'R$ 5.005,00'), findsNWidgets(2));
+        await app.pumpUntil(
+          find.descendant(
+            of: find.byKey(const Key('stat-applied')),
+            matching: find.text(r'R$ 5.005,00'),
+          ),
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('stat-market')),
+            matching: find.text(r'R$ 5.600,00'),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text(r'R$ 4.995,00'), findsWidgets);
+        // Resultado não realizado e resultado total (sem vendas nem proventos).
+        expect(find.text(r'+R$ 595,00'), findsNWidgets(2));
+        expect(find.textContaining('+11,89% sobre o custo'), findsOneWidget);
+        // TIR: −5.005 em 10/01 e +5.600 em 31/05/2024; menos de um ano, então
+        // mostra o retorno do período.
+        expect(find.text('+11,89% no período'), findsOneWidget);
+        expect(
+          find.textContaining('de 10/01/2024 a 31/05/2024'),
+          findsOneWidget,
+        );
+        // Distribuição: uma rosca, com o seletor por classe.
+        await app.tap(find.byKey(const Key('dist-Classe')));
+        expect(find.text('Por classe'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('distribution')),
+            matching: find.text('Ações BR'),
+          ),
+          findsOneWidget,
+        );
+        // Resultado total sobre o aplicado: 595 ÷ 5.005.
+        expect(find.textContaining('+11,89% sobre o aplicado'), findsOneWidget);
+        expect(find.textContaining('saldos até 31/05/2024'), findsOneWidget);
+      },
+    );
   });
 
   testWidgets('valores grandes nos cards do dashboard não quebram linha', (
@@ -117,7 +133,8 @@ void main() {
       );
     });
     final app = AppHarness(tester, f.t);
-    await app.run(size: const Size(960, 640), () async {
+    // Janela de 960 px de largura, alta para construir todos os cartões.
+    await app.run(size: const Size(960, 4200), () async {
       for (final key in [
         'stat-equity',
         'stat-cash',
@@ -414,7 +431,7 @@ void main() {
       );
     });
     final app = AppHarness(tester, f.t);
-    await app.run(() async {
+    await app.run(size: const Size(1280, 2600), () async {
       expect(find.byKey(const Key('stat-cash')), findsNothing);
       expect(find.textContaining('Caixa negativo'), findsNothing);
       expect(

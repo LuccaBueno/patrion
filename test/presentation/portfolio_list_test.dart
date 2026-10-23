@@ -345,7 +345,7 @@ void main() {
           )
           .first;
       Future<void> show(String key) => tester.scrollUntilVisible(
-        find.byKey(Key(key)),
+        find.byKey(Key(key)).hitTestable(),
         200,
         scrollable: list,
       );
@@ -357,17 +357,47 @@ void main() {
         findsOneWidget,
       );
       // Variação do dia: só o BBAS3 tem cotação e fechamento anterior.
-      expect(inKey('stat-day', r'-R$ 18,00 (-0,75%)'), findsOneWidget);
       expect(
-        inKey('stat-day', 'parcial: 4 ativos sem a variação'),
+        inKey('stat-day', r'-R$ 18,00 (-0,75%) · parcial'),
         findsOneWidget,
       );
-      // Distribuição por ativo com os mesmos valores da Carteira.
-      expect(inKey('dist-asset', 'VALE3'), findsOneWidget);
-      expect(inKey('dist-asset', r'R$ 3.500,00'), findsOneWidget);
-      expect(inKey('dist-asset', r'R$ 2.392,00'), findsOneWidget);
-      expect(find.byKey(const Key('dist-sector')), findsOneWidget);
-      expect(inKey('dist-sector', 'Sem setor informado'), findsOneWidget);
+      expect(
+        tester
+            .widget<Tooltip>(
+              find.ancestor(
+                of: find.byKey(const Key('stat-day')),
+                matching: find.byType(Tooltip),
+              ),
+            )
+            .message,
+        contains('parcial: 4 ativos sem a variação'),
+      );
+      // Faixa do M-09: aplicado dos ativos com preço (o WEGE3 fica fora):
+      // 2.500 + 300 + 3.000 + 2.000 + 91; ganho = 8.182 − 7.891.
+      await app.pumpUntil(inKey('stat-applied', r'R$ 7.891,00'));
+      expect(inKey('stat-gain', r'+R$ 291,00'), findsOneWidget);
+      // Distribuição por ativo com os mesmos valores da Carteira; o seletor
+      // troca para setor.
+      await show('distribution');
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('distribution')),
+          matching: find.text('VALE3'),
+        ),
+        findsOneWidget,
+      );
+      expect(inKey('distribution', r'R$ 3.500,00'), findsOneWidget);
+      expect(inKey('distribution', r'R$ 2.392,00'), findsOneWidget);
+      expect(inKey('distribution', 'VALE3 é 42,78% do patrimônio'), findsOne);
+      await show('dist-Setor');
+      await app.tap(find.byKey(const Key('dist-Setor')));
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('distribution')),
+          matching: find.text('Sem setor informado'),
+        ),
+        findsOneWidget,
+      );
       await show('dash-contributions');
       // Aportes: no mês, a compra de 10/10 (91); no ano, as cinco compras
       // de janeiro (2.500 + 300 + 3.000 + 2.000 + 800) + 91.
@@ -377,7 +407,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        inKey('dash-income', r'Últimos 12 meses R$ 25,00'),
+        inKey('dash-income', r'Você recebeu R$ 25,00 de proventos'),
         findsOneWidget,
       );
       await show('dash-movers');

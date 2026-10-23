@@ -32,6 +32,16 @@ abstract final class Fmt {
     return '$sign${_group(abs, abs.scale)}';
   }
 
+  /// Número com 2 casas e sinal explícito: `+2,15`, `-0,40` (pontos
+  /// percentuais).
+  static String signedNumber(Decimal value) {
+    final rounded = DecimalMath.roundHalfUp(value);
+    final sign = rounded < Decimal.zero
+        ? '-'
+        : (rounded > Decimal.zero ? '+' : '');
+    return '$sign${_group(rounded.abs(), 2)}';
+  }
+
   /// Fração como percentual com 2 casas e sinal: 0,1234 → `+12,34%`.
   static String percent(Decimal fraction, {bool signed = true}) {
     final pct = DecimalMath.roundHalfUp(fraction * Decimal.fromInt(100));

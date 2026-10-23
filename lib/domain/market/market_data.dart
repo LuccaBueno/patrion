@@ -191,7 +191,10 @@ enum IndicatorSeries implements Coded {
   ipca('ipca', 'IPCA', IndicatorUnit.pctMonth),
 
   /// IGP-M, variação mensal (%). SGS 189.
-  igpm('igpm', 'IGP-M', IndicatorUnit.pctMonth);
+  igpm('igpm', 'IGP-M', IndicatorUnit.pctMonth),
+
+  /// Ibovespa, em pontos (fechamento diário; B3, M-09).
+  ibovespa('ibov', 'Ibovespa', IndicatorUnit.indexNumber);
 
   const IndicatorSeries(this.code, this.label, this.unit);
 

@@ -98,6 +98,10 @@ class DonutCard extends StatelessWidget {
     required this.slices,
     required this.currency,
     this.subtitle,
+    this.trailing,
+    this.center,
+    this.header,
+    this.size = 132,
     super.key,
   });
 
@@ -105,6 +109,16 @@ class DonutCard extends StatelessWidget {
   final String? subtitle;
   final List<AllocationSlice<String?>> slices;
   final String currency;
+  final Widget? trailing;
+
+  /// Conteúdo acima da rosca (o seletor da distribuição).
+  final Widget? header;
+
+  /// Texto no meio da rosca (o total, por exemplo).
+  final String? center;
+
+  /// Diâmetro da rosca.
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -130,92 +144,118 @@ class DonutCard extends StatelessWidget {
           ChartColors.other(context),
         ),
     ];
+    final Widget content = items.isEmpty
+        ? const SizedBox(
+            height: 140,
+            child: Center(
+              child: UnavailableText(
+                tooltip: 'Informe preços ou saldos para ver a distribuição.',
+              ),
+            ),
+          )
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: size,
+                height: size,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PieChart(
+                      PieChartData(
+                        centerSpaceRadius: size / 2 - 28,
+                        sectionsSpace: 2,
+                        startDegreeOffset: -90,
+                        sections: [
+                          for (final (_, _, f, color) in items)
+                            PieChartSectionData(
+                              // Conversão para desenho apenas (regra 6).
+                              value: f.toDouble(),
+                              color: color,
+                              radius: 26,
+                              showTitle: false,
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (center != null)
+                      SizedBox(
+                        width: size - 64,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            center!,
+                            key: const Key('donut-center'),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  children: [
+                    for (final (label, value, f, color) in items)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: color,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                            Text(
+                              Fmt.percent(f, signed: false),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 104,
+                              child: Text(
+                                Fmt.money(value, currency),
+                                textAlign: TextAlign.end,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          );
     return DashCard(
       title: title,
       subtitle: subtitle,
-      child: items.isEmpty
-          ? const SizedBox(
-              height: 140,
-              child: Center(
-                child: UnavailableText(
-                  tooltip: 'Informe preços ou saldos para ver a distribuição.',
-                ),
-              ),
-            )
-          : Row(
+      trailing: trailing,
+      child: header == null
+          ? content
+          : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 132,
-                  height: 132,
-                  child: PieChart(
-                    PieChartData(
-                      centerSpaceRadius: 38,
-                      sectionsSpace: 2,
-                      startDegreeOffset: -90,
-                      sections: [
-                        for (final (_, _, f, color) in items)
-                          PieChartSectionData(
-                            // Conversão para desenho apenas (regra 6).
-                            value: f.toDouble(),
-                            color: color,
-                            radius: 26,
-                            showTitle: false,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    children: [
-                      for (final (label, value, f, color) in items)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 3),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 10,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  label,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              ),
-                              Text(
-                                Fmt.percent(f, signed: false),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              SizedBox(
-                                width: 104,
-                                child: Text(
-                                  Fmt.money(value, currency),
-                                  textAlign: TextAlign.end,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+              children: [header!, const SizedBox(height: 12), content],
             ),
     );
   }
@@ -223,10 +263,16 @@ class DonutCard extends StatelessWidget {
 
 /// Uma série de barras por mês.
 class BarSeries {
-  const BarSeries(this.label, this.valueOf);
+  const BarSeries(this.label, this.valueOf, {this.colorOf});
 
   final String label;
   final Decimal Function(MonthFlow) valueOf;
+
+  /// Cor da série (padrão: a paleta, na ordem das séries).
+  final Color Function(BuildContext)? colorOf;
+
+  Color color(BuildContext context, int i) =>
+      colorOf?.call(context) ?? ChartColors.of(context, i);
 }
 
 /// Barras por mês (últimos 12), uma ou mais séries lado a lado, com legenda
@@ -300,7 +346,7 @@ class MonthlyBars extends StatelessWidget {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: ChartColors.of(context, i),
+                        color: s.color(context, i),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -374,7 +420,7 @@ class MonthlyBars extends StatelessWidget {
                         BarChartRodData(
                           toY: s.valueOf(m).toDouble(),
                           width: width,
-                          color: ChartColors.of(context, i),
+                          color: s.color(context, i),
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(4),
                           ),
@@ -403,4 +449,70 @@ String compact(double v) {
   if (abs >= 1e6) return '${one(v / 1e6)} mi';
   if (abs >= 1e3) return '${one(v / 1e3)} mil';
   return one(v);
+}
+
+/// Uma visão da distribuição (por ativo, classe, setor ou corretora).
+class DistributionView {
+  const DistributionView(this.label, this.slices, {this.subtitle});
+
+  final String label;
+  final List<AllocationSlice<String?>> slices;
+  final String? subtitle;
+}
+
+/// Distribuição numa rosca só, com seletor, o total no centro e a lista de
+/// percentuais ao lado (M-09).
+class DistributionCard extends StatefulWidget {
+  const DistributionCard({
+    required this.views,
+    required this.total,
+    required this.currency,
+    super.key,
+  });
+
+  final List<DistributionView> views;
+  final Decimal total;
+  final String currency;
+
+  @override
+  State<DistributionCard> createState() => _DistributionCardState();
+}
+
+class _DistributionCardState extends State<DistributionCard> {
+  var _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final view = widget.views[_index];
+    final top = view.slices.isEmpty ? null : view.slices.first;
+    return DonutCard(
+      key: const Key('distribution'),
+      title: top == null
+          ? 'Distribuição'
+          : '${top.key ?? 'Caixa'} é ${Fmt.percent(top.fraction, signed: false)} '
+                'do patrimônio',
+      subtitle: view.subtitle ?? 'Por ${view.label.toLowerCase()}',
+      currency: widget.currency,
+      slices: view.slices,
+      size: 168,
+      center: Fmt.money(widget.total, widget.currency),
+      header: SegmentedButton<int>(
+        key: const Key('distribution-by'),
+        showSelectedIcon: false,
+        style: const ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        segments: [
+          for (final (i, v) in widget.views.indexed)
+            ButtonSegment(
+              value: i,
+              label: Text(v.label, key: Key('dist-${v.label}')),
+            ),
+        ],
+        selected: {_index},
+        onSelectionChanged: (s) => setState(() => _index = s.single),
+      ),
+    );
+  }
 }

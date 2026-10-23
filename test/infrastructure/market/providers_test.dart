@@ -12,6 +12,7 @@ import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/domain/market/market_data.dart';
 import 'package:patrion/infrastructure/market/providers/b3_cotahist_provider.dart';
 import 'package:patrion/infrastructure/market/providers/b3_events_provider.dart';
+import 'package:patrion/infrastructure/market/providers/b3_index_provider.dart';
 import 'package:patrion/infrastructure/market/providers/bcb_providers.dart';
 import 'package:patrion/infrastructure/market/providers/brapi_provider.dart';
 import 'package:patrion/infrastructure/market/providers/global_providers.dart';
@@ -468,6 +469,51 @@ void main() {
       expect(events, isNotEmpty);
       expect(events.first.amount, d('0.67407131'));
       expect(events.first.kind, CorporateEventKind.jcp);
+    });
+  });
+
+  group('B3 índices (Ibovespa)', () {
+    test('tabela dia × mês da B3 vira um ponto por pregão, em pontos', () {
+      final points = B3IndexProvider.parse(
+        read('b3_ibov_2026.json'),
+        series: IndicatorSeries.ibovespa,
+        year: 2026,
+        collectedAt: at,
+      );
+      // Resposta real de 23/10/2026: até o pregão de 22/10.
+      expect(points.last.refDate, day('2026-10-22'));
+      expect(points.last.value, d('204120.12'));
+      final oct20 = points.firstWhere((p) => p.refDate == day('2026-10-20'));
+      expect(oct20.value, d('208295.98'));
+      expect(points.first.refDate.year, 2026);
+      expect(points.every((p) => p.source == 'b3_indices'), isTrue);
+      // Sem pregão (fins de semana, feriados): sem ponto.
+      expect(points.where((p) => p.refDate == day('2026-10-18')), isEmpty);
+    });
+
+    test('pede um ano por vez, só com o código do índice', () async {
+      adapter.on(
+        'indexStatisticsProxy',
+        FakeReply.file(fixture('b3_ibov_2026.json')),
+      );
+      final provider = B3IndexProvider(
+        fakeMarketHttp(adapter),
+        wallClock: clock,
+      );
+      final points = await provider.indicator(
+        IndicatorSeries.ibovespa,
+        from: day('2026-10-01'),
+        to: day('2026-10-22'),
+      );
+      expect(points.first.refDate, day('2026-10-01'));
+      expect(points.last.refDate, day('2026-10-22'));
+      final url = adapter.urls.single;
+      final param = url.split('/').last;
+      expect(
+        utf8.decode(base64.decode(Uri.decodeComponent(param))),
+        '{"index":"IBOV","language":"pt-br","year":"2026"}',
+      );
+      expect(provider.supports(IndicatorSeries.cdi), isFalse);
     });
   });
 

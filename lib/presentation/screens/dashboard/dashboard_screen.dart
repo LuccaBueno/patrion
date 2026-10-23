@@ -26,6 +26,10 @@ import '../sync/sync_screen.dart';
 import '../updates/update_widgets.dart';
 import '../portfolio/add_asset_dialog.dart';
 import '../../router/app_router.dart';
+import '../../../application/portfolio/wealth_service.dart';
+import '../../../core/time/local_date.dart';
+import '../../../domain/portfolio/wealth_history.dart';
+import 'wealth_chart.dart';
 
 /// Dashboard da carteira real (SPEC §8).
 ///
@@ -156,9 +160,11 @@ class _DashboardState extends ConsumerState<_Dashboard> {
       asOf: widget.snap.asOf,
     );
     final theme = Theme.of(context);
-    final muted = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
+    final wealth = ref.watch(wealthOverviewProvider);
+    final overview = wealth.value;
+    final height = MediaQuery.sizeOf(context).height;
+    final contributions12m = months.fold(Decimal.zero, (a, m) => a + m.buys);
+    final income12m = months.fold(Decimal.zero, (a, m) => a + m.income);
 
     return PageScaffold(
       title: 'Painel',
@@ -189,6 +195,8 @@ class _DashboardState extends ConsumerState<_Dashboard> {
           const SyncReminder(),
           const UpdateReminder(),
           ..._warnings(context, summary),
+          // Faixa de números (M-09): quanto tenho, quanto coloquei, quanto
+          // rendeu e a rentabilidade no ano.
           _HeroRow(
             children: [
               _StatCard(
@@ -203,11 +211,171 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                           'fora do total)'
                     : summary.trackCash
                     ? 'Valor de mercado + caixa'
-                    : 'Valor de mercado das posições (sem controle de caixa)',
+                    : 'Valor de mercado das posições',
+                footer: _DayChange(day: day, currency: currency),
               ),
               _StatCard(
-                key: const Key('stat-total-result'),
+                key: const Key('stat-applied'),
                 big: true,
+                label: 'Total aplicado',
+                value: overview == null || currency != 'BRL'
+                    ? null
+                    : Fmt.money(
+                        _last(overview)?.invested ?? Decimal.zero,
+                        'BRL',
+                      ),
+                unavailableReason: currency != 'BRL'
+                    ? 'A evolução e o aplicado são calculados em reais.'
+                    : 'Calculando…',
+                info:
+                    'Aportes acumulados (compras com custos) menos resgates '
+                    '(vendas, líquidas de custos), dos ativos com preço.',
+                note: 'Aportes − resgates',
+              ),
+              _StatCard(
+                key: const Key('stat-gain'),
+                big: true,
+                label: 'Ganho',
+                pnl: _last(overview)?.gain,
+                value: _last(overview) == null || currency != 'BRL'
+                    ? null
+                    : '${Fmt.signedMoney(_last(overview)!.gain, 'BRL')}'
+                          '${_last(overview)!.gainFraction == null ? '' : ' (${Fmt.percent(_last(overview)!.gainFraction!)})'}',
+                unavailableReason: currency != 'BRL'
+                    ? 'A evolução e o ganho são calculados em reais.'
+                    : 'Calculando…',
+                info:
+                    'Patrimônio das posições − total aplicado. Os proventos '
+                    'recebidos ficam de fora (estão em Proventos).',
+                note: 'Patrimônio − aplicado',
+              ),
+              _StatCard(
+                key: const Key('stat-ytd'),
+                big: true,
+                label: 'Rentabilidade no ano',
+                pnl: _ytd(overview, widget.snap.asOf),
+                value: _ytd(overview, widget.snap.asOf) == null
+                    ? null
+                    : Fmt.percent(_ytd(overview, widget.snap.asOf)!),
+                unavailableReason: overview == null
+                    ? 'Calculando…'
+                    : 'Sem histórico de preços suficiente neste ano.',
+                info: ReturnMethod.twr.description,
+                note:
+                    'TWR desde 31/12/${widget.snap.asOf.year - 1}, com '
+                    'proventos',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          WealthChartCard(
+            key: const Key('wealth'),
+            overview: currency == 'BRL' ? overview : null,
+            assets: widget.snap.assets,
+            // Cerca de metade da altura da janela (M-09).
+            height: (height * 0.42).clamp(260.0, 520.0),
+          ),
+          const SizedBox(height: 16),
+          _ChartsGrid(
+            children: [
+              DistributionCard(
+                currency: currency,
+                total: totals.marketValue,
+                views: [
+                  DistributionView(
+                    'Ativo',
+                    _slices([
+                      for (final h in holdings)
+                        if (h.currency == currency && h.marketValue != null)
+                          (h.asset?.symbol ?? '?', h.marketValue!),
+                    ]),
+                  ),
+                  DistributionView(
+                    'Classe',
+                    summary.allocation(
+                      currency,
+                      (v) => v.asset?.assetClass.label ?? '?',
+                    ),
+                  ),
+                  DistributionView(
+                    'Setor',
+                    summary.allocation(
+                      currency,
+                      (v) => v.asset?.sector ?? 'Sem setor informado',
+                      includeCash: false,
+                    ),
+                    subtitle: 'Por setor do cadastro do ativo',
+                  ),
+                  DistributionView(
+                    'Corretora',
+                    summary.allocation(
+                      currency,
+                      (v) =>
+                          widget.snap
+                              .institutionOfAccount(v.position.accountId)
+                              ?.name ??
+                          '?',
+                      includeCash: false,
+                    ),
+                  ),
+                ],
+              ),
+              DashCard(
+                key: const Key('dash-contributions'),
+                title:
+                    'Você aportou ${Fmt.money(contributions12m, currency)} em '
+                    '12 meses',
+                subtitle:
+                    'No mês ${Fmt.money(months.last.buys, currency)} · no ano '
+                    '${Fmt.money(DashboardMetrics.investedInYear(widget.snap.operations, currency: currency, asOf: widget.snap.asOf), currency)}'
+                    ' · compras com custos; o saldo inicial não conta',
+                child: MonthlyBars(
+                  months: months,
+                  currency: currency,
+                  series: [
+                    BarSeries(
+                      'Compras e aportes',
+                      (m) => m.buys,
+                      colorOf: (c) => SemanticColors.of(c).gain,
+                    ),
+                    BarSeries(
+                      'Vendas e resgates',
+                      (m) => m.sells,
+                      colorOf: (c) => Theme.of(c).colorScheme.outline,
+                    ),
+                  ],
+                ),
+              ),
+              DashCard(
+                key: const Key('dash-income'),
+                title:
+                    'Você recebeu ${Fmt.money(income12m, currency)} de '
+                    'proventos em 12 meses',
+                subtitle: 'Líquidos, por mês de pagamento registrado',
+                child: MonthlyBars(
+                  months: months,
+                  currency: currency,
+                  series: [
+                    BarSeries(
+                      'Proventos',
+                      (m) => m.income,
+                      colorOf: (c) => Theme.of(c).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+              _MoversCard(holdings: holdings, currency: currency),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text('Mais números', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: [
+              _StatCard(
+                key: const Key('stat-total-result'),
                 label: 'Resultado total',
                 pnl: performance.totalResult,
                 value: performance.totalResult == null
@@ -221,31 +389,6 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                           '(${Fmt.money(performance.invested, currency)}); '
                           'realizado + não realizado + proventos',
               ),
-              _StatCard(
-                key: const Key('stat-day'),
-                big: true,
-                label: 'Variação do dia',
-                pnl: day?.amount,
-                value: day == null
-                    ? null
-                    : '${Fmt.signedMoney(day.amount, currency)} '
-                          '(${day.fraction == null ? '—' : Fmt.percent(day.fraction!)})',
-                unavailableReason:
-                    'Nenhum ativo com cotação de mercado e o fechamento '
-                    'anterior guardado.',
-                note: day == null
-                    ? 'Cotação atual × fechamento anterior'
-                    : 'Desde o fechamento de ${Fmt.date(day.since)}'
-                          '${day.partial ? ' · parcial: ${day.missing} '
-                                    '${day.missing == 1 ? 'ativo' : 'ativos'} sem a variação' : ''}',
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: [
               _StatCard(
                 key: const Key('stat-invested'),
                 label: 'Valor investido',
@@ -304,91 +447,6 @@ class _DashboardState extends ConsumerState<_Dashboard> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          _ChartsGrid(
-            children: [
-              DonutCard(
-                key: const Key('dist-asset'),
-                title: 'Por ativo',
-                currency: currency,
-                slices: _slices([
-                  for (final h in holdings)
-                    if (h.currency == currency && h.marketValue != null)
-                      (h.asset?.symbol ?? '?', h.marketValue!),
-                ]),
-              ),
-              DonutCard(
-                key: const Key('dist-class'),
-                title: 'Por classe',
-                currency: currency,
-                slices: summary.allocation(
-                  currency,
-                  (v) => v.asset?.assetClass.label ?? '?',
-                ),
-              ),
-              DonutCard(
-                key: const Key('dist-sector'),
-                title: 'Por setor',
-                subtitle: 'Setor do cadastro do ativo',
-                currency: currency,
-                slices: summary.allocation(
-                  currency,
-                  (v) => v.asset?.sector ?? 'Sem setor informado',
-                  includeCash: false,
-                ),
-              ),
-              DonutCard(
-                key: const Key('dist-institution'),
-                title: 'Por instituição',
-                currency: currency,
-                slices: summary.allocation(
-                  currency,
-                  (v) =>
-                      widget.snap
-                          .institutionOfAccount(v.position.accountId)
-                          ?.name ??
-                      '?',
-                  includeCash: false,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _ChartsGrid(
-            children: [
-              DashCard(
-                key: const Key('dash-contributions'),
-                title: 'Aportes',
-                subtitle:
-                    'No mês ${Fmt.money(months.last.buys, currency)} · no ano '
-                    '${Fmt.money(DashboardMetrics.investedInYear(widget.snap.operations, currency: currency, asOf: widget.snap.asOf), currency)}'
-                    ' · compras com custos; o saldo inicial não conta',
-                child: MonthlyBars(
-                  months: months,
-                  currency: currency,
-                  series: [
-                    BarSeries('Compras e aportes', (m) => m.buys),
-                    BarSeries('Vendas e resgates', (m) => m.sells),
-                  ],
-                ),
-              ),
-              DashCard(
-                key: const Key('dash-income'),
-                title: 'Proventos',
-                subtitle:
-                    'Últimos 12 meses '
-                    '${Fmt.money(months.fold(Decimal.zero, (a, m) => a + m.income), currency)}'
-                    ' · líquidos, por mês de pagamento registrado',
-                child: MonthlyBars(
-                  months: months,
-                  currency: currency,
-                  series: [BarSeries('Proventos', (m) => m.income)],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _MoversCard(holdings: holdings, currency: currency),
           const SizedBox(height: 16),
           _TopPositionsCard(snap: widget.snap, currency: currency),
           if (summary.upcomingMaturities.isNotEmpty) ...[
@@ -397,17 +455,17 @@ class _DashboardState extends ConsumerState<_Dashboard> {
           ],
           const SizedBox(height: 16),
           const MarketOverviewCard(),
-          const SizedBox(height: 16),
-          Text(
-            'A evolução do patrimônio, a rentabilidade no mês, no ano e '
-            'desde o início comparada com CDI e Ibovespa e o seletor de '
-            'período usam o histórico e os benchmarks e entram na Fase 8.',
-            style: muted,
-          ),
         ],
       ),
     );
   }
+
+  static WealthPoint? _last(WealthOverview? o) =>
+      o == null || o.series.isEmpty ? null : o.series.points.last;
+
+  /// TWR do ano corrente (desde o último dia do ano anterior).
+  static Decimal? _ytd(WealthOverview? o, LocalDate today) =>
+      o?.series.twrBetween(LocalDate(today.year - 1, 12, 31), today);
 
   List<Widget> _warnings(BuildContext context, PortfolioSummary summary) {
     final snap = widget.snap;
@@ -471,10 +529,14 @@ class _StatCard extends StatelessWidget {
     this.pnl,
     this.info,
     this.unavailableReason,
+    this.footer,
     super.key,
   });
 
   final String label;
+
+  /// Linha extra embaixo da nota (a variação do dia, no patrimônio).
+  final Widget? footer;
 
   /// Nulo mostra "indisponível" com [unavailableReason].
   final String? value;
@@ -558,6 +620,7 @@ class _StatCard extends StatelessWidget {
                 note,
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
+              if (footer != null) ...[const SizedBox(height: 6), footer!],
             ],
           ),
         ),
@@ -792,19 +855,19 @@ class _ChartsGrid extends StatelessWidget {
                 padding: EdgeInsets.only(
                   bottom: i + 2 < children.length ? 16 : 0,
                 ),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(child: children[i]),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: i + 1 < children.length
-                            ? children[i + 1]
-                            : const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
+                // Sem IntrinsicHeight: a medição intrínseca subestima alguns
+                // cartões (texto que quebra linha) e corta o conteúdo.
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: children[i]),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: i + 1 < children.length
+                          ? children[i + 1]
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -861,19 +924,33 @@ class _MoversCardState extends State<_MoversCard> {
           Text(title, style: theme.textTheme.labelLarge),
           const SizedBox(height: 4),
           if (list.isEmpty) Text('Nenhuma', style: muted),
+          // Linhas simples (sem ListTile): a altura entra certa na grade.
           for (final m in list)
-            ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+            InkWell(
               onTap: () => context.go(Routes.asset(m.holding.assetId)),
-              title: Text(m.holding.asset?.symbol ?? '?'),
-              subtitle: Text(
-                'desde ${Fmt.date(m.change.from.refDate)} · '
-                '${Fmt.money(m.change.to, widget.currency)}',
-              ),
-              trailing: PnlText(
-                value: m.change.perUnit,
-                text: Fmt.percent(m.change.fraction),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(m.holding.asset?.symbol ?? '?'),
+                          Text(
+                            'desde ${Fmt.date(m.change.from.refDate)} · '
+                            '${Fmt.money(m.change.to, widget.currency)}',
+                            style: muted,
+                          ),
+                        ],
+                      ),
+                    ),
+                    PnlText(
+                      value: m.change.perUnit,
+                      text: Fmt.percent(m.change.fraction),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
@@ -910,6 +987,53 @@ class _MoversCardState extends State<_MoversCard> {
                 column('Baixas', downs),
               ],
             ),
+    );
+  }
+}
+
+/// Variação do dia embaixo do patrimônio.
+class _DayChange extends StatelessWidget {
+  const _DayChange({required this.day, required this.currency});
+
+  final PortfolioDayChange? day;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    final d = day;
+    if (d == null) {
+      return Text(
+        'Variação do dia indisponível: nenhum ativo com cotação e o '
+        'fechamento anterior guardado.',
+        key: const Key('stat-day'),
+        style: muted,
+      );
+    }
+    return Tooltip(
+      message:
+          'Cotação atual × fechamento de ${Fmt.date(d.since)}'
+          '${d.partial ? ' · parcial: ${d.missing} ${d.missing == 1 ? 'ativo' : 'ativos'} sem a variação' : ''}',
+      child: Row(
+        key: const Key('stat-day'),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Hoje ', style: muted),
+          Flexible(
+            child: PnlText(
+              value: d.amount,
+              text:
+                  '${Fmt.signedMoney(d.amount, currency)} '
+                  '(${d.fraction == null ? '—' : Fmt.percent(d.fraction!)})'
+                  '${d.partial ? ' · parcial' : ''}',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -6,6 +6,7 @@ import '../../domain/market/provider_catalog.dart';
 import 'market_http.dart';
 import 'providers/b3_cotahist_provider.dart';
 import 'providers/b3_events_provider.dart';
+import 'providers/b3_index_provider.dart';
 import 'providers/b3_ticker_catalog.dart';
 import 'providers/bcb_providers.dart';
 import 'providers/brapi_provider.dart';
@@ -32,6 +33,9 @@ abstract final class MarketSetup {
       maxAttempts: 4,
     ),
     ProviderCatalog.b3Events.code: const HttpPolicy(
+      minInterval: Duration(seconds: 1),
+    ),
+    ProviderCatalog.b3Indices.code: const HttpPolicy(
       minInterval: Duration(seconds: 1),
     ),
     ProviderCatalog.yahoo.code: const HttpPolicy(
@@ -91,6 +95,7 @@ abstract final class MarketSetup {
       indicators: [
         BcbSgsProvider(http, wallClock: wallClock),
         IbgeSidraProvider(http, wallClock: wallClock),
+        B3IndexProvider(http, wallClock: wallClock),
       ],
       fx: [
         BcbPtaxProvider(http, wallClock: wallClock),

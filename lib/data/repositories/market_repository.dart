@@ -373,6 +373,29 @@ class MarketRepository {
     return _fx(sameDay.first);
   }
 
+  /// Câmbio diário da moeda contra o real (média de compra e venda), em
+  /// ordem; na mesma data, a PTAX antes da referência do BCE.
+  Future<List<(LocalDate, Decimal)>> fxHistory(String currency) async {
+    final rows =
+        await (_db.select(_db.mktFxRates)
+              ..where((t) => t.base.equals(currency) & t.quote.equals('BRL'))
+              ..orderBy([(t) => OrderingTerm.asc(t.refDate)]))
+            .get();
+    final byDate = <String, FxRate>{};
+    for (final r in rows) {
+      final rate = _fx(r);
+      final current = byDate[r.refDate];
+      if (current == null ||
+          (current.kind != FxKind.ptaxClose && rate.kind == FxKind.ptaxClose)) {
+        byDate[r.refDate] = rate;
+      }
+    }
+    return [
+      for (final r in byDate.values)
+        if (r.mid != null) (r.refDate, r.mid!),
+    ];
+  }
+
   /// Moedas com câmbio contra o real guardado.
   Future<List<String>> fxCurrencies() async {
     final rows = await _db

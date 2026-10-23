@@ -652,3 +652,23 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - O eixo de datas dos gráficos (`DateAxis`) põe os rótulos no início de cada ano ou mês.
 - Alternativas: painel mais largo (continuaria cobrindo a lista); marcar compras e vendas no gráfico (pedido explícito de não misturar a carteira com o mercado); ajuste automático por saltos de preço (proibido sem evento confirmado).
 - Motivo: MUDANCAS M-07; regras 1 (nada inventado: sem histórico, "indisponível") e 2 (fonte e tipo do dado, inclusive "calculado").
+
+### 2026-10-23 — D-50: Ibovespa pela B3 (estatísticas de índices) (M-09)
+
+- Contexto: a comparação do Painel precisa do Ibovespa diário. O COTAHIST não traz índices; o Yahoo (`^BVSP`) é não oficial e vem desligado (D-08); a brapi só com plano pago para o histórico.
+- Decisão: adaptador `B3IndexProvider` para o serviço de estatísticas de índices do site da B3 (o mesmo domínio dos proventos, D-35): um ano por requisição, tabela dia × mês em pontos, gravado como o indicador `ibov` (unidade "pontos") em `mkt_indicators`, com fonte e datas, atualizado com os demais indicadores. Testado em 23/10/2026: 2.685 pregões de 04/01/2016 a 22/10/2026, os mesmos dias do COTAHIST.
+- Riscos: endereço interno, não documentado (como os proventos): se mudar, o app avisa na atualização e a comparação usa o que já está guardado ou fica indisponível.
+- Alternativas: BOVA11 como aproximação (é um ETF, com taxa e erro de acompanhamento); Yahoo (não oficial, termos restritivos).
+
+### 2026-10-23 — D-51: Painel com evolução patrimonial, TWR e comparação com índices (M-09; antecipa parte da F8)
+
+- Decisão:
+  - **Evolução patrimonial** calculada dia a dia a partir das operações e dos fechamentos guardados (`WealthHistory`, `FORMULAS.md` §3.2), num isolate, recalculada quando a carteira muda ou os dados de mercado mudam (no máximo a cada 3 s, porque o histórico completo grava em sequência). O último dia usa os valores do retrato da Carteira: os números batem.
+  - **Total aplicado** = aportes − resgates (com custos), não o custo das posições abertas: é a pergunta "quanto eu coloquei?", e o espaço entre as linhas é o ganho, realizado ou não. O custo das posições continua em "Valor investido".
+  - **Ativos sem preço** entram na evolução no primeiro preço (com o aplicado acumulado e, no TWR, como aporte do valor), e os que nunca tiveram preço ficam fora, sempre com uma nota no gráfico (regra 1: nada estimado pelo custo).
+  - **Proventos** ficam fora do patrimônio e das simulações em R$ (o patrimônio não inclui o caixa) e entram no TWR como retorno.
+  - **Comparação** com CDI, Ibovespa (D-50) e IPCA, desligada por padrão: em R$, "os mesmos aportes nas mesmas datas no índice"; em %, TWR contra o índice, ambos a partir de 0%. Rotulada como simulação hipotética (regra 3).
+  - **Faixa de números** no topo (patrimônio, total aplicado, ganho, rentabilidade no ano); os demais indicadores do M-04 continuam em "Mais números". Distribuição numa rosca só, com seletor.
+  - **Desempenho:** `DecimalMath.divide` passou a dividir só com inteiros e `rescale` a devolver a forma compacta. Antes, numa cadeia de multiplicações (o índice do TWR de 10 anos), a representação interna crescia a cada passo e o cálculo levava minutos; agora, 10 anos levam frações de segundo. Os resultados não mudaram (todos os testes de cálculo passam iguais).
+- Alternativas: aplicado como custo das posições (não responde "quanto coloquei" quando há vendas com lucro); preencher dias sem preço pelo custo (proibido); comparação como gráfico separado (pedido para ser opção do gráfico principal).
+- Motivo: MUDANCAS M-09; regras 1, 2, 3 e 10.
