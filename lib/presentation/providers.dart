@@ -20,6 +20,7 @@ import '../application/portfolio/portfolio_query.dart';
 import '../application/portfolio/quick_add_service.dart';
 import '../application/portfolio/registry_service.dart';
 import '../application/portfolio/valuation_service.dart';
+import '../application/portfolio/class_views_service.dart';
 import '../application/portfolio/passive_income_service.dart';
 import '../application/portfolio/risk_service.dart';
 import '../application/portfolio/wealth_service.dart';
@@ -475,4 +476,20 @@ final passiveIncomeProvider = FutureProvider<PassiveIncomeOverview>((
   ref.watch(marketTickProvider);
   final snap = await ref.watch(portfolioSnapshotProvider.future);
   return ref.watch(passiveIncomeServiceProvider).load(snap);
+});
+
+// -- Visões por classe da Carteira (F8) ---------------------------------------
+
+/// FIIs, renda fixa e outras moedas, com o que está guardado.
+final classViewsProvider = FutureProvider<ClassViewsData>((ref) async {
+  ref.watch(marketTickProvider);
+  final snap = await ref.watch(portfolioSnapshotProvider.future);
+  final fx = ref.watch(marketOverviewProvider).value?.fx ?? const {};
+  return ClassViewsService(ref.watch(marketRepositoryProvider)).load(
+    snap,
+    toBrl: {
+      for (final MapEntry(:key, :value) in fx.entries)
+        if (value.mid != null) key: value.mid!,
+    },
+  );
 });

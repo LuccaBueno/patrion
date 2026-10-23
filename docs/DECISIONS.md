@@ -733,3 +733,13 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Já registrado = mesma conta, ativo e tipo, com a nota da data-com ou com data entre a data-com e 10 dias depois do pagamento (quem lançou à mão perto da data não recebe a sugestão de novo).
 - Alternativas: lançar automaticamente (proibido gravar sem confirmação); quantidade pela posição de hoje (erra quem comprou ou vendeu depois); estimar a quantidade antes do saldo inicial (seria inventar).
 - Motivo: SPEC §12.7 e §21 (F8); regras 1, 3 e 10 (`FORMULAS.md` §12).
+
+### 2026-10-23 — D-57: Visões por classe na Carteira (F8, parte 5)
+
+- Decisão:
+  - **Seletor acima da lista da Carteira** (Todos, FIIs, Renda fixa, Cripto, Internacional), cada visão só quando a carteira tem posição aberta na classe; com só "Todos", a Carteira fica como antes. Sem tela nova no menu.
+  - **FIIs:** P/VP pelo informe mensal da CVM (já baixado desde a F6), DY de 12 meses e rendimentos mês a mês pelos proventos da B3, liquidez pelo volume do COTAHIST; recebido (operações), anunciado (B3) e estimado (último rendimento × cotas, hipotético) separados. Vacância e emissões indisponíveis (aprovado).
+  - **Renda fixa:** a **projeção pelo indexador é nova** (o app só tinha o saldo informado e o PU do Tesouro); é bruta, rotulada como calculada e para no último índice publicado. Os três valores (informado, projetado e de mercado) ficam lado a lado, sem escolher por você. A rentabilidade a.a. é a TIR com o valor da Carteira (ou a projeção, sem ele), e o "% do CDI" compara com os mesmos fluxos no CDI.
+  - **Cripto e internacional:** em reais pela PTAX; no internacional, o retorno na moeda, o efeito do câmbio e o total separados, com o câmbio de custo médio das compras.
+- Alternativas: projeção líquida de IR (a tabela regressiva depende de cada resgate; fica para os simuladores, F10); escolher automaticamente entre informado e projetado (esconderia a diferença, que é justamente o que a SPEC §12.2 pede para mostrar).
+- Motivo: SPEC §12.1 a §12.4 e §21 (F8); regras 1, 2, 3 e 10 (`FORMULAS.md` §13).

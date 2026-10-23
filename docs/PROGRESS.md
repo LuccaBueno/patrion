@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 8 em andamento** (desde 23/10/2026; escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos). Partes 1 (Rentabilidade), 2 (Benchmarks), 3 (Risco) e 4 (Renda passiva) concluídas; próximas: 5 (visões por classe) e 6 (Painel e acabamento), depois a versão 1.3.0. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Fase 8 em andamento** (desde 23/10/2026; escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos). Partes 1 (Rentabilidade), 2 (Benchmarks), 3 (Risco), 4 (Renda passiva) e 5 (visões por classe) concluídas; próxima: 6 (Painel e acabamento), depois a versão 1.3.0. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -51,6 +51,16 @@ Cada parte tem um commit; o relatório completo sai no fim (com a 1.3.0).
 - Arquivos: `domain/portfolio/passive_income.dart` (novo), `application/portfolio/passive_income_service.dart` (novo), `presentation/screens/income/income_screen.dart` (novo), `router/app_router.dart` (`/renda` e o item do menu), `providers.dart`.
 - Testes: `passive_income_test.dart` (quantidade na data-com por conta; comprado depois da data-com fora; já registrado pela data ou pela nota; outra conta ainda falta; vendido antes; saldo inicial depois da data-com não sugerido e o seguinte sugerido; anunciado com a quantidade de hoje; amortização fora; totais por tipo, ano, ativo e 12 meses), `income_screen_test.dart` (1 provento pendente de R$ 30,00, anunciado R$ 80,00 no calendário, prévia com 100 × R$ 0,3 e 15%, lançamento grava bruto R$ 30,00, IR R$ 4,50 e a nota, e o cartão some; saldo inicial explicado), `app_test.dart` (menu). Suíte inteira: 568 passando.
 - **Conferência visual (1280 × 800, banco de teste com os proventos reais da B3):** 30 proventos pagos não registrados (R$ 1.043,24 bruto), com a quebra Nubank 800 cotas / XP 50 cotas do BBAS3 na prévia; anunciados de PETR4 e TAEE11 para 11 e 12/2026; recebido em 12 meses R$ 610,55. Corrigido depois da conferência: o valor por cota com 2 casas (agora as da B3) e o campo do IR esticado na prévia.
+
+**Parte 5 — Visões por classe na Carteira (concluída)** (DECISIONS D-57; SPEC §12.1 a §12.4 e §16; FORMULAS §13)
+
+- Seletor acima da lista: Todos, FIIs, Renda fixa, Cripto e Internacional, cada um só quando a carteira tem a classe.
+- **FIIs:** cotação, VP/cota (mês do informe da CVM), P/VP, DY de 12 meses, liquidez diária e segmento; recebido, anunciado e estimado (hipotético); rendimento por cota mês a mês; amortizações; vacância e emissões indisponíveis com o motivo.
+- **Renda fixa:** agrupada em prefixados, pós-fixados e inflação: condições, vencimento, aplicado, saldo informado (com a data), projeção bruta pelo indexador (até o último índice publicado), valor de mercado (Tesouro), rentabilidade a.a. (TIR) e % do CDI.
+- **Cripto e internacional:** custo, preço médio, cotação e valor em reais; no internacional, o retorno na moeda, o câmbio e o total em reais.
+- Arquivos: `domain/portfolio/class_views.dart` (novo), `application/portfolio/class_views_service.dart` (novo), `presentation/screens/portfolio/class_views.dart` (novo), `portfolio_screen.dart`, `providers.dart` (`classViewsProvider`).
+- Testes: `class_views_test.dart` de domínio (P/VP 1,0526, DY 9,6%, 12 meses, volume dos últimos 30 pregões; prefixado de 12% = R$ 1.120,00; 110% do CDI dia a dia, parando no último publicado; IPCA + 6%; indisponível sem condições ou sem CDI; % do CDI 1,2; internacional +10% / +10% / +21%), `presentation/class_views_test.dart` (HGLG11 com P/VP 1,10, DY 8,00%, VP de 08/2026, liquidez, segmento e estimado R$ 11,00; CDB 110% do CDI com projeção até 19/10/2026; AAPL com R$ 6.050,00, +10%, +10% e +21%). Suíte inteira: 577 passando.
+- **Conferência visual (1280 × 800, dados reais):** HGLG11 com VP/cota R$ 165,48 (09/2026), P/VP 0,95, DY 7,84%, liquidez média de R$ 21,6 milhões e rendimentos de R$ 1,10 e R$ 1,17 por cota. Corrigido depois da conferência: os rendimentos com 2 casas no mínimo. O banco de teste não tem renda fixa, cripto nem internacional: essas visões foram conferidas nos testes.
 
 ### Ajustes M-06 a M-09 (desde 23/10/2026)
 

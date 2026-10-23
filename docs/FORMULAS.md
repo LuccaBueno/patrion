@@ -316,3 +316,29 @@ Séries de nível: a carteira pelo índice do TWR (§3.2), cada ativo pelo preç
 - **Saldo inicial depois da data-com** (cadastro rápido, `InitialBalance`): a quantidade naquela data não é conhecida, então o provento não é sugerido; a tela agrupa esses casos por ativo e explica (decisão do usuário em 23/10/2026).
 - **Lançamento** (depois da prévia e da confirmação): uma operação por conta, na data de pagamento, com o bruto da B3 e, no JCP, o IR retido = bruto × a alíquota informada na prévia (padrão 15%, arredondado a 2 casas).
 - Exemplos (testes): 100 cotas na conta A e 40 na B na data-com, dividendo de R$ 0,50: R$ 50,00 e R$ 20,00; JCP de R$ 0,30 × 100 com 15%: bruto R$ 30,00, IR R$ 4,50, líquido R$ 25,50.
+
+## 13. Visões por classe (`FiiMetrics`, `FixedIncomeView`, `ForeignReturn`; `lib/domain/portfolio/class_views.dart`; F8)
+
+### 13.1 FIIs
+
+- **P/VP** = cotação da Carteira ÷ valor patrimonial por cota do informe mensal mais recente da CVM (o mês aparece ao lado). Sem informe ou sem ISIN: indisponível.
+- **DY de 12 meses** = Σ rendimentos por cota com data-com entre o dia 1 do mês de 11 meses atrás e hoje (B3) ÷ cotação.
+- **Rendimento por cota mês a mês**: soma dos rendimentos com data-com em cada um dos 12 meses.
+- **Liquidez** = média do volume financeiro do dia (COTAHIST) nos últimos 30 pregões guardados.
+- **Estimado por mês** = último rendimento por cota × quantidade de hoje (hipotético).
+- **Vacância e emissões**: indisponíveis (decisão aprovada em 23/10/2026).
+
+### 13.2 Renda fixa
+
+- **Projeção bruta** (antes de IR, IOF e custos): Σ fluxo × fator do fluxo até hoje (ou o vencimento), com aportes positivos e resgates, amortizações e vencimentos negativos.
+  - Prefixado: `(1 + taxa)^(prazo na base do título)` (§5).
+  - CDI ou Selic a `p`%: Π(1 + p × CDIᵢ ÷ 100) dos dias úteis publicados de `início` (incluído) a `fim` (excluído); com taxa adicional, × `(1 + s)^(du ÷ 252)`. Para no último dia publicado (a tela mostra "até").
+  - IPCA ou IGP-M + s: `(1 + p × variação do índice até o último mês publicado) × (1 + s)^(du ÷ 252)` (a taxa real até hoje).
+- **Rentabilidade a.a.** = TIR (§7) dos fluxos com o valor de hoje: o da Carteira (saldo informado ou preço de mercado do Tesouro) ou, sem ele, a projeção.
+- **% do CDI** = TIR do título ÷ TIR dos mesmos fluxos aplicados no CDI até o último dia publicado (hipotético).
+- Grupos: prefixados, pós-fixados (CDI, Selic) e inflação (IPCA, IGP-M).
+
+### 13.3 Outras moedas (cripto e internacional)
+
+- Câmbio de custo = média dos câmbios das compras, ponderada pelo valor (o câmbio da operação ou a PTAX do dia); câmbio de hoje = a última PTAX guardada.
+- Retorno na moeda = valor ÷ custo − 1; câmbio = câmbio de hoje ÷ câmbio de custo − 1; em reais = `(1 + na moeda) × (1 + câmbio) − 1` (§9). Exemplo (CASOS §7): US$ 1.000 → 1.100 e 5,00 → 5,50: +10%, +10% e +21%.

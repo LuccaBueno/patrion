@@ -15,7 +15,9 @@ import '../../format/market_labels.dart';
 import '../../providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/common.dart';
+import '../../../domain/portfolio/class_views.dart';
 import 'add_asset_dialog.dart';
+import 'class_views.dart';
 
 /// Carteira real: um item por ativo, onde há mais dinheiro primeiro (M-05;
 /// SPEC §16). O clique na linha abre a página do ativo em tela cheia
@@ -42,7 +44,7 @@ class PortfolioScreen extends ConsumerWidget {
       ],
       child: AsyncBody(
         value: snapshot,
-        builder: (snap) => HoldingsList(
+        builder: (snap) => _ClassViews(
           snap: snap,
           toBrl: {
             for (final MapEntry(:key, :value) in fx.entries)
@@ -539,6 +541,72 @@ class _HoldingRow extends StatelessWidget {
           child: Opacity(opacity: closed ? 0.5 : 1, child: row),
         ),
       ),
+    );
+  }
+}
+
+/// A lista da Carteira e, quando há FIIs, renda fixa, cripto ou
+/// internacional, as visões por classe (F8).
+class _ClassViews extends StatefulWidget {
+  const _ClassViews({
+    required this.snap,
+    required this.toBrl,
+    required this.onSelect,
+    this.broker,
+    this.group = false,
+    this.onBroker,
+    this.onGroup,
+  });
+
+  final PortfolioSnapshot snap;
+  final Map<String, Decimal> toBrl;
+  final String? broker;
+  final bool group;
+  final ValueChanged<String?>? onBroker;
+  final ValueChanged<bool>? onGroup;
+  final ValueChanged<String> onSelect;
+
+  @override
+  State<_ClassViews> createState() => _ClassViewsState();
+}
+
+class _ClassViewsState extends State<_ClassViews> {
+  var _view = ClassView.all;
+
+  @override
+  Widget build(BuildContext context) {
+    final views = classViewsOf(widget.snap);
+    final view = views.contains(_view) ? _view : ClassView.all;
+    final list = HoldingsList(
+      snap: widget.snap,
+      toBrl: widget.toBrl,
+      broker: widget.broker,
+      group: widget.group,
+      onBroker: widget.onBroker,
+      onGroup: widget.onGroup,
+      onSelect: widget.onSelect,
+    );
+    if (views.length < 2) return list;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClassViewBar(
+          views: views,
+          selected: view,
+          onChanged: (v) => setState(() => _view = v),
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: view == ClassView.all
+              ? list
+              : ClassViewBody(
+                  view: view,
+                  snap: widget.snap,
+                  toBrl: widget.toBrl,
+                  onSelect: widget.onSelect,
+                ),
+        ),
+      ],
     );
   }
 }
