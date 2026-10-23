@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`) concluídos** em 23/10/2026, como versão 1.2.0 (sem tag nem Release; só quando você pedir). Parte da F8 foi antecipada no M-09 (SPEC §21). Próximo: o restante da Fase 8, quando você pedir. A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-06 a M-09 (`docs/MUDANCAS.md`) concluídos** em 23/10/2026, como versão 1.2.0 (sem tag nem Release; só quando você pedir). Parte da F8 foi antecipada no M-09 (SPEC §21). Próximo: o restante da Fase 8; o escopo foi reescrito na SPEC §21 e aguarda a sua aprovação. A 1.1.0 (M-01 a M-05) terminou em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
