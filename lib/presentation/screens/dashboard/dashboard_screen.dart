@@ -30,6 +30,7 @@ import '../../router/app_router.dart';
 import '../../../application/portfolio/wealth_service.dart';
 import '../../../core/time/local_date.dart';
 import '../../../domain/portfolio/wealth_history.dart';
+import 'market_strip.dart';
 import 'wealth_chart.dart';
 
 /// Dashboard da carteira real (SPEC §8).
@@ -456,7 +457,7 @@ class _DashboardState extends ConsumerState<_Dashboard> {
             _MaturitiesCard(items: summary.upcomingMaturities),
           ],
           const SizedBox(height: 16),
-          const MarketOverviewCard(),
+          const MarketStrip(),
         ],
       ),
     );

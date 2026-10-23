@@ -658,20 +658,20 @@ Cada indicador traz fórmula, unidade, período, fonte e limitações.
 
 - Em português brasileiro, pensada para desktop, com navegação lateral.
 - As telas aparecem conforme as fases forem implementadas.
-- **Menu lateral (ajuste M-02, DECISIONS D-43):** em cima, só as telas de uso diário. Na 1.2.0: Painel, Carteira e Operações (Cadastros saiu do menu no ajuste M-06 e virou Configurações → Corretoras e ativos). A F8 acrescenta **Desempenho** e **Renda passiva**, nesta ordem: Painel, Carteira, Desempenho, Renda passiva, Operações. As fases seguintes (Hipotéticas, Simuladores) entram aqui, antes de Operações. No rodapé, depois de um divisor: **Sincronizar** (leva direto à exportação e importação do save, com uma marca quando a última sincronização com outro computador tem 7 dias ou mais) e **Configurações**, sempre por último.
+- **Menu lateral (ajuste M-02, DECISIONS D-43):** em cima, só as telas de uso diário. Na 1.2.0: Painel, Carteira e Operações (Cadastros saiu do menu no ajuste M-06 e virou Configurações → Corretoras e ativos). A F8 (1.3.0) acrescentou **Desempenho** e **Renda passiva**, nesta ordem: Painel, Carteira, Desempenho, Renda passiva, Operações. As fases seguintes (Hipotéticas, Simuladores) entram aqui, antes de Operações. No rodapé, depois de um divisor: **Sincronizar** (leva direto à exportação e importação do save, com uma marca quando a última sincronização com outro computador tem 7 dias ou mais) e **Configurações**, sempre por último.
 - **Configurações** tem seções: Geral (tema e preferências), Segurança (senha, Windows Hello, inatividade, chave de recuperação), Fontes de dados (chaves, cota da brapi, intervalo), Backup (manual, restauração, lista), Sincronização (save, computadores, histórico) e Sobre (versão, atualizações, licenças e pastas). Avisos que levavam a Backup ou Fontes de dados abrem a seção correspondente.
 
 **Telas**
 
-Situação na 1.2.0: existem Painel (§8), Carteira, página do ativo, Operações e Configurações (com Corretoras e ativos, Fontes de dados, Backup e Sincronização). As telas marcadas "(F8)" ou com outra fase ainda não existem.
+Situação na 1.3.0 (F8 concluída): existem Painel (§8), Carteira (com as visões por classe), página do ativo, Desempenho, Renda passiva, Operações e Configurações (com Corretoras e ativos, Fontes de dados, Backup e Sincronização). As telas com outra fase marcada ainda não existem.
 
-- **Painel (§8; ajustes M-04 e M-09):** faixa de números, evolução patrimonial com "Comparar com", distribuição, aportes, proventos, altas e baixas e "Mais números". (F8) Faixa compacta de câmbio e indicadores no rodapé, no lugar do cartão atual de mercado.
+- **Painel (§8; ajustes M-04 e M-09):** faixa de números, evolução patrimonial com "Comparar com", distribuição, aportes, proventos, altas e baixas e "Mais números". Faixa compacta de câmbio e indicadores no rodapé (F8), que leva a Fontes de dados.
 - **Carteira (ajuste M-05, DECISIONS D-45):** lista principal com um item por ativo (todas as contas somadas), do maior valor da posição para o menor; cada linha mostra ativo (código, nome e quantidade de cotas), valor da posição em destaque, preço médio, cotação atual (fonte e data embaixo; tipo e coleta no tooltip), valorização % com cor, sinal e ícone, e o botão "Detalhes". Sem cotação, "indisponível" e ordem pelo total aplicado; com zero cotas, no fim e em cinza. Cabe em 1280 px sem rolagem lateral. O clique na linha (ou em "Detalhes") abre a **página do ativo em tela cheia** (ajuste M-07, DECISIONS D-49; o painel lateral do M-05 deixou de existir), e "Voltar" retorna à Carteira com a busca e a rolagem.
 - **Corretoras na Carteira (ajuste M-06, DECISIONS D-52):** filtro por corretora no topo da lista (Todas / Nubank / XP…), lembrado entre aberturas neste computador; o mesmo ticker em várias corretoras aparece numa linha só (quantidade, valor e preço médio somados), com a quebra por corretora (quantidade, preço médio e valor) na página do ativo; opção "Agrupar por corretora", com uma seção e o subtotal em reais de cada uma. Comprar usa o mesmo campo "Corretora / custodiante" do "Adicionar ativo" (aceita corretora nova); Vender oferece só as corretoras com o ativo. **Transferência de custódia** na página do ativo ("Transferir de corretora"): leva cotas de uma corretora para outra com o mesmo custo e preço médio (`FORMULAS.md` §1.3). **Corretoras e ativos** (antes "Cadastros") fica em Configurações, para corrigir: renomear corretora ou conta, arquivar conta, editar ativo (fonte da cotação, renda fixa) e excluir cadastro sem uso; `/cadastros` leva para lá.
 - **Página do ativo (ajuste M-07, DECISIONS D-49):** cabeçalho fixo com ticker, nome, classe e corretoras; à direita, o valor da posição em destaque, o lucro (R$ e valorização %) e a variação do dia, com "Comprar", "Vender" e um menu (editar, informar preço, outra operação, atualizar). **Gráfico grande** (~45% da altura) só com o desempenho do ativo no mercado: fechamentos diários, períodos de mercado 1M, 6M, 1A (padrão), 5A, 10A e Tudo (sem dados, o período fica desabilitado com "Histórico disponível desde mm/aaaa"), variação do período em destaque ("+18,4% em 1 ano"), máxima e mínima, tooltip com data, cotação e variação desde o início do período, eixo sem começar em zero e a opção "Preço ajustado por proventos" (calculado, `FORMULAS.md` §2.5). Nada da carteira no gráfico (sem preço médio, sem compras e vendas) e sem comparação com índices. Avisos: evento em ações no período (a queda não é perda) e saltos sem evento registrado (possível desdobramento não listado; não corrigido). Abaixo, cartões em grade: total aplicado, preço médio, cotação atual, lucro não realizado, lucro realizado, proventos recebidos, % da carteira e a quebra por corretora. Abas: Operações (tabela com edição), Proventos (por mês) e Dados do ativo (cadastro, dados de mercado com o histórico guardado e "Baixar histórico completo", desempenho/TIR, características de renda fixa e preços informados).
-- **(F8) Visões por classe na Carteira:** abas acima da lista — Todos (a lista atual), FIIs, Renda fixa, Cripto e Internacional —, cada uma só aparece quando a carteira tem a classe (§12.1 a §12.4). Não há tela separada por classe no menu.
-- **(F8) Desempenho:** abas Rentabilidade (tabela mês × ano), Benchmarks (§12.5) e Risco (§12.6), com o seletor de período de §8.
-- **(F8) Renda passiva (§12.7):** totais, meses, calendário e lançamento dos proventos pagos.
+- **Visões por classe na Carteira (F8, DECISIONS D-57):** abas acima da lista — Todos (a lista atual), FIIs, Renda fixa, Cripto e Internacional —, cada uma só aparece quando a carteira tem a classe (§12.1 a §12.4). Não há tela separada por classe no menu.
+- **Desempenho (F8, DECISIONS D-53 a D-55):** abas Rentabilidade (tabela mês × ano), Benchmarks (§12.5) e Risco (§12.6), com o seletor de período de §8.
+- **Renda passiva (F8, §12.7, DECISIONS D-56):** totais, meses, calendário e lançamento dos proventos pagos.
 - Operações (lista com busca e filtros, edição e exclusão).
 - Carteiras hipotéticas (F9) e Simuladores (F10), com identificação visual própria.
 - Relatórios e Alertas (F13).
@@ -933,7 +933,7 @@ Pronto quando:
 
 A numeração "F5B" indica que a fase depende da F5 (backup e save). Ela é a primeira da v1.x e não renumera as seguintes.
 
-**F8. Classes, benchmarks, risco e renda passiva**
+**F8. Classes, benchmarks, risco e renda passiva** — concluída na versão 1.3.0 (23/10/2026)
 
 §12, mais o que sobrou de §8 e §9 para a carteira real.
 
@@ -947,7 +947,7 @@ A numeração "F5B" indica que a fase depende da F5 (backup e save). Ela é a pr
 - [x] Distribuição por ativo, classe, setor e corretora; aportes e proventos por mês; maiores altas e baixas.
 - [x] Proventos e eventos da B3 baixados para os ativos da carteira (M-08), usados no preço ajustado.
 
-**Escopo da F8 (o que falta)**, em seis partes, cada uma com commit e `PROGRESS.md` atualizado:
+**Escopo da F8 (entregue na 1.3.0; DECISIONS D-53 a D-57)**, em seis partes, cada uma com commit e `PROGRESS.md` atualizado:
 
 1. **Desempenho → Rentabilidade (§8 e §9).** Tela nova no menu.
    - Tabela mês × ano com o TWR da carteira em cada mês, o total do ano e o acumulado; por linha (ano), o CDI do ano e a rentabilidade em % do CDI.

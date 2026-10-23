@@ -4,6 +4,32 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.3.0] - 2026-10-23
+
+Fase 8: desempenho, benchmarks, risco, renda passiva e análises por classe.
+
+### Adicionado
+
+- **Desempenho** (menu): o mesmo período para três abas, com 1M, 3M, 6M, YTD, 1A, 3A, 5A, 10A, Tudo e Personalizado (só aparecem os períodos que os dados sustentam).
+  - **Rentabilidade:** tabela mês a mês com o ano e o acumulado, o CDI do ano e o "% do CDI"; rentabilidade do período (TWR), CDI, retorno real (descontado o IPCA), taxa anual equivalente e a TIR para comparar.
+  - **Benchmarks:** CDI, Selic, IPCA, IGP-M, Ibovespa, IFIX, Bitcoin, S&P 500 e Nasdaq contra a carteira no mesmo intervalo, com fonte, moeda, período, metodologia, retorno acumulado e ao ano e a diferença em pontos percentuais; gráfico em base 100 com até 4 índices. IMA e IDkA aparecem como indisponíveis (histórico pago na ANBIMA); S&P 500 e Nasdaq dependem da fonte Yahoo, que vem desligada.
+  - **Risco:** volatilidade, queda máxima (com pico, fundo e recuperação), Sharpe e beta da carteira; volatilidade e queda de cada ativo pelo preço ajustado; correlação entre os ativos; concentração (maior posição, cinco maiores, HHI) por ativo, classe, setor, país e moeda; exposição cambial; liquidez; e **alocação-alvo por classe**, com a distância até o alvo em pontos e em reais (vale em todos os computadores).
+- **Renda passiva** (menu): recebido em 12 meses, média mensal, renda sobre o patrimônio e sobre o custo; recebido, anunciado e projetado separados; proventos por mês; próximos pagamentos; por ano e por ativo.
+- **Lançar proventos pagos:** a B3 publica os proventos dos seus ativos; o app mostra os já pagos que não estão registrados, com a quantidade que você tinha na data-com (pelas operações, por corretora), e grava só depois da prévia e da confirmação, com o IR do JCP informado na hora. Se a posição foi lançada como saldo inicial depois da data-com, o provento não é sugerido e a tela explica por quê.
+- **Visões por classe na Carteira:** FIIs (P/VP pelo informe da CVM, DY de 12 meses, rendimentos por mês, liquidez, recebido/anunciado/estimado), Renda fixa (saldo informado, projeção pelo indexador e valor de mercado lado a lado, rentabilidade e % do CDI), Cripto e Internacional (retorno na moeda, efeito do câmbio e em reais).
+- Novos índices guardados: **IFIX** (B3), **Bitcoin** (Binance) e S&P 500 e Nasdaq (Yahoo, opcional).
+- Faixa compacta de **câmbio e indicadores** no rodapé do Painel (o clique leva a Fontes de dados).
+
+### Alterado
+
+- Painel: "Comparar com" ganhou o IFIX.
+- Gravar uma preferência sincronizada (como os alvos) não recalcula mais a carteira inteira; só o controle de caixa recalcula.
+
+### Corrigido
+
+- Consulta de índices no Yahoo (o "^" de `^GSPC` era codificado duas vezes).
+- O Bitcoin da Binance não grava mais o candle do dia ainda aberto como fechamento.
+
 ## [1.2.0] - 2026-10-23
 
 Histórico de 10 anos, página do ativo em tela cheia, Painel com a evolução do patrimônio e corretora escolhida na hora.

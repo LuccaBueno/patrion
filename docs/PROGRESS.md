@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 8 em andamento** (desde 23/10/2026; escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos). Partes 1 (Rentabilidade), 2 (Benchmarks), 3 (Risco), 4 (Renda passiva) e 5 (visões por classe) concluídas; próxima: 6 (Painel e acabamento), depois a versão 1.3.0. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -61,6 +61,29 @@ Cada parte tem um commit; o relatório completo sai no fim (com a 1.3.0).
 - Arquivos: `domain/portfolio/class_views.dart` (novo), `application/portfolio/class_views_service.dart` (novo), `presentation/screens/portfolio/class_views.dart` (novo), `portfolio_screen.dart`, `providers.dart` (`classViewsProvider`).
 - Testes: `class_views_test.dart` de domínio (P/VP 1,0526, DY 9,6%, 12 meses, volume dos últimos 30 pregões; prefixado de 12% = R$ 1.120,00; 110% do CDI dia a dia, parando no último publicado; IPCA + 6%; indisponível sem condições ou sem CDI; % do CDI 1,2; internacional +10% / +10% / +21%), `presentation/class_views_test.dart` (HGLG11 com P/VP 1,10, DY 8,00%, VP de 08/2026, liquidez, segmento e estimado R$ 11,00; CDB 110% do CDI com projeção até 19/10/2026; AAPL com R$ 6.050,00, +10%, +10% e +21%). Suíte inteira: 577 passando.
 - **Conferência visual (1280 × 800, dados reais):** HGLG11 com VP/cota R$ 165,48 (09/2026), P/VP 0,95, DY 7,84%, liquidez média de R$ 21,6 milhões e rendimentos de R$ 1,10 e R$ 1,17 por cota. Corrigido depois da conferência: os rendimentos com 2 casas no mínimo. O banco de teste não tem renda fixa, cripto nem internacional: essas visões foram conferidas nos testes.
+
+**Parte 6 — Painel e acabamento (concluída)**
+
+- Faixa compacta de **câmbio e indicadores** no rodapé do Painel (item 8 do M-04): dólar, euro, CDI anualizado, IPCA em 12 meses, Selic, Ibovespa, IFIX e Bitcoin, com data e fonte no tooltip; o clique leva a Fontes de dados (onde fica o cartão completo).
+- Documentação: SPEC §16 e §21 (F8 concluída), FORMULAS §3.4, §3.5 e §11 a §13, FONTES_DE_DADOS (IFIX, Bitcoin, IMA/IDkA, vacância e emissões), DECISIONS D-53 a D-57, ARQUITETURA (telas), CHANGELOG 1.3.0, DISTRIBUICAO (nome do instalador). Versão 1.3.0+4 (`pubspec.yaml`, `app_info.dart`).
+- Arquivos: `presentation/screens/dashboard/market_strip.dart` (novo), `dashboard_screen.dart`; teste em `dashboard_wealth_test.dart` (USD R$ 5,4321, CDI 10,60% a.a. e o clique abrindo Fontes de dados).
+
+**Versão 1.3.0 — relatório final da Fase 8 (23/10/2026)**
+
+1. **Implementado:** Desempenho com Rentabilidade (mês × ano, CDI, real, CAGR, TIR), Benchmarks (9 índices + IMA/IDkA indisponíveis, base 100) e Risco (volatilidade, queda máxima, Sharpe, beta, correlação, concentração, câmbio, liquidez e alocação-alvo); Renda passiva com o lançamento dos proventos pagos da B3 (regra do saldo inicial como pedida); visões por classe na Carteira (FIIs, renda fixa com projeção pelo indexador, cripto, internacional); faixa de câmbio e indicadores no Painel. Novos índices guardados: IFIX, Bitcoin, S&P 500 e Nasdaq. Detalhes em cada parte acima.
+2. **Arquivos (resumo):** os de cada parte; na versão, `pubspec.yaml` (1.3.0+4), `core/config/app_info.dart`, `CHANGELOG.md`, `docs/SPEC.md`, `FORMULAS.md`, `FONTES_DE_DADOS.md`, `DECISIONS.md` (D-53 a D-57), `ARQUITETURA.md`, `DISTRIBUICAO.md`.
+3. **Testes (resultados reais):** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com **578 testes passando** (5 capturas manuais puladas sem as variáveis); `flutter build windows --release` compilou e o `patrion.exe` tem a versão 1.3.0+4; o release abriu numa pasta de dados de teste ("Iniciando Patrion 1.3.0" e a atualização da abertura no log). CI: ver abaixo.
+4. **Problemas e limitações:**
+   - IMA, IDkA, vacância e emissões de FII: indisponíveis, como aprovado.
+   - S&P 500 e Nasdaq dependem do Yahoo (não oficial, desligado por padrão): ligando a fonte, a próxima atualização baixa os 10 anos.
+   - Bitcoin em reais é calculado (BTC/USDT × PTAX), com o USDT tratado como dólar.
+   - A projeção da renda fixa é bruta (sem IR, IOF e custos) e para no último índice publicado; o IR do JCP lançado usa a alíquota que você confirma na prévia (padrão 15%).
+   - Os proventos da B3 vêm de endereços internos do site (como desde a 1.2.0) e são renovados a cada 30 dias; anunciados muito recentes podem demorar a aparecer.
+   - O banco de teste não tem renda fixa, cripto nem internacional: essas visões foram conferidas nos testes, não com dados reais.
+   - Conferência visual: as telas foram renderizadas com os mesmos widgets, a Segoe UI e dados reais em 1280 × 800; o app real foi aberto (log), mas não capturei a janela (a captura do Flutter sai em branco) nem cliquei nele.
+   - Os builds desta sessão substituíram `build\windows\x64\runner\Release`: abrir o Patrion por ali roda a 1.3.0, que baixa o IFIX e o Bitcoin dos últimos 10 anos na primeira abertura (alguns segundos). Se você abriu a build entre a parte 2 e a correção do candle aberto, o Bitcoin de 23/10 pode ter ficado gravado com o valor parcial; a atualização seguinte o sobrescreve com o fechamento.
+5. **Pendências:** tag e Release v1.3.0 (só quando você pedir); confirmação manual de eventos suspeitos e importação CSV (F11); Windows Hello (F5B), antiga.
+6. **Como testar:** roteiro na resposta desta sessão; resumo: Desempenho (períodos, tabela, Benchmarks, Risco e "Definir alvos"), Renda passiva ("Revisar e lançar", JCP, saldo inicial), Carteira (visões por classe) e o rodapé do Painel.
 
 ### Ajustes M-06 a M-09 (desde 23/10/2026)
 

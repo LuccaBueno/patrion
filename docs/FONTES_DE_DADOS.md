@@ -112,7 +112,7 @@ Por isso, a proposta é:
 | Histórico | Vários anos de arquivos (datas iniciais não conferidas; o app só pede os anos necessários) |
 | Ajuste | Cotas de fundos já são líquidas de taxas; não há "ajuste" de eventos |
 | Licença | Dados abertos do governo federal, licença ODbL (conferido em 18/10/2026) |
-| Limitações e falha | Não traz cotação de mercado de FII (essa vem da B3). Defasagem do informe mensal. |
+| Limitações e falha | Não traz cotação de mercado de FII (essa vem da B3). Defasagem do informe mensal. **Vacância e emissões** só aparecem no informe trimestral (imóveis e cotas emitidas), sem um formato estruturado por imóvel que permita calcular a vacância do fundo de forma confiável: ficam "indisponível" na visão de FIIs (F8, aprovado em 23/10/2026). O app usa do informe mensal o valor patrimonial por cota (P/VP). |
 | Verificado | Testado (arquivos acessíveis) |
 
 ### 2.5 B3

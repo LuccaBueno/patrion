@@ -194,4 +194,44 @@ void main() {
       );
     });
   });
+
+  testWidgets('faixa compacta de câmbio e indicadores no rodapé; o clique '
+      'leva a Fontes de dados', (tester) async {
+    await tester.runAsync(() async {
+      await seed();
+      await MarketRepository(f.t.db).saveFx([
+        FxRate(
+          base: 'USD',
+          quote: 'BRL',
+          refDate: LocalDate(2026, 10, 16),
+          kind: FxKind.ptaxClose,
+          source: 'bcb_ptax',
+          collectedAt: '2026-10-17T12:00:00.000Z',
+          ask: Decimal.parse('5.4321'),
+        ),
+      ]);
+    });
+    final app = AppHarness(tester, f.t);
+    await app.run(size: const Size(1280, 3000), () async {
+      await app.pumpUntil(find.byKey(const Key('market-strip')));
+      expect(find.byKey(const Key('market-overview')), findsNothing);
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('strip-USD')))
+            .textSpan!
+            .toPlainText(),
+        r'USD R$ 5,4321',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('strip-CDI')))
+            .textSpan!
+            .toPlainText(),
+        // 0,04% ao dia útil: 1,0004^252 − 1.
+        'CDI 10,60% a.a.',
+      );
+      await app.tap(find.byKey(const Key('market-strip')));
+      expect(find.byKey(const Key('market-overview')), findsOneWidget);
+    });
+  });
 }
