@@ -8,7 +8,9 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 | Item | Situação |
 |---|---|
 | M-01 a M-05 | **Feitos** na versão 1.1.0 (exceto M-04 itens 4, 5 e 9, que passaram para o M-09) |
-| M-06 a M-09 | **Feitos** na versão 1.2.0 (sem tag nem Release) |
+| M-06 a M-09 | **Feitos** na versão 1.2.0 |
+| Fase 8 | **Feita** na versão 1.3.0 |
+| M-10 a M-12 | **Pendentes** (antes de publicar a próxima Release) |
 
 ---
 
@@ -190,23 +192,78 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 
 ---
 
-## Prompt sugerido para enviar ao Claude Code (M-06 a M-09)
+### M-10 — Bug: a tela Desempenho fica piscando
+- **Onde:** Desempenho (abas Rentabilidade, Benchmarks e Risco)
+- **Problema:** a tela pisca continuamente, como se fosse redesenhada ou recarregada em loop.
+- **Mudança:**
+  1. Reproduzir com um teste que falhe e achar a causa (suspeitas: provider recalculando a cada frame, `setState`/`watch` em loop, animação reiniciando, consulta ao banco disparada no `build`).
+  2. Corrigir de forma que a tela só seja recalculada quando os dados mudarem (operação nova, cotação nova, troca de período).
+  3. Conferir que o mesmo problema não acontece no Painel, na Carteira e na Renda passiva.
+- **Critério de pronto:** a tela fica parada (sem piscar) por 1 minuto aberta; um teste garante que o cálculo de rentabilidade não roda mais de uma vez sem mudança de dados.
+- **Prioridade:** **alta (bug)**
+- **Fase:** correção imediata
+
+### M-11 — Painel único, mais simples (Desempenho entra no Painel), estilo Nubank
+- **Onde:** Painel, Desempenho e menu lateral
+- **Problema:** o Painel tem informações repetidas e é longo demais para rolar. Exemplos na tela atual: Patrimônio = Valor de mercado; Total aplicado = Valor investido; Ganho = Resultado total = Resultado não realizado (todos R$ 673,32); "Maiores posições" repete a rosca "por ativo". O Desempenho é uma tela separada com assuntos que o usuário espera encontrar no Painel.
+- **Referências de organização:** Nubank (um número grande no topo, poucos blocos, detalhe sob demanda, botão de ocultar valores), Kinvo (gráfico investido × saldo separando aporte de rendimento), Snowball Analytics (valor, investido, lucro total, TIR e renda passiva no topo; análises detalhadas em abas).
+- **Mudança:** nenhuma função é removida; só reorganizada.
+  1. **Desempenho deixa de ser item do menu.** O Painel ganha abas no topo: **Visão geral · Rentabilidade · Comparação · Risco** (as três últimas são as abas atuais do Desempenho, sem mudança de conteúdo). Menu fica: Painel, Carteira, Renda passiva, Operações.
+  2. **Visão geral, de cima para baixo:**
+     - **Topo (estilo Nubank):** "Patrimônio" em número grande, com o ícone de **olho para ocultar valores** (troca todos os R$ do app por "••••", lembrado entre aberturas). Logo abaixo, numa linha: **Ganho total** (R$ e %) · **Hoje** (R$ e %) · **Total aplicado**.
+     - **Linha de 3 números pequenos** (só os que não se repetem): Lucro realizado · Proventos (12 meses) · Rentabilidade (TIR a.a.). Cada um com o ícone (i) explicando a métrica.
+     - **Gráfico de evolução patrimonial** (o atual, com "Comparar com"), em destaque.
+     - **Duas colunas:** Distribuição (rosca com seletor) | Aportes por mês.
+     - **Duas colunas:** Proventos por mês | Maiores altas e baixas.
+     - **Faixa de câmbio e indicadores** no rodapé (já existe).
+  3. **Saem** (por serem repetidos): a seção "Mais números" inteira e o bloco "Maiores posições" (a Carteira e a rosca "por ativo" já mostram isso). Se algum número só existia ali, ele vai para o tooltip do número correspondente no topo.
+  4. A Visão geral deve caber em **até 2 telas de rolagem** em 1280 × 800.
+  5. **Hierarquia visual:** um único número grande por tela; títulos dos blocos em forma de resposta ("Você aportou R$ X em 12 meses"); textos explicativos longos vão para o ícone (i), não ficam abaixo dos gráficos.
+- **Critério de pronto:** o menu não tem mais "Desempenho"; as abas Rentabilidade, Comparação e Risco do Painel mostram o mesmo conteúdo de antes; nenhum valor aparece duas vezes na Visão geral; o olho oculta todos os valores em R$ do app; a Visão geral cabe em até 2 rolagens em 1280 × 800.
+- **Prioridade:** alta
+- **Fase:** ajuste avulso
+
+### M-12 — Números e rótulos inconsistentes no Painel
+- **Onde:** Painel (cartões, gráfico de evolução, aportes, altas e baixas) e Rentabilidade
+- **Problema:** com a carteira real (posições lançadas em 22/10/2026), a tela mostra números que parecem se contradizer:
+  1. O cartão **Ganho** mostra **+R$ 673,32**, mas o gráfico diz "**Ganho de R$ 97,32**" e o título "**Seu patrimônio cresceu R$ 1.473,97**" (que soma aportes ao crescimento e soa como ganho).
+  2. No gráfico de evolução, a linha do **total aplicado** não aparece como degraus: surge uma **linha vertical no fim do gráfico**.
+  3. "Rentabilidade no ano" diz "**TWR desde 31/12/2025**", mas não há operações antes de 22/10/2026.
+  4. Aportes: o título diz "Você aportou R$ 5.106,25" e o subtítulo diz "**o saldo inicial não conta**", mas o valor é justamente o saldo inicial.
+  5. "Maiores altas e baixas" no modo **Dia** mostra "**desde 22/10/2026**" (deveria ser a data do fechamento anterior).
+  6. "CDI no período" mostra **0,00%** num período de 2 dias (deveria somar os dias publicados ou dizer "ainda não publicado").
+  7. TIR e retorno real aparecem só como "indisponível", sem dizer por quê.
+- **Mudança:**
+  1. **Uma definição única de ganho**, usada em todo o app: *Ganho total = patrimônio − total aplicado (+ lucro realizado + proventos)*. No gráfico, o título usa o mesmo número quando o período é "Tudo"; nos outros períodos, diz "**ganho no período**" e mostra a diferença em relação ao início do período, deixando claro que **aportes não são ganho** (ex.: "Seu patrimônio é R$ 5.779 · ganho de R$ 97 no período · R$ 1.377 de aportes").
+  2. Corrigir o desenho do **total aplicado** como linha em degraus visível desde a primeira operação.
+  3. Rótulos de período sempre com a **data real de início dos dados** ("desde 22/10/2026, início dos registros").
+  4. Aportes: decidir uma regra (o saldo inicial **conta** como aporte na data informada) e deixar o subtítulo coerente.
+  5. Altas e baixas: mostrar a data do fechamento usado como referência.
+  6. CDI do período: somar os dias publicados e indicar quando o último dia ainda não saiu.
+  7. Todo "indisponível" mostra o **motivo** no tooltip (ex.: "TIR precisa de pelo menos 30 dias de histórico").
+  8. Teste que confere que **Ganho**, título do gráfico (em "Tudo") e Carteira mostram o mesmo valor.
+- **Critério de pronto:** com a carteira atual, nenhum par de números na tela parece se contradizer; todo período mostra a data real de início; todo "indisponível" explica o motivo.
+- **Prioridade:** alta
+- **Fase:** ajuste avulso, junto com o M-11
+
+---
+
+## Prompt sugerido para enviar ao Claude Code (M-10 a M-12)
 
 Salve este arquivo em `C:\dev\patrion\docs\MUDANCAS.md`, abra uma conversa nova (`/clear`) e cole:
 
 ```
 Leia CLAUDE.md, docs/PROGRESS.md e docs/MUDANCAS.md. Implemente os itens
-pendentes M-06 a M-09, nesta ordem: M-08 (histórico), M-07 (página do
-ativo), M-09 (Painel) e M-06 (corretoras). M-09 antecipa parte da Fase 8
-(evolução patrimonial, TWR e benchmarks): registre isso na SPEC §21.
+pendentes M-10 a M-12, nesta ordem: M-10 (bug de piscar), M-12 (números
+e rótulos) e M-11 (Painel único com abas; Desempenho sai do menu).
 
-- Atualize SPEC e DECISIONS.md quando uma mudança alterar uma regra.
-- Faça commit e atualize o PROGRESS.md ao fim de cada item, para não perder
-  o andamento se o limite de uso acabar.
-- Inclua testes e confira cada tela visualmente no app em 1280 px, com uma
-  carteira de exemplo com compras espalhadas por vários anos.
+- Atualize SPEC §16 e DECISIONS.md com a nova organização das telas.
+- Faça commit e atualize o PROGRESS.md ao fim de cada item.
+- Inclua testes. Confira cada tela no app real em 1280 x 800, nos temas
+  claro e escuro, abrindo o executável e olhando a janela (não só
+  renderizando widgets). Se não conseguir capturar a janela, diga isso.
 
-Ao final, rode format, analyze, test e build, atualize CHANGELOG (1.2.0) e
+Ao final, rode format, analyze, test e build, atualize CHANGELOG (1.4.0) e
 faça push (se o push for bloqueado, me avise para eu rodar). Confirme que o
 CI ficou verde. Não crie tag nem Release. No relatório, inclua um roteiro
 para eu testar cada item.

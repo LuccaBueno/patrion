@@ -65,12 +65,16 @@ class _RiskTabState extends ConsumerState<RiskTab> {
     return ListView(
       padding: const EdgeInsets.only(bottom: 32),
       children: [
+        // Recalculando, fica com o resultado anterior (M-10).
         switch (report) {
-          AsyncData(:final value) => _PeriodRisk(report: value, name: _name),
-          AsyncError(:final error) => MessageCard(
+          AsyncValue(hasError: true, :final error?) => MessageCard(
             icon: Icons.error_outline,
             title: 'Não foi possível calcular o risco',
             message: errorMessage(error),
+          ),
+          AsyncValue(hasValue: true, :final value?) => _PeriodRisk(
+            report: value,
+            name: _name,
           ),
           _ => const Padding(
             padding: EdgeInsets.all(24),

@@ -106,6 +106,94 @@ class PortfolioSnapshot {
   /// O controle de caixa está ligado (M-03).
   bool get trackCash => summary.trackCash;
 
+  /// Cadastros, operações e preços informados, comparáveis: duas leituras
+  /// com a mesma chave são a mesma carteira (sem os preços de mercado). As
+  /// telas só recalculam quando ela muda (M-10).
+  late final SnapshotKey holdingsKey = SnapshotKey([
+    asOf,
+    trackCash,
+    for (final i in institutions.values)
+      (i.id, i.name, i.kind, i.country, i.notes),
+    for (final a in accounts.values)
+      (a.id, a.institutionId, a.name, a.kind, a.currency, a.archived),
+    for (final a in assets.values)
+      (
+        a.id,
+        a.symbol,
+        a.market,
+        a.assetClass,
+        a.name,
+        a.currency,
+        a.country,
+        a.priceSource,
+        a.isin,
+        a.sector,
+        a.segment,
+        a.liquidity,
+        a.notes,
+      ),
+    for (final t in fixedIncome.values)
+      (
+        t.id,
+        t.assetId,
+        t.product,
+        t.issuer,
+        t.indexer,
+        t.rate,
+        t.spread,
+        t.dayCount,
+        t.issueDate,
+        t.maturityDate,
+        t.graceUntil,
+        t.liquidity,
+        t.taxRegime,
+        t.costsNotes,
+      ),
+    for (final o in operations)
+      (
+        o.id,
+        o.accountId,
+        o.assetId,
+        o.type,
+        o.tradeDate,
+        o.settlementDate,
+        o.quantity,
+        o.unitPrice,
+        o.grossAmount,
+        o.fees,
+        o.taxes,
+        o.currency,
+        o.fxRate,
+        (o.ratioFrom, o.ratioTo, o.transferGroupId, o.relatedOperationId),
+        (o.justification, o.notes, o.origin),
+      ),
+    for (final v in valuations)
+      (v.id, v.assetId, v.accountId, v.refDate, v.kind, v.value, v.currency),
+  ]);
+
+  /// [holdingsKey] e os preços de mercado usados: mesma chave, mesmo
+  /// retrato.
+  late final SnapshotKey dataKey = SnapshotKey([
+    holdingsKey,
+    for (final p in marketPrices.values)
+      (
+        p.assetId,
+        p.price,
+        p.currency,
+        p.refDate,
+        p.refAt,
+        p.source,
+        p.dataType,
+        p.collectedAt,
+        p.delayNote,
+        _reference(p.previousClose),
+        _reference(p.previousMonthClose),
+      ),
+  ]);
+
+  static Object? _reference(PriceReference? r) =>
+      r == null ? null : (r.price, r.refDate, r.source);
+
   final _performanceByCurrency = <String, Performance>{};
   final _performanceByAsset = <String, Performance>{};
 
@@ -149,6 +237,28 @@ class PortfolioSnapshot {
     return institution == null
         ? account.name
         : '${institution.name} · ${account.name}';
+  }
+}
+
+/// Lista de valores comparada elemento a elemento (registros, datas e
+/// decimais já comparam pelo conteúdo).
+class SnapshotKey {
+  SnapshotKey(List<Object?> parts) : _parts = List.unmodifiable(parts);
+
+  final List<Object?> _parts;
+
+  @override
+  late final int hashCode = Object.hashAll(_parts);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! SnapshotKey || other.hashCode != hashCode) return false;
+    if (other._parts.length != _parts.length) return false;
+    for (var i = 0; i < _parts.length; i++) {
+      if (_parts[i] != other._parts[i]) return false;
+    }
+    return true;
   }
 }
 

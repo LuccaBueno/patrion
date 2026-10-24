@@ -502,6 +502,30 @@ class MarketRepository {
   Stream<void> watchChanges() =>
       _db.tableUpdates(TableUpdateQuery.onAllTables(marketTables(_db)));
 
+  /// Resumo do conteúdo das tabelas de mercado (registros e última coleta
+  /// de cada uma): muda quando algum dado muda, não quando a atualização
+  /// regrava o que já estava guardado (M-10).
+  Future<String> contentVersion() async {
+    final parts = <String>[];
+    for (final t in marketTables(_db)) {
+      final collected = t.columnsByName.containsKey('collected_at')
+          ? 'MAX(collected_at)'
+          : 'NULL';
+      final row = await _db
+          .customSelect(
+            'SELECT COUNT(*) AS n, $collected AS c '
+            'FROM "${t.actualTableName}"',
+            readsFrom: {t},
+          )
+          .getSingle();
+      parts.add(
+        '${t.actualTableName}:${row.read<int>('n')}:'
+        '${row.readNullable<String>('c')}',
+      );
+    }
+    return parts.join('|');
+  }
+
   /// Registros por tabela de mercado (tela Fontes de dados e save).
   Future<Map<String, int>> counts() async {
     final result = <String, int>{};

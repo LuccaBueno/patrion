@@ -6,6 +6,7 @@ import 'package:patrion/application/portfolio/wealth_service.dart';
 import 'package:patrion/application/updates/update_checker.dart';
 import 'package:patrion/core/config/app_info.dart';
 import 'package:patrion/core/config/app_paths.dart';
+import 'package:patrion/data/repositories/market_repository.dart';
 import 'package:patrion/infrastructure/market/market_http.dart';
 import 'package:patrion/infrastructure/security/api_key_store.dart';
 import 'package:patrion/presentation/app.dart';
@@ -36,6 +37,7 @@ class AppHarness {
     List<Override> overrides = const [],
     MarketHttp? marketHttp,
     ReleaseFeed? releaseFeed,
+    WealthService Function(MarketRepository market)? wealthService,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -60,10 +62,12 @@ class AppHarness {
           apiKeyStoreProvider.overrideWithValue(keys),
           // Sem isolate: o teste roda com relógio falso.
           wealthServiceProvider.overrideWith(
-            (ref) => WealthService(
-              ref.watch(marketRepositoryProvider),
-              useIsolate: false,
-            ),
+            (ref) =>
+                wealthService?.call(ref.watch(marketRepositoryProvider)) ??
+                WealthService(
+                  ref.watch(marketRepositoryProvider),
+                  useIsolate: false,
+                ),
           ),
           releaseFeedProvider.overrideWithValue(
             releaseFeed ?? const OfflineReleaseFeed(),
@@ -128,6 +132,7 @@ class AppHarness {
     List<Override> overrides = const [],
     MarketHttp? marketHttp,
     ReleaseFeed? releaseFeed,
+    WealthService Function(MarketRepository market)? wealthService,
   }) async {
     await pump(
       location: location,
@@ -136,6 +141,7 @@ class AppHarness {
       overrides: overrides,
       marketHttp: marketHttp,
       releaseFeed: releaseFeed,
+      wealthService: wealthService,
     );
     try {
       await body();

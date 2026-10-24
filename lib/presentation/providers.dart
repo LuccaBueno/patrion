@@ -153,10 +153,25 @@ final portfolioQueryProvider = Provider<PortfolioQuery>(
   ),
 );
 
-/// Retrato da carteira real, recalculado a cada alteração.
+/// Retrato da carteira real, recalculado a cada alteração. Uma releitura com
+/// os mesmos dados não é repassada às telas (M-10).
 final portfolioSnapshotProvider = StreamProvider<PortfolioSnapshot>(
-  (ref) => ref.watch(portfolioQueryProvider).watch(),
+  (ref) => ref
+      .watch(portfolioQueryProvider)
+      .watch()
+      .distinct((a, b) => a.dataKey == b.dataKey),
 );
+
+/// O retrato atual, avisando só quando cadastros, operações ou preços
+/// informados mudam. Para os cálculos que leem o mercado por conta própria
+/// e já recalculam com o [marketTickProvider]: uma cotação nova não os
+/// dispara duas vezes (M-10).
+Future<PortfolioSnapshot> _holdingsSnapshot(Ref ref) async {
+  await ref.watch(
+    portfolioSnapshotProvider.selectAsync((s) => s.holdingsKey),
+  );
+  return ref.read(portfolioSnapshotProvider.future);
+}
 
 // -- Sessão, backup e save (F5) ----------------------------------------------
 
@@ -400,15 +415,25 @@ final wealthServiceProvider = Provider<WealthService>(
 
 /// Conta as mudanças nos dados de mercado, no máximo uma a cada
 /// [marketTickInterval] (o histórico completo grava muitas vezes seguidas).
+/// Regravar o que já estava guardado não conta (M-10).
 final marketTickProvider = StreamProvider<int>((ref) {
   final repo = ref.watch(marketRepositoryProvider);
   final controller = StreamController<int>();
   var count = 0;
   Timer? pending;
+  var version = repo.contentVersion();
   final sub = repo.watchChanges().listen((_) {
-    pending ??= Timer(marketTickInterval, () {
+    pending ??= Timer(marketTickInterval, () async {
       pending = null;
-      if (!controller.isClosed) controller.add(++count);
+      try {
+        final before = await version;
+        final now = await repo.contentVersion();
+        if (now == before || controller.isClosed) return;
+        version = Future.value(now);
+        controller.add(++count);
+      } on Object {
+        // Banco fechado no meio (troca de sessão): a próxima sessão relê.
+      }
     });
   });
   controller.add(count);
@@ -422,11 +447,14 @@ final marketTickProvider = StreamProvider<int>((ref) {
 
 const marketTickInterval = Duration(seconds: 3);
 
+// Quem recalcula com o tique observa só o número: a passagem de "carregando"
+// para o primeiro valor não é uma mudança de dados (M-10).
+
 /// Evolução patrimonial e índices, recalculados quando a carteira ou os
 /// dados de mercado mudam.
 final wealthOverviewProvider = FutureProvider<WealthOverview>((ref) async {
-  ref.watch(marketTickProvider);
-  final snap = await ref.watch(portfolioSnapshotProvider.future);
+  ref.watch(marketTickProvider.select((t) => t.value ?? 0));
+  final snap = await _holdingsSnapshot(ref);
   return ref.watch(wealthServiceProvider).load(snap);
 });
 
@@ -473,8 +501,8 @@ final passiveIncomeServiceProvider = Provider<PassiveIncomeService>(
 final passiveIncomeProvider = FutureProvider<PassiveIncomeOverview>((
   ref,
 ) async {
-  ref.watch(marketTickProvider);
-  final snap = await ref.watch(portfolioSnapshotProvider.future);
+  ref.watch(marketTickProvider.select((t) => t.value ?? 0));
+  final snap = await _holdingsSnapshot(ref);
   return ref.watch(passiveIncomeServiceProvider).load(snap);
 });
 
@@ -482,7 +510,7 @@ final passiveIncomeProvider = FutureProvider<PassiveIncomeOverview>((
 
 /// FIIs, renda fixa e outras moedas, com o que está guardado.
 final classViewsProvider = FutureProvider<ClassViewsData>((ref) async {
-  ref.watch(marketTickProvider);
+  ref.watch(marketTickProvider.select((t) => t.value ?? 0));
   final snap = await ref.watch(portfolioSnapshotProvider.future);
   final fx = ref.watch(marketOverviewProvider).value?.fx ?? const {};
   return ClassViewsService(ref.watch(marketRepositoryProvider)).load(

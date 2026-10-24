@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/application/portfolio/portfolio_query.dart';
+import 'package:patrion/application/portfolio/wealth_service.dart';
 import 'package:patrion/application/settings/portfolio_preferences.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/shared_settings_repository.dart';
@@ -51,9 +53,12 @@ void main() {
     final cal = BusinessCalendar.brazil;
     final bars = <PriceBar>[];
     final cdi = <IndicatorPoint>[];
+    // Até hoje: o período de 1 ano anda com a data real, e o risco precisa
+    // de um ano inteiro de pregões.
+    final today = LocalDate.fromDateTime(DateTime.now());
     for (
       var d = LocalDate(2024, 1, 2);
-      !d.isAfter(LocalDate(2026, 10, 16));
+      !d.isAfter(today);
       d = d.addDays(1)
     ) {
       if (!cal.isBusinessDay(d)) continue;
@@ -331,6 +336,68 @@ void main() {
     );
   });
 
+  testWidgets('M-10: a tela não pisca e o cálculo só roda de novo quando '
+      'os dados mudam', (tester) async {
+    await tester.runAsync(seed);
+    final repo = MarketRepository(f.t.db);
+    final bars = (await tester.runAsync(() => repo.prices('PETR4', 'B3')))!;
+    var loads = 0;
+    // Depois da primeira carga, nenhum indicador de progresso: a tela fica
+    // com os números anteriores enquanto recalcula.
+    Future<void> watchSteady(Duration total) async {
+      const step = Duration(milliseconds: 250);
+      for (var t = Duration.zero; t < total; t += step) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump(step);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byKey(const Key('perf-periods')), findsOneWidget);
+      }
+    }
+
+    final app = AppHarness(tester, f.t);
+    await app.run(
+      location: '/desempenho',
+      wealthService: (market) => _CountingWealthService(market, () => loads++),
+      () async {
+        await app.pumpUntil(find.byKey(const Key('returns-table')));
+        expect(loads, 1);
+
+        // Trocar de aba e de período não recalcula.
+        await app.tap(find.byKey(const Key('perf-tab-risk')));
+        await app.tap(find.byKey(const Key('perf-tab-returns')));
+        await app.tap(find.byKey(const Key('perf-period-Tudo')));
+        expect(loads, 1);
+
+        // A atualização regrava os mesmos fechamentos: nada muda, nada é
+        // recalculado e a tela fica parada.
+        await tester.runAsync(() => repo.savePrices(bars));
+        await watchSteady(const Duration(seconds: 8));
+        expect(loads, 1);
+
+        // Um fechamento novo muda os dados: recalcula uma vez, sem piscar.
+        await tester.runAsync(
+          () => repo.savePrices([
+            PriceBar(
+              symbol: 'PETR4',
+              market: 'B3',
+              refDate: LocalDate(2026, 10, 19),
+              close: Decimal.parse('45'),
+              currency: 'BRL',
+              source: 'b3_cotahist',
+              dataType: MarketDataType.close,
+              collectedAt: '2026-10-19T21:00:00.000Z',
+            ),
+          ]),
+        );
+        await watchSteady(const Duration(seconds: 8));
+        expect(loads, 2);
+        expect(find.byKey(const Key('returns-table')), findsOneWidget);
+      },
+    );
+  });
+
   testWidgets('sem operações: indisponível com o motivo', (tester) async {
     final app = AppHarness(tester, f.t);
     await app.run(location: '/desempenho', () async {
@@ -338,4 +405,18 @@ void main() {
       expect(find.textContaining('datas reais'), findsOneWidget);
     });
   });
+}
+
+/// Conta as vezes que a evolução (base da rentabilidade) é calculada.
+class _CountingWealthService extends WealthService {
+  const _CountingWealthService(super.market, this.onLoad)
+    : super(useIsolate: false);
+
+  final void Function() onLoad;
+
+  @override
+  Future<WealthOverview> load(PortfolioSnapshot snap) {
+    onLoad();
+    return super.load(snap);
+  }
 }

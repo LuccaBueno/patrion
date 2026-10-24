@@ -743,3 +743,14 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - **Cripto e internacional:** em reais pela PTAX; no internacional, o retorno na moeda, o efeito do câmbio e o total separados, com o câmbio de custo médio das compras.
 - Alternativas: projeção líquida de IR (a tabela regressiva depende de cada resgate; fica para os simuladores, F10); escolher automaticamente entre informado e projetado (esconderia a diferença, que é justamente o que a SPEC §12.2 pede para mostrar).
 - Motivo: SPEC §12.1 a §12.4 e §21 (F8); regras 1, 2, 3 e 10 (`FORMULAS.md` §13).
+
+### 2026-10-24 — D-58: Telas recalculam só quando os dados mudam (M-10)
+
+- Decisão:
+  - **Causa do piscar do Desempenho:** no Riverpod 3, um `FutureProvider` que recalcula por mudança de dependência fica em `AsyncLoading` (com o valor anterior guardado), e o `AsyncBody` trocava a tela inteira por um indicador de progresso até o fim do cálculo. Como o retrato da carteira era refeito a cada gravação nas tabelas `mkt_` (sem filtro), a evolução de 10 anos e o risco recalculavam em sequência durante a atualização e o histórico em segundo plano: a tela piscava e as abas voltavam ao início.
+  - **Tela parada durante o recálculo:** `AsyncBody` (e o cartão do risco) mostram os dados anteriores enquanto recalculam; o indicador só aparece na primeira carga. O erro continua aparecendo.
+  - **Retrato com chave de dados:** `PortfolioSnapshot.dataKey` (cadastros, operações, preços informados e os preços de mercado usados) e `holdingsKey` (sem os preços de mercado). O provedor do retrato descarta uma releitura com a mesma chave.
+  - **Quem lê o mercado por conta própria** (evolução, renda passiva) observa só a `holdingsKey` e o tique de mercado; o tique (`marketTickProvider`, no máximo 1 a cada 3 s) só conta quando o conteúdo das tabelas de mercado mudou (registros e última coleta de cada uma, `MarketRepository.contentVersion`). Uma cotação nova recalcula uma vez; regravar o que já estava guardado não recalcula.
+  - Corrigido junto: Sharpe e beta de "1 ano" ficavam indisponíveis no fim de semana (de sexta a sexta são 364 dias); o mínimo de 12 meses passou a 360 dias entre o primeiro e o último pregão.
+- Alternativas: comparar os resultados depois de calcular (o custo é justamente o cálculo); um intervalo maior no tique (só espaça o piscar); `skipLoadingOnReload` tela a tela (cada tela nova repetiria o erro).
+- Motivo: M-10 (`docs/MUDANCAS.md`); regra 9 (teste que conta os cálculos).

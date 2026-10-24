@@ -33,8 +33,10 @@ abstract final class Risk {
   /// Mínimo de retornos em comum para a correlação.
   static const minCommon = 60;
 
-  /// Sharpe e beta: pelo menos 12 meses e 200 retornos diários.
-  static const minYearDays = 365;
+  /// Sharpe e beta: pelo menos 12 meses e 200 retornos diários. Os 12 meses
+  /// toleram 5 dias: no fim de semana, "1 ano" vai de sexta a sexta (364
+  /// dias entre os pregões).
+  static const minYearDays = 360;
   static const minYearReturns = 200;
 
   /// Níveis entre o fim de [from] (o último até ele) e [to].

@@ -106,6 +106,10 @@ void main() {
     // 0,001 ÷ √(400 × 0,0001 ÷ 399) × √365,25 = 1,9088.
     expect(r4(Risk.sharpe(p, cdi)!), d('1.9088'));
     expect(Risk.sharpe(p.sublist(0, 100), cdi), isNull);
+    // "1 ano" num sábado vai de sexta a sexta: 364 dias entre os pregões
+    // ainda são 12 meses; 359 dias, não.
+    expect(Risk.sharpe(p.sublist(0, 365), cdi), isNotNull);
+    expect(Risk.sharpe(p.sublist(0, 360), cdi), isNull);
   });
 
   test('concentração: maior, cinco maiores, HHI e número efetivo', () {

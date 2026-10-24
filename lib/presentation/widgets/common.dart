@@ -85,17 +85,20 @@ class AsyncBody<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (value) {
-      AsyncData(:final value) => builder(value),
-      AsyncError(:final error) => Center(
+    // Enquanto recalcula, a tela fica com os dados anteriores: trocar tudo
+    // por um indicador de progresso a cada atualização faz a tela piscar
+    // (M-10).
+    if (value.hasError) {
+      return Center(
         child: MessageCard(
           icon: Icons.error_outline,
           title: 'Não foi possível carregar os dados',
-          message: errorMessage(error),
+          message: errorMessage(value.error!),
         ),
-      ),
-      _ => const Center(child: CircularProgressIndicator()),
-    };
+      );
+    }
+    if (value.hasValue) return builder(value.requireValue);
+    return const Center(child: CircularProgressIndicator());
   }
 }
 
