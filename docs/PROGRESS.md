@@ -4,13 +4,33 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes M-10 a M-12 em andamento** (24/10/2026; os três itens concluídos; falta a conferência no app real e a 1.4.0). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-10 a M-12 concluídos** em 24/10/2026, como versão 1.4.0 (sem tag nem Release; só quando você pedir). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
 ### Ajustes M-10 a M-12 (desde 24/10/2026)
 
-Cada item tem um commit; o relatório completo sai no fim (com a 1.4.0).
+Cada item tem um commit; o relatório completo está logo abaixo.
+
+**Versão 1.4.0 — relatório final dos ajustes M-10 a M-12 (24/10/2026)**
+
+1. **Implementado:** M-10 (a tela não pisca mais e o cálculo só roda de novo com dados novos), M-12 (uma definição de ganho, datas reais, CDI/IPCA não publicados e TIR curta com motivo, saldo inicial como aporte, todo "indisponível" com motivo) e M-11 (Painel com abas; Desempenho fora do menu; Visão geral enxuta; olho para ocultar valores). Detalhes em cada item abaixo.
+2. **Arquivos (resumo):** os de cada item; na versão, `pubspec.yaml` (1.4.0+5), `core/config/app_info.dart`, `CHANGELOG.md`, `docs/SPEC.md` (§8 e §16), `DECISIONS.md` (D-58 a D-60), `FORMULAS.md` (§3.1, §3.4 e §11), `ARQUITETURA.md`, `DISTRIBUICAO.md`.
+3. **Testes (resultados reais):** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com **585 testes passando** (8 capturas manuais puladas sem as variáveis); `flutter build windows --release` compilou e o `patrion.exe` tem a versão 1.4.0+5. CI: abaixo.
+   - **No app real** (build release copiado para o scratchpad, com uma cópia dos seus dados; seus dados intocados), janela de 1280 × 800, conferido por captura da própria janela (cliques enviados à janela do app de teste; não usei o seu mouse):
+     - M-10: na aba Rentabilidade, 60 capturas durante um "Atualizar agora" completo: a área de conteúdo mudou uma única vez (chegou cotação nova: +2,26% → +5,19%) e nenhum quadro mostrou indicador de carregamento; 40 capturas com a tela parada, todas iguais.
+     - M-12: ganho total +R$ 799,49 (+15,66%) igual no topo, no título do gráfico em "Tudo" e na linha "Carteira toda"; degrau do aplicado visível; "No ano +5,19%, desde 22/10/2026, início dos registros"; CDI, retorno real e TIR "indisponível" com o motivo no tooltip; altas e baixas com "fechamento de 22/10/2026".
+     - M-11: menu sem Desempenho; abas Visão geral, Rentabilidade, Comparação e Risco; a Visão geral termina na 2ª tela; o olho ocultou os valores no Painel (inclusive eixos), na Carteira e em Operações e continuou oculto depois de fechar e abrir o app; temas escuro e claro.
+     - Corrigido depois da conferência: o CDI "0,00%" que restava na tabela mês a mês, o motivo errado de índice não publicado na Comparação e o texto do centro da rosca encostando no anel (conferidos de novo no build final).
+   - Observação: no começo da sessão, a janela de teste ficou em branco enquanto os monitores estavam desligados por inatividade (o Flutter não desenha sem a composição do Windows); as capturas acima foram feitas com a tela ligada.
+4. **Problemas e limitações:**
+   - O título do gráfico em "Tudo" repete o ganho total do topo de propósito (pedido do M-12); com o período padrão de 1 ano (carteiras com mais histórico), não repete.
+   - Com o olho ligado, as cores e setas de ganho/perda e os percentuais continuam visíveis (só os valores em dinheiro somem); campos de formulário mostram os valores ao editar.
+   - "Cabe em 2 telas" foi medido em 1280 × 800 com seus dados e no cenário do teste (com vencimentos); avisos no topo (atualização, sincronização antiga) somam altura.
+   - Na sua carteira (2 dias de histórico), TIR, CDI e retorno real ficam indisponíveis até haver 30 dias e índices publicados — agora com o motivo.
+   - O build substituiu `build\windows\x64\runner\Release`. O seu Patrion estava aberto por ali; para compilar, renomeei o executável em uso para `patrion.em-uso-1.3.0.exe` (o app aberto continuou funcionando). Abrindo pelo `patrion.exe`, já roda a 1.4.0; o arquivo renomeado pode ser apagado depois de fechar o app.
+5. **Pendências:** tag e Release v1.4.0 (só quando você pedir); Fase 9 (hipotéticas e backtest); importação CSV (F11); Windows Hello (F5B), antiga.
+6. **Como testar:** roteiro na resposta desta sessão.
 
 **M-10 — Desempenho piscando (concluído)** (DECISIONS D-58)
 

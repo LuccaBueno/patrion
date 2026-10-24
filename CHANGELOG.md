@@ -4,6 +4,33 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.4.0] - 2026-10-24
+
+Painel único com abas, números coerentes e o fim do piscar (ajustes M-10 a M-12).
+
+### Alterado
+
+- **Painel com abas:** Visão geral · Rentabilidade · Comparação · Risco. O **Desempenho saiu do menu** (agora: Painel, Carteira, Renda passiva, Operações); as três abas de desempenho têm o mesmo conteúdo de antes e o mesmo período. Benchmarks passou a se chamar Comparação. O endereço antigo leva à Rentabilidade.
+- **Visão geral mais simples:** o patrimônio em número grande; numa linha, ganho total, hoje e total aplicado; lucro realizado, proventos de 12 meses e TIR (com a rentabilidade no ano); a evolução patrimonial; distribuição e aportes; proventos e altas e baixas; câmbio e indicadores no rodapé. "Mais números" e "Maiores posições" saíram por serem repetidos; o que só existia lá está no ícone (i) do patrimônio. Cabe em até 2 telas em 1280 × 800.
+- **Uma definição de ganho:** ganho total = patrimônio − total aplicado + proventos, igual no Painel, no título do gráfico em "Tudo" e na Carteira (que ganhou a linha "Carteira toda"). Nos outros períodos, o gráfico diz "ganho no período" e mostra os aportes à parte (aporte não é ganho).
+- O **saldo inicial conta como aporte** na data informada.
+- Os textos longos dos gráficos foram para o ícone (i).
+
+### Adicionado
+
+- **Olho para ocultar valores** ao lado do patrimônio: troca todos os valores em reais do app por "R$ ••••" (inclusive gráficos) e fica lembrado neste computador.
+
+### Corrigido
+
+- A tela **Desempenho piscava** e voltava à primeira aba durante a atualização e o download do histórico: a tela agora fica com os números anteriores enquanto recalcula, e o cálculo só roda de novo quando os dados mudam de verdade.
+- O título do gráfico falava em "patrimônio cresceu" somando os aportes; o ganho do período deixava de fora o ganho do primeiro dia.
+- A linha do **total aplicado** aparecia como uma linha vertical no fim do gráfico quando havia poucos dias.
+- Períodos que começam antes dos registros diziam "desde 31/12/2025"; agora dizem a data real ("desde 22/10/2026, início dos registros").
+- **CDI do período** aparecia como 0,00% quando o dia ainda não tinha sido publicado; agora soma os dias publicados e diz até quando, ou "indisponível" com o motivo. O IPCA do mês anterior ao início ficava de fora.
+- **TIR** em poucos dias aparecia como "indisponível" sem explicação; agora exige 30 dias e diz isso. Todo "indisponível" mostra o motivo.
+- "Maiores altas e baixas" mostram a data do fechamento de referência.
+- Sharpe e beta de 1 ano ficavam indisponíveis nos fins de semana.
+
 ## [1.3.0] - 2026-10-23
 
 Fase 8: desempenho, benchmarks, risco, renda passiva e análises por classe.
