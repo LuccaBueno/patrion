@@ -149,6 +149,28 @@ void main() {
       expect(short.ipca, isNull);
       expect(short.real, isNull);
       expect(short.mwr, isNull, reason: '1 dia < 30');
+      // A tabela mês a mês também: o CDI do ano não é 0%.
+      expect(
+        ReturnTable.build(
+          two,
+          cdi: levels(IndicatorSeries.cdi, {
+            '2026-10-21': '1',
+            '2026-10-22': '1.0005',
+          }),
+        ).single.cdi,
+        isNull,
+      );
+      // A tabela mês a mês também: o CDI do ano não é 0%.
+      expect(
+        ReturnTable.build(
+          two,
+          cdi: levels(IndicatorSeries.cdi, {
+            '2026-10-21': '1',
+            '2026-10-22': '1.0005',
+          }),
+        ).single.cdi,
+        isNull,
+      );
 
       // Com parte do período publicada: o CDI até o último dia, e a data.
       final partial = PeriodPerformance.compute(

@@ -117,7 +117,11 @@ abstract final class ReturnTable {
           months: cells,
           total: y.value,
           accumulated: DecimalMath.divide(endLevel, first.$2) - Decimal.one,
-          cdi: cdi?.growth(baseDate, y.end),
+          // Sem nenhum dia do CDI publicado depois da base, o CDI do ano
+          // ainda não existe (não é 0%, M-12).
+          cdi: cdi?.last == null || !cdi!.last!.isAfter(baseDate)
+              ? null
+              : cdi.growth(baseDate, y.end),
           // Parcial: o primeiro ano (sem base no ano anterior) e o último,
           // se ainda não acabou (o último pregão do ano pode ser 29 ou 30/12).
           partial:

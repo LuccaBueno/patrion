@@ -164,7 +164,7 @@ class DonutCard extends StatelessWidget {
                   children: [
                     PieChart(
                       PieChartData(
-                        centerSpaceRadius: size / 2 - 28,
+                        centerSpaceRadius: size / 2 - 22,
                         sectionsSpace: 2,
                         startDegreeOffset: -90,
                         sections: [
@@ -173,7 +173,7 @@ class DonutCard extends StatelessWidget {
                               // Conversão para desenho apenas (regra 6).
                               value: f.toDouble(),
                               color: color,
-                              radius: 26,
+                              radius: 20,
                               showTitle: false,
                             ),
                         ],
@@ -181,7 +181,7 @@ class DonutCard extends StatelessWidget {
                     ),
                     if (center != null)
                       SizedBox(
-                        width: size - 64,
+                        width: size - 56,
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(

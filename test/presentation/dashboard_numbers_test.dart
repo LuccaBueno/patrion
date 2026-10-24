@@ -185,6 +185,7 @@ void main() {
         await app.pumpUntil(find.byKey(const Key('returns-table')));
         // Nenhum dia do CDI publicado depois de 22/10: não é 0,00%.
         expect(inKey('returns-cdi', '0,00%'), findsNothing);
+        expect(find.byKey(const Key('returns-2026-cdi')), findsNothing);
         expect(
           reasonIn(tester, 'returns-cdi'),
           contains('depois de 22/10/2026 ainda não foi publicado'),

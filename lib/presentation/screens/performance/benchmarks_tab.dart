@@ -154,9 +154,15 @@ class _BenchmarksTabState extends ConsumerState<BenchmarksTab> {
         usdToBrl: o.usdToBrl,
       );
       if (c == null) {
-        final first = (b.inUsd ? levels.inBrl(o.usdToBrl) : levels).first;
+        final inBrl = b.inUsd ? levels.inBrl(o.usdToBrl) : levels;
+        final first = inBrl.first;
+        final last = inBrl.last;
         reasons[b] = first == null
             ? 'Sem dados no período.'
+            // Nenhum dia publicado depois do dia-base (M-12).
+            : last != null && !last.isAfter(from)
+            ? 'Ainda sem dado publicado depois de ${Fmt.date(last)} (o '
+                  'período começa no fim de ${Fmt.date(from)}).'
             : 'Dados guardados só desde ${Fmt.date(first)}, depois do início '
                   'do período.';
       } else {
