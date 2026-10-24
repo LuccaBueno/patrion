@@ -11,6 +11,7 @@ import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
 import 'package:patrion/presentation/providers.dart';
+import 'package:patrion/presentation/widgets/common.dart';
 
 import '../helpers/app_harness.dart';
 import '../helpers/portfolio_fixture.dart';
@@ -146,8 +147,10 @@ void main() {
       expect(inKey('stat-ytd', '31/12/2025'), findsNothing);
       // Aportes: o saldo inicial conta, e o texto diz isso.
       expect(
-        inKey('dash-contributions', r'Você aportou R$ 2.250,00'),
-        findsOneWidget,
+        tester
+            .widget<InfoIcon>(find.byKey(const Key('dash-contributions-info')))
+            .message,
+        contains(r'em 12 meses R$ 2.250,00'),
       );
       expect(
         inKey('dash-contributions', 'inclusive o saldo inicial'),
@@ -155,10 +158,7 @@ void main() {
       );
       // Altas e baixas: a data do fechamento de referência.
       expect(find.byKey(Key('mover-ref-${f.petr}')), findsOneWidget);
-      expect(
-        inKey('dash-movers', 'contra o fechamento de 22/10/2026'),
-        findsOneWidget,
-      );
+      expect(inKey('dash-movers', 'fechamento de 22/10/2026'), findsOneWidget);
       // TIR com 1 dia: indisponível, com o motivo.
       expect(reasonIn(tester, 'stat-mwr'), contains('30 dias'));
 
@@ -178,23 +178,27 @@ void main() {
       'TIR curta dizem o motivo', (tester) async {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
-    await app.run(location: '/desempenho', overrides: today, () async {
-      await app.pumpUntil(find.byKey(const Key('returns-table')));
-      // Nenhum dia do CDI publicado depois de 22/10: não é 0,00%.
-      expect(inKey('returns-cdi', '0,00%'), findsNothing);
-      expect(
-        reasonIn(tester, 'returns-cdi'),
-        contains('depois de 22/10/2026 ainda não foi publicado'),
-      );
-      expect(
-        reasonIn(tester, 'returns-real'),
-        contains('IPCA de 10/2026 ainda não foi publicado'),
-      );
-      expect(reasonIn(tester, 'returns-mwr'), contains('30 dias'));
-      expect(
-        inKey('returns-twr', '22/10/2026 (início dos registros)'),
-        findsOneWidget,
-      );
-    });
+    await app.run(
+      location: '/painel/rentabilidade',
+      overrides: today,
+      () async {
+        await app.pumpUntil(find.byKey(const Key('returns-table')));
+        // Nenhum dia do CDI publicado depois de 22/10: não é 0,00%.
+        expect(inKey('returns-cdi', '0,00%'), findsNothing);
+        expect(
+          reasonIn(tester, 'returns-cdi'),
+          contains('depois de 22/10/2026 ainda não foi publicado'),
+        );
+        expect(
+          reasonIn(tester, 'returns-real'),
+          contains('IPCA de 10/2026 ainda não foi publicado'),
+        );
+        expect(reasonIn(tester, 'returns-mwr'), contains('30 dias'));
+        expect(
+          inKey('returns-twr', '22/10/2026 (início dos registros)'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

@@ -8,6 +8,7 @@ import 'package:patrion/domain/market/market_data.dart';
 import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
+import 'package:patrion/presentation/widgets/common.dart';
 
 import '../helpers/app_harness.dart';
 import '../helpers/portfolio_fixture.dart';
@@ -378,6 +379,7 @@ void main() {
       await app.pumpUntil(inKey('stat-applied', r'R$ 7.891,00'));
       expect(inKey('stat-gain', r'+R$ 316,00'), findsOneWidget);
       expect(inKey('stat-gain', 'parcial'), findsOneWidget);
+      expect(inKey('stat-income', r'R$ 25,00'), findsOneWidget);
       // Distribuição por ativo com os mesmos valores da Carteira; o seletor
       // troca para setor.
       await show('distribution');
@@ -403,13 +405,15 @@ void main() {
       await show('dash-contributions');
       // Aportes: no mês, a compra de 10/10 (91); no ano, as cinco compras
       // de janeiro (2.500 + 300 + 3.000 + 2.000 + 800) + 91.
-      expect(inKey('dash-contributions', r'No mês R$ 91,00'), findsOneWidget);
+      // Os totais do mês e do ano ficam no (i) (M-11).
+      final aportes = tester
+          .widget<InfoIcon>(find.byKey(const Key('dash-contributions-info')))
+          .message;
+      expect(aportes, contains(r'No mês R$ 91,00'));
+      expect(aportes, contains(r'no ano R$ 8.691,00'));
+      // Proventos: a média de 12 meses (25 ÷ 12); o total está no cartão.
       expect(
-        inKey('dash-contributions', r'no ano R$ 8.691,00'),
-        findsOneWidget,
-      );
-      expect(
-        inKey('dash-income', r'Você recebeu R$ 25,00 de proventos'),
+        inKey('dash-income', r'Você recebe em média R$ 2,08 por mês'),
         findsOneWidget,
       );
       await show('dash-movers');
@@ -419,10 +423,7 @@ void main() {
       expect(inKey('dash-movers', '-0,75%'), findsOneWidget);
       await tester.tap(find.text('Mês'));
       await app.settle();
-      expect(
-        inKey('dash-movers', 'contra o fechamento de 30/09/2026'),
-        findsOneWidget,
-      );
+      expect(inKey('dash-movers', 'fechamento de 30/09/2026'), findsOneWidget);
     });
   });
 }

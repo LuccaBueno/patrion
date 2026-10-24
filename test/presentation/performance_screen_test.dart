@@ -106,7 +106,7 @@ void main() {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
     await app.run(
-      location: '/desempenho',
+      location: '/painel/rentabilidade',
       size: const Size(1280, 900),
       () async {
         await app.pumpUntil(find.byKey(const Key('returns-table')));
@@ -175,7 +175,7 @@ void main() {
     try {
       final app = AppHarness(tester, f.t);
       await app.run(
-        location: '/desempenho',
+        location: '/painel/rentabilidade',
         size: const Size(1264, 681),
         () async {
           await app.pumpUntil(find.byKey(const Key('returns-table')));
@@ -216,7 +216,7 @@ void main() {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
     await app.run(
-      location: '/desempenho',
+      location: '/painel/rentabilidade',
       size: const Size(1280, 1400),
       () async {
         await app.pumpUntil(find.byKey(const Key('returns-table')));
@@ -287,7 +287,7 @@ void main() {
     });
     final app = AppHarness(tester, f.t);
     await app.run(
-      location: '/desempenho',
+      location: '/painel/rentabilidade',
       size: const Size(1280, 2400),
       () async {
         await app.pumpUntil(find.byKey(const Key('returns-table')));
@@ -354,7 +354,7 @@ void main() {
 
     final app = AppHarness(tester, f.t);
     await app.run(
-      location: '/desempenho',
+      location: '/painel/rentabilidade',
       wealthService: (market) => _CountingWealthService(market, () => loads++),
       () async {
         await app.pumpUntil(find.byKey(const Key('returns-table')));
@@ -394,9 +394,15 @@ void main() {
     );
   });
 
-  testWidgets('sem operações: indisponível com o motivo', (tester) async {
+  testWidgets('sem histórico: indisponível com o motivo', (tester) async {
+    // Uma compra de hoje, sem preço: a carteira existe (o Painel mostra as
+    // abas), mas não há dois dias de evolução.
+    final today = LocalDate.fromDateTime(DateTime.now()).toString();
+    await tester.runAsync(
+      () => f.add(f.draft(OperationType.buy, today, qty: '1', price: '10')),
+    );
     final app = AppHarness(tester, f.t);
-    await app.run(location: '/desempenho', () async {
+    await app.run(location: '/painel/rentabilidade', () async {
       await app.pumpUntil(find.byKey(const Key('returns-unavailable')));
       expect(find.textContaining('datas reais'), findsOneWidget);
     });

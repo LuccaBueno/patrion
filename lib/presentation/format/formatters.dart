@@ -8,10 +8,18 @@ import '../../core/time/local_date.dart';
 abstract final class Fmt {
   static const _symbols = {'BRL': r'R$', 'USD': r'US$', 'EUR': '€'};
 
+  /// Valores em dinheiro ocultos pelo olho do Painel (M-11): `R$ ••••` em
+  /// todo o app. Preferência deste PC, aplicada pelo `PatrionApp`.
+  static bool hideMoney = false;
+
+  /// O que aparece no lugar de um valor oculto.
+  static const hidden = '••••';
+
   /// Valor em moeda com 2 casas, meio para cima (DECISIONS D-03):
   /// `R$ 1.234,56`, `-R$ 10,00`, `US$ 5,00`, `GBP 3,00`.
   static String money(Decimal value, String currency) {
     final symbol = _symbols[currency] ?? currency;
+    if (hideMoney) return '$symbol $hidden';
     final rounded = DecimalMath.roundHalfUp(value);
     final sign = rounded < Decimal.zero ? '-' : '';
     return '$sign$symbol ${_group(rounded.abs(), 2)}';
@@ -19,6 +27,7 @@ abstract final class Fmt {
 
   /// Valor com sinal explícito para ganhos e perdas: `+R$ 10,00`.
   static String signedMoney(Decimal value, String currency) {
+    if (hideMoney) return money(value, currency);
     final text = money(value, currency);
     return DecimalMath.roundHalfUp(value) > Decimal.zero ? '+$text' : text;
   }

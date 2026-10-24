@@ -358,7 +358,7 @@ class MonthlyBars extends StatelessWidget {
           ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 170,
+          height: 110,
           child: BarChart(
             BarChartData(
               maxY: maxY <= 0 ? 1 : maxY * 1.1,
@@ -378,7 +378,10 @@ class MonthlyBars extends StatelessWidget {
                     maxIncluded: false,
                     getTitlesWidget: (v, meta) => SideTitleWidget(
                       meta: meta,
-                      child: Text(compact(v), style: small),
+                      child: Text(
+                        Fmt.hideMoney ? Fmt.hidden : compact(v),
+                        style: small,
+                      ),
                     ),
                   ),
                 ),
@@ -481,6 +484,16 @@ class DistributionCard extends StatefulWidget {
 class _DistributionCardState extends State<DistributionCard> {
   var _index = 0;
 
+  static String _plural(String label, int n) {
+    final word = label.toLowerCase();
+    if (n == 1) return word;
+    return switch (word) {
+      'setor' => 'setores',
+      'classe' => 'classes',
+      _ => '${word}s',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final view = widget.views[_index];
@@ -494,8 +507,10 @@ class _DistributionCardState extends State<DistributionCard> {
       subtitle: view.subtitle ?? 'Por ${view.label.toLowerCase()}',
       currency: widget.currency,
       slices: view.slices,
-      size: 168,
-      center: Fmt.money(widget.total, widget.currency),
+      size: 112,
+      // A contagem, não o total: o patrimônio já está no topo (M-11).
+      center:
+          '${view.slices.length} ${_plural(view.label, view.slices.length)}',
       header: SegmentedButton<int>(
         key: const Key('distribution-by'),
         showSelectedIcon: false,

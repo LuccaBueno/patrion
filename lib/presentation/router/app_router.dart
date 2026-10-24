@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/income/income_screen.dart';
 import '../screens/operations/operations_screen.dart';
-import '../screens/performance/performance_screen.dart';
 import '../screens/portfolio/asset_detail_screen.dart';
 import '../screens/portfolio/portfolio_screen.dart';
 import '../screens/settings_screen.dart';
@@ -14,7 +13,10 @@ import '../shell/app_shell.dart';
 abstract final class Routes {
   static const dashboard = '/';
   static const portfolio = '/carteira';
-  static const performance = '/desempenho';
+
+  /// Abas do Painel além da Visão geral (M-11): `/painel/rentabilidade`,
+  /// `/painel/comparacao` e `/painel/risco`.
+  static String dashboardTab(String tab) => '/painel/$tab';
   static const income = '/renda';
   static const operations = '/operacoes';
   static const registry = '/configuracoes/corretoras';
@@ -59,12 +61,6 @@ const navDestinations = [
     selectedIcon: Icons.pie_chart,
   ),
   NavDestination(
-    path: Routes.performance,
-    label: 'Desempenho',
-    icon: Icons.query_stats_outlined,
-    selectedIcon: Icons.query_stats,
-  ),
-  NavDestination(
     path: Routes.income,
     label: 'Renda passiva',
     icon: Icons.payments_outlined,
@@ -107,6 +103,12 @@ GoRouter createRouter({String initialLocation = Routes.dashboard}) {
       GoRoute(path: '/sincronizacao', redirect: (_, _) => Routes.sync),
       // Cadastros saiu do menu (M-06): agora em Configurações.
       GoRoute(path: '/cadastros', redirect: (_, _) => Routes.registry),
+      // Desempenho saiu do menu (M-11): agora são abas do Painel.
+      GoRoute(
+        path: '/desempenho',
+        redirect: (_, _) => Routes.dashboardTab('rentabilidade'),
+      ),
+      GoRoute(path: '/painel', redirect: (_, _) => Routes.dashboard),
       ShellRoute(
         builder: (context, state, child) =>
             AppShell(location: state.uri.path, child: child),
@@ -114,6 +116,14 @@ GoRouter createRouter({String initialLocation = Routes.dashboard}) {
           GoRoute(
             path: Routes.dashboard,
             pageBuilder: (context, state) => _page(const DashboardScreen()),
+          ),
+          GoRoute(
+            path: '/painel/:tab',
+            pageBuilder: (context, state) => _page(
+              DashboardScreen(
+                tab: DashboardTab.ofPath(state.pathParameters['tab']!),
+              ),
+            ),
           ),
           GoRoute(
             path: Routes.portfolio,
@@ -126,10 +136,6 @@ GoRouter createRouter({String initialLocation = Routes.dashboard}) {
                 ),
               ),
             ],
-          ),
-          GoRoute(
-            path: Routes.performance,
-            pageBuilder: (context, state) => _page(const PerformanceScreen()),
           ),
           GoRoute(
             path: Routes.income,

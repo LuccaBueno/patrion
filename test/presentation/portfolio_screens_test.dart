@@ -10,6 +10,7 @@ import 'package:patrion/domain/portfolio/operation_type.dart';
 import 'package:go_router/go_router.dart';
 import 'package:patrion/application/settings/appearance_service.dart';
 import 'package:patrion/data/repositories/device_settings_repository.dart';
+import 'package:patrion/presentation/widgets/common.dart';
 
 import '../helpers/app_harness.dart';
 import '../helpers/portfolio_fixture.dart';
@@ -67,25 +68,30 @@ void main() {
         expect(find.text('Painel'), findsWidgets);
         // Caixa 10.000 − 3.005 − 2.000; mercado 3.500 + 2.100.
         expect(find.text(r'R$ 10.595,00'), findsOneWidget);
-        // Investido (custo) e aplicado (aportes − resgates) coincidem aqui.
-        expect(find.text(r'R$ 5.005,00'), findsNWidgets(2));
         await app.pumpUntil(
           find.descendant(
             of: find.byKey(const Key('stat-applied')),
             matching: find.text(r'R$ 5.005,00'),
           ),
         );
+        // Sem números repetidos na Visão geral (M-11): o custo das posições
+        // (igual ao aplicado aqui), o caixa e o não realizado ficam no (i)
+        // do patrimônio.
+        expect(find.text(r'R$ 5.005,00'), findsOneWidget);
+        final equityInfo = tester
+            .widget<InfoIcon>(find.byKey(const Key('stat-equity-info')))
+            .message;
+        expect(equityInfo, contains(r'caixa (R$ 4.995,00)'));
+        expect(equityInfo, contains(r'(valor investido): R$ 5.005,00'));
+        expect(equityInfo, contains(r'+R$ 595,00 (+11,89% sobre o custo'));
+        // Ganho total (sem vendas nem proventos): 5.600 − 5.005.
         expect(
           find.descendant(
-            of: find.byKey(const Key('stat-market')),
-            matching: find.text(r'R$ 5.600,00'),
+            of: find.byKey(const Key('stat-gain')),
+            matching: find.textContaining(r'+R$ 595,00 (+11,89%)'),
           ),
           findsOneWidget,
         );
-        expect(find.text(r'R$ 4.995,00'), findsWidgets);
-        // Resultado não realizado e resultado total (sem vendas nem proventos).
-        expect(find.text(r'+R$ 595,00'), findsNWidgets(2));
-        expect(find.textContaining('+11,89% sobre o custo'), findsOneWidget);
         // TIR: −5.005 em 10/01 e +5.600 em 31/05/2024; menos de um ano, então
         // mostra o retorno do período.
         expect(find.text('+11,89% no período'), findsOneWidget);
@@ -103,9 +109,12 @@ void main() {
           ),
           findsOneWidget,
         );
-        // Resultado total sobre o aplicado: 595 ÷ 5.005.
-        expect(find.textContaining('+11,89% sobre o aplicado'), findsOneWidget);
-        expect(find.textContaining('saldos até 31/05/2024'), findsOneWidget);
+        expect(
+          tester
+              .widget<InfoIcon>(find.byKey(const Key('stat-equity-info')))
+              .message,
+          contains('saldos até 31/05/2024'),
+        );
       },
     );
   });
@@ -135,27 +144,34 @@ void main() {
     final app = AppHarness(tester, f.t);
     // Janela de 960 px de largura, alta para construir todos os cartões.
     await app.run(size: const Size(960, 4200), () async {
-      for (final key in [
-        'stat-equity',
-        'stat-cash',
-        'stat-unrealized',
-        'stat-total-result',
-        'stat-mwr',
+      // O patrimônio não tem rótulo dentro da chave; nos outros, o primeiro
+      // parágrafo depois do rótulo é o valor.
+      for (final (key, index) in [
+        ('stat-equity', 0),
+        ('stat-gain', 1),
+        ('stat-applied', 1),
+        ('stat-realized', 1),
+        ('stat-mwr', 1),
       ]) {
         final card = find.byKey(Key(key));
         expect(card, findsOneWidget, reason: key);
         final paragraphs = tester.renderObjectList<RenderParagraph>(
           find.descendant(of: card, matching: find.byType(RichText)),
         );
-        // O primeiro parágrafo depois do rótulo é o valor.
-        final value = paragraphs.elementAt(1);
+        final value = paragraphs.elementAt(index);
         final lineHeight = value.getFullHeightForCaret(
           const TextPosition(offset: 0),
         );
         expect(value.size.height, lessThan(lineHeight * 1.5), reason: key);
         expect(value.didExceedMaxLines, isFalse, reason: key);
       }
-      expect(find.text(r'R$ 123.426.789.012,34'), findsOneWidget);
+      // O caixa fica no (i) do patrimônio (M-11).
+      expect(
+        tester
+            .widget<InfoIcon>(find.byKey(const Key('stat-equity-info')))
+            .message,
+        contains(r'R$ 123.426.789.012,34'),
+      );
     });
   });
 
@@ -431,8 +447,12 @@ void main() {
       );
     });
     final app = AppHarness(tester, f.t);
+    // O caixa fica no (i) do patrimônio (M-11).
+    String equityInfo() => tester
+        .widget<InfoIcon>(find.byKey(const Key('stat-equity-info')))
+        .message;
     await app.run(size: const Size(1280, 2600), () async {
-      expect(find.byKey(const Key('stat-cash')), findsNothing);
+      expect(equityInfo(), isNot(contains('caixa')));
       expect(find.textContaining('Caixa negativo'), findsNothing);
       expect(
         find.descendant(
@@ -445,7 +465,7 @@ void main() {
       await app.tap(find.text('Configurações').first);
       await app.tap(find.byKey(const Key('track-cash')));
       await app.tap(find.text('Painel').first);
-      expect(find.byKey(const Key('stat-cash')), findsOneWidget);
+      expect(equityInfo(), contains('caixa'));
       expect(find.textContaining('Caixa negativo'), findsOneWidget);
       expect(
         find.descendant(

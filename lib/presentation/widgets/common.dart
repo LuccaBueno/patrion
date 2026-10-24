@@ -518,3 +518,24 @@ class Choice<T> extends StatelessWidget {
     );
   }
 }
+
+/// Ícone (i) com a explicação no tooltip: os textos longos ficam aqui, não
+/// embaixo dos números e gráficos (M-11).
+class InfoIcon extends StatelessWidget {
+  const InfoIcon({required this.message, super.key});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: message,
+      child: Icon(
+        Icons.info_outline,
+        size: 16,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        semanticLabel: 'Sobre',
+      ),
+    );
+  }
+}

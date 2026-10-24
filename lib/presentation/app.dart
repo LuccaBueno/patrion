@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../application/settings/appearance_service.dart';
 import '../core/config/app_info.dart';
+import 'format/formatters.dart';
 import 'providers.dart';
 import 'router/app_router.dart';
 import 'services/open_requests.dart';
@@ -44,8 +45,28 @@ class _PatrionAppState extends ConsumerState<PatrionApp> {
     super.dispose();
   }
 
+  /// Aplica o olho (M-11): troca o formato do dinheiro e redesenha todas as
+  /// telas abertas, sem perder o estado delas (aba, período, rolagem).
+  void _applyHideValues(bool hide) {
+    if (Fmt.hideMoney == hide) return;
+    Fmt.hideMoney = hide;
+    void mark(Element e) {
+      e.markNeedsBuild();
+      e.visitChildren(mark);
+    }
+
+    if (mounted) (context as Element).visitChildren(mark);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Na abertura, oculto até ler a preferência (nunca mostra um valor que
+    // devia estar oculto); depois, a cada mudança.
+    Fmt.hideMoney = ref.read(hideValuesProvider).value ?? true;
+    ref.listen(
+      hideValuesProvider,
+      (_, next) => _applyHideValues(next.value ?? false),
+    );
     final preference =
         ref.watch(themePreferenceProvider).value ?? ThemePreference.system;
     return MaterialApp.router(

@@ -101,6 +101,11 @@ final themePreferenceProvider = StreamProvider<ThemePreference>(
   (ref) => ref.watch(appearanceServiceProvider).watchTheme(),
 );
 
+/// Valores em dinheiro ocultos neste PC (olho do Painel, M-11).
+final hideValuesProvider = StreamProvider<bool>(
+  (ref) => ref.watch(appearanceServiceProvider).watchHideValues(),
+);
+
 // -- Carteira real (F3) -------------------------------------------------------
 
 final portfolioRepositoriesProvider = Provider<PortfolioRepositories>(

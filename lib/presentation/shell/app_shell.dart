@@ -25,8 +25,11 @@ class AppShell extends ConsumerWidget {
   /// Item de cima selecionado; nulo quando a tela é do rodapé.
   int? get _selectedIndex {
     if (location.startsWith(Routes.settings)) return null;
+    // As abas do Painel (`/painel/...`) também são o Painel (M-11).
     final index = navDestinations.lastIndexWhere(
-      (d) => d.path == '/' ? location == '/' : location.startsWith(d.path),
+      (d) => d.path == '/'
+          ? location == '/' || location.startsWith('/painel')
+          : location.startsWith(d.path),
     );
     return index < 0 ? 0 : index;
   }

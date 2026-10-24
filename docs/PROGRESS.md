@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes M-10 a M-12 em andamento** (24/10/2026; M-10 e M-12 concluídos, M-11 a seguir). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-10 a M-12 em andamento** (24/10/2026; os três itens concluídos; falta a conferência no app real e a 1.4.0). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -18,6 +18,15 @@ Cada item tem um commit; o relatório completo sai no fim (com a 1.4.0).
 - Correção: `AsyncBody` e o cartão do risco ficam com os dados anteriores enquanto recalculam; o retrato descarta releituras com os mesmos dados (`PortfolioSnapshot.dataKey`/`holdingsKey`); o tique de mercado só conta quando o conteúdo das tabelas `mkt_` muda (`MarketRepository.contentVersion`); evolução e renda passiva observam só a `holdingsKey` e o tique. Painel, Carteira e Renda passiva usam o mesmo `AsyncBody` e os mesmos provedores.
 - Corrigido junto: Sharpe e beta de 1 ano indisponíveis no fim de semana (de sexta a sexta são 364 dias; mínimo agora 360) e o teste de risco que dependia da data de hoje.
 - Testes: `performance_screen_test.dart` ("M-10": o cálculo roda 1 vez na abertura, nenhuma ao trocar aba/período ou ao regravar os mesmos fechamentos, 1 vez com um fechamento novo; nenhum indicador de progresso por 16 s de tela aberta), `risk_test.dart` (364 dias).
+
+**M-11 — Painel único com abas (concluído)** (DECISIONS D-60; SPEC §8 e §16)
+
+- Desempenho saiu do menu (Painel, Carteira, Renda passiva, Operações). O Painel tem as abas Visão geral · Rentabilidade · Comparação · Risco (`/`, `/painel/rentabilidade`, `/painel/comparacao`, `/painel/risco`; `/desempenho` redireciona); o período vale nas três abas de desempenho.
+- Visão geral: patrimônio grande com o (i) e o **olho**; linha ganho total · hoje · total aplicado; lucro realizado, proventos (12 meses) e TIR (com "no ano"); evolução; distribuição | aportes; proventos | altas e baixas; vencimentos; câmbio. Saíram "Mais números" e "Maiores posições" (o que só existia lá foi para o (i)). Títulos sem repetir valores; notas longas no (i).
+- Olho: "R$ ••••" em todo o app (inclusive eixos e tooltips), lembrado neste PC; oculto na abertura até ler a preferência.
+- Medido: com a cópia dos seus dados, a Visão geral rola 556 px numa área de 621 px (cabe em 2 telas); no teste (com vencimentos e 1 ano de histórico), também.
+- Arquivos: `dashboard_screen.dart` (abas e Visão geral), `performance/performance_tabs.dart` (antes `performance_screen.dart`), `wealth_chart.dart`, `dashboard_charts.dart`, `app_router.dart`, `app_shell.dart`, `app.dart`, `formatters.dart`, `common.dart` (`InfoIcon`), `appearance_service.dart`, `providers.dart`.
+- Testes: `dashboard_tabs_test.dart` (novo: abas e redirecionamento, período compartilhado; cabe em 2 telas com a Segoe UI e nenhum valor em reais repetido; o olho oculta tudo no Painel, Carteira, Renda passiva e Operações e fica gravado), `app_test.dart` (menu) e ajustes nos testes do Painel.
 
 **M-12 — Números e rótulos (concluído)** (DECISIONS D-59; FORMULAS §3.1 e §3.4)
 

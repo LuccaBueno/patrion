@@ -104,8 +104,9 @@ void main() {
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
       expect(
         [for (final d in rail.destinations) (d.label as Text).data],
-        // Cadastros saiu do menu (M-06): está em Configurações.
-        ['Painel', 'Carteira', 'Desempenho', 'Renda passiva', 'Operações'],
+        // Cadastros saiu do menu (M-06) e o Desempenho virou abas do
+        // Painel (M-11).
+        ['Painel', 'Carteira', 'Renda passiva', 'Operações'],
       );
       final sync = tester.getCenter(find.byKey(const Key('nav-Sincronizar')));
       final settings = tester.getCenter(

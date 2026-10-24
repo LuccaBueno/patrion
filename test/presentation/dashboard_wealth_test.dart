@@ -9,6 +9,7 @@ import 'package:patrion/domain/market/market_data.dart';
 import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
+import 'package:patrion/presentation/widgets/common.dart';
 
 import '../helpers/app_harness.dart';
 import '../helpers/portfolio_fixture.dart';
@@ -195,9 +196,10 @@ void main() {
     final app = AppHarness(tester, f.t);
     await app.run(size: const Size(1280, 2000), () async {
       await app.pumpUntil(find.byKey(const Key('wealth-title')));
+      // A explicação fica no (i) da legenda (M-11).
       expect(
-        find.textContaining('registre as compras com as datas reais'),
-        findsOneWidget,
+        tester.widget<InfoIcon>(find.byKey(const Key('wealth-notes'))).message,
+        contains('registre as compras com as datas reais'),
       );
     });
   });

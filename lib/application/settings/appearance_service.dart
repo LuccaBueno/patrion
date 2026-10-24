@@ -19,6 +19,9 @@ class AppearanceService {
 
   static const themeKey = 'theme';
 
+  /// Valores em dinheiro ocultos (olho do Painel, M-11).
+  static const hideValuesKey = 'hide_values';
+
   final DeviceSettingsRepository _settings;
 
   Stream<ThemePreference> watchTheme() =>
@@ -29,6 +32,12 @@ class AppearanceService {
 
   Future<void> setTheme(ThemePreference value) =>
       _settings.put(themeKey, jsonEncode(value.name));
+
+  Stream<bool> watchHideValues() =>
+      _settings.watch(hideValuesKey).map((json) => json == jsonEncode(true));
+
+  Future<void> setHideValues(bool value) =>
+      _settings.put(hideValuesKey, jsonEncode(value));
 
   /// Valor ausente ou desconhecido (de uma versão futura) volta ao padrão.
   static ThemePreference _decode(String? json) {

@@ -131,6 +131,12 @@ class _WealthChartCardState extends State<WealthChartCard> {
       sims: {for (final s in shownIndices) s: sims[s]!},
       names: _indexNames,
       onPeriod: (p) => setState(() => _period = p),
+      compareChip: FilterChip(
+        key: const Key('compare-toggle'),
+        label: const Text('Comparar com'),
+        selected: _compare,
+        onSelected: (v) => setState(() => _compare = v),
+      ),
       periodEnabled: (p) =>
           p.days == null || (span >= (p.days! * 0.5) && all.length > 1),
     );
@@ -140,12 +146,6 @@ class _WealthChartCardState extends State<WealthChartCard> {
       runSpacing: 4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        FilterChip(
-          key: const Key('compare-toggle'),
-          label: const Text('Comparar com'),
-          selected: _compare,
-          onSelected: (v) => setState(() => _compare = v),
-        ),
         if (_compare) ...[
           for (final s in WealthOverview.compared)
             Tooltip(
@@ -273,20 +273,34 @@ class _WealthChartCardState extends State<WealthChartCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             header,
-            const SizedBox(height: 8),
-            controls,
+            if (_compare) ...[const SizedBox(height: 8), controls],
             const SizedBox(height: 8),
             SizedBox(height: widget.height, child: body),
             const SizedBox(height: 6),
-            _Legend(
-              mode: _compare ? _mode : WealthMode.money,
-              indices: shownIndices,
-              names: _indexNames,
+            // Legenda e, no (i), as notas longas (M-11).
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _Legend(
+                    mode: _compare ? _mode : WealthMode.money,
+                    indices: shownIndices,
+                    names: _indexNames,
+                  ),
+                ),
+                if (notes.isNotEmpty)
+                  InfoIcon(
+                    key: const Key('wealth-notes'),
+                    message: notes.join('\n\n'),
+                  ),
+              ],
             ),
-            for (final n in notes)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(n, style: muted),
+            // A simulação é sempre rotulada na tela, não só no (i) (regra 3).
+            if (shownIndices.isNotEmpty)
+              Text(
+                'Índices: simulação hipotética com os mesmos aportes; não é '
+                'previsão nem recomendação.',
+                style: muted,
               ),
           ],
         ),
@@ -308,7 +322,10 @@ class _Header extends StatelessWidget {
     required this.names,
     required this.onPeriod,
     required this.periodEnabled,
+    required this.compareChip,
   });
+
+  final Widget compareChip;
 
   final WealthPeriod period;
   final List<WealthPoint> window;
@@ -352,13 +369,11 @@ class _Header extends StatelessWidget {
             '${gain >= Decimal.zero ? 'Ganho' : 'Perda'} de '
             '${Fmt.money(gain.abs(), 'BRL')} ${all ? phrase : 'no período ($phrase)'}';
         subtitle = all
-            ? 'Patrimônio − total aplicado + proventos; aportes não contam '
-                  'como ganho'
+            ? 'Patrimônio − aplicado + proventos; aporte não é ganho'
             : '${Fmt.money(added.abs(), 'BRL')} de '
                   '${added >= Decimal.zero ? 'aportes líquidos' : 'resgates líquidos'} '
-                  'no período não ${added >= Decimal.zero ? 'são ganho' : 'são perda'} · '
-                  'patrimônio de ${Fmt.money(a.value, 'BRL')} para '
-                  '${Fmt.money(b.value, 'BRL')}';
+                  'no período (não são '
+                  '${added >= Decimal.zero ? 'ganho' : 'perda'})';
       }
     }
     return Wrap(
@@ -383,26 +398,37 @@ class _Header extends StatelessWidget {
               Text(subtitle, key: const Key('wealth-subtitle'), style: muted),
           ],
         ),
-        SegmentedButton<WealthPeriod>(
-          key: const Key('wealth-periods'),
-          showSelectedIcon: false,
-          style: const ButtonStyle(
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          segments: [
-            for (final p in WealthPeriod.values)
-              ButtonSegment(
-                value: p,
-                label: Text(p.label, key: Key('wealth-period-${p.label}')),
-                enabled: periodEnabled(p),
-                tooltip: periodEnabled(p)
-                    ? null
-                    : 'A carteira tem menos histórico que este período.',
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            compareChip,
+            const SizedBox(width: 12),
+            SegmentedButton<WealthPeriod>(
+              key: const Key('wealth-periods'),
+              showSelectedIcon: false,
+              style: const ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                // Estreito: o título e os períodos cabem numa linha (M-11).
+                padding: WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: 10),
+                ),
               ),
+              segments: [
+                for (final p in WealthPeriod.values)
+                  ButtonSegment(
+                    value: p,
+                    label: Text(p.label, key: Key('wealth-period-${p.label}')),
+                    enabled: periodEnabled(p),
+                    tooltip: periodEnabled(p)
+                        ? null
+                        : 'A carteira tem menos histórico que este período.',
+                  ),
+              ],
+              selected: {period},
+              onSelectionChanged: (s) => onPeriod(s.single),
+            ),
           ],
-          selected: {period},
-          onSelectionChanged: (s) => onPeriod(s.single),
         ),
       ],
     );
@@ -766,7 +792,11 @@ class _WealthLine extends StatelessWidget {
               getTitlesWidget: (v, meta) => SideTitleWidget(
                 meta: meta,
                 child: Text(
-                  percent ? '${compact(v)}%' : 'R\$ ${compact(v)}',
+                  percent
+                      ? '${compact(v)}%'
+                      : Fmt.hideMoney
+                      ? 'R\$ ${Fmt.hidden}'
+                      : 'R\$ ${compact(v)}',
                   style: small,
                   maxLines: 1,
                   softWrap: false,
