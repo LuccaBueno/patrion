@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
+import '../../../core/money/decimal_math.dart';
 import '../../../core/time/local_date.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
@@ -12,6 +13,7 @@ import '../../../domain/portfolio/portfolio_valuation.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../format/market_labels.dart';
+import '../../format/performance_format.dart';
 import '../../providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/common.dart';
@@ -213,6 +215,7 @@ class _HoldingsListState extends State<HoldingsList> {
           ],
         ),
         const SizedBox(height: 12),
+        _Totals(snap: snap),
         for (final (gi, g) in groups.indexed) ...[
           if (gi > 0) const SizedBox(height: 16),
           if (g.institution != null)
@@ -269,6 +272,77 @@ class _HoldingsListState extends State<HoldingsList> {
         (h.marketValue ?? h.totalCost) *
             (widget.toBrl[h.currency] ?? Decimal.one),
   );
+}
+
+/// Totais da carteira toda em cada moeda, com o mesmo ganho total do Painel
+/// (M-12; `docs/FORMULAS.md` §3.1).
+class _Totals extends StatelessWidget {
+  const _Totals({required this.snap});
+
+  final PortfolioSnapshot snap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Wrap(
+        spacing: 24,
+        runSpacing: 4,
+        children: [
+          for (final c in snap.summary.currencies())
+            if (snap.summary.byCurrency[c] case final totals?)
+              Builder(
+                builder: (context) {
+                  final p = snap.pricedPerformance(c);
+                  final total = p.totalResult;
+                  final fraction = total == null || p.invested <= Decimal.zero
+                      ? null
+                      : DecimalMath.divide(total, p.invested);
+                  return Tooltip(
+                    message: totalGainInfo,
+                    child: Wrap(
+                      key: Key('portfolio-totals-$c'),
+                      spacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text('Carteira toda ($c):', style: muted),
+                        Text(
+                          'patrimônio ${Fmt.money(totals.equity, c)} · '
+                          'aplicado ${Fmt.money(p.invested - p.returned, c)} · '
+                          'ganho total',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        if (total == null)
+                          UnavailableText(
+                            tooltip: p.gap?.label ?? 'Sem dados suficientes.',
+                          )
+                        else
+                          PnlText(
+                            key: Key('portfolio-gain-$c'),
+                            value: total,
+                            text:
+                                '${Fmt.signedMoney(total, c)}'
+                                '${fraction == null ? '' : ' (${Fmt.percent(fraction)})'}',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        if (snap.unpricedAssets.isNotEmpty)
+                          Text(
+                            '· parcial (sem as posições sem preço)',
+                            style: muted,
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Cabeçalho de uma corretora: nome e subtotal (M-06).

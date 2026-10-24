@@ -173,6 +173,10 @@ class _NoMarketChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final reason = asset.priceSource == PriceSource.market
+        ? 'Sem gráfico de cotação para esta classe de ativo.'
+        : 'Este ativo usa preço ou saldo informado por você: não há '
+              'histórico de mercado.';
     return SizedBox(
       height: 120,
       child: Center(
@@ -181,12 +185,9 @@ class _NoMarketChart extends StatelessWidget {
           children: [
             Text('Cotação', style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
-            const UnavailableText(),
+            UnavailableText(tooltip: reason),
             Text(
-              asset.priceSource == PriceSource.market
-                  ? 'Sem gráfico de cotação para esta classe de ativo.'
-                  : 'Este ativo usa preço ou saldo informado por você: não '
-                        'há histórico de mercado.',
+              reason,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -600,7 +601,11 @@ class _NumberCard extends StatelessWidget {
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
-              child: value ?? UnavailableText(tooltip: unavailable),
+              child:
+                  value ??
+                  UnavailableText(
+                    tooltip: unavailable ?? 'Sem dados suficientes.',
+                  ),
             ),
             Text(
               note ?? '',
@@ -1008,7 +1013,9 @@ class _Metric extends StatelessWidget {
           ),
         ),
         if (value == null)
-          UnavailableText(tooltip: unavailableReason)
+          UnavailableText(
+            tooltip: unavailableReason ?? 'Sem dados suficientes.',
+          )
         else
           SelectableText(value!, style: theme.textTheme.bodyLarge),
       ],

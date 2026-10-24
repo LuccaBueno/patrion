@@ -128,6 +128,43 @@ void main() {
       expect(p.cagr, isNull);
     });
 
+    test('M-12: CDI só até o último dia publicado; sem nenhum dia depois do '
+        'dia-base, nulo (não 0%); TIR só com 30 dias', () {
+      final two = series([
+        pt('2026-10-22', '2400', flow: '2000'),
+        pt('2026-10-23', '2750', flow: '250'),
+      ]);
+      final short = PeriodPerformance.compute(
+        two,
+        from: day('2026-10-01'),
+        to: day('2026-10-23'),
+        cdi: levels(IndicatorSeries.cdi, {
+          '2026-10-21': '1',
+          '2026-10-22': '1.0005',
+        }),
+        ipca: levels(IndicatorSeries.ipca, {'2026-09-30': '1'}),
+      )!;
+      expect(short.cdi, isNull);
+      expect(short.cdiUntil, isNull);
+      expect(short.ipca, isNull);
+      expect(short.real, isNull);
+      expect(short.mwr, isNull, reason: '1 dia < 30');
+
+      // Com parte do período publicada: o CDI até o último dia, e a data.
+      final partial = PeriodPerformance.compute(
+        s,
+        from: day('2025-01-31'),
+        to: day('2025-12-31'),
+        cdi: levels(IndicatorSeries.cdi, {
+          '2025-01-31': '1',
+          '2025-06-30': '1.05',
+        }),
+      )!;
+      expect(pct(partial.cdi), '5');
+      expect(partial.cdiUntil, day('2025-06-30'));
+      expect(partial.mwr, isNotNull);
+    });
+
     test('desde o início: CAGR acima de um ano e TIR igual sem aportes', () {
       final p = PeriodPerformance.compute(
         s,

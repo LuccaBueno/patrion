@@ -4,9 +4,30 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-10 a M-12 em andamento** (24/10/2026; M-10 e M-12 concluídos, M-11 a seguir). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
+
+### Ajustes M-10 a M-12 (desde 24/10/2026)
+
+Cada item tem um commit; o relatório completo sai no fim (com a 1.4.0).
+
+**M-10 — Desempenho piscando (concluído)** (DECISIONS D-58)
+
+- Causa: no Riverpod 3, um `FutureProvider` que recalcula por mudança de dependência fica em `AsyncLoading` (com o valor anterior), e o `AsyncBody` trocava a tela inteira por um indicador de progresso; o retrato da carteira era refeito a cada gravação de mercado, então a evolução e o risco recalculavam em sequência durante a atualização e o histórico em segundo plano. A tela piscava e as abas voltavam ao início.
+- Correção: `AsyncBody` e o cartão do risco ficam com os dados anteriores enquanto recalculam; o retrato descarta releituras com os mesmos dados (`PortfolioSnapshot.dataKey`/`holdingsKey`); o tique de mercado só conta quando o conteúdo das tabelas `mkt_` muda (`MarketRepository.contentVersion`); evolução e renda passiva observam só a `holdingsKey` e o tique. Painel, Carteira e Renda passiva usam o mesmo `AsyncBody` e os mesmos provedores.
+- Corrigido junto: Sharpe e beta de 1 ano indisponíveis no fim de semana (de sexta a sexta são 364 dias; mínimo agora 360) e o teste de risco que dependia da data de hoje.
+- Testes: `performance_screen_test.dart` ("M-10": o cálculo roda 1 vez na abertura, nenhuma ao trocar aba/período ou ao regravar os mesmos fechamentos, 1 vez com um fechamento novo; nenhum indicador de progresso por 16 s de tela aberta), `risk_test.dart` (364 dias).
+
+**M-12 — Números e rótulos (concluído)** (DECISIONS D-59; FORMULAS §3.1 e §3.4)
+
+- Uma definição de ganho: **patrimônio − total aplicado + proventos**, no cartão "Ganho total", no título do gráfico em "Tudo" e na Carteira (linha "Carteira toda" nova); parcial, e dito, quando há posição sem preço.
+- Gráfico: "Ganho de R$ X desde dd/mm/aaaa, início dos registros" em "Tudo"; "ganho no período" com os aportes à parte nos outros; degrau do total aplicado no meio entre os dias.
+- Saldo inicial conta como aporte na data informada (texto coerente); "Rentabilidade no ano" e a aba Rentabilidade dizem a data real de início; altas e baixas dizem a data do fechamento de referência.
+- CDI e IPCA do período até o último dia publicado, com a data; sem nenhum dia publicado, "indisponível" com o motivo (não mais 0,00%). A evolução lê as séries mensais desde 2 meses antes (o IPCA do mês anterior ficava de fora). TIR só com 30 dias, com o motivo.
+- Todo "indisponível" tem motivo (`UnavailableText` exige o texto; `StatCard` sem valor exige `unavailableReason`).
+- Com a cópia dos seus dados (renderização com os widgets do app): ganho +R$ 673,32 (+13,19%) no cartão e no título do gráfico (antes: "Ganho de R$ 97,32" e "cresceu R$ 1.473,97"); "TWR desde 22/10/2026, início dos registros".
+- Testes: `dashboard_numbers_test.dart` (novo: ganho igual no cartão, no gráfico em "Tudo" e na Carteira; degrau; datas; aportes; TIR, CDI e IPCA com motivo), `performance_report_test.dart`, `dashboard_metrics_test.dart`, ajustes em `dashboard_wealth_test.dart` e `portfolio_list_test.dart`.
 
 ### Fase 8 — Classes, benchmarks, risco e renda passiva (desde 23/10/2026)
 

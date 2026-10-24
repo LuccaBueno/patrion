@@ -754,3 +754,16 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - Corrigido junto: Sharpe e beta de "1 ano" ficavam indisponíveis no fim de semana (de sexta a sexta são 364 dias); o mínimo de 12 meses passou a 360 dias entre o primeiro e o último pregão.
 - Alternativas: comparar os resultados depois de calcular (o custo é justamente o cálculo); um intervalo maior no tique (só espaça o piscar); `skipLoadingOnReload` tela a tela (cada tela nova repetiria o erro).
 - Motivo: M-10 (`docs/MUDANCAS.md`); regra 9 (teste que conta os cálculos).
+
+### 2026-10-24 — D-59: Uma definição de ganho e rótulos com a data real (M-12)
+
+- Decisão:
+  - **Ganho total = patrimônio − total aplicado + proventos recebidos** (igual ao resultado total do §10 de `FORMULAS.md`), no Painel, no título do gráfico em "Tudo" e na Carteira (linha de totais nova, "Carteira toda"). Calculado só com os ativos que têm valor (`PortfolioSnapshot.pricedPerformance`), como o patrimônio: com posição sem preço, os três ficam "parciais" e a tela diz isso (antes o Painel usava a evolução, sem os proventos).
+  - **Gráfico:** em "Tudo", o título é o ganho total desde o início dos registros (o dia-base é antes da primeira operação; antes ele começava no fim do primeiro dia e deixava de fora o ganho da posição lançada pelo preço médio). Nos outros períodos, "ganho no período", com os aportes líquidos à parte ("não são ganho"). O total aplicado continua em degraus, com o degrau no meio entre o dia anterior e o do aporte (no último ponto ele parecia uma linha vertical na borda).
+  - **Saldo inicial conta como aporte** na data informada (altera o M-04): é o mesmo dinheiro do total aplicado, e o Painel não pode dizer que "o saldo inicial não conta" mostrando ele.
+  - **Datas reais:** períodos que começam antes dos registros dizem "desde 22/10/2026, início dos registros"; altas e baixas mostram a data do fechamento de referência.
+  - **Índices ainda não publicados:** CDI e IPCA do período vão até o último dia publicado (com a data); sem nenhum dia publicado depois do dia-base, "indisponível" com o motivo, nunca 0%. A evolução passou a ler as séries mensais desde dois meses antes da primeira operação (o IPCA do mês anterior ficava de fora).
+  - **TIR só com 30 dias** (período e Painel); antes, "indisponível" sem explicação.
+  - **Todo "indisponível" tem motivo:** `UnavailableText` exige o texto e `StatCard` sem valor exige `unavailableReason`.
+- Alternativas: ganho sem proventos (contradiz o resultado total e a renda passiva); excluir o saldo inicial também do total aplicado (o patrimônio ficaria todo como "ganho"); mostrar o CDI parcial sem a data (parece o período inteiro).
+- Motivo: M-12 (`docs/MUDANCAS.md`); regras 1 e 10 (`FORMULAS.md` §3.1 e §3.4).

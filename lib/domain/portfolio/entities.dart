@@ -262,7 +262,8 @@ class ManualValuation {
 }
 
 /// Compra que registra uma posição que o usuário já tinha (saldo inicial do
-/// cadastro rápido, M-01). Não é um aporte daquele mês (Painel, M-04).
+/// cadastro rápido, M-01). Conta como aporte na data informada (M-12); os
+/// proventos anteriores a ela não são sugeridos (F8).
 abstract final class InitialBalance {
   /// Nota gravada na compra.
   static const note = 'Saldo inicial (posição informada pela corretora)';

@@ -160,9 +160,10 @@ class MessageCard extends StatelessWidget {
 
 /// Texto "indisponível" para dados ausentes (regra 1).
 class UnavailableText extends StatelessWidget {
-  const UnavailableText({this.tooltip, super.key});
+  const UnavailableText({required this.tooltip, super.key});
 
-  final String? tooltip;
+  /// O motivo, sempre (M-12): "indisponível" sozinho não diz o que falta.
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +175,7 @@ class UnavailableText extends StatelessWidget {
         fontStyle: FontStyle.italic,
       ),
     );
-    return tooltip == null ? text : Tooltip(message: tooltip, child: text);
+    return Tooltip(message: tooltip, child: text);
   }
 }
 

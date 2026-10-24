@@ -29,7 +29,7 @@ import '../portfolio/add_asset_dialog.dart';
 import '../../router/app_router.dart';
 import '../../../application/portfolio/wealth_service.dart';
 import '../../../core/time/local_date.dart';
-import '../../../domain/portfolio/wealth_history.dart';
+import '../../../domain/portfolio/performance_report.dart';
 import 'market_strip.dart';
 import 'wealth_chart.dart';
 
@@ -152,11 +152,27 @@ class _DashboardState extends ConsumerState<_Dashboard> {
       },
     );
     final day = DashboardMetrics.dayChange(holdings, currency);
-    final total = performance.totalResult;
+    // TIR só com 30 dias de histórico (M-12): em poucos dias, a taxa anual
+    // dos fluxos não tem significado.
+    final mwrSpan = widget.snap.operations.isEmpty
+        ? 0
+        : widget.snap.asOf.daysSince(widget.snap.operations.last.tradeDate);
+    final mwrShort = mwrSpan < PeriodPerformance.minMwrDays;
+    final mwr = mwrShort ? null : performance.net;
+    final mwrReason = mwrShort
+        ? PerformanceReasons.mwrTooShort(mwrSpan, PeriodPerformance.minMwrDays)
+        : performance.gap?.label ?? PerformanceReasons.mwrNoSolution;
+    // Uma definição de ganho no app inteiro (M-12; FORMULAS §3.1).
+    final priced = widget.snap.pricedPerformance(currency);
+    final applied = priced.invested - priced.returned;
+    final total = priced.totalResult;
     // Resultado total sobre o dinheiro aplicado (FORMULAS §3.1).
-    final totalFraction = total == null || performance.invested <= Decimal.zero
+    final totalFraction = total == null || priced.invested <= Decimal.zero
         ? null
-        : DecimalMath.divide(total, performance.invested);
+        : DecimalMath.divide(total, priced.invested);
+    final partial = widget.snap.unpricedAssets.isNotEmpty
+        ? ' (parcial: sem as posições sem preço)'
+        : '';
     final months = DashboardMetrics.monthly(
       widget.snap.operations,
       currency: currency,
@@ -221,36 +237,22 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                 key: const Key('stat-applied'),
                 big: true,
                 label: 'Total aplicado',
-                value: overview == null || currency != 'BRL'
-                    ? null
-                    : Fmt.money(
-                        _last(overview)?.invested ?? Decimal.zero,
-                        'BRL',
-                      ),
-                unavailableReason: currency != 'BRL'
-                    ? 'A evolução e o aplicado são calculados em reais.'
-                    : 'Calculando…',
-                info:
-                    'Aportes acumulados (compras com custos) menos resgates '
-                    '(vendas, líquidas de custos), dos ativos com preço.',
-                note: 'Aportes − resgates',
+                value: Fmt.money(applied, currency),
+                info: totalAppliedInfo,
+                note: 'Aportes − resgates$partial',
               ),
               StatCard(
                 key: const Key('stat-gain'),
                 big: true,
-                label: 'Ganho',
-                pnl: _last(overview)?.gain,
-                value: _last(overview) == null || currency != 'BRL'
+                label: 'Ganho total',
+                pnl: total,
+                value: total == null
                     ? null
-                    : '${Fmt.signedMoney(_last(overview)!.gain, 'BRL')}'
-                          '${_last(overview)!.gainFraction == null ? '' : ' (${Fmt.percent(_last(overview)!.gainFraction!)})'}',
-                unavailableReason: currency != 'BRL'
-                    ? 'A evolução e o ganho são calculados em reais.'
-                    : 'Calculando…',
-                info:
-                    'Patrimônio das posições − total aplicado. Os proventos '
-                    'recebidos ficam de fora (estão em Proventos).',
-                note: 'Patrimônio − aplicado',
+                    : '${Fmt.signedMoney(total, currency)}'
+                          '${totalFraction == null ? '' : ' (${Fmt.percent(totalFraction)})'}',
+                unavailableReason: priced.gap?.label ?? _gainReason,
+                info: totalGainInfo,
+                note: 'Patrimônio − aplicado + proventos$partial',
               ),
               StatCard(
                 key: const Key('stat-ytd'),
@@ -265,8 +267,8 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                     : 'Sem histórico de preços suficiente neste ano.',
                 info: ReturnMethod.twr.description,
                 note:
-                    'TWR desde 31/12/${widget.snap.asOf.year - 1}, com '
-                    'proventos',
+                    'TWR ${sinceLabel(LocalDate(widget.snap.asOf.year - 1, 12, 31), _first(overview))}, '
+                    'com proventos',
               ),
             ],
           ),
@@ -331,7 +333,8 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                 subtitle:
                     'No mês ${Fmt.money(months.last.buys, currency)} · no ano '
                     '${Fmt.money(DashboardMetrics.investedInYear(widget.snap.operations, currency: currency, asOf: widget.snap.asOf), currency)}'
-                    ' · compras com custos; o saldo inicial não conta',
+                    ' · compras com custos, inclusive o saldo inicial, na '
+                    'data informada',
                 child: MonthlyBars(
                   months: months,
                   currency: currency,
@@ -425,10 +428,10 @@ class _DashboardState extends ConsumerState<_Dashboard> {
               StatCard(
                 key: const Key('stat-mwr'),
                 label: 'Rentabilidade (TIR)',
-                pnl: performance.net?.annual,
-                value: performance.net?.text,
+                pnl: mwr?.annual,
+                value: mwr?.text,
                 info: ReturnMethod.mwr.description,
-                unavailableReason: performance.gap?.label,
+                unavailableReason: mwrReason,
                 note: performance.net == null
                     ? 'Ponderada pelo dinheiro (MWR), dos investimentos'
                     : 'MWR dos investimentos ${performance.net!.range}, '
@@ -463,8 +466,11 @@ class _DashboardState extends ConsumerState<_Dashboard> {
     );
   }
 
-  static WealthPoint? _last(WealthOverview? o) =>
-      o == null || o.series.isEmpty ? null : o.series.points.last;
+  static const _gainReason = 'Sem o valor de todas as posições.';
+
+  /// Primeiro dia da evolução (início dos registros).
+  static LocalDate? _first(WealthOverview? o) =>
+      o == null || o.series.isEmpty ? null : o.series.points.first.date;
 
   /// TWR do ano corrente (desde o último dia do ano anterior).
   static Decimal? _ytd(WealthOverview? o, LocalDate today) =>
@@ -832,8 +838,10 @@ class _MoversCardState extends State<_MoversCard> {
                         children: [
                           Text(m.holding.asset?.symbol ?? '?'),
                           Text(
-                            'desde ${Fmt.date(m.change.from.refDate)} · '
-                            '${Fmt.money(m.change.to, widget.currency)}',
+                            '${Fmt.money(m.change.to, widget.currency)} · '
+                            'contra o fechamento de '
+                            '${Fmt.date(m.change.from.refDate)}',
+                            key: Key('mover-ref-${m.holding.assetId}'),
                             style: muted,
                           ),
                         ],
@@ -855,8 +863,10 @@ class _MoversCardState extends State<_MoversCard> {
       key: const Key('dash-movers'),
       title: 'Maiores altas e baixas',
       subtitle: _month
-          ? 'Cotação atual contra o fechamento do mês anterior'
-          : 'Cotação atual contra o fechamento anterior',
+          ? 'Cotação atual contra o fechamento do mês anterior; a data de '
+                'referência está em cada ativo'
+          : 'Cotação atual contra o fechamento anterior; a data de '
+                'referência está em cada ativo',
       trailing: SegmentedButton<bool>(
         showSelectedIcon: false,
         style: const ButtonStyle(visualDensity: VisualDensity.compact),

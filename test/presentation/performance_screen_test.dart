@@ -56,11 +56,7 @@ void main() {
     // Até hoje: o período de 1 ano anda com a data real, e o risco precisa
     // de um ano inteiro de pregões.
     final today = LocalDate.fromDateTime(DateTime.now());
-    for (
-      var d = LocalDate(2024, 1, 2);
-      !d.isAfter(today);
-      d = d.addDays(1)
-    ) {
+    for (var d = LocalDate(2024, 1, 2); !d.isAfter(today); d = d.addDays(1)) {
       if (!cal.isBusinessDay(d)) continue;
       final close = d.isBefore(LocalDate(2025, 6, 1))
           ? '30'

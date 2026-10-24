@@ -209,6 +209,31 @@ class PortfolioSnapshot {
         ),
       );
 
+  /// Ativos com posição aberta sem preço nem saldo (fora do patrimônio).
+  late final Set<String> unpricedAssets = {
+    for (final v in valued)
+      if (v.position.isOpen && v.marketValue == null) v.position.assetId,
+  };
+
+  final _pricedByCurrency = <String, Performance>{};
+
+  /// Desempenho só dos ativos com valor, que acompanha o patrimônio: o
+  /// ganho total e o total aplicado do Painel e da Carteira (M-12). Igual a
+  /// [performance] quando todas as posições têm preço; senão, parcial.
+  Performance pricedPerformance(String currency) =>
+      _pricedByCurrency.putIfAbsent(
+        currency,
+        () => PerformanceCalculator.compute(
+          currency: currency,
+          operations: operations.where(
+            (o) => o.assetId == null || !unpricedAssets.contains(o.assetId),
+          ),
+          positions: valued.where(
+            (v) => !unpricedAssets.contains(v.position.assetId),
+          ),
+        ),
+      );
+
   /// Desempenho de um ativo, somando todas as contas. Nulo se o ativo não
   /// existe.
   Performance? assetPerformance(String assetId) {

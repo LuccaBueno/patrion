@@ -130,7 +130,9 @@ class WealthService {
         : snap.operations
               .map((o) => o.tradeDate)
               .reduce((a, b) => a.isBefore(b) ? a : b);
-    final since = LocalDate(first.year, first.month, 1).addDays(-10);
+    // Dois meses antes: as séries mensais (IPCA, IGP-M) são datadas no dia 1
+    // e o nível do primeiro dia depende do mês anterior publicado (M-12).
+    final since = LocalDate(first.year, first.month, 1).addMonths(-2);
     final raw = <IndicatorSeries, List<IndicatorPoint>>{
       for (final s in WealthOverview.loaded)
         s: await _market.indicator(s, from: since),

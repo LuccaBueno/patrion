@@ -65,8 +65,8 @@ abstract final class DashboardMetrics {
   /// Os últimos [months] meses até o de [asOf] (inclusive), do mais antigo
   /// para o mais recente, na moeda [currency].
   ///
-  /// O saldo inicial do cadastro rápido não conta como aporte: é uma
-  /// posição que já existia, registrada numa data aproximada.
+  /// O saldo inicial do cadastro rápido conta como aporte na data informada
+  /// (M-12): é o mesmo dinheiro que entra no total aplicado.
   static List<MonthFlow> monthly(
     Iterable<Operation> operations, {
     required String currency,
@@ -92,9 +92,7 @@ abstract final class DashboardMetrics {
         case OperationType.buy ||
             OperationType.contribution ||
             OperationType.reinvestment:
-          if (!InitialBalance.isInitial(op)) {
-            month.buys += op.amount + op.charges;
-          }
+          month.buys += op.amount + op.charges;
         case OperationType.sell || OperationType.redemption:
           month.sells += op.amount - op.charges;
         case OperationType.dividend ||
@@ -109,7 +107,7 @@ abstract final class DashboardMetrics {
     return list;
   }
 
-  /// Aportes do ano de [asOf] até [asOf] (sem o saldo inicial).
+  /// Aportes do ano de [asOf] até [asOf] (com o saldo inicial).
   static Decimal investedInYear(
     Iterable<Operation> operations, {
     required String currency,

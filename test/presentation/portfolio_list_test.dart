@@ -372,10 +372,12 @@ void main() {
             .message,
         contains('parcial: 4 ativos sem a variação'),
       );
-      // Faixa do M-09: aplicado dos ativos com preço (o WEGE3 fica fora):
-      // 2.500 + 300 + 3.000 + 2.000 + 91; ganho = 8.182 − 7.891.
+      // Aplicado dos ativos com preço (o WEGE3 fica fora, como no
+      // patrimônio): 2.500 + 300 + 3.000 + 2.000 + 91; ganho total (M-12) =
+      // 8.182 − 7.891 + 25 de proventos do ITSA4.
       await app.pumpUntil(inKey('stat-applied', r'R$ 7.891,00'));
-      expect(inKey('stat-gain', r'+R$ 291,00'), findsOneWidget);
+      expect(inKey('stat-gain', r'+R$ 316,00'), findsOneWidget);
+      expect(inKey('stat-gain', 'parcial'), findsOneWidget);
       // Distribuição por ativo com os mesmos valores da Carteira; o seletor
       // troca para setor.
       await show('distribution');
@@ -417,7 +419,10 @@ void main() {
       expect(inKey('dash-movers', '-0,75%'), findsOneWidget);
       await tester.tap(find.text('Mês'));
       await app.settle();
-      expect(inKey('dash-movers', 'desde 30/09/2026'), findsOneWidget);
+      expect(
+        inKey('dash-movers', 'contra o fechamento de 30/09/2026'),
+        findsOneWidget,
+      );
     });
   });
 }

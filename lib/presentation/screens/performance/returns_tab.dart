@@ -8,6 +8,7 @@ import '../../../domain/finance/returns.dart';
 import '../../../domain/market/market_data.dart';
 import '../../../domain/portfolio/performance_report.dart';
 import '../../format/formatters.dart';
+import '../../format/performance_format.dart';
 import '../../format/labels.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
@@ -61,7 +62,13 @@ class ReturnsTab extends StatelessWidget {
                 'preço. Escolha outro período.',
           )
         else
-          _Figures(perf: perf, period: period),
+          _Figures(
+            perf: perf,
+            period: period,
+            first: series.points.first.date,
+            cdiLast: cdi?.last,
+            ipcaLast: overview.indices[IndicatorSeries.ipca]?.last,
+          ),
         const SizedBox(height: 16),
         _MonthTable(rows: rows),
         const SizedBox(height: 12),
@@ -108,14 +115,31 @@ List<Widget> notesOf(BuildContext context, List<String> notes) {
 
 /// Cartões do período: TWR, CDI, retorno real, CAGR e TIR.
 class _Figures extends StatelessWidget {
-  const _Figures({required this.perf, required this.period});
+  const _Figures({
+    required this.perf,
+    required this.period,
+    required this.first,
+    this.cdiLast,
+    this.ipcaLast,
+  });
 
   final PeriodPerformance perf;
   final PerformancePeriod period;
 
+  /// Primeiro dia da evolução (início dos registros).
+  final LocalDate first;
+
+  /// Último dia publicado do CDI e do IPCA guardados (nulos sem dados).
+  final LocalDate? cdiLast;
+  final LocalDate? ipcaLast;
+
   @override
   Widget build(BuildContext context) {
-    final range = 'de ${Fmt.date(perf.from)} a ${Fmt.date(perf.to)}';
+    final range =
+        'de ${Fmt.date(perf.from)}'
+        '${perf.from == first ? ' (início dos registros)' : ''} '
+        'a ${Fmt.date(perf.to)}';
+    final cdiUntil = perf.cdiUntil;
     final ofCdi = perf.ofCdi;
     final cdi = perf.cdi;
     final ipca = perf.ipca;
@@ -136,14 +160,17 @@ class _Figures extends StatelessWidget {
           key: const Key('returns-cdi'),
           label: 'CDI no período',
           value: cdi == null ? null : Fmt.percent(cdi),
-          unavailableReason:
-              'Sem CDI guardado para todo o período. Atualize os indicadores '
-              'em Configurações → Fontes de dados.',
+          unavailableReason: cdiLast == null
+              ? PerformanceReasons.noIndex('CDI')
+              : PerformanceReasons.cdiPending(cdiLast!),
           note: cdi == null
               ? 'Mesmo intervalo da carteira'
               : [
                   if (ofCdi != null) 'Carteira: ${percentOfCdi(ofCdi)}',
                   'diferença ${pointsDiff(perf.twr - cdi)}',
+                  if (cdiUntil != null && cdiUntil.isBefore(perf.to))
+                    'CDI até ${Fmt.date(cdiUntil)}; os dias seguintes '
+                        'ainda não foram publicados',
                 ].join(' · '),
         ),
         StatCard(
@@ -154,9 +181,9 @@ class _Figures extends StatelessWidget {
           info:
               'Rentabilidade descontada a inflação: (1 + TWR) ÷ (1 + IPCA) '
               '− 1.',
-          unavailableReason:
-              'Sem IPCA guardado para o início do período. Atualize os '
-              'indicadores em Configurações → Fontes de dados.',
+          unavailableReason: ipcaLast == null
+              ? PerformanceReasons.noIndex('IPCA')
+              : PerformanceReasons.ipcaPending(ipcaLast!),
           note: ipca == null
               ? 'Descontado o IPCA'
               : 'Descontado o IPCA de ${Fmt.percent(ipca)}'
@@ -177,8 +204,12 @@ class _Figures extends StatelessWidget {
           value: mwr == null ? null : _mwrText(mwr.rate, perf.days),
           pnl: mwr?.rate,
           info: ReturnMethod.mwr.description,
-          unavailableReason:
-              'Os fluxos do período não têm uma taxa que os equilibre.',
+          unavailableReason: perf.days < PeriodPerformance.minMwrDays
+              ? PerformanceReasons.mwrTooShort(
+                  perf.days,
+                  PeriodPerformance.minMwrDays,
+                )
+              : PerformanceReasons.mwrNoSolution,
           note: mwr != null && mwr.multipleSignChanges
               ? 'MWR; os fluxos mudam de sinal mais de uma vez'
               : 'MWR: considera quando cada aporte entrou',

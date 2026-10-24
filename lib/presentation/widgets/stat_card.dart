@@ -16,7 +16,10 @@ class StatCard extends StatelessWidget {
     this.unavailableReason,
     this.footer,
     super.key,
-  });
+  }) : assert(
+         value != null || unavailableReason != null,
+         '"indisponível" precisa do motivo (M-12)',
+       );
 
   final String label;
 
@@ -46,7 +49,9 @@ class StatCard extends StatelessWidget {
     final muted = theme.colorScheme.onSurfaceVariant;
     final Widget valueWidget;
     if (value == null) {
-      valueWidget = UnavailableText(tooltip: unavailableReason);
+      valueWidget = UnavailableText(
+        tooltip: unavailableReason ?? 'Sem dados suficientes.',
+      );
     } else {
       // O valor nunca quebra linha: se não couber, a fonte diminui.
       valueWidget = FittedBox(

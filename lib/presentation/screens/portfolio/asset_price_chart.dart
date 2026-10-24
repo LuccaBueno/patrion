@@ -260,22 +260,19 @@ class _AssetPriceChartState extends ConsumerState<AssetPriceChart> {
     if (data == null) {
       body = const Center(child: CircularProgressIndicator());
     } else if (visible.length < 2) {
+      final reason = backfill != null
+          ? 'Baixando o histórico de cotações em segundo plano…'
+          : closes.isEmpty
+          ? 'Nenhum fechamento guardado para este ativo.'
+          : 'Menos de dois fechamentos guardados neste período.';
       body = Center(
         key: const Key('asset-chart-unavailable'),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const UnavailableText(),
+            UnavailableText(tooltip: reason),
             const SizedBox(height: 4),
-            Text(
-              backfill != null
-                  ? 'Baixando o histórico de cotações em segundo plano…'
-                  : closes.isEmpty
-                  ? 'Nenhum fechamento guardado para este ativo.'
-                  : 'Menos de dois fechamentos guardados neste período.',
-              style: muted,
-              textAlign: TextAlign.center,
-            ),
+            Text(reason, style: muted, textAlign: TextAlign.center),
             if (widget.onDownload != null && backfill == null) ...[
               const SizedBox(height: 8),
               OutlinedButton.icon(

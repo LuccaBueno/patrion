@@ -109,13 +109,13 @@ void main() {
       expect(inKey('stat-gain', r'+R$ 2.100,00 (+46,67%)'), findsOneWidget);
       expect(inKey('stat-ytd', '+10,00%'), findsOneWidget);
 
-      // 1 ano: de 6.000 a 6.600, sem aportes.
+      // 1 ano: de 6.000 a 6.600, sem aportes: o ganho no período.
       expect(
-        textOf('wealth-title', r'Seu patrimônio cresceu R$ 600,00 em 1 ano'),
+        textOf('wealth-title', r'Ganho de R$ 600,00 no período (em 1 ano)'),
         findsOneWidget,
       );
       expect(
-        textOf('wealth-subtitle', r'aportes líquidos de R$ 0,00'),
+        textOf('wealth-subtitle', r'R$ 0,00 de aportes líquidos'),
         findsOneWidget,
       );
       LineChart chart() => tester.widget<LineChart>(
@@ -132,7 +132,14 @@ void main() {
 
       // Tudo: desde a primeira compra, com o aporte de 2025.
       await app.tap(find.byKey(const Key('wealth-period-Tudo')));
-      expect(textOf('wealth-title', 'desde 10/01/2024'), findsOneWidget);
+      // Tudo: o mesmo ganho total do cartão (M-12), não o crescimento.
+      expect(
+        textOf(
+          'wealth-title',
+          r'Ganho de R$ 2.100,00 desde 10/01/2024, início dos registros',
+        ),
+        findsOneWidget,
+      );
       expect(chart().data.lineBarsData.first.spots.first.y, 3000);
       final bar = chart().data.lineBarsData.first;
       final tip = chart().data.lineTouchData.touchTooltipData

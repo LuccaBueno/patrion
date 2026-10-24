@@ -216,7 +216,9 @@ class _RiskTabState extends ConsumerState<RiskTab> {
             ),
             const SizedBox(height: 12),
             if (c == null)
-              const UnavailableText()
+              const UnavailableText(
+                tooltip: 'Nenhuma posição com valor em reais para dividir.',
+              )
             else ...[
               Wrap(
                 spacing: 12,

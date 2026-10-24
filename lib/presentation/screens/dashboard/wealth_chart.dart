@@ -213,20 +213,17 @@ class _WealthChartCardState extends State<WealthChartCard> {
         child: Text('Calculando a evolução…'),
       );
     } else if (window.length < 2) {
+      final reason = all.isEmpty
+          ? 'Registre compras para ver a evolução do patrimônio.'
+          : 'Menos de dois dias com dados neste período.';
       body = Center(
         key: const Key('wealth-unavailable'),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const UnavailableText(),
+            UnavailableText(tooltip: reason),
             const SizedBox(height: 4),
-            Text(
-              all.isEmpty
-                  ? 'Registre compras para ver a evolução do patrimônio.'
-                  : 'Menos de dois dias com dados neste período.',
-              style: muted,
-              textAlign: TextAlign.center,
-            ),
+            Text(reason, style: muted, textAlign: TextAlign.center),
           ],
         ),
       );
@@ -333,10 +330,10 @@ class _Header extends StatelessWidget {
     if (window.length >= 2) {
       final a = window.first;
       final b = window.last;
-      final phrase = period.phrase ?? 'desde ${Fmt.date(a.date)}';
-      final change = b.value - a.value;
-      final added = b.invested - a.invested;
-      final gain = change - added;
+      final all = period == WealthPeriod.all;
+      final phrase =
+          period.phrase ?? 'desde ${Fmt.date(a.date)}, início dos registros';
+      final (gain, added) = periodGain(window, fromStart: all);
       if (mode == WealthMode.percent && sims.isNotEmpty) {
         final r = _twrBetween(twr, a.date, b.date);
         title = r == null
@@ -348,14 +345,20 @@ class _Header extends StatelessWidget {
               '${names[key]} ${Fmt.percent(c)}',
         ].join(' · ');
       } else {
+        // Uma definição de ganho só (M-12): em "Tudo", o mesmo número do
+        // ganho total; nos outros períodos, o ganho no período. Aportes não
+        // são ganho.
         title =
-            'Seu patrimônio ${change >= Decimal.zero ? 'cresceu' : 'caiu'} '
-            '${Fmt.money(change.abs(), 'BRL')} $phrase';
-        subtitle =
             '${gain >= Decimal.zero ? 'Ganho' : 'Perda'} de '
-            '${Fmt.money(gain.abs(), 'BRL')} e '
-            '${added >= Decimal.zero ? 'aportes líquidos' : 'resgates líquidos'} '
-            'de ${Fmt.money(added.abs(), 'BRL')} no período';
+            '${Fmt.money(gain.abs(), 'BRL')} ${all ? phrase : 'no período ($phrase)'}';
+        subtitle = all
+            ? 'Patrimônio − total aplicado + proventos; aportes não contam '
+                  'como ganho'
+            : '${Fmt.money(added.abs(), 'BRL')} de '
+                  '${added >= Decimal.zero ? 'aportes líquidos' : 'resgates líquidos'} '
+                  'no período não ${added >= Decimal.zero ? 'são ganho' : 'são perda'} · '
+                  'patrimônio de ${Fmt.money(a.value, 'BRL')} para '
+                  '${Fmt.money(b.value, 'BRL')}';
       }
     }
     return Wrap(
@@ -404,6 +407,26 @@ class _Header extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Ganho e aportes líquidos de uma janela da evolução (`docs/FORMULAS.md`
+/// §3.1). [fromStart]: desde o início dos registros (o ganho total, igual
+/// ao do Painel e da Carteira); senão, do fim do primeiro dia da janela (o
+/// dia-base) ao último.
+(Decimal gain, Decimal added) periodGain(
+  List<WealthPoint> window, {
+  required bool fromStart,
+}) {
+  final a = window.first;
+  final b = window.last;
+  var income = Decimal.zero;
+  for (final p in window) {
+    if (!fromStart && identical(p, a)) continue;
+    income += p.income;
+  }
+  if (fromStart) return (b.value - b.invested + income, b.invested);
+  final added = b.invested - a.invested;
+  return (b.value - a.value - added + income, added);
 }
 
 Decimal? _twrBetween(List<(LocalDate, Decimal)> twr, LocalDate a, LocalDate b) {
@@ -690,7 +713,10 @@ class _WealthLine extends StatelessWidget {
           color: _investedColor(context),
           barWidth: 1.4,
           isStepLineChart: true,
-          lineChartStepData: const LineChartStepData(stepDirection: 0),
+          // O degrau no meio entre o dia anterior e o do aporte: com poucos
+          // dias, um degrau no último ponto parecia só uma linha vertical na
+          // borda do gráfico (M-12).
+          lineChartStepData: const LineChartStepData(stepDirection: 0.5),
           dotData: FlDotData(
             checkToShowDot: (spot, _) => buyDays.contains(spot.x),
             getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(

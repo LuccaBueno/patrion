@@ -99,7 +99,7 @@ Holding _holding(String symbol, String qty, String price, String? previous) {
 
 void main() {
   test('aportes, vendas e proventos por mês nos últimos 12 meses; o saldo '
-      'inicial não conta como aporte', () {
+      'inicial conta como aporte na data informada (M-12)', () {
     final ops = [
       _op(OperationType.buy, '2026-10-02', qty: '10', price: '20', fees: '1'),
       _op(
@@ -131,7 +131,8 @@ void main() {
     expect(months, hasLength(12));
     expect((months.first.year, months.first.month), (2025, 11));
     final oct = months.last;
-    expect(oct.buys, d('201'));
+    // 10 × 20 + 1 de custo e o saldo inicial de 100 × 25.
+    expect(oct.buys, d('2701'));
     expect(oct.sells, d('108'));
     expect(oct.income, d('30'));
     final mar = months.firstWhere((m) => m.month == 3);
@@ -143,7 +144,7 @@ void main() {
         currency: 'BRL',
         asOf: LocalDate(2026, 10, 22),
       ),
-      d('1201'),
+      d('3701'),
     );
   });
 

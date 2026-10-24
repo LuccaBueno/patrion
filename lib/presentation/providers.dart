@@ -167,9 +167,7 @@ final portfolioSnapshotProvider = StreamProvider<PortfolioSnapshot>(
 /// e já recalculam com o [marketTickProvider]: uma cotação nova não os
 /// dispara duas vezes (M-10).
 Future<PortfolioSnapshot> _holdingsSnapshot(Ref ref) async {
-  await ref.watch(
-    portfolioSnapshotProvider.selectAsync((s) => s.holdingsKey),
-  );
+  await ref.watch(portfolioSnapshotProvider.selectAsync((s) => s.holdingsKey));
   return ref.read(portfolioSnapshotProvider.future);
 }
 

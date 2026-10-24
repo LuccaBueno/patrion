@@ -150,10 +150,15 @@ class PeriodPerformance {
     required this.to,
     required this.twr,
     this.cdi,
+    this.cdiUntil,
     this.ipca,
     this.ipcaUntil,
     this.mwr,
   });
+
+  /// Prazo mínimo da TIR do período: em poucos dias, a taxa que equilibra os
+  /// fluxos não tem significado (M-12).
+  static const minMwrDays = 30;
 
   /// Dia-base (o retorno conta a partir do fim dele) e último dia.
   final LocalDate from;
@@ -162,15 +167,21 @@ class PeriodPerformance {
   /// TWR do período (fração).
   final Decimal twr;
 
-  /// CDI e IPCA do mesmo intervalo; nulos sem dados.
+  /// CDI e IPCA do mesmo intervalo, até o último dia publicado; nulos sem
+  /// dados ou sem nenhum dia publicado depois do dia-base (o índice do
+  /// período ainda não existe; não é 0%).
   final Decimal? cdi;
   final Decimal? ipca;
+
+  /// Último dia coberto pelo CDI publicado (antes de [to] quando os últimos
+  /// dias ainda não saíram).
+  final LocalDate? cdiUntil;
 
   /// Último dia coberto pelo IPCA publicado (antes de [to] quando o mês
   /// ainda não saiu).
   final LocalDate? ipcaUntil;
 
-  /// TIR (MWR) do período, ao ano.
+  /// TIR (MWR) do período, ao ano; nula em menos de [minMwrDays] dias.
   final XirrResult? mwr;
 
   int get days => to.daysSince(from);
@@ -209,17 +220,25 @@ class PeriodPerformance {
       if (!p.date.isAfter(start)) base = p;
       end = p;
     }
-    final ipcaEnd = ipca?.last;
+    LocalDate? until(IndexLevels? levels) {
+      final last = levels?.last;
+      if (last == null || !last.isAfter(base.date)) return null;
+      return last.isBefore(end.date) ? last : end.date;
+    }
+
+    final cdiEnd = until(cdi);
+    final ipcaEnd = until(ipca);
     return PeriodPerformance(
       from: base.date,
       to: end.date,
       twr: twr,
-      cdi: cdi?.growth(base.date, end.date),
-      ipca: ipca?.growth(base.date, end.date),
-      ipcaUntil: ipcaEnd == null
+      cdi: cdiEnd == null ? null : cdi!.growth(base.date, cdiEnd),
+      cdiUntil: cdiEnd,
+      ipca: ipcaEnd == null ? null : ipca!.growth(base.date, ipcaEnd),
+      ipcaUntil: ipcaEnd,
+      mwr: end.date.daysSince(base.date) < minMwrDays
           ? null
-          : (ipcaEnd.isBefore(end.date) ? ipcaEnd : end.date),
-      mwr: _mwr(points, base, end),
+          : _mwr(points, base, end),
     );
   }
 
