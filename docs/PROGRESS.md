@@ -4,9 +4,22 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajustes M-10 a M-12 concluídos** em 24/10/2026, como versão 1.4.0 (sem tag nem Release; só quando você pedir). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajustes M-10 a M-12 concluídos** em 24/10/2026, como versão 1.4.0 (tag `v1.4.0` e Release em rascunho em 04/11/2026, aguardando sua publicação). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
+
+### Release v1.4.0 em rascunho (04/11/2026)
+
+- `docs/MUDANCAS.md`: M-10 a M-12 marcados como feitos na 1.4.0. `dist\` regenerado (instalador, ZIP, somas e notas), numa cópia limpa do commit `b7ac67b`, porque o Patrion estava aberto em `build\windows\x64\runner\Release` e essa pasta tem o `patrion.em-uso-1.3.0.exe`, que entraria nos pacotes.
+- O primeiro workflow da tag falhou nos testes ([run 41884628399](https://github.com/LuccaBueno/patrion/actions/runs/41884628399): 582 passaram, 3 falharam). Causa: testes com o relógio real e dados fixos de outubro; o app não tinha defeito.
+- Correção (só em `test/`, `lib/` igual ao que foi testado): `AppHarness` usa o relógio falso no retrato da carteira por padrão, com o parâmetro `today` para outra data; `performance_screen_test`, `portfolio_screens_test` e o aviso de sincronização antiga em `sync_backup_screens_test` ficaram com data fixa.
+- Com sua autorização, a tag `v1.4.0` foi movida de `b7ac67b` para `c070751`.
+- **Testes (resultados reais):** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com 585 testes passando (8 capturas manuais puladas). Simulação de datas: a suíte inteira passou (585) em 30/11/2026, 01/12/2026, 31/12/2026 (12h e 23h30), 01/01/2027 (0h30 e 12h), 02/01/2027, 03/01/2027 (domingo, 23h30), 01/03/2027 (0h30), 29/02/2028, 31/12/2028 (23h59) e 15/06/2030.
+- **Como a simulação foi feita:** numa cópia descartável, fora do repositório, `DateTime.now()` e `const Clock()` foram trocados por um relógio deslocado (variável `SIM_NOW`). O relógio do Windows não foi alterado. A cópia deixou de fora `market_http`, `single_instance` e `key_file_store`, que medem durações reais e não datas de calendário.
+- **Workflow:** [run 41894176294](https://github.com/LuccaBueno/patrion/actions/runs/41894176294) com sucesso. Release **em rascunho**, com instalador, ZIP e `SHA256SUMS.txt`; falta sua revisão e publicação.
+- **Limitações:**
+  - O teste da cota da brapi (`data_sources_screen_test`) ainda usa a data real, porque a tela lê `DateTime.now()` direto; para fixar, é preciso mudar `lib/`. Só falharia se o teste cruzasse a meia-noite da virada do mês.
+  - Os arquivos do `dist\` local vêm de `b7ac67b` e não são os mesmos da Release (mesmo `lib/`, builds diferentes); os publicados são os do workflow.
 
 ### Ajustes M-10 a M-12 (desde 24/10/2026)
 
@@ -29,7 +42,7 @@ Cada item tem um commit; o relatório completo está logo abaixo.
    - "Cabe em 2 telas" foi medido em 1280 × 800 com seus dados e no cenário do teste (com vencimentos); avisos no topo (atualização, sincronização antiga) somam altura.
    - Na sua carteira (2 dias de histórico), TIR, CDI e retorno real ficam indisponíveis até haver 30 dias e índices publicados — agora com o motivo.
    - O build substituiu `build\windows\x64\runner\Release`. O seu Patrion estava aberto por ali; para compilar, renomeei o executável em uso para `patrion.em-uso-1.3.0.exe` (o app aberto continuou funcionando). Abrindo pelo `patrion.exe`, já roda a 1.4.0; o arquivo renomeado pode ser apagado depois de fechar o app.
-5. **Pendências:** tag e Release v1.4.0 (só quando você pedir); Fase 9 (hipotéticas e backtest); importação CSV (F11); Windows Hello (F5B), antiga.
+5. **Pendências:** Fase 9 (hipotéticas e backtest); importação CSV (F11); Windows Hello (F5B), antiga.
 6. **Como testar:** roteiro na resposta desta sessão.
 
 **M-10 — Desempenho piscando (concluído)** (DECISIONS D-58)
@@ -1111,3 +1124,4 @@ Fechar a F7: seu teste do instalador em ambiente limpo (Windows Sandbox) e a aut
 | 2026-10-18 | F5B | Pendências da F5 (aviso de carteira inconsistente na prévia; teste da falha ao reabrir na restauração) e bloqueio do app: SQLCipher, senha, chave de recuperação, Windows Hello, inatividade, backups criptografados e senha do arquivo de save; conversão de um banco existente verificada no app real |
 | 2026-10-18 | F6 | Dados de mercado: pendências da F1, schema 4, 14 adaptadores, cache, atualização automática e manual, câmbio e indicadores, patrimônio em reais, tela Fontes de dados, chaves com DPAPI, dados de mercado no save; cotações reais e funcionamento sem internet verificados no app real |
 | 2026-10-19 | F7 | Distribuição: instalador Inno Setup (por usuário, atualização por cima, desinstalação sem perder dados, associação do .invsave), runtime do Visual C++ no pacote, ZIP portátil, avisos de licença, instância única por pasta de dados, verificador de atualizações, workflow de release em rascunho e teste de instalação (26/26 neste PC); Carteira cabe em 1280 px; v1.0.0 preparada, sem tag |
+| 2026-11-04 | v1.4.0 | M-10 a M-12 marcados como feitos; testes sem depender da data real (simulação em 12 datas); tag v1.4.0 movida para `c070751` e Release em rascunho |
