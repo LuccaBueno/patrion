@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajuste M-13 concluído** em 04/11/2026, como versão 1.4.1 (sem tag nem Release; só quando você pedir). **Ajustes M-10 a M-12 concluídos** em 24/10/2026, como versão 1.4.0 (tag `v1.4.0` e Release em rascunho em 04/11/2026, aguardando sua publicação). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajuste M-13 concluído** em 04/11/2026, como versão 1.4.1 (sem tag nem Release; só quando você pedir). **Ajustes M-10 a M-12 concluídos** em 24/10/2026, como versão 1.4.0 (tag `v1.4.0` e Release publicada em 04/11/2026). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -12,7 +12,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 **Causa do BTC sem cotação:** no seu banco, o ativo estava como `market: B3`, `asset_class: crypto`. O "Adicionar ativo" gravava tudo na B3, e o cadastro completo, para onde ele mandava a cripto, abria com mercado B3 e não mudava ao escolher a classe Cripto. As fontes de cripto só atendem o mercado Cripto, as da B3 não conhecem o código, e o app não avisa "sem fonte" para ativos da B3. A falha era silenciosa.
 
-1. **Implementado** (DECISIONS D-61; FORMULAS §14; SPEC §4):
+1. **Implementado** (DECISIONS D-61; FORMULAS §14; SPEC §7):
    - Reconhecimento de cripto pelo código (Binance e CoinGecko), com mercado Cripto, cotação automática e histórico desde a listagem do par. A Binance passou a ser fonte de cotação, sem chave.
    - Classe Cripto só nos mercados Cripto ou Manual; o cadastro completo muda o mercado sozinho.
    - Quantidade com até 8 casas, sem arredondar; mais casas são recusadas.
@@ -22,7 +22,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
    - Botão "Corrigir para cotação automática" em "Dados do ativo", com o motivo.
    - `wallClockProvider`: telas e serviços leem o relógio injetado; o teste da cota da brapi usa data fixa (pedido durante a sessão).
 2. **Arquivos (resumo):** `domain/` (`codes`, `entities`, `tickers`, `trade_total` novo, `provider_catalog`); `application/` (`market_data_service`, `history_backfill`, `portfolio_query`, `quick_add_service`, `registry_service`); `infrastructure/market/` (`global_providers`, `market_setup`); `presentation/` (`providers`, `add_asset_dialog`, `trade_dialog`, `custody_dialog`, `broker_field`, `total_paid` novo, `portfolio_screen`, `asset_detail_screen`, `class_views`, `operations_screen`, `dashboard_screen`, `wealth_chart`, `data_sources_screen`, `registry_dialogs`, `formatters`, `labels`, `common`); testes `crypto_test` e `trade_total_test` (novos), `providers_test`, `quick_add_service_test`, `data_sources_screen_test`, `portfolio_width_test`, `app_harness`; `pubspec.yaml` (1.4.1+6), `app_info.dart`, `CHANGELOG.md`, `SPEC.md`, `DECISIONS.md`, `FORMULAS.md`, `FONTES_DE_DADOS.md`, `DESENVOLVIMENTO.md`, `DISTRIBUICAO.md`, `MUDANCAS.md`.
-3. **Testes (resultados reais):** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com **606 testes passando** (8 capturas manuais puladas); `flutter build windows --release` compilou e o `patrion.exe` tem a versão 1.4.1+6.
+3. **Testes (resultados reais):** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com **606 testes passando** (8 capturas manuais puladas); `flutter build windows --release` compilou e o `patrion.exe` tem a versão 1.4.1+6. **CI verde** ([run 41904497024](https://github.com/LuccaBueno/patrion/actions/runs/41904497024), commit `f2b0988`; formatação, análise, testes e build release).
    - Simulação de datas com o código final: 606 testes passando em 30/11/2026 (23h59), 31/12/2026 (23h30), 01/01/2027 (0h30), 03/01/2027 (23h30), 29/02/2028 e 15/06/2030.
    - **No app real** (build release copiado para o scratchpad, com uma cópia dos seus dados e cotações reais; a cópia foi apagada e o seu banco não mudou), janela de 1280 × 800, tema escuro, conferido por captura da janela:
      - O BTC mostrou "cadastrada no mercado B3"; o botão corrigiu: cotação da Binance, gráfico de 1 ano e a operação mantida.
@@ -38,7 +38,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
    - Na cópia de teste, apareceu "No ano +1.494,50%" no Painel. A causa provável é o BTC comprado bem abaixo do mercado numa carteira pequena; não investiguei. Vale olhar depois de acertar a operação.
    - O tema claro não foi conferido por captura nesta sessão.
    - O `dist\` local continua com a 1.4.0.
-5. **Pendências:** publicar a Release 1.4.0 em rascunho (ou trocar pela 1.4.1); tag e Release da 1.4.1 (só quando você pedir); Fase 9; importação CSV (F11); Windows Hello (F5B), antiga.
+5. **Pendências:** tag e Release da 1.4.1 (só quando você pedir); Fase 9; importação CSV (F11); Windows Hello (F5B), antiga.
 6. **Como testar:**
    1. Abra o BTC, vá em "Dados do ativo", leia o motivo e clique em "Corrigir para cotação automática". A cotação e o gráfico devem aparecer em alguns segundos.
    2. Se precisar, edite a operação do BTC com a quantidade real.
