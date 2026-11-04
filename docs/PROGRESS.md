@@ -4,7 +4,7 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Fase atual
 
-**Ajuste M-13 concluído** em 04/11/2026, como versão 1.4.1 (sem tag nem Release; só quando você pedir). **Ajustes M-10 a M-12 concluídos** em 24/10/2026, como versão 1.4.0 (tag `v1.4.0` e Release publicada em 04/11/2026). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
+**Ajuste M-13 concluído** em 04/11/2026, como versão 1.4.1 (tag `v1.4.1` e Release em rascunho em 04/11/2026, aguardando sua publicação). **Ajustes M-10 a M-12 concluídos** em 24/10/2026, como versão 1.4.0 (tag `v1.4.0` e Release publicada em 04/11/2026). **Fase 8 concluída** em 23/10/2026, como versão 1.3.0 (sem tag nem Release; só quando você pedir). Escopo aprovado na SPEC §21, com IMA/IDkA e vacância/emissões de FII como "indisponível" e o lançamento dos proventos pagos. Próximo: Fase 9 (carteiras hipotéticas e backtest), quando você pedir. A 1.2.0 (M-06 a M-09) e a 1.1.0 (M-01 a M-05) terminaram em 23/10/2026, sem tag nem Release. Pendência sua antiga: Windows Hello (F5B).
 
 ## Concluído
 
@@ -37,8 +37,8 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
    - O tipo de um custodiante já existente não muda pelo novo campo; a Nubank continua Corretora e o tipo se ajusta em Cadastros.
    - Na cópia de teste, apareceu "No ano +1.494,50%" no Painel. A causa provável é o BTC comprado bem abaixo do mercado numa carteira pequena; não investiguei. Vale olhar depois de acertar a operação.
    - O tema claro não foi conferido por captura nesta sessão.
-   - O `dist\` local continua com a 1.4.0.
-5. **Pendências:** tag e Release da 1.4.1 (só quando você pedir); Fase 9; importação CSV (F11); Windows Hello (F5B), antiga.
+   - O `dist\` local continua com a 1.4.0. **Resolvido:** regenerado com a 1.4.1 (ver abaixo).
+5. **Pendências:** publicar o rascunho da Release 1.4.1; Fase 9; importação CSV (F11); Windows Hello (F5B), antiga.
 6. **Como testar:**
    1. Abra o BTC, vá em "Dados do ativo", leia o motivo e clique em "Corrigir para cotação automática". A cotação e o gráfico devem aparecer em alguns segundos.
    2. Se precisar, edite a operação do BTC com a quantidade real.
@@ -49,6 +49,16 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
    7. Em Comprar e Vender da cripto, teste o valor total com custos.
    8. Na Carteira, use "Agrupar por custodiante". No Painel, abra a aba "Custodiante" da distribuição.
    9. Em "Adicionar ativo", confira que `bbas3` continua igual, sem a opção de valor total.
+
+### Release v1.4.1 em rascunho (04/11/2026)
+
+- Você testou a 1.4.1 e aprovou. O M-13 já estava marcado como feito em `docs/MUDANCAS.md` desde `0c7d622`, então essa marcação não precisou de alteração. O item M-14, que está no arquivo sem commit, ficou de fora do commit e do push.
+- Push do `main` em `f10c77b`; CI verde ([run 41910344234](https://github.com/LuccaBueno/patrion/actions/runs/41910344234)).
+- `dist\` regenerado numa cópia limpa do `f10c77b` (`patrion.exe` 1.4.1+6, sem `patrion.em-uso-*.exe` no ZIP, somas SHA-256 conferidas). O build falhou no scratchpad porque um caminho chegou a 260 caracteres; a cópia foi feita em `C:\temp\p141` e apagada depois.
+- O `dist\` ainda tem o instalador e o ZIP da 1.4.0: a remoção foi bloqueada nesta sessão. `RELEASE_NOTES.md` e `SHA256SUMS.txt` são da 1.4.1.
+- Tag anotada `v1.4.1` em `f10c77b`. Workflow `Release` com sucesso ([run 41912134747](https://github.com/LuccaBueno/patrion/actions/runs/41912134747)) e Release em rascunho criada, com instalador, ZIP e `SHA256SUMS.txt`.
+- Os arquivos do `dist\` local não são os mesmos da Release (mesmo commit, builds diferentes); os publicados são os do workflow.
+- A Release 1.4.0 já estava publicada e não foi alterada.
 
 ### Release v1.4.0 em rascunho (04/11/2026)
 
@@ -1168,3 +1178,4 @@ Fechar a F7: seu teste do instalador em ambiente limpo (Windows Sandbox) e a aut
 | 2026-10-19 | F7 | Distribuição: instalador Inno Setup (por usuário, atualização por cima, desinstalação sem perder dados, associação do .invsave), runtime do Visual C++ no pacote, ZIP portátil, avisos de licença, instância única por pasta de dados, verificador de atualizações, workflow de release em rascunho e teste de instalação (26/26 neste PC); Carteira cabe em 1280 px; v1.0.0 preparada, sem tag |
 | 2026-11-04 | v1.4.0 | M-10 a M-12 marcados como feitos; testes sem depender da data real (simulação em 12 datas); tag v1.4.0 movida para `c070751` e Release em rascunho |
 | 2026-11-04 | v1.4.1 | M-13: causa do BTC sem cotação corrigida, criptomoedas no cadastro rápido, valor total pago, 8 casas, tipos de custódia e botão de correção; relógio injetado nas telas |
+| 2026-11-04 | v1.4.1 | Push do `main`, `dist\` regenerado em cópia limpa, tag `v1.4.1` em `f10c77b` e Release em rascunho |
