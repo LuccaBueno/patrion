@@ -129,7 +129,8 @@ void main() {
       'do dia e o gráfico só do mercado (M-07)', (tester) async {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
-    await app.run(location: '/carteira', () async {
+    final today = [portfolioAt(f.t.wall.clock)];
+    await app.run(location: '/carteira', overrides: today, () async {
       expect(order(tester), ['VALE3', 'BBAS3', 'ITSA4', 'WEGE3', 'PETR4']);
       // WEGE3 sem preço: valor, cotação e valorização indisponíveis.
       final wege = find.byKey(const Key('holding-WEGE3'));
@@ -334,7 +335,7 @@ void main() {
       );
     });
     final app = AppHarness(tester, f.t);
-    await app.run(() async {
+    await app.run(overrides: [portfolioAt(f.t.wall.clock)], () async {
       Finder inKey(String key, String text) => find.descendant(
         of: find.byKey(Key(key)),
         matching: find.textContaining(text),

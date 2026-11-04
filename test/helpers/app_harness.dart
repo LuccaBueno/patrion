@@ -1,7 +1,9 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrion/application/portfolio/portfolio_query.dart';
 import 'package:patrion/application/portfolio/wealth_service.dart';
 import 'package:patrion/application/updates/update_checker.dart';
 import 'package:patrion/core/config/app_info.dart';
@@ -14,6 +16,16 @@ import 'package:patrion/presentation/providers.dart';
 
 import 'fake_http.dart';
 import 'test_database.dart';
+
+/// Retrato da carteira na data de [clock], não no dia em que o teste roda.
+Override portfolioAt(Clock clock) => portfolioQueryProvider.overrideWith(
+  (ref) => PortfolioQuery(
+    ref.watch(portfolioRepositoriesProvider),
+    market: ref.watch(marketRepositoryProvider),
+    preferences: ref.watch(portfolioPreferencesProvider),
+    wallClock: clock,
+  ),
+);
 
 /// Monta o app inteiro sobre um banco de teste.
 class AppHarness {
