@@ -10,7 +10,7 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 | M-01 a M-05 | **Feitos** na versão 1.1.0 (exceto M-04 itens 4, 5 e 9, que passaram para o M-09) |
 | M-06 a M-09 | **Feitos** na versão 1.2.0 |
 | Fase 8 | **Feita** na versão 1.3.0 |
-| M-10 a M-12 | **Pendentes** (antes de publicar a próxima Release) |
+| M-10 a M-12 | **Feitos** na versão 1.4.0 |
 
 ---
 
