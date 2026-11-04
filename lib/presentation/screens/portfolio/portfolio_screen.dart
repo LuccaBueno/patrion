@@ -199,6 +199,7 @@ class _HoldingsListState extends State<HoldingsList> {
                 ChoiceChip(
                   key: Key('broker-${b.name}'),
                   label: Text(b.name),
+                  tooltip: snap.custodyOfInstitution(b).label,
                   selected: broker == b.id,
                   onSelected: (_) => widget.onBroker?.call(b.id),
                 ),
@@ -207,7 +208,7 @@ class _HoldingsListState extends State<HoldingsList> {
               const SizedBox(width: 8),
               FilterChip(
                 key: const Key('group-by-broker'),
-                label: const Text('Agrupar por corretora'),
+                label: const Text('Agrupar por custodiante'),
                 selected: widget.group,
                 onSelected: (v) => widget.onGroup?.call(v),
               ),
@@ -221,6 +222,7 @@ class _HoldingsListState extends State<HoldingsList> {
           if (g.institution != null)
             _GroupHeader(
               institution: g.institution!,
+              kind: snap.custodyOfInstitution(g.institution!),
               holdings: g.holdings,
               toBrl: widget.toBrl,
             ),
@@ -349,11 +351,13 @@ class _Totals extends StatelessWidget {
 class _GroupHeader extends StatelessWidget {
   const _GroupHeader({
     required this.institution,
+    required this.kind,
     required this.holdings,
     required this.toBrl,
   });
 
   final Institution institution;
+  final CustodyKind kind;
   final List<Holding> holdings;
   final Map<String, Decimal> toBrl;
 
@@ -376,18 +380,26 @@ class _GroupHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
       child: Row(
         children: [
+          Text(
+            institution.name,
+            key: Key('group-title-${institution.name}'),
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
-              institution.name,
-              key: Key('group-title-${institution.name}'),
-              style: theme.textTheme.titleMedium,
+              kind.label,
+              key: Key('group-kind-${institution.name}'),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           Tooltip(
             message: partial
                 ? 'Parcial: há ativos sem cotação ou sem câmbio, fora do '
                       'subtotal.'
-                : 'Soma do valor das posições nesta corretora, em reais.',
+                : 'Soma do valor das posições neste custodiante, em reais.',
             child: Text(
               '${Fmt.money(total, 'BRL')}${partial ? ' (parcial)' : ''}',
               key: Key('group-total-${institution.name}'),
@@ -500,10 +512,11 @@ class _HoldingRow extends StatelessWidget {
               ),
               Text(
                 closed
-                    ? 'sem cotas'
+                    ? asset?.assetClass == AssetClass.crypto
+                          ? 'sem saldo'
+                          : 'sem cotas'
                     : h.quantity > Decimal.zero
-                    ? '${Fmt.number(h.quantity)} '
-                          '${h.quantity == Decimal.one ? 'cota' : 'cotas'}'
+                    ? Units.quantity(h.quantity, asset)
                     : asset?.assetClass.singular ?? '',
                 style: theme.textTheme.labelSmall?.copyWith(color: muted),
               ),

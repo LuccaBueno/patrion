@@ -224,8 +224,11 @@ abstract final class ProviderCatalog {
   static const binance = ProviderInfo(
     code: 'binance',
     name: 'Binance (dados públicos)',
+    shortName: 'Binance',
     site: 'https://www.binance.com',
-    role: 'Histórico diário de criptomoedas e o Bitcoin dos benchmarks',
+    role:
+        'Cotação e histórico diário de criptomoedas e o Bitcoin dos '
+        'benchmarks',
     sends: 'Só o par negociado (por exemplo, BTCBRL ou BTCUSDT).',
     license: 'API pública de mercado; termos da Binance',
     limits:

@@ -489,8 +489,7 @@ class _CardsGrid extends StatelessWidget {
             ? const Text('—')
             : Text(Fmt.money(h!.averagePrice!, c)),
         note: (h?.quantity ?? Decimal.zero) > Decimal.zero
-            ? '${Fmt.number(h!.quantity)} '
-                  '${h.quantity == Decimal.one ? 'cota' : 'cotas'}'
+            ? Units.quantity(h!.quantity, h.asset)
             : null,
       ),
       _NumberCard(
@@ -642,7 +641,7 @@ class _BrokersCard extends StatelessWidget {
         if (v.position.isOpen) v,
     ];
     return Card(
-      key: const Key('card-Por corretora'),
+      key: const Key('card-Por custodiante'),
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -650,7 +649,7 @@ class _BrokersCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Por corretora',
+              'Por custodiante',
               style: theme.textTheme.bodySmall?.copyWith(color: muted),
             ),
             const SizedBox(height: 2),
@@ -658,8 +657,9 @@ class _BrokersCard extends StatelessWidget {
             for (final v in open)
               Tooltip(
                 message:
-                    '${snap.accountLabel(v.position.accountId)}: '
-                    '${Fmt.number(v.position.quantity)} × preço médio '
+                    '${snap.accountLabel(v.position.accountId)} '
+                    '(${snap.custodyOf(v.position.accountId).label}): '
+                    '${Units.quantity(v.position.quantity, v.asset)} × preço médio '
                     '${v.position.averagePrice == null ? '—' : Fmt.money(v.position.averagePrice!, c)}',
                 child: Padding(
                   key: Key(
@@ -696,8 +696,7 @@ class _BrokersCard extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        '${Fmt.number(v.position.quantity)} '
-                        '${v.position.quantity == Decimal.one ? 'cota' : 'cotas'}'
+                        '${Units.quantity(v.position.quantity, v.asset)}'
                         '${v.position.averagePrice == null ? '' : ' · PM ${Fmt.money(v.position.averagePrice!, c)}'}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1206,6 +1205,26 @@ class _MarketCard extends ConsumerWidget {
     if (context.mounted) showInfo(context, MarketLabels.result(result));
   }
 
+  /// Passa a cripto para o mercado certo e busca cotação e histórico (M-13).
+  Future<void> _fixCrypto(BuildContext context, WidgetRef ref) async {
+    final backfill = ref.read(historyBackfillProvider.notifier);
+    final Asset fixed;
+    try {
+      fixed = await ref.read(registryServiceProvider).fixCrypto(asset.id);
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+      return;
+    }
+    if (!context.mounted) return;
+    await _run(
+      context,
+      ref,
+      'Cotação de ${fixed.symbol}',
+      (s) => s.refreshAsset(fixed),
+    );
+    await backfill.start();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -1241,7 +1260,24 @@ class _MarketCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Dados de mercado', style: theme.textTheme.titleMedium),
-            if (manual)
+            if (asset.cryptoNeedsFix) ...[
+              Text(
+                asset.market == Market.crypto
+                    ? 'Esta criptomoeda usa preço informado por você.'
+                    : 'Esta criptomoeda está cadastrada no mercado '
+                          '${asset.market.label}, onde não há cotação nem '
+                          'histórico dela.',
+                key: const Key('crypto-fix-reason'),
+                style: muted,
+              ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                key: const Key('crypto-fix'),
+                onPressed: busy ? null : () => _fixCrypto(context, ref),
+                icon: const Icon(Icons.build_outlined, size: 18),
+                label: const Text('Corrigir para cotação automática'),
+              ),
+            ] else if (manual)
               Text(
                 'Este ativo usa preço informado por você. Para usar cotações '
                 'automáticas, escolha "preço de mercado" em Editar.',

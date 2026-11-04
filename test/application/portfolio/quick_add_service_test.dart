@@ -173,6 +173,22 @@ void main() {
       addTearDown(t.close);
       final repos = PortfolioRepositories(t.db, t.sync);
       final registry = RegistryService(repos);
+      // Custodiante novo com o tipo escolhido; existente não muda (M-13).
+      final wallet = await registry.accountForBroker(
+        'Carteira própria',
+        kind: CustodyKind.selfCustody,
+      );
+      expect(
+        (await repos.accounts.byId(wallet))!.kind,
+        AccountKind.cryptoWallet,
+      );
+      expect(
+        await registry.accountForBroker(
+          'carteira propria',
+          kind: CustodyKind.bank,
+        ),
+        wallet,
+      );
       final nubank = await registry.accountForBroker('Nubank');
       expect(await registry.accountForBroker('  nubank '), nubank);
       final xp = await registry.accountForBroker('XP');
@@ -180,7 +196,7 @@ void main() {
       final institutions = await repos.institutions.all();
       expect(
         institutions.map((i) => i.name),
-        unorderedEquals(['Nubank', 'XP']),
+        unorderedEquals(['Carteira própria', 'Nubank', 'XP']),
       );
       expect((await repos.accounts.byId(xp))!.name, 'Principal');
       // Conta arquivada não serve: cria outra "Principal".

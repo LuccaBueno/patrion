@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patrion/application/portfolio/portfolio_query.dart';
 import 'package:patrion/application/portfolio/wealth_service.dart';
 import 'package:patrion/application/updates/update_checker.dart';
 import 'package:patrion/core/config/app_info.dart';
@@ -63,16 +62,9 @@ class AppHarness {
             marketHttp ?? fakeMarketHttp(FakeHttpAdapter()..offline = true),
           ),
           apiKeyStoreProvider.overrideWithValue(keys),
-          // A data do retrato vem do relógio falso, nunca do dia em que o
+          // A data das telas vem do relógio falso, nunca do dia em que o
           // teste roda.
-          portfolioQueryProvider.overrideWith(
-            (ref) => PortfolioQuery(
-              ref.watch(portfolioRepositoriesProvider),
-              market: ref.watch(marketRepositoryProvider),
-              preferences: ref.watch(portfolioPreferencesProvider),
-              wallClock: today ?? t.wall.clock,
-            ),
-          ),
+          wallClockProvider.overrideWithValue(today ?? t.wall.clock),
           // Sem isolate: o teste roda com relógio falso.
           wealthServiceProvider.overrideWith(
             (ref) =>

@@ -1,8 +1,30 @@
+import 'package:decimal/decimal.dart';
+
 import '../../domain/market/market_data.dart';
 import '../../domain/finance/returns.dart';
 import '../../domain/portfolio/codes.dart';
+import '../../domain/portfolio/entities.dart';
 import '../../domain/portfolio/operation_type.dart';
 import '../../domain/portfolio/performance.dart';
+import 'formatters.dart';
+
+/// Quantidade com a unidade do ativo (M-13): "0,02111111 BTC", "100 cotas".
+abstract final class Units {
+  static String quantity(Decimal value, Asset? asset) =>
+      asset?.assetClass == AssetClass.crypto
+      ? '${Fmt.number(value)} ${asset!.symbol}'
+      : '${Fmt.number(value)} ${value == Decimal.one ? 'cota' : 'cotas'}';
+}
+
+extension CustodyKindLabel on CustodyKind {
+  String get label => switch (this) {
+    CustodyKind.broker => 'Corretora',
+    CustodyKind.bank => 'Banco',
+    CustodyKind.exchange => 'Exchange de cripto',
+    CustodyKind.selfCustody => 'Autocustódia',
+    CustodyKind.other => 'Outro',
+  };
+}
 
 /// Rótulos em português das enumerações do domínio.
 extension InstitutionKindLabel on InstitutionKind {

@@ -310,6 +310,7 @@ class DecimalField extends StatelessWidget {
     this.helper,
     this.suffix,
     this.fieldKey,
+    this.maxDecimals,
     super.key,
   });
 
@@ -320,6 +321,9 @@ class DecimalField extends StatelessWidget {
   final String? helper;
   final String? suffix;
   final Key? fieldKey;
+
+  /// Limite de casas decimais: recusa em vez de arredondar.
+  final int? maxDecimals;
 
   @override
   Widget build(BuildContext context) {
@@ -345,6 +349,8 @@ class DecimalField extends StatelessWidget {
           final value = Fmt.parseDecimal(text ?? '');
           if (value == null) return required ? 'Obrigatório' : null;
           if (!allowNegative && value < Decimal.zero) return 'Não negativo';
+          final max = maxDecimals;
+          if (max != null && value.scale > max) return 'Até $max casas';
           return null;
         } on FormatException {
           return 'Número inválido';

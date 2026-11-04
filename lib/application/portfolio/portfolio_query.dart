@@ -6,6 +6,7 @@ import '../../core/time/local_date.dart';
 import '../../data/repositories/market_repository.dart';
 import '../../data/repositories/portfolio_repositories.dart';
 import '../../domain/market/market_price.dart';
+import '../../domain/portfolio/codes.dart';
 import '../../domain/portfolio/entities.dart';
 import '../../domain/portfolio/performance.dart';
 import '../../domain/portfolio/portfolio_calculator.dart';
@@ -253,6 +254,21 @@ class PortfolioSnapshot {
     final account = accounts[accountId];
     return account == null ? null : institutions[account.institutionId];
   }
+
+  /// Tipo do custodiante da conta (M-13).
+  CustodyKind custodyOf(String accountId) => CustodyKind.of(
+    institutionOfAccount(accountId)?.kind,
+    accounts[accountId]?.kind,
+  );
+
+  /// Tipo do custodiante da instituição, pela primeira conta dela.
+  CustodyKind custodyOfInstitution(Institution institution) => CustodyKind.of(
+    institution.kind,
+    accounts.values
+        .where((a) => a.institutionId == institution.id)
+        .firstOrNull
+        ?.kind,
+  );
 
   /// "Instituição · Conta", para listas e tabelas.
   String accountLabel(String accountId) {

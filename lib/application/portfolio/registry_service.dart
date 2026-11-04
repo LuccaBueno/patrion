@@ -63,8 +63,12 @@ class RegistryService {
   /// Conta da corretora [name] (M-06; DECISIONS D-52): a instituição com
   /// esse nome (sem diferença de maiúsculas, acentos e espaços) e a conta
   /// ativa dela ("Principal" primeiro); sem conta ativa, cria a
-  /// "Principal"; sem a instituição, cria a corretora e a conta.
-  Future<String> accountForBroker(String name) => _repos.transaction(() async {
+  /// "Principal"; sem a instituição, cria o custodiante do tipo [kind] e a
+  /// conta (M-13).
+  Future<String> accountForBroker(
+    String name, {
+    CustodyKind kind = CustodyKind.broker,
+  }) => _repos.transaction(() async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
       throw const DataError('Informe a corretora ou o custodiante.');
@@ -78,7 +82,7 @@ class RegistryService {
             Institution(
               id: '',
               name: trimmed,
-              kind: InstitutionKind.broker,
+              kind: kind.institution,
               country: 'BR',
             ),
           );
@@ -97,7 +101,7 @@ class RegistryService {
         id: '',
         institutionId: institutionId,
         name: defaultAccountName,
-        kind: AccountKind.brokerage,
+        kind: kind.account,
         currency: 'BRL',
       ),
     );
@@ -169,6 +173,30 @@ class RegistryService {
         }
       });
 
+  /// Passa o ativo para o mercado de cripto com cotação automática (M-13):
+  /// as operações continuam, porque são do mesmo ativo.
+  Future<Asset> fixCrypto(String id) => _repos.transaction(() async {
+    final a = await _repos.assets.byId(id);
+    if (a == null) throw const DataError('O ativo não existe mais.');
+    final fixed = Asset(
+      id: a.id,
+      symbol: a.symbol.trim().toUpperCase(),
+      market: Market.crypto,
+      assetClass: AssetClass.crypto,
+      name: a.name,
+      currency: a.currency,
+      country: a.country,
+      priceSource: PriceSource.market,
+      isin: a.isin,
+      sector: a.sector,
+      segment: a.segment,
+      liquidity: a.liquidity,
+      notes: a.notes,
+    );
+    await updateAsset(fixed);
+    return fixed;
+  });
+
   /// Exclui o ativo (tombstone), com suas características e preços.
   Future<void> deleteAsset(String id) => _repos.transaction(() async {
     if (await _repos.operations.anyForAsset(id)) {
@@ -195,6 +223,13 @@ class RegistryService {
     }
     if (!_countryPattern.hasMatch(value.country)) {
       throw const DataError('País inválido (use o código, ex.: BR).');
+    }
+    if (value.assetClass == AssetClass.crypto &&
+        value.market != Market.crypto &&
+        value.market != Market.manual) {
+      throw const DataError(
+        'Criptomoeda usa o mercado Cripto; em outro mercado não há cotação.',
+      );
     }
     if (value.assetClass.hasFixedIncomeTerms && terms == null) {
       throw const DataError('Informe as características do título.');

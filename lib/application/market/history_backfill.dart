@@ -319,9 +319,10 @@ class HistoryBackfillService {
           total: total,
         ),
       );
+      // Cripto: desde a listagem do par, sem o ano inicial da B3 (M-13).
       final r = await _market.downloadHistory(
         a,
-        from: LocalDate(startYear, 1, 1),
+        from: a.market == Market.crypto ? null : LocalDate(startYear, 1, 1),
       );
       result.merge(r);
       if (r.failures.isEmpty) {

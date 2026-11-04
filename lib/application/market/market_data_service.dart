@@ -152,6 +152,9 @@ class MarketDataService {
   bool get _looksOffline =>
       !_runAnySuccess && (_runNetworkDown?.length ?? 0) >= 2;
 
+  /// Antes de qualquer par de cripto: a Binance começa na listagem do par.
+  static final cryptoHistoryStart = LocalDate(2017, 1, 1);
+
   /// Moedas sempre acompanhadas no câmbio.
   static const baseCurrencies = {'USD', 'EUR'};
 
@@ -695,10 +698,18 @@ class MarketDataService {
   Future<RefreshResult> downloadHistory(Asset asset, {LocalDate? from}) async {
     final result = RefreshResult();
     final i = instrumentOf(asset);
+    // Cripto: desde a listagem do par, e todo dia é dia de negociação (M-13).
+    final crypto = asset.market == Market.crypto;
     final start =
         from ??
-        LocalDate(await _preferences.historyStartYear(_today.year), 1, 1);
-    final end = _lastSession;
+        (crypto
+            ? cryptoHistoryStart
+            : LocalDate(
+                await _preferences.historyStartYear(_today.year),
+                1,
+                1,
+              ));
+    final end = crypto ? _today.addDays(-1) : _lastSession;
     final range = await _repo.priceRange(i.symbol, i.market);
     // Só os trechos que faltam: antes do primeiro e depois do último dia.
     final gaps = <(LocalDate, LocalDate)>[

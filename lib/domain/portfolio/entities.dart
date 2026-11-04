@@ -1,6 +1,7 @@
 import 'package:decimal/decimal.dart';
 
 import '../../core/time/local_date.dart';
+import '../market/tickers.dart';
 import 'codes.dart';
 import 'operation_type.dart';
 
@@ -96,6 +97,13 @@ class Asset {
   /// Chave natural: símbolo + mercado + classe.
   String get naturalKey =>
       '${symbol.trim().toUpperCase()}|${market.code}|${assetClass.code}';
+
+  /// Criptomoeda cadastrada de um jeito que impede a cotação automática: no
+  /// mercado errado, com preço informado ou, na B3, com outra classe (M-13).
+  bool get cryptoNeedsFix => assetClass == AssetClass.crypto
+      ? market != Market.crypto || priceSource != PriceSource.market
+      : market == Market.b3 &&
+            Tickers.cryptoIds.containsKey(symbol.trim().toUpperCase());
 }
 
 /// Características de um título de renda fixa (1:1 com o ativo).

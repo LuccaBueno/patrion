@@ -42,6 +42,33 @@ enum AccountKind implements Coded {
   final String code;
 }
 
+/// Tipo do custodiante (M-13): não é gravado; vem do tipo da instituição e
+/// do tipo da conta, sem tabela nova.
+enum CustodyKind {
+  broker(InstitutionKind.broker, AccountKind.brokerage),
+  bank(InstitutionKind.bank, AccountKind.checking),
+  exchange(InstitutionKind.exchange, AccountKind.brokerage),
+  selfCustody(InstitutionKind.other, AccountKind.cryptoWallet),
+  other(InstitutionKind.other, AccountKind.other);
+
+  const CustodyKind(this.institution, this.account);
+
+  /// Tipos gravados ao criar um custodiante novo.
+  final InstitutionKind institution;
+  final AccountKind account;
+
+  /// Onde normalmente fica a cripto: vêm primeiro nas sugestões.
+  bool get forCrypto => this == exchange || this == selfCustody;
+
+  static CustodyKind of(InstitutionKind? institution, AccountKind? account) =>
+      switch (institution) {
+        InstitutionKind.exchange => exchange,
+        InstitutionKind.bank => bank,
+        InstitutionKind.broker => broker,
+        _ => account == AccountKind.cryptoWallet ? selfCustody : other,
+      };
+}
+
 enum AssetClass implements Coded {
   stockBr('stock_br'),
   fii('fii'),

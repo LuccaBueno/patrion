@@ -7,6 +7,7 @@ import '../../../core/time/instant_format.dart';
 import '../../../core/time/local_date.dart';
 import '../../../domain/market/market_data.dart';
 import '../../../domain/market/provider_catalog.dart';
+import '../../../domain/market/tickers.dart';
 import '../market_http.dart';
 import 'parse.dart';
 
@@ -40,23 +41,7 @@ class CoinGeckoProvider implements QuoteProvider {
   final _ids = <String, String>{};
 
   /// Identificadores das moedas mais comuns; as outras são buscadas.
-  static const knownIds = {
-    'BTC': 'bitcoin',
-    'ETH': 'ethereum',
-    'USDT': 'tether',
-    'USDC': 'usd-coin',
-    'BNB': 'binancecoin',
-    'SOL': 'solana',
-    'XRP': 'ripple',
-    'ADA': 'cardano',
-    'DOGE': 'dogecoin',
-    'TRX': 'tron',
-    'DOT': 'polkadot',
-    'LTC': 'litecoin',
-    'LINK': 'chainlink',
-    'AVAX': 'avalanche-2',
-    'BCH': 'bitcoin-cash',
-  };
+  static const knownIds = Tickers.cryptoIds;
 
   @override
   String get code => ProviderCatalog.coingecko.code;
@@ -112,13 +97,20 @@ class CoinGeckoProvider implements QuoteProvider {
   }
 
   /// A moeda de maior capitalização com exatamente este símbolo.
-  static String? parseSearch(String text, String symbol) {
+  static String? parseSearch(String text, String symbol) =>
+      parseCoin(text, symbol)?.id;
+
+  /// Identificador, nome e posição no ranking da moeda de [parseSearch].
+  static ({String id, String name, int? rank})? parseCoin(
+    String text,
+    String symbol,
+  ) {
     final json = MarketParse.map(
       'CoinGecko',
       MarketParse.json('CoinGecko', text),
       'resposta',
     );
-    String? best;
+    Map<String, Object?>? best;
     int? bestRank;
     for (final c in (json['coins'] as List<Object?>?) ?? const []) {
       if (c is! Map<String, Object?>) continue;
@@ -128,11 +120,13 @@ class CoinGeckoProvider implements QuoteProvider {
           : null;
       if (best == null ||
           (rank != null && (bestRank == null || rank < bestRank))) {
-        best = '${c['id']}';
+        best = c;
         bestRank = rank;
       }
     }
-    return best;
+    return best == null
+        ? null
+        : (id: '${best['id']}', name: '${best['name']}', rank: bestRank);
   }
 
   /// `{"bitcoin":{"brl":410477,"last_updated_at":1792281600}}`.
@@ -174,7 +168,7 @@ class CoinGeckoProvider implements QuoteProvider {
 
 /// Binance: histórico diário de criptomoedas contra o real
 /// (`FONTES_DE_DADOS.md` §2.13). Dia em UTC; preço da corretora.
-class BinanceProvider implements HistoryProvider {
+class BinanceProvider implements HistoryProvider, QuoteProvider {
   BinanceProvider(this._http, {Clock wallClock = const Clock()})
     : _clock = wallClock;
 
@@ -195,6 +189,58 @@ class BinanceProvider implements HistoryProvider {
     required LocalDate from,
     required LocalDate to,
   }) => pairHistory('${i.symbol.toUpperCase()}BRL', i, from: from, to: to);
+
+  /// Último preço do par contra o real, sem chave.
+  @override
+  Future<MarketQuote> quote(MarketInstrument i) async {
+    final pair = '${i.symbol.toUpperCase()}BRL';
+    final String text;
+    try {
+      text = await _http.getText(
+        code,
+        Uri.https('api.binance.com', '/api/v3/ticker/24hr', {'symbol': pair}),
+      );
+    } on HttpStatusError catch (e) {
+      if (e.statusCode == 400) {
+        throw DataError('A Binance não negocia o par $pair.');
+      }
+      throw _refused('Binance', e);
+    }
+    return parseQuote(text, i, collectedAt: formatInstant(_clock.now()));
+  }
+
+  /// `{"symbol":"BTCBRL","lastPrice":"438456.00","closeTime":1793820679859}`.
+  static MarketQuote parseQuote(
+    String text,
+    MarketInstrument i, {
+    required String collectedAt,
+  }) {
+    const name = 'Binance';
+    final json = MarketParse.map(
+      name,
+      MarketParse.json(name, text),
+      'resposta',
+    );
+    final price = MarketParse.decimal(json['lastPrice']);
+    final closeTime = json['closeTime'];
+    if (price == null || closeTime is! JsonNumber) {
+      MarketParse.invalid(name, 'sem preço');
+    }
+    return MarketQuote(
+      symbol: i.symbol,
+      market: i.market,
+      price: price,
+      currency: 'BRL',
+      refAt: DateTime.fromMillisecondsSinceEpoch(
+        closeTime.integer,
+        isUtc: true,
+      ),
+      source: ProviderCatalog.binance.code,
+      dataType: MarketDataType.intraday,
+      collectedAt: collectedAt,
+      delayNote: 'preço da própria Binance, não um índice',
+    );
+  }
 
   /// Candles diários de um par qualquer (o preço vem na moeda de cotação do
   /// par: BRL em BTCBRL, USDT em BTCUSDT).
@@ -281,6 +327,99 @@ class BinanceProvider implements HistoryProvider {
       );
     }
     return result;
+  }
+}
+
+/// Reconhece uma criptomoeda pelo par contra o real na Binance (M-13).
+class BinanceTickerLookup implements TickerInfoProvider {
+  BinanceTickerLookup(this._http);
+
+  final MarketHttp _http;
+
+  @override
+  String get code => ProviderCatalog.binance.code;
+
+  @override
+  bool supports(String market) => market == 'CRYPTO';
+
+  @override
+  Future<TickerInfo?> lookup(String symbol) async {
+    final upper = symbol.toUpperCase();
+    final String text;
+    try {
+      text = await _http.getText(
+        code,
+        Uri.https('api.binance.com', '/api/v3/exchangeInfo', {
+          'symbol': '${upper}BRL',
+        }),
+      );
+    } on HttpStatusError catch (e) {
+      if (e.statusCode == 400) return null;
+      throw _refused('Binance', e);
+    }
+    return parse(text, upper) ? _info(upper, code) : null;
+  }
+
+  /// O par está em negociação: `{"symbols":[{"status":"TRADING",...}]}`.
+  static bool parse(String text, String symbol) {
+    const name = 'Binance';
+    final json = MarketParse.map(
+      name,
+      MarketParse.json(name, text),
+      'resposta',
+    );
+    for (final s in (json['symbols'] as List<Object?>?) ?? const []) {
+      if (s is Map<String, Object?> &&
+          s['baseAsset'] == symbol &&
+          s['status'] == 'TRADING') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static TickerInfo _info(String symbol, String source, {String? name}) =>
+      TickerInfo(
+        symbol: symbol,
+        market: 'CRYPTO',
+        source: source,
+        name: name,
+        assetClass: 'crypto',
+      );
+}
+
+/// Nome da criptomoeda (e as que não têm par contra o real na Binance).
+/// A busca da CoinGecko funciona sem chave. Só vale moeda com posição no
+/// ranking: há tokens sem valor com quase qualquer código (M-13).
+class CoinGeckoTickerLookup implements TickerInfoProvider {
+  CoinGeckoTickerLookup(this._http, {required this._apiKey});
+
+  final MarketHttp _http;
+  final String? Function() _apiKey;
+
+  @override
+  String get code => ProviderCatalog.coingecko.code;
+
+  @override
+  bool supports(String market) => market == 'CRYPTO';
+
+  @override
+  Future<TickerInfo?> lookup(String symbol) async {
+    final upper = symbol.toUpperCase();
+    final key = _apiKey();
+    final String text;
+    try {
+      text = await _http.getText(
+        code,
+        Uri.https('api.coingecko.com', '/api/v3/search', {'query': upper}),
+        headers: {'x-cg-demo-api-key': ?key},
+      );
+    } on HttpStatusError catch (e) {
+      throw _refused('CoinGecko', e);
+    }
+    final coin = CoinGeckoProvider.parseCoin(text, upper);
+    if (coin == null || coin.rank == null) return null;
+    return BinanceTickerLookup._info(upper, code, name: coin.name);
   }
 }
 

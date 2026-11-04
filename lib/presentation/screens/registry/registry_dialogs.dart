@@ -395,12 +395,18 @@ class _AssetDialogState extends ConsumerState<_AssetDialog> {
                 value: _class,
                 items: AssetClass.values,
                 labelOf: (c) => c.label,
-                onChanged: (v) => setState(() => _class = v),
+                onChanged: (v) => setState(() {
+                  _class = v;
+                  // Cripto fora do mercado Cripto fica sem cotação (M-13).
+                  if (v == AssetClass.crypto) _market = Market.crypto;
+                }),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Choice<Market>(
+                // Recria o campo quando a classe muda o mercado.
+                key: ValueKey(_market),
                 label: 'Mercado',
                 value: _market,
                 items: Market.values,

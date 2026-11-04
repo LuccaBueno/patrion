@@ -81,7 +81,7 @@ abstract final class MarketSetup {
     final yahoo = YahooProvider(http, wallClock: wallClock);
     final binance = BinanceProvider(http, wallClock: wallClock);
     return MarketProviders(
-      quotes: [brapi, coingecko, finnhub, twelve, yahoo],
+      quotes: [brapi, binance, coingecko, finnhub, twelve, yahoo],
       history: [binance, twelve, yahoo],
       batchHistory: B3CotahistProvider(
         http,
@@ -108,6 +108,11 @@ abstract final class MarketSetup {
           http,
           apiKey: () => key(ProviderCatalog.brapi.code),
           wallClock: wallClock,
+        ),
+        BinanceTickerLookup(http),
+        CoinGeckoTickerLookup(
+          http,
+          apiKey: () => key(ProviderCatalog.coingecko.code),
         ),
       ],
     );

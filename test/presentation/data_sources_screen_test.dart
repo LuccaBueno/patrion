@@ -223,7 +223,7 @@ void main() {
     await tester.runAsync(() async {
       await seed();
       await ProviderStateRepository(f.t.db)
-          .addQuota('brapi', DateTime.now(), n: 12000);
+          .addQuota('brapi', f.t.wall.now, n: 12000);
     });
     final app = AppHarness(tester, f.t);
     await app.run(location: '/fontes', () async {

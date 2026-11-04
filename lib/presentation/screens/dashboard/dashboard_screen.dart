@@ -422,14 +422,12 @@ class _DashboardState extends ConsumerState<_Dashboard> {
                   subtitle: 'Por setor do cadastro do ativo',
                 ),
                 DistributionView(
-                  'Corretora',
-                  summary.allocation(
-                    currency,
-                    (v) =>
-                        snap.institutionOfAccount(v.position.accountId)?.name ??
-                        '?',
-                    includeCash: false,
-                  ),
+                  'Custodiante',
+                  summary.allocation(currency, (v) {
+                    final id = v.position.accountId;
+                    final name = snap.institutionOfAccount(id)?.name ?? '?';
+                    return '$name (${snap.custodyOf(id).label})';
+                  }, includeCash: false),
                 ),
               ],
             ),

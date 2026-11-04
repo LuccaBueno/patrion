@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,19 +9,23 @@ import '../../../application/market/market_data_service.dart';
 import '../../../application/portfolio/operation_service.dart';
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../application/portfolio/quick_add_service.dart';
+import '../../../core/errors/app_error.dart';
 import '../../../core/time/local_date.dart';
 import '../../../domain/market/provider_catalog.dart';
 import '../../../domain/market/tickers.dart';
 import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
+import '../../../domain/portfolio/trade_total.dart';
 import '../../format/formatters.dart';
 import '../../format/labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
 import 'broker_field.dart';
+import 'total_paid.dart';
 import '../registry/registry_dialogs.dart';
 
-/// Adição rápida de ações, FIIs, ETFs e BDRs da B3 pelo ticker (M-01).
+/// Adição rápida pelo ticker: ações, FIIs, ETFs e BDRs da B3 (M-01) e
+/// criptomoedas (M-13).
 ///
 /// Devolve o id do ativo quando grava.
 Future<String?> showAddAssetDialog(BuildContext context) => showDialog<String>(
@@ -48,10 +53,20 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
   final _quantity = TextEditingController();
   final _price = TextEditingController();
   final _fees = TextEditingController();
+  final _total = TextEditingController();
 
   /// Corretora / custodiante (M-06): a última usada vem preenchida.
   final _broker = TextEditingController();
   bool _brokerFilled = false;
+
+  /// O que o app preencheu no campo, para trocar se o ativo for cripto.
+  String? _brokerAuto;
+
+  /// Tipo do custodiante novo; sem escolha, o sugerido pelo ativo (M-13).
+  CustodyKind? _custody;
+
+  /// Valor total em vez do preço unitário; sem escolha, ligado em cripto.
+  bool? _useTotal;
   final _date = TextEditingController(
     text: Fmt.date(LocalDate.fromDateTime(DateTime.now())),
   );
@@ -88,6 +103,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
       _quantity,
       _price,
       _fees,
+      _total,
       _broker,
       _date,
       _sector,
@@ -103,15 +119,24 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
 
   String get _symbol => Tickers.normalize(_ticker.text);
 
-  /// Ativo da B3 já cadastrado com o ticker digitado.
+  /// Ativo da B3 ou cripto já cadastrado com o ticker digitado.
   Asset? _existing(PortfolioSnapshot snap) {
     final symbol = _symbol;
     if (symbol.isEmpty) return null;
     for (final a in snap.assets.values) {
-      if (a.market == Market.b3 && a.symbol.toUpperCase() == symbol) return a;
+      if ((a.market == Market.b3 || a.market == Market.crypto) &&
+          a.symbol.toUpperCase() == symbol) {
+        return a;
+      }
     }
     return null;
   }
+
+  bool _isCrypto(Asset? existing) =>
+      (existing?.assetClass ?? _class) == AssetClass.crypto;
+
+  CustodyKind _custodyFor(bool crypto) =>
+      _custody ?? (crypto ? CustodyKind.exchange : CustodyKind.broker);
 
   /// Preenche a corretora com a última usada, uma vez.
   void _fillBroker(PortfolioSnapshot snap) {
@@ -119,7 +144,19 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
     _brokerFilled = true;
     final options = Brokers.options(snap);
     final label = Brokers.labelOf(options, Brokers.lastUsed(snap));
-    if (label != null) _broker.text = label;
+    if (label != null) _broker.text = _brokerAuto = label;
+  }
+
+  /// Cripto não herda a corretora de ações: troca o que o app preencheu pelo
+  /// último custodiante de cripto (M-13). O que o usuário digitou fica.
+  void _fillCryptoBroker() {
+    final snap = ref.read(portfolioSnapshotProvider).value;
+    if (snap == null || _broker.text != (_brokerAuto ?? '')) return;
+    final label = Brokers.labelOf(
+      Brokers.options(snap),
+      Brokers.lastUsed(snap, crypto: true),
+    );
+    _broker.text = _brokerAuto = label ?? '';
   }
 
   Future<void> _runLookup() {
@@ -152,8 +189,13 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
 
   Future<void> _doLookup(String symbol) async {
     TickerLookup? result;
+    final service = ref.read(marketDataServiceProvider);
     try {
-      result = await ref.read(marketDataServiceProvider).lookupTicker(symbol);
+      // Código sem a forma da B3 (BTC, SOL): primeiro as fontes de cripto.
+      if (!Tickers.looksLikeB3(symbol)) {
+        result = await service.lookupTicker(symbol, market: Market.crypto.code);
+      }
+      if (result?.info == null) result = await service.lookupTicker(symbol);
     } on Object {
       result = null;
     }
@@ -178,6 +220,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
       _name.text = info.name ?? _name.text;
       final cls = info.assetClass;
       if (cls != null) _class = byCode(AssetClass.values, cls);
+      if (_class == AssetClass.crypto) _fillCryptoBroker();
       _isin.text = info.isin ?? '';
       _sector.text = info.sector ?? '';
       _segment.text = info.segment ?? '';
@@ -199,6 +242,15 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
     final existing = _existing(snap);
     final symbol = _symbol;
     final accountId = Brokers.match(Brokers.options(snap), _broker.text);
+    final crypto = _isCrypto(existing);
+    final useTotal = crypto && (_useTotal ?? true);
+    final quantity = decimalOf(_quantity)!;
+    final fees = mode == AddMode.buy ? decimalOf(_fees) : null;
+    final gross = useTotal ? TradeTotal.gross(decimalOf(_total)!, fees) : null;
+    if (gross != null && gross <= Decimal.zero) {
+      showError(context, const DataError(TradeTotal.tooLow));
+      return;
+    }
     if (existing == null && (_class == null || _name.text.trim().isEmpty)) {
       // Os campos de nome e classe aparecem depois da consulta: valida de
       // novo quando estiverem na tela.
@@ -216,7 +268,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
           : Asset(
               id: '',
               symbol: symbol,
-              market: Market.b3,
+              market: crypto ? Market.crypto : Market.b3,
               assetClass: _class!,
               name: _name.text.trim(),
               currency: 'BRL',
@@ -230,10 +282,14 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
             ),
       accountId: accountId,
       brokerName: accountId == null ? _broker.text.trim() : null,
-      quantity: decimalOf(_quantity)!,
-      price: decimalOf(_price)!,
+      custody: _custodyFor(crypto),
+      quantity: quantity,
+      price: gross == null
+          ? decimalOf(_price)!
+          : TradeTotal.unitPrice(gross, quantity),
+      grossAmount: gross,
       date: dateOf(_date)!,
-      fees: mode == AddMode.buy ? decimalOf(_fees) : null,
+      fees: fees,
       initialBalance: mode == AddMode.initialBalance,
       offsetCash:
           mode == AddMode.initialBalance && snap.trackCash && _offsetCash,
@@ -251,7 +307,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
             SnackBar(
               content: Text(
                 '$symbol: ${mode == AddMode.initialBalance ? 'saldo inicial' : 'compra'} '
-                'de ${Fmt.number(input.quantity)} registrado.',
+                'de ${crypto ? '${Fmt.number(input.quantity)} $symbol' : Fmt.number(input.quantity)} registrado.',
               ),
             ),
           );
@@ -322,6 +378,8 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
         existing == null &&
         _lookup != _Lookup.idle &&
         _lookup != _Lookup.loading;
+    final crypto = _isCrypto(existing);
+    final useTotal = crypto && (_useTotal ?? true);
 
     return FormDialog(
       title: 'Adicionar ativo',
@@ -352,8 +410,9 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
           decoration: InputDecoration(
             labelText: 'Ticker *',
             helperText:
-                'Ações, FIIs, ETFs e BDRs da B3 (ex.: BBAS3, HGLG11). '
-                'Ao sair do campo, o app busca nome e classe.',
+                'Ações, FIIs, ETFs e BDRs da B3 (ex.: BBAS3, HGLG11) e '
+                'criptomoedas (ex.: BTC, ETH). Ao sair do campo, o app busca '
+                'nome e classe.',
             helperMaxLines: 2,
             suffixIcon: _lookup == _Lookup.loading
                 ? const Padding(
@@ -409,8 +468,9 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
                 'Não foi possível consultar as fontes agora. Preencha nome e '
                     'classe para cadastrar manualmente.',
               _ =>
-                'Ticker não encontrado na B3 nem na brapi. Confira o código '
-                    'ou preencha nome e classe para cadastrar manualmente.',
+                'Ticker não encontrado na B3, na brapi nem nas fontes de '
+                    'cripto. Confira o código ou preencha nome e classe para '
+                    'cadastrar manualmente.',
             },
           ),
         if (newAsset)
@@ -435,12 +495,24 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
                   fieldKey: const Key('add-class'),
                   label: 'Classe',
                   value: _class,
-                  items: Tickers.b3QuickClasses,
+                  items: Tickers.quickClasses,
                   labelOf: (c) => c.singular,
-                  onChanged: (v) => setState(() => _class = v),
+                  onChanged: (v) => setState(() {
+                    _class = v;
+                    if (v == AssetClass.crypto) {
+                      _priceSource = PriceSource.market;
+                      _fillCryptoBroker();
+                    }
+                  }),
                 ),
               ),
             ],
+          ),
+        if (crypto)
+          UseTotalSwitch(
+            key: const Key('add-use-total'),
+            value: useTotal,
+            onChanged: (v) => setState(() => _useTotal = v),
           ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,19 +521,28 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
               child: DecimalField(
                 fieldKey: const Key('add-quantity'),
                 controller: _quantity,
-                label: 'Quantidade',
+                label: crypto ? 'Quantidade ($_symbol)' : 'Quantidade',
                 required: true,
+                maxDecimals: crypto ? TradeTotal.cryptoDecimals : null,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: DecimalField(
-                fieldKey: const Key('add-price'),
-                controller: _price,
-                label: initial ? 'Preço médio' : 'Preço unitário',
-                required: true,
-                suffix: 'R\$',
-              ),
+              child: useTotal
+                  ? DecimalField(
+                      fieldKey: const Key('add-total'),
+                      controller: _total,
+                      label: TradeTotal.label(),
+                      required: true,
+                      suffix: 'R\$',
+                    )
+                  : DecimalField(
+                      fieldKey: const Key('add-price'),
+                      controller: _price,
+                      label: initial ? 'Preço médio' : 'Preço unitário',
+                      required: true,
+                      suffix: 'R\$',
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -473,6 +554,14 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
             ),
           ],
         ),
+        if (useTotal)
+          TotalPreview(
+            key: const Key('add-unit-preview'),
+            quantity: _quantity,
+            total: _total,
+            fees: initial ? null : _fees,
+            currency: 'BRL',
+          ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -481,7 +570,9 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
               child: BrokerField(
                 fieldKey: const Key('add-broker'),
                 controller: _broker,
-                options: Brokers.options(snap),
+                options: Brokers.options(snap, crypto: crypto),
+                kind: _custodyFor(crypto),
+                onKindChanged: (k) => setState(() => _custody = k),
               ),
             ),
             if (!initial) ...[
@@ -606,9 +697,7 @@ class _AddAssetDialogState extends ConsumerState<AddAssetDialog> {
                     unawaited(showAssetDialog(navigator.context));
                   },
             icon: const Icon(Icons.tune, size: 18),
-            label: const Text(
-              'Renda fixa, cripto ou internacional: cadastro completo',
-            ),
+            label: const Text('Renda fixa ou internacional: cadastro completo'),
           ),
         ),
       ],

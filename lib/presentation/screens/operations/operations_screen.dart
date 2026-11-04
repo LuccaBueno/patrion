@@ -6,6 +6,7 @@ import '../../../application/portfolio/portfolio_query.dart';
 import '../../../domain/portfolio/entities.dart';
 import '../../../domain/portfolio/operation_type.dart';
 import '../../format/formatters.dart';
+import '../../../domain/portfolio/codes.dart';
 import '../../format/labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
@@ -263,6 +264,12 @@ class _OperationsTableState extends ConsumerState<OperationsTable> {
                                   '${Fmt.number(op.ratioTo!)}'
                             : op.quantity == null
                             ? '—'
+                            : snap.assets[op.assetId]?.assetClass ==
+                                  AssetClass.crypto
+                            ? Units.quantity(
+                                op.quantity!,
+                                snap.assets[op.assetId],
+                              )
                             : Fmt.number(op.quantity!),
                       ),
                     ),

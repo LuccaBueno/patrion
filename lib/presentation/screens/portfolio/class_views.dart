@@ -11,6 +11,7 @@ import '../../../domain/portfolio/entities.dart';
 import '../../../domain/portfolio/holdings.dart';
 import '../../../domain/portfolio/passive_income.dart';
 import '../../format/formatters.dart';
+import '../../format/labels.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common.dart';
@@ -370,7 +371,9 @@ class ClassViewBody extends ConsumerWidget {
         : f?.split.totalReturn;
     return [
       h.asset!.symbol,
-      Fmt.number(h.quantity),
+      h.asset!.assetClass == AssetClass.crypto
+          ? Units.quantity(h.quantity, h.asset)
+          : Fmt.number(h.quantity),
       Fmt.money(h.totalCost, h.currency),
       h.averagePrice == null ? '—' : Fmt.money(h.averagePrice!, h.currency),
       h.unitPrice == null ? '—' : Fmt.money(h.unitPrice!, h.currency),

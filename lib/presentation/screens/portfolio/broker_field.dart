@@ -2,25 +2,31 @@ import 'package:flutter/material.dart';
 
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../application/portfolio/registry_service.dart';
+import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
+import '../../format/labels.dart';
+import '../../widgets/common.dart';
 
 /// Uma conta oferecida no campo "Corretora / custodiante".
 class BrokerOption {
-  const BrokerOption(this.accountId, this.label);
+  const BrokerOption(this.accountId, this.label, this.kind);
 
   final String accountId;
 
   /// O nome da corretora; com mais de uma conta ativa nela, "XP · Conta".
   final String label;
+  final CustodyKind kind;
 }
 
 /// Corretoras e contas (M-06; DECISIONS D-52).
 abstract final class Brokers {
   /// Contas ativas como opções, em ordem alfabética. [only] restringe às
-  /// contas informadas (a venda só oferece onde há o ativo).
+  /// contas informadas (a venda só oferece onde há o ativo). Com [crypto],
+  /// exchanges e autocustódia vêm primeiro (M-13).
   static List<BrokerOption> options(
     PortfolioSnapshot snap, {
     Set<String>? only,
+    bool crypto = false,
   }) {
     final active = [
       for (final a in snap.accounts.values)
@@ -40,22 +46,33 @@ abstract final class Brokers {
               ? snap.accountLabel(a.id)
               : snap.institutions[a.institutionId]?.name ??
                     snap.accountLabel(a.id),
+          snap.custodyOf(a.id),
         ),
-    ]..sort((a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()));
+    ]..sort((a, b) {
+      if (crypto && a.kind.forCrypto != b.kind.forCrypto) {
+        return a.kind.forCrypto ? -1 : 1;
+      }
+      return a.label.toLowerCase().compareTo(b.label.toLowerCase());
+    });
   }
 
-  /// A conta da operação mais recente; senão, a única ativa.
-  static String? lastUsed(PortfolioSnapshot snap, {Set<String>? only}) {
+  /// A conta da operação mais recente; senão, a única ativa. Com [crypto],
+  /// só exchanges e autocustódia: a cripto não vai para a corretora de ações
+  /// sem o usuário escolher (M-13).
+  static String? lastUsed(
+    PortfolioSnapshot snap, {
+    Set<String>? only,
+    bool crypto = false,
+  }) {
+    bool fits(Account a) =>
+        !a.archived &&
+        (only == null || only.contains(a.id)) &&
+        (!crypto || snap.custodyOf(a.id).forCrypto);
     for (final op in snap.operations) {
       final account = snap.accounts[op.accountId];
-      if (account == null || account.archived) continue;
-      if (only != null && !only.contains(account.id)) continue;
-      return account.id;
+      if (account != null && fits(account)) return account.id;
     }
-    final active = [
-      for (final a in snap.accounts.values)
-        if (!a.archived && (only == null || only.contains(a.id))) a,
-    ];
+    final active = snap.accounts.values.where(fits).toList();
     return active.length == 1 ? active.single.id : null;
   }
 
@@ -77,12 +94,14 @@ abstract final class Brokers {
   }
 
   /// A conta do texto: a escolhida na lista ou a da corretora com esse nome
-  /// (criada se for nova).
+  /// (criada do tipo [kind], se for nova).
   static Future<String> resolve(
     RegistryService registry,
     List<BrokerOption> options,
-    String text,
-  ) async => match(options, text) ?? await registry.accountForBroker(text);
+    String text, {
+    CustodyKind kind = CustodyKind.broker,
+  }) async =>
+      match(options, text) ?? await registry.accountForBroker(text, kind: kind);
 }
 
 /// Campo "Corretora / custodiante": escolhe uma das corretoras usadas ou
@@ -95,6 +114,8 @@ class BrokerField extends StatefulWidget {
     this.allowNew = true,
     this.onChanged,
     this.label = 'Corretora / custodiante',
+    this.kind = CustodyKind.broker,
+    this.onKindChanged,
     super.key,
   });
 
@@ -108,6 +129,10 @@ class BrokerField extends StatefulWidget {
 
   /// Rótulo do campo (sem o asterisco de obrigatório).
   final String label;
+
+  /// Tipo do custodiante novo, escolhido ao digitar um nome novo (M-13).
+  final CustodyKind kind;
+  final ValueChanged<CustodyKind>? onKindChanged;
 
   @override
   State<BrokerField> createState() => _BrokerFieldState();
@@ -127,6 +152,7 @@ class _BrokerFieldState extends State<BrokerField> {
     final options = widget.options;
     final allowNew = widget.allowNew;
     final onChanged = widget.onChanged;
+    final onKindChanged = widget.onKindChanged;
     return RawAutocomplete<BrokerOption>(
       textEditingController: widget.controller,
       focusNode: _focus,
@@ -147,7 +173,7 @@ class _BrokerFieldState extends State<BrokerField> {
               final text = value.text.trim();
               final isNew =
                   text.isNotEmpty && Brokers.match(options, text) == null;
-              return TextFormField(
+              final field = TextFormField(
                 key: widget.fieldKey,
                 controller: textController,
                 focusNode: focusNode,
@@ -172,6 +198,29 @@ class _BrokerFieldState extends State<BrokerField> {
                   return null;
                 },
               );
+              // Sempre a mesma coluna: se o campo mudasse de lugar na árvore,
+              // perderia o foco ao aparecer o tipo, na primeira letra digitada.
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  field,
+                  if (isNew && allowNew && onKindChanged != null) ...[
+                    const SizedBox(height: 12),
+                    Choice<CustodyKind>(
+                      // Recria o campo quando o tipo sugerido muda.
+                      key: ValueKey(widget.kind),
+                      fieldKey: const Key('custody-kind'),
+                      label: 'Tipo do custodiante',
+                      value: widget.kind,
+                      items: CustodyKind.values,
+                      labelOf: (k) => k.label,
+                      onChanged: (k) {
+                        if (k != null) onKindChanged(k);
+                      },
+                    ),
+                  ],
+                ],
+              );
             },
           ),
       optionsViewBuilder: (context, onSelected, list) => Align(
@@ -190,6 +239,7 @@ class _BrokerFieldState extends State<BrokerField> {
                     key: Key('broker-option-${o.label}'),
                     dense: true,
                     title: Text(o.label),
+                    subtitle: Text(o.kind.label),
                     onTap: () => onSelected(o),
                   ),
               ],

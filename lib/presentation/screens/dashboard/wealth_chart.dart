@@ -867,7 +867,7 @@ enum DistributionBy {
   asset('Ativo'),
   assetClass('Classe'),
   sector('Setor'),
-  broker('Corretora');
+  broker('Custodiante');
 
   const DistributionBy(this.label);
 

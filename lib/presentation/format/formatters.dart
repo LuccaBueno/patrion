@@ -25,6 +25,13 @@ abstract final class Fmt {
     return '$sign$symbol ${_group(rounded.abs(), 2)}';
   }
 
+  /// Preço de uma unidade: 2 casas; abaixo de 1, até 8 casas, porque uma
+  /// cripto barata não pode virar `R$ 0,00` (M-13).
+  static String unitPrice(Decimal value, String currency) {
+    if (hideMoney || value.abs() >= Decimal.one) return money(value, currency);
+    return '${_symbols[currency] ?? currency} ${number(value)}';
+  }
+
   /// Valor com sinal explícito para ganhos e perdas: `+R$ 10,00`.
   static String signedMoney(Decimal value, String currency) {
     if (hideMoney) return money(value, currency);

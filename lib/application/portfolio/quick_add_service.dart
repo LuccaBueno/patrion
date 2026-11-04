@@ -3,6 +3,7 @@ import 'package:decimal/decimal.dart';
 import '../../core/errors/app_error.dart';
 import '../../core/time/local_date.dart';
 import '../../data/repositories/portfolio_repositories.dart';
+import '../../domain/portfolio/codes.dart';
 import '../../domain/portfolio/entities.dart';
 import '../../domain/portfolio/operation_type.dart';
 import 'operation_service.dart';
@@ -19,6 +20,8 @@ class QuickAddInput {
     this.newAsset,
     this.accountId,
     this.brokerName,
+    this.custody = CustodyKind.broker,
+    this.grossAmount,
     this.initialBalance = false,
     this.offsetCash = false,
     Decimal? fees,
@@ -32,10 +35,16 @@ class QuickAddInput {
   /// com a conta "Principal", se ainda não existir; M-06).
   final String? accountId;
   final String? brokerName;
+
+  /// Tipo do custodiante, se [brokerName] for novo (M-13).
+  final CustodyKind custody;
   final Decimal quantity;
 
   /// Preço unitário da compra, ou o preço médio no saldo inicial.
   final Decimal price;
+
+  /// Valor bruto exato, quando o usuário informou o valor total (M-13).
+  final Decimal? grossAmount;
   final LocalDate date;
   final Decimal fees;
 
@@ -87,7 +96,10 @@ class QuickAddService {
     }
     final accountId =
         input.accountId ??
-        await _registry.accountForBroker(input.brokerName ?? '');
+        await _registry.accountForBroker(
+          input.brokerName ?? '',
+          kind: input.custody,
+        );
     final String assetId;
     final String currency;
     final existing = input.assetId;
@@ -110,6 +122,7 @@ class QuickAddService {
       currency: currency,
       quantity: input.quantity,
       unitPrice: input.price,
+      grossAmount: input.grossAmount,
       fees: input.fees,
       notes: input.initialBalance ? initialBalanceNote : null,
     );

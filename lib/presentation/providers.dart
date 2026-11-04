@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -150,11 +151,15 @@ final allocationTargetsProvider = StreamProvider<Map<AssetClass, Decimal>>(
   (ref) => ref.watch(portfolioPreferencesProvider).watchTargets(),
 );
 
+/// Relógio das telas e do retrato da carteira (nos testes, uma data fixa).
+final wallClockProvider = Provider<Clock>((ref) => const Clock());
+
 final portfolioQueryProvider = Provider<PortfolioQuery>(
   (ref) => PortfolioQuery(
     ref.watch(portfolioRepositoriesProvider),
     market: ref.watch(marketRepositoryProvider),
     preferences: ref.watch(portfolioPreferencesProvider),
+    wallClock: ref.watch(wallClockProvider),
   ),
 );
 
@@ -345,6 +350,7 @@ final marketDataServiceProvider = Provider<MarketDataService>(
     providers: ref.watch(marketProvidersProvider),
     preferences: ref.watch(marketPreferencesProvider),
     portfolio: ref.watch(portfolioQueryProvider),
+    wallClock: ref.watch(wallClockProvider),
   ),
 );
 
@@ -379,6 +385,7 @@ final historyBackfillServiceProvider = Provider<HistoryBackfillService>((ref) {
     preferences: ref.watch(marketPreferencesProvider),
     portfolio: ref.watch(portfolioQueryProvider),
     cleanCache: () => B3CotahistProvider.cleanAnnual(cacheDir),
+    wallClock: ref.watch(wallClockProvider),
   );
 });
 

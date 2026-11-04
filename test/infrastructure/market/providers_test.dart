@@ -576,6 +576,78 @@ void main() {
       );
     });
 
+    test('Binance: cotação sem chave, com fonte, data e tipo', () async {
+      adapter.on(
+        '/api/v3/ticker/24hr',
+        FakeReply.text(
+          '{"symbol":"BTCBRL","lastPrice":"438456.00000000",'
+          '"closeTime":1793820679859}',
+        ),
+      );
+      final q = await BinanceProvider(fakeMarketHttp(adapter)).quote(btc);
+      expect(q.price.toString(), '438456');
+      expect(q.currency, 'BRL');
+      expect(q.source, 'binance');
+      expect(q.dataType, MarketDataType.intraday);
+      expect(
+        q.refAt,
+        DateTime.fromMillisecondsSinceEpoch(1793820679859, isUtc: true),
+      );
+      expect(adapter.urls.single, contains('symbol=BTCBRL'));
+    });
+
+    test('Binance: par que não existe não vira cotação', () async {
+      adapter
+        ..on('/api/v3/ticker/24hr', FakeReply.text('{}', status: 400))
+        ..on('/api/v3/exchangeInfo', FakeReply.text('{}', status: 400));
+      final http = fakeMarketHttp(adapter);
+      await expectLater(
+        BinanceProvider(http).quote(btc),
+        throwsA(isA<DataError>()),
+      );
+      expect(await BinanceTickerLookup(http).lookup('XYZ'), isNull);
+    });
+
+    test('consulta de cripto: par em negociação e nome da CoinGecko', () async {
+      expect(
+        BinanceTickerLookup.parse(
+          '{"symbols":[{"baseAsset":"BTC","status":"TRADING"}]}',
+          'BTC',
+        ),
+        isTrue,
+      );
+      expect(
+        BinanceTickerLookup.parse(
+          '{"symbols":[{"baseAsset":"BTC","status":"BREAK"}]}',
+          'BTC',
+        ),
+        isFalse,
+        reason: 'par suspenso',
+      );
+      adapter.on(
+        '/api/v3/search',
+        FakeReply.text(
+          '{"coins":[{"id":"token-x","name":"Token X","symbol":"PETR",'
+          '"market_cap_rank":null}]}',
+        ),
+      );
+      final lookup = CoinGeckoTickerLookup(
+        fakeMarketHttp(adapter),
+        apiKey: () => null,
+      );
+      expect(
+        await lookup.lookup('PETR'),
+        isNull,
+        reason: 'token sem ranking não é reconhecido',
+      );
+      final coin = CoinGeckoProvider.parseCoin(
+        read('coingecko_search_eth.json'),
+        'ETH',
+      );
+      expect(coin!.name, 'Ethereum');
+      expect(coin.rank, isNotNull);
+    });
+
     test('Binance: barras diárias em real, dia em UTC', () {
       final bars = BinanceProvider.parse(
         read('binance_btcbrl.json'),

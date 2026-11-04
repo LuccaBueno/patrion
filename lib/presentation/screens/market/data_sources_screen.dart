@@ -164,7 +164,7 @@ class _UpdateSettingsCard extends ConsumerWidget {
     final minutes =
         ref.watch(marketRefreshMinutesProvider).value ??
         MarketPreferences.defaultRefreshMinutes;
-    final year = DateTime.now().year;
+    final year = ref.watch(wallClockProvider).now().year;
     final startYear =
         ref.watch(_startYearProvider).value ??
         MarketPreferences.defaultStartYear(year);
@@ -662,7 +662,7 @@ class _ManualAssetsCard extends ConsumerWidget {
 
 /// Uso da cota mensal de um provedor neste computador (SPEC §5: respeito aos
 /// limites), com aviso a partir de 80% e ao esgotar.
-class QuotaMeter extends StatelessWidget {
+class QuotaMeter extends ConsumerWidget {
   const QuotaMeter({required this.state, super.key});
 
   final ProviderState state;
@@ -672,9 +672,9 @@ class QuotaMeter extends StatelessWidget {
       s.quotaPeriod == ProviderStateRepository.periodOf(now) ? s.quotaUsed : 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final quota = state.info.monthlyQuota!;
-    final now = DateTime.now();
+    final now = ref.watch(wallClockProvider).now();
     final used = usedNow(state, now);
     final theme = Theme.of(context);
     final warn = used >= quota * ProviderInfo.quotaWarningFraction;
@@ -739,7 +739,7 @@ class QuotaWarningBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final states = ref.watch(providerStatesProvider).value ?? const [];
-    final now = DateTime.now();
+    final now = ref.watch(wallClockProvider).now();
     final over = [
       for (final s in states)
         if (s.info.monthlyQuota case final q?)

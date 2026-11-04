@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../application/portfolio/operation_service.dart';
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../core/time/local_date.dart';
+import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
 import '../../format/formatters.dart';
 import '../../providers.dart';
@@ -62,6 +63,9 @@ class _CustodyDialogState extends ConsumerState<_CustodyDialog> {
     return held.isEmpty ? null : held.first.key;
   }
 
+  /// Tipo do destino, se for um custodiante novo (M-13).
+  CustodyKind _custody = CustodyKind.broker;
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +90,7 @@ class _CustodyDialogState extends ConsumerState<_CustodyDialog> {
         ref.read(registryServiceProvider),
         _toOptions,
         _to.text,
+        kind: _custody,
       );
       if (to == from) {
         throw const FormatException('Escolha outra corretora de destino.');
@@ -151,6 +156,8 @@ class _CustodyDialogState extends ConsumerState<_CustodyDialog> {
           label: 'Para (corretora de destino)',
           controller: _to,
           options: _toOptions,
+          kind: _custody,
+          onKindChanged: (k) => setState(() => _custody = k),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,

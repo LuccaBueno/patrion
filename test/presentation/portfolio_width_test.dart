@@ -156,7 +156,7 @@ void main() {
             'asset-buy',
             'asset-sell',
             'asset-more',
-            'card-Por corretora',
+            'card-Por custodiante',
             'card-% da carteira',
           ]) {
             final r = tester.getRect(find.byKey(Key(key)));

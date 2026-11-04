@@ -5,12 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../application/portfolio/operation_service.dart';
 import '../../../application/portfolio/portfolio_query.dart';
 import '../../../core/time/local_date.dart';
+import '../../../core/errors/app_error.dart';
+import '../../../domain/portfolio/codes.dart';
 import '../../../domain/portfolio/entities.dart';
 import '../../../domain/portfolio/operation_type.dart';
+import '../../../domain/portfolio/trade_total.dart';
 import '../../format/formatters.dart';
+import '../../format/labels.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
 import 'broker_field.dart';
+import 'total_paid.dart';
 
 /// Compra ou venda rápida de um ativo já cadastrado (painel da Carteira,
 /// M-05): pede só conta, quantidade, preço, data e custos opcionais.
@@ -44,12 +49,21 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
   final _quantity = TextEditingController();
   final _price = TextEditingController();
   final _fees = TextEditingController();
+  final _total = TextEditingController();
   final _date = TextEditingController(
     text: Fmt.date(LocalDate.fromDateTime(DateTime.now())),
   );
+  late final _crypto = widget.asset.assetClass == AssetClass.crypto;
+
+  /// Cripto: valor total em vez do preço unitário (M-13).
+  late bool _useTotal = _crypto;
+  late CustodyKind _custody = _crypto
+      ? CustodyKind.exchange
+      : CustodyKind.broker;
   late final _options = Brokers.options(
     widget.snap,
     only: widget.sell ? _held.keys.toSet() : null,
+    crypto: _crypto,
   );
 
   /// Corretora / custodiante (M-06): na compra, a do ativo, a última usada
@@ -86,7 +100,7 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
 
   @override
   void dispose() {
-    for (final c in [_quantity, _price, _fees, _date, _broker]) {
+    for (final c in [_quantity, _price, _fees, _total, _date, _broker]) {
       c.dispose();
     }
     super.dispose();
@@ -94,6 +108,18 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
 
   Future<void> _save({bool allowDuplicate = false}) async {
     if (!_form.currentState!.validate()) return;
+    final quantity = decimalOf(_quantity)!;
+    final gross = _useTotal
+        ? TradeTotal.gross(
+            decimalOf(_total)!,
+            decimalOf(_fees),
+            sell: widget.sell,
+          )
+        : null;
+    if (gross != null && gross <= Decimal.zero) {
+      showError(context, const DataError(TradeTotal.tooLow));
+      return;
+    }
     setState(() => _saving = true);
     final String accountId;
     try {
@@ -101,6 +127,7 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
         ref.read(registryServiceProvider),
         _options,
         _broker.text,
+        kind: _custody,
       );
     } catch (e) {
       if (mounted) {
@@ -115,8 +142,11 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
       type: widget.sell ? OperationType.sell : OperationType.buy,
       tradeDate: dateOf(_date)!,
       currency: widget.asset.currency,
-      quantity: decimalOf(_quantity),
-      unitPrice: decimalOf(_price),
+      quantity: quantity,
+      unitPrice: gross == null
+          ? decimalOf(_price)
+          : TradeTotal.unitPrice(gross, quantity),
+      grossAmount: gross,
       fees: decimalOf(_fees),
     );
     try {
@@ -132,7 +162,7 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
             SnackBar(
               content: Text(
                 '${widget.sell ? 'Venda' : 'Compra'} de '
-                '${Fmt.number(draft.quantity!)} ${widget.asset.symbol} '
+                '${_crypto ? Units.quantity(quantity, widget.asset) : '${Fmt.number(quantity)} ${widget.asset.symbol}'} '
                 'registrada.',
               ),
             ),
@@ -176,7 +206,16 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
           options: _options,
           allowNew: !widget.sell,
           onChanged: (_) => setState(() {}),
+          kind: _custody,
+          onKindChanged: (k) => setState(() => _custody = k),
         ),
+        if (_crypto)
+          UseTotalSwitch(
+            key: const Key('trade-use-total'),
+            value: _useTotal,
+            sell: widget.sell,
+            onChanged: (v) => setState(() => _useTotal = v),
+          ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -184,25 +223,45 @@ class _TradeDialogState extends ConsumerState<_TradeDialog> {
               child: DecimalField(
                 fieldKey: const Key('trade-quantity'),
                 controller: _quantity,
-                label: 'Quantidade',
+                label: _crypto
+                    ? 'Quantidade (${widget.asset.symbol})'
+                    : 'Quantidade',
                 required: true,
+                maxDecimals: _crypto ? TradeTotal.cryptoDecimals : null,
                 helper: widget.sell && available != null
-                    ? 'Disponível: ${Fmt.number(available)}'
+                    ? 'Disponível: ${_crypto ? Units.quantity(available, widget.asset) : Fmt.number(available)}'
                     : null,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: DecimalField(
-                fieldKey: const Key('trade-price'),
-                controller: _price,
-                label: 'Preço unitário',
-                required: true,
-                suffix: currency,
-              ),
+              child: _useTotal
+                  ? DecimalField(
+                      fieldKey: const Key('trade-total'),
+                      controller: _total,
+                      label: TradeTotal.label(sell: widget.sell),
+                      required: true,
+                      suffix: currency,
+                    )
+                  : DecimalField(
+                      fieldKey: const Key('trade-price'),
+                      controller: _price,
+                      label: 'Preço unitário',
+                      required: true,
+                      suffix: currency,
+                    ),
             ),
           ],
         ),
+        if (_useTotal)
+          TotalPreview(
+            key: const Key('trade-unit-preview'),
+            quantity: _quantity,
+            total: _total,
+            fees: _fees,
+            currency: currency,
+            sell: widget.sell,
+          ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
