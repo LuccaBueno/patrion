@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -383,18 +384,22 @@ void main() {
         maxHlc: '001760702400000-00000-x',
         knownHlcOfThisDevice: null,
         at: formatInstant(
-          DateTime.now().subtract(const Duration(days: 10, hours: 1)),
+          pc.t.wall.now.subtract(const Duration(days: 10, hours: 1)),
         ),
       );
     });
     final h = AppHarness(tester, pc.t);
 
-    await h.run(() async {
-      expect(
-        find.textContaining('A última sincronização com PC-NOTEBOOK foi há 10'),
-        findsOneWidget,
-      );
-      expect(find.widgetWithText(TextButton, 'Sincronizar'), findsOneWidget);
+    await withClock(pc.t.wall.clock, () async {
+      await h.run(() async {
+        expect(
+          find.textContaining(
+            'A última sincronização com PC-NOTEBOOK foi há 10',
+          ),
+          findsOneWidget,
+        );
+        expect(find.widgetWithText(TextButton, 'Sincronizar'), findsOneWidget);
+      });
     });
     await tester.runAsync(pc.close);
   });

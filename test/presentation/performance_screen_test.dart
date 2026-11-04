@@ -53,9 +53,9 @@ void main() {
     final cal = BusinessCalendar.brazil;
     final bars = <PriceBar>[];
     final cdi = <IndicatorPoint>[];
-    // Até hoje: o período de 1 ano anda com a data real, e o risco precisa
-    // de um ano inteiro de pregões.
-    final today = LocalDate.fromDateTime(DateTime.now());
+    // Até a data do relógio falso: o risco precisa de um ano inteiro de
+    // pregões.
+    final today = LocalDate.fromDateTime(f.t.wall.now);
     for (var d = LocalDate(2024, 1, 2); !d.isAfter(today); d = d.addDays(1)) {
       if (!cal.isBusinessDay(d)) continue;
       final close = d.isBefore(LocalDate(2025, 6, 1))
@@ -397,7 +397,7 @@ void main() {
   testWidgets('sem histórico: indisponível com o motivo', (tester) async {
     // Uma compra de hoje, sem preço: a carteira existe (o Painel mostra as
     // abas), mas não há dois dias de evolução.
-    final today = LocalDate.fromDateTime(DateTime.now()).toString();
+    final today = LocalDate.fromDateTime(f.t.wall.now).toString();
     await tester.runAsync(
       () => f.add(f.draft(OperationType.buy, today, qty: '1', price: '10')),
     );

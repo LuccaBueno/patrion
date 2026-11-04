@@ -17,16 +17,6 @@ import 'package:patrion/presentation/providers.dart';
 import 'fake_http.dart';
 import 'test_database.dart';
 
-/// Retrato da carteira na data de [clock], não no dia em que o teste roda.
-Override portfolioAt(Clock clock) => portfolioQueryProvider.overrideWith(
-  (ref) => PortfolioQuery(
-    ref.watch(portfolioRepositoriesProvider),
-    market: ref.watch(marketRepositoryProvider),
-    preferences: ref.watch(portfolioPreferencesProvider),
-    wallClock: clock,
-  ),
-);
-
 /// Monta o app inteiro sobre um banco de teste.
 class AppHarness {
   AppHarness(this.tester, this.t);
@@ -50,6 +40,7 @@ class AppHarness {
     MarketHttp? marketHttp,
     ReleaseFeed? releaseFeed,
     WealthService Function(MarketRepository market)? wealthService,
+    Clock? today,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -72,6 +63,16 @@ class AppHarness {
             marketHttp ?? fakeMarketHttp(FakeHttpAdapter()..offline = true),
           ),
           apiKeyStoreProvider.overrideWithValue(keys),
+          // A data do retrato vem do relógio falso, nunca do dia em que o
+          // teste roda.
+          portfolioQueryProvider.overrideWith(
+            (ref) => PortfolioQuery(
+              ref.watch(portfolioRepositoriesProvider),
+              market: ref.watch(marketRepositoryProvider),
+              preferences: ref.watch(portfolioPreferencesProvider),
+              wallClock: today ?? t.wall.clock,
+            ),
+          ),
           // Sem isolate: o teste roda com relógio falso.
           wealthServiceProvider.overrideWith(
             (ref) =>
@@ -145,6 +146,7 @@ class AppHarness {
     MarketHttp? marketHttp,
     ReleaseFeed? releaseFeed,
     WealthService Function(MarketRepository market)? wealthService,
+    Clock? today,
   }) async {
     await pump(
       location: location,
@@ -154,6 +156,7 @@ class AppHarness {
       marketHttp: marketHttp,
       releaseFeed: releaseFeed,
       wealthService: wealthService,
+      today: today,
     );
     try {
       await body();

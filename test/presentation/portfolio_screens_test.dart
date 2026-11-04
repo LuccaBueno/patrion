@@ -451,6 +451,7 @@ void main() {
     String equityInfo() => tester
         .widget<InfoIcon>(find.byKey(const Key('stat-equity-info')))
         .message;
+    f.t.wall.now = DateTime(2026, 10, 22, 15);
     await app.run(size: const Size(1280, 2600), () async {
       expect(equityInfo(), isNot(contains('caixa')));
       expect(find.textContaining('Caixa negativo'), findsNothing);

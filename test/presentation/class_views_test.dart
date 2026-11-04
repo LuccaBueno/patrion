@@ -170,7 +170,6 @@ void main() {
     await app.run(
       location: '/carteira',
       size: const Size(1280, 1600),
-      overrides: [portfolioAt(f.t.wall.clock)],
       () async {
         await app.pumpUntil(find.byKey(const Key('class-views')));
         expect(find.byKey(const Key('view-crypto')), findsNothing);

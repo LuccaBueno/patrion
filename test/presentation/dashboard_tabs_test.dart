@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patrion/application/portfolio/portfolio_query.dart';
 import 'package:patrion/application/settings/appearance_service.dart';
 import 'package:patrion/core/time/local_date.dart';
 import 'package:patrion/data/repositories/device_settings_repository.dart';
@@ -15,7 +14,6 @@ import 'package:patrion/domain/portfolio/codes.dart';
 import 'package:patrion/domain/portfolio/entities.dart';
 import 'package:patrion/domain/portfolio/operation_type.dart';
 import 'package:patrion/presentation/format/formatters.dart';
-import 'package:patrion/presentation/providers.dart';
 
 import '../helpers/app_harness.dart';
 import '../helpers/fonts.dart';
@@ -103,16 +101,7 @@ void main() {
     await repo.saveIndicators(cdi);
   }
 
-  final today = [
-    portfolioQueryProvider.overrideWith(
-      (ref) => PortfolioQuery(
-        ref.watch(portfolioRepositoriesProvider),
-        market: ref.watch(marketRepositoryProvider),
-        preferences: ref.watch(portfolioPreferencesProvider),
-        wallClock: Clock.fixed(DateTime(2026, 10, 23, 21)),
-      ),
-    ),
-  ];
+  final today = Clock.fixed(DateTime(2026, 10, 23, 21));
 
   /// Textos visíveis dentro de [root] (Text e RichText).
   List<String> texts(WidgetTester tester, Finder root) => [
@@ -128,7 +117,7 @@ void main() {
       'endereço antigo do Desempenho abre a Rentabilidade', (tester) async {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
-    await app.run(location: '/desempenho', overrides: today, () async {
+    await app.run(location: '/desempenho', today: today, () async {
       await app.pumpUntil(find.byKey(const Key('returns-table')));
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
       expect(rail.selectedIndex, 0, reason: 'Painel selecionado');
@@ -168,7 +157,7 @@ void main() {
     final app = AppHarness(tester, f.t);
     // A área do app numa janela de 1280 × 800 (sem bordas e título).
     try {
-      await app.run(size: const Size(1264, 761), overrides: today, () async {
+      await app.run(size: const Size(1264, 761), today: today, () async {
         await app.pumpUntil(find.byKey(const Key('wealth-title')));
         final list = find.byKey(const Key('dashboard-list'));
         final position = tester
@@ -241,7 +230,7 @@ void main() {
       'lembrado', (tester) async {
     await tester.runAsync(seed);
     final app = AppHarness(tester, f.t);
-    await app.run(size: const Size(1280, 2000), overrides: today, () async {
+    await app.run(size: const Size(1280, 2000), today: today, () async {
       await app.pumpUntil(find.byKey(const Key('wealth-title')));
       final root = find.byType(MaterialApp);
       expect(texts(tester, root).where(money.hasMatch), isNotEmpty);
