@@ -345,3 +345,15 @@ Séries de nível: a carteira pelo índice do TWR (§3.2), cada ativo pelo preç
 
 - Câmbio de custo = média dos câmbios das compras, ponderada pelo valor (o câmbio da operação ou a PTAX do dia); câmbio de hoje = a última PTAX guardada.
 - Retorno na moeda = valor ÷ custo − 1; câmbio = câmbio de hoje ÷ câmbio de custo − 1; em reais = `(1 + na moeda) × (1 + câmbio) − 1` (§9). Exemplo (CASOS §7): US$ 1.000 → 1.100 e 5,00 → 5,50: +10%, +10% e +21%.
+
+## 14. Operação pelo valor total (`TradeTotal`, `lib/domain/portfolio/trade_total.dart`; M-13)
+
+Na compra ou venda de cripto, o usuário pode informar o valor total em vez do preço unitário.
+
+- **Compra:** o total pago já inclui os custos. `V = total − custos`.
+- **Venda:** o total recebido já descontou os custos. `V = total + custos`.
+- **Preço unitário** = `V ÷ quantidade`, com 12 casas, meio para o par.
+- `V` é gravado como valor bruto e é ele que entra nas posições (§1); o preço unitário é informativo. Assim, o total aplicado é exato, sem erro de arredondamento do preço.
+- `V` precisa ser maior que zero.
+- Exemplo: 0,02111111 BTC por R$ 8.500,00, sem custos: `V = 8.500,00`; preço unitário ≈ R$ 402.631,60.
+- Quantidades de cripto têm até 8 casas, gravadas e mostradas sem arredondar.

@@ -66,6 +66,7 @@ Rode de novo sempre que `assets/branding/patrion-simbolo.svg` mudar e faça comm
 
 Os testes de interface usam banco em memória (`test/helpers/test_database.dart`). Ao final de cada teste, o app precisa ser desmontado (`AppHarness.run` em `test/helpers/app_harness.dart`, ou `withApp` em `test/presentation/app_test.dart`): o Drift encerra os streams de consulta com um timer, e sem isso o fechamento do banco trava a execução dos testes.
 
+- Nos testes de tela, a data vem de `wallClockProvider`: o `AppHarness` usa o relógio de `TestDb` (17/10/2026), e `today:` escolhe outra data. Telas e serviços devem ler esse provedor, não `DateTime.now()`.
 - As consultas do Drift rodam fora do relógio falso do teste: depois de cada ação, use `AppHarness.settle()` (deixa o tempo real andar e redesenha).
 - Escritas feitas pelo teste depois de montar o app vão dentro de `tester.runAsync(...)`.
 - `test/helpers/portfolio_fixture.dart` cria serviços da carteira com uma instituição, duas contas e dois ativos.

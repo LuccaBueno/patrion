@@ -249,6 +249,7 @@ Por isso, a proposta é:
 **Binance (API pública de mercado)**
 
 - Candles diários sem chave, desde a listagem do par. BTCBRL desde 13/10/2020 (testado); BTCUSDT desde 2017.
+- Cotação sem chave (`/api/v3/ticker/24hr`) e consulta do par (`/api/v3/exchangeInfo`; par inexistente responde 400), testadas em 04/11/2026 (M-13).
 - Bom para o histórico de cripto além de 1 ano.
 - Os pesos de requisição são publicados na documentação. Preço da própria corretora, não índice.
 

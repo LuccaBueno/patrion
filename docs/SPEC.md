@@ -169,6 +169,14 @@ Data, ativo, quantidade, preço, valor bruto, custos, impostos, moeda, câmbio, 
 - Validações e detecção de duplicatas.
 - Editar uma operação antiga recalcula posições e métricas a partir dela.
 
+**Criptomoedas e tipos de custódia (ajuste M-13, DECISIONS D-61)**
+
+- O "Adicionar ativo" reconhece criptomoedas pelo código (Binance e CoinGecko) e cria o ativo no mercado Cripto, com cotação automática em reais e histórico diário desde a listagem do par. Classe Cripto só existe nos mercados Cripto ou Manual.
+- Quantidade de cripto com até 8 casas, sem arredondar ao salvar nem ao exibir, com a unidade da moeda ("0,02111111 BTC").
+- Em cripto, "Informar valor total pago" (ligado por padrão) calcula o preço unitário e mostra antes de salvar; na venda, o valor total recebido.
+- Ao criar um custodiante, o usuário escolhe o tipo: Corretora, Banco, Exchange de cripto, Autocustódia ou Outro. O tipo vem dos campos que já existem na instituição e na conta. Aparece na Carteira e no gráfico "Por custodiante" do Painel.
+- Cripto cadastrada no mercado errado mostra o motivo em "Dados do ativo" e o botão "Corrigir para cotação automática", que mantém as operações.
+
 **Adição rápida de ativos da B3 (ajuste M-01, DECISIONS D-42)**
 
 - Formulário curto "Adicionar ativo" (Carteira e Configurações → Corretoras e ativos): ticker (normalizado: maiúsculas; fracionário vira o lote padrão), quantidade, preço (unitário ou médio), data e **corretora / custodiante** (ajuste M-06, DECISIONS D-52: lista as corretoras usadas, com a última pré-selecionada; um nome novo cria a instituição e a conta "Principal" ao salvar, sem passar por cadastros).

@@ -776,3 +776,20 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - **Olho:** `Fmt.hideMoney` troca todo valor em dinheiro por "R$ ••••" (inclusive eixos e tooltips); percentuais e quantidades continuam. Preferência deste PC (`dev_settings.hide_values`, não vai no save: é privacidade da tela, não dado da carteira). Ao trocar, o app marca toda a árvore para redesenhar, sem perder o estado das telas. Na abertura, os valores ficam ocultos até a preferência ser lida (nunca aparece um valor que devia estar oculto). Campos de formulário não usam esse formato, então editar continua igual.
 - Alternativas: manter o Desempenho e só enxugar o Painel (o usuário espera os assuntos no Painel); ocultar com um widget por número (cada tela nova teria de lembrar); sincronizar o olho no save (um PC compartilhado poderia querer diferente).
 - Motivo: M-11 (`docs/MUDANCAS.md`); SPEC §8 e §16.
+
+### 2026-11-04 — D-61: Criptomoedas no cadastro rápido e tipos de custódia (M-13; complementa D-42 e D-52)
+
+- Causa do BTC sem cotação: o cadastro rápido gravava todo ativo com `market: B3`, e o cadastro completo, para onde ele mandava a cripto, abria com mercado B3 e não mudava ao escolher a classe Cripto. O BTC ficou como `market: B3`, `asset_class: crypto`. As fontes de cripto só atendem `CRYPTO`, as da B3 não conhecem o código, e `refreshQuotes` não avisa "sem fonte" para ativos da B3: a falha era silenciosa.
+- Decisão:
+  - **Reconhecimento:** código sem a forma da B3 (`Tickers.looksLikeB3`) vai primeiro às fontes de cripto; se elas não conhecem, vai às da B3. A Binance confirma o par contra o real (`exchangeInfo`) e a CoinGecko dá o nome. Moeda só na CoinGecko exige posição no ranking, porque há tokens sem valor com quase qualquer código. Offline, a classe Cripto pode ser escolhida à mão.
+  - **Regra nova:** classe Cripto só nos mercados Cripto ou Manual (`RegistryService._checkAsset`). O cadastro completo muda o mercado ao escolher a classe.
+  - **Cotação:** a Binance passa a ser fonte de cotação (`/api/v3/ticker/24hr`, sem chave, tipo intradiário), antes da CoinGecko, que continua como alternativa e atende moedas sem par em real. Essas ficam sem histórico diário.
+  - **Histórico:** cripto ignora o ano inicial da B3 e pede desde 01/01/2017 (a Binance começa na listagem do par); vai até ontem, porque todo dia é dia de negociação.
+  - **Valor total:** em cripto, "Informar valor total pago" vem ligado e pode ser desligado. O valor bruto exato é gravado em `grossAmount`, e o preço unitário calculado (12 casas) fica em `unitPrice`. Fórmula em `FORMULAS.md` §14.
+  - **Quantidade:** até 8 casas em cripto; o campo recusa mais casas em vez de arredondar.
+  - **Tipos de custódia:** `CustodyKind` não é gravado; sai do tipo da instituição e da conta, sem tabela nem migração. Autocustódia = instituição `other` + conta `crypto_wallet`. O tipo só é escolhido ao criar um custodiante; um existente não muda.
+  - **Sugestões:** em cripto, exchanges e autocustódia vêm primeiro e a corretora de ações preenchida pelo app é trocada; o que o usuário digitou fica.
+  - **Correção do ativo existente:** `RegistryService.fixCrypto` altera o mesmo ativo (mesmo id), sem tocar nas operações, e preserva o nome. O botão aparece em "Dados do ativo" quando `Asset.cryptoNeedsFix`.
+  - **Relógio das telas:** `wallClockProvider` alimenta o retrato da carteira, os serviços de mercado e a tela Fontes de dados; os testes usam uma data fixa.
+- Alternativas: corrigir o BTC por migração automática (mudaria dado do usuário sem ele ver); gravar o tipo de custódia em coluna nova (mudaria o schema sem necessidade); guardar só o preço unitário (o total deixaria de ser exato).
+- Motivo: M-13 (`docs/MUDANCAS.md`); regras 1, 2, 6, 8 e 10.

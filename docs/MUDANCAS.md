@@ -11,6 +11,7 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 | M-06 a M-09 | **Feitos** na versão 1.2.0 |
 | Fase 8 | **Feita** na versão 1.3.0 |
 | M-10 a M-12 | **Feitos** na versão 1.4.0 |
+| M-13 | **Feito** na versão 1.4.1 |
 
 ---
 
@@ -248,23 +249,45 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 
 ---
 
-## Prompt sugerido para enviar ao Claude Code (M-10 a M-12)
+### M-13 — Criptomoedas no "Adicionar ativo" (cotação, frações e valor pago)
+- **Onde:** Adicionar ativo (M-01), Comprar/Vender, Carteira, página do ativo
+- **Problema:** cadastrar Bitcoin pelo "Adicionar ativo" criou o ativo **BTC** com cotação **indisponível** e o gráfico vazio ("Nenhum fechamento guardado"). A quantidade aparece como "1 **cota**", e não fica claro se o campo preço é o preço de 1 BTC ou o valor pago. Quem compra cripto em geral compra frações (ex.: 0,02111111 BTC) e sabe o **valor total pago**, não o preço unitário.
+- **Mudança:**
+  1. O "Adicionar ativo" reconhece **criptomoedas** pelo código (BTC, ETH, SOL…), consultando a Binance/CoinGecko, e cria o ativo com mercado **CRYPTO**, moeda de cotação correta e **cotação automática** (Binance sem chave; CoinGecko se houver chave).
+  2. Ao salvar um ativo cripto, o app **baixa o histórico diário** (Binance, desde a listagem do par) para o gráfico da página do ativo (M-07/M-08).
+  3. **Quantidade com até 8 casas decimais** (satoshi), digitada com vírgula ou ponto ("0,02111111" ou "0.02111111"), sem arredondar ao salvar nem ao exibir.
+  4. No formulário de compra/venda de cripto, opção **"Informar valor total pago"**: o usuário digita a quantidade e o valor total em R$, e o app calcula o preço unitário (mostra o resultado antes de salvar).
+  5. Unidade correta na interface: "0,02111111 **BTC**" (não "cota"); para ações, "cotas" ou "ações"; para FIIs, "cotas".
+  6. **Tipos de custódia** no campo "Corretora / custodiante" (M-06), escolhidos ao criar um novo custodiante:
+     - **Corretora** (ex.: XP, Nubank, Inter);
+     - **Banco** (ex.: caixinhas, CDB do banco);
+     - **Exchange de cripto** (ex.: Binance, Mercado Bitcoin);
+     - **Autocustódia / carteira própria** (ex.: hardware wallet, carteira no celular), com nome livre ("Ledger", "Carteira própria");
+     - **Outro.**
+     O tipo aparece na Carteira (agrupar e filtrar por custodiante) e no gráfico "Por corretora" do Painel, que passa a se chamar **"Por custodiante"**. Para cripto, o formulário sugere primeiro exchanges e autocustódia; para ações e FIIs, corretoras. Usa os tipos que o banco já tem (`exchange`, `crypto_wallet`) sem tabela nova.
+  7. Se um ativo cripto já existir sem cotação (como o BTC atual), a tela "Dados do ativo" mostra o motivo e um botão **"Corrigir para cotação automática"**.
+- **Critério de pronto:** adicionar "btc" com quantidade 0,02111111, valor total de R$ 8.500,00 e custodiante novo "Carteira própria" (tipo autocustódia) cria o ativo BTC (cripto) fora de qualquer corretora, grava o preço unitário calculado, mostra a cotação atual em R$ e o gráfico com anos de histórico; a quantidade aparece como "0,02111111 BTC" em todas as telas; o BTC já cadastrado é corrigido pelo botão do item 7.
+- **Prioridade:** média
+- **Fase:** ajuste avulso
+
+---
+
+## Prompt sugerido para enviar ao Claude Code (M-13)
 
 Salve este arquivo em `C:\dev\patrion\docs\MUDANCAS.md`, abra uma conversa nova (`/clear`) e cole:
 
 ```
-Leia CLAUDE.md, docs/PROGRESS.md e docs/MUDANCAS.md. Implemente os itens
-pendentes M-10 a M-12, nesta ordem: M-10 (bug de piscar), M-12 (números
-e rótulos) e M-11 (Painel único com abas; Desempenho sai do menu).
+Leia CLAUDE.md, docs/PROGRESS.md e docs/MUDANCAS.md. Implemente o item
+M-13 (criptomoedas). Antes, descubra por que o BTC que eu cadastrei pelo
+"Adicionar ativo" ficou sem cotação e sem histórico, e corrija a causa.
 
-- Atualize SPEC §16 e DECISIONS.md com a nova organização das telas.
-- Faça commit e atualize o PROGRESS.md ao fim de cada item.
-- Inclua testes. Confira cada tela no app real em 1280 x 800, nos temas
-  claro e escuro, abrindo o executável e olhando a janela (não só
-  renderizando widgets). Se não conseguir capturar a janela, diga isso.
+- Atualize SPEC e DECISIONS.md se alguma regra mudar.
+- Inclua testes (inclusive quantidade 0,02111111 sem arredondamento) e
+  confira no app real em 1280 x 800.
+- Use data fixa nos testes que dependem de data.
 
-Ao final, rode format, analyze, test e build, atualize CHANGELOG (1.4.0) e
-faça push (se o push for bloqueado, me avise para eu rodar). Confirme que o
-CI ficou verde. Não crie tag nem Release. No relatório, inclua um roteiro
-para eu testar cada item.
+Ao final, rode format, analyze, test e build, atualize PROGRESS.md e
+CHANGELOG (1.4.1) e faça push (se for bloqueado, me avise para eu rodar).
+Confirme que o CI ficou verde. Não crie tag nem Release. No relatório,
+inclua um roteiro para eu testar.
 ```

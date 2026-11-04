@@ -4,6 +4,27 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.4.1] - 2026-11-04
+
+Criptomoedas com cotação automática e tipos de custódia (ajuste M-13).
+
+### Adicionado
+
+- **Criptomoedas no "Adicionar ativo":** digite BTC, ETH ou SOL e o app reconhece a moeda pela Binance e pela CoinGecko, com cotação automática em reais e histórico diário desde a listagem do par.
+- **Valor total pago:** em cripto, informe a quantidade e o total; o app calcula o preço unitário e mostra antes de salvar. Na venda, o valor total recebido.
+- **Tipos de custódia:** ao criar um custodiante, escolha Corretora, Banco, Exchange de cripto, Autocustódia ou Outro. Para cripto, exchanges e autocustódia vêm primeiro nas sugestões.
+- **"Corrigir para cotação automática"** em "Dados do ativo", para cripto já cadastrada no mercado errado. As operações não mudam.
+
+### Alterado
+
+- A quantidade de cripto aparece com a unidade ("0,02111111 BTC", não "cota"), com até 8 casas e sem arredondar.
+- O gráfico "Por corretora" do Painel e o agrupamento da Carteira passam a se chamar "Por custodiante", com o tipo.
+- A Binance passa a dar a cotação de cripto, sem chave. A CoinGecko continua como alternativa.
+
+### Corrigido
+
+- **Cripto ficava sem cotação e sem histórico:** o cadastro gravava o ativo no mercado B3, onde as fontes de cripto não atuam, sem nenhum aviso. Agora o mercado acompanha a classe, e o app não aceita cripto em mercado de bolsa.
+
 ## [1.4.0] - 2026-10-24
 
 Painel único com abas, números coerentes e o fim do piscar (ajustes M-10 a M-12).
