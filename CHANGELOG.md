@@ -4,6 +4,27 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.5.0] - 2026-11-06
+
+Atualizar o app por dentro, com um botão (ajuste M-14), e a correção do TWR.
+
+### Adicionado
+
+- **"Atualizar agora"** em Configurações > Sobre e no aviso do Painel: o app baixa a versão nova, confere a assinatura, faz um backup, fecha e reabre atualizado, mantendo os dados. Mostra a barra de progresso, deixa cancelar e, ao reabrir, diz "Atualizado para a versão X" com as notas.
+- **Assinatura das Releases:** o app só instala arquivos assinados com a chave do projeto (Ed25519). Um instalador alterado ou com assinatura inválida é recusado e a versão atual continua funcionando.
+- **"Baixar em segundo plano e instalar ao fechar o app"**, desligado por padrão.
+- A área "Atualizações" mostra a versão instalada e a mais recente.
+
+### Alterado
+
+- A versão portátil explica que não se atualiza sozinha e leva à página de download.
+- A partir desta versão, a Release tem o arquivo `SHA256SUMS.txt.minisig`.
+- **Da 1.4.1 para a 1.5.0, a atualização ainda é manual.** O botão funciona a partir da 1.5.0.
+
+### Corrigido
+
+- **"No ano +1.494,50%" no Painel:** numa compra a preço diferente da cotação do dia, a diferença virava retorno do capital que já estava na carteira. Uma compra grande numa carteira pequena multiplicava o TWR. Agora ela rende sobre o capital que entrou. O ganho total não muda; a rentabilidade (TWR) de quem tem compras assim muda.
+
 ## [1.4.1] - 2026-11-04
 
 Criptomoedas com cotação automática e tipos de custódia (ajuste M-13).

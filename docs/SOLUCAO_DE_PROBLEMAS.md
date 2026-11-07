@@ -24,6 +24,14 @@
 
 **"O GitHub limitou as consultas deste computador".** A API pública permite 60 consultas por hora por endereço IP (somadas a outros programas na mesma rede). Espere e tente mais tarde.
 
+**"A assinatura desta versão é inválida" ou "O instalador baixado não confere".** O app recusou o arquivo e nada foi instalado. Tente de novo; se repetir, não instale essa versão e confira a página de Releases.
+
+**"Esta versão não tem assinatura".** Só as versões a partir da 1.5.0 têm. Baixe pela página da Release.
+
+**"A atualização para a versão X não foi concluída".** A versão anterior voltou, com os dados como estavam. O motivo está em `%APPDATA%\Patrion\logs\atualizacao-<versão>.log`. Tente de novo ou baixe o instalador pela página da Release.
+
+**A versão nova não abre depois de atualizar.** Baixe o instalador da versão anterior na página de Releases e instale por cima: os dados continuam em `%APPDATA%\Patrion`. Se precisar voltar o banco, o backup `pre-atualizacao` está em `%APPDATA%\Patrion\backups`.
+
 **Ignorei uma versão por engano.** Configurações > Sobre > Atualizações > "Voltar a avisar".
 
 ## Dados

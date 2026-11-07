@@ -1,0 +1,4 @@
+# Pacote separado: não herda as regras do app (que dependem do flutter_lints).
+analyzer:
+  language:
+    strict-casts: true

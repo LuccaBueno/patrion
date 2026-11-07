@@ -5,6 +5,7 @@ import 'package:clock/clock.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,6 +32,10 @@ import '../application/settings/appearance_service.dart';
 import '../application/settings/lock_preferences.dart';
 import '../application/sync/save_service.dart';
 import '../application/updates/update_checker.dart';
+import '../application/updates/update_installer.dart';
+import '../core/config/app_info.dart';
+import '../core/config/launch_options.dart';
+import '../domain/backup/backup_metadata.dart';
 import '../core/config/app_paths.dart';
 import '../core/crypto/database_key.dart';
 import '../data/db/app_database.dart';
@@ -50,10 +55,14 @@ import '../infrastructure/market/market_http.dart';
 import '../infrastructure/market/market_setup.dart';
 import '../infrastructure/market/providers/b3_cotahist_provider.dart';
 import '../infrastructure/security/api_key_store.dart';
+import '../infrastructure/system/window_setup.dart';
+import '../infrastructure/updates/github_release_downloads.dart';
 import '../infrastructure/updates/github_release_feed.dart';
+import '../infrastructure/updates/minisign.dart';
 import 'services/file_dialogs.dart';
 import 'services/market_refresh.dart';
 import 'services/open_requests.dart';
+import 'services/update_task.dart';
 
 /// Ambiente montado na inicialização (`main.dart`). Os provedores abaixo são
 /// sobrescritos no `ProviderScope` raiz; nos testes, com um banco em memória.
@@ -410,6 +419,77 @@ final updateCheckerProvider = Provider<UpdateChecker>(
 final updateSnapshotProvider = StreamProvider<UpdateSnapshot>(
   (ref) => ref.watch(updateCheckerProvider).watch(),
 );
+
+/// Atualização por dentro do app (M-14; DECISIONS D-62).
+final updateInstallerProvider = Provider<UpdateInstaller>((ref) {
+  final env = ref.watch(appEnvironmentProvider);
+  final backups = ref.watch(backupServiceProvider);
+  return UpdateInstaller(
+    downloads: GitHubReleaseDownloads(appVersion: env.appVersion),
+    checkSignature: (message, signature) => Minisign.verify(
+      message: message,
+      signatureFile: signature,
+      publicKeys: AppInfo.updatePublicKeys,
+    ),
+    settings: ref.watch(deviceSettingsRepositoryProvider),
+    current: Version.parse(env.appVersion),
+    startInstaller: (installer, arguments) =>
+        Process.start(installer, arguments, mode: ProcessStartMode.detached),
+    backup: () => backups.createAutomatic(BackupReason.preUpdate),
+    repository: AppInfo.releasesRepository,
+    cacheDir: env.paths.cacheDir,
+    logsDir: env.paths.logsDir,
+    relaunchArguments: ref.watch(relaunchArgumentsProvider),
+    clock: ref.watch(wallClockProvider),
+  );
+});
+
+/// Parâmetros para o instalador reabrir este app, com as mesmas pastas
+/// (sobrescrito nos testes).
+final relaunchArgumentsProvider = Provider<List<String>>((ref) {
+  final options = LaunchOptions.parse(ref.watch(launchArgumentsProvider));
+  return [
+    '/RELAUNCH=${Platform.resolvedExecutable}',
+    if (options.dataDir case final dir?) '/DATADIR=$dir',
+    if (options.cacheDir case final dir?) '/CACHEDIR=$dir',
+  ];
+});
+
+/// Argumentos com que o app foi aberto (sobrescrito na inicialização).
+final launchArgumentsProvider = Provider<List<String>>((ref) => const []);
+
+/// Instalação com o instalador: a versão portátil e o build de
+/// desenvolvimento não têm o marcador e não atualizam por dentro.
+final selfUpdateAvailableProvider = Provider<bool>(
+  (ref) =>
+      File(p.join(p.dirname(Platform.resolvedExecutable), 'patrion.instalado'))
+          .existsSync(),
+);
+
+/// Fecha o banco e encerra o app (sobrescrito nos testes).
+final appQuitProvider = Provider<Future<void> Function()>((ref) {
+  final db = ref.watch(databaseProvider);
+  return () async {
+    await db.close();
+    exit(0);
+  };
+});
+
+/// Registra o que fazer antes de a janela fechar (sobrescrito nos testes).
+final beforeWindowClosesProvider =
+    Provider<Future<void> Function(Future<void> Function())>(
+      (ref) => runBeforeWindowCloses,
+    );
+
+final updateTaskProvider = NotifierProvider<UpdateTask, UpdateTaskState>(
+  UpdateTask.new,
+);
+
+/// Resultado da atualização pedida antes desta abertura.
+final updateOutcomeProvider =
+    AsyncNotifierProvider<UpdateOutcomeNotifier, UpdateOutcome?>(
+      UpdateOutcomeNotifier.new,
+    );
 
 /// Abre um endereço no navegador padrão (sobrescrito nos testes).
 final linkOpenerProvider = Provider<Future<bool> Function(Uri)>(

@@ -9,6 +9,7 @@ Como o Patrion é empacotado, publicado, instalado, atualizado e removido (SPEC 
 | `Patrion-X.Y.Z-instalador.exe` | Instalador do Inno Setup 6 |
 | `Patrion-X.Y.Z-portatil.zip` | Pasta `Patrion\` com o app e um `LEIA-ME.txt` |
 | `SHA256SUMS.txt` | Somas SHA-256 dos dois arquivos |
+| `SHA256SUMS.txt.minisig` | Assinatura das somas (só na Release, feita pelo workflow; D-62) |
 | Notas | Seção da versão no `CHANGELOG.md` + requisitos, instalação, atualização e desinstalação (`installer/RELEASE_TEMPLATE.md`) |
 
 **Avisos de terceiros:** `AVISOS_DE_TERCEIROS.txt` vai junto do app (instalador e ZIP). Os textos das licenças do SQLCipher (BSD-3) e do OpenSSL (Apache-2.0, embutido no `sqlcipher.dll`) ficam em `assets/licenses/` e aparecem em Configurações > Sobre > "Licenças de terceiros", junto das licenças do Flutter e dos pacotes Dart (que o Flutter reúne sozinho em `NOTICES.Z`).
@@ -51,11 +52,50 @@ O ZIP tem a pasta `Patrion\` com o app e um `LEIA-ME.txt`. Não instala nada: se
 - Consulta `https://api.github.com/repos/LuccaBueno/patrion/releases/latest` (ou `/releases`, com as versões de teste), sem token. A requisição leva só `User-Agent: Patrion/<versão>`; nada da carteira. O repositório fica só em `AppInfo.releasesRepository`.
 - Compara pelo SemVer (`pub_semver`). Uma versão mais nova aparece com as notas, a data e o botão "Abrir página de download" (só abre páginas do próprio repositório no GitHub); "Ignorar esta versão" tira o aviso do Painel até sair outra.
 - Sem internet, a consulta automática falha em silêncio e tenta na próxima abertura; "Verificar agora" mostra "Sem conexão".
-- **Não há atualização automática** (Fase 15, SPEC §19 e §21): o usuário baixa e executa o instalador.
+- **"Atualizar agora"** (M-14; DECISIONS D-62): em Sobre e no aviso do Painel, baixa, confere a assinatura e o SHA-256, faz um backup `pre-atualizacao`, instala em modo silencioso e reabre o app. O log do instalador fica em `logs\atualizacao-<versão>.log`. Opção "Baixar em segundo plano e instalar ao fechar o app" (desligada).
+- **Versão portátil e build de desenvolvimento:** sem o arquivo `patrion.instalado` ao lado do `.exe`, não há o botão; a tela explica e leva à página de download.
+- **Da 1.4.1 para a 1.5.0, a atualização é manual:** o atualizador só existe a partir da 1.5.0.
 
 ## Assinatura de código e SmartScreen
 
-O instalador e o app não são assinados. Na primeira execução o Windows SmartScreen mostra "O Windows protegeu o computador": clique em **Mais informações** e **Executar assim mesmo**. A assinatura exige certificado pago (opção futura). As somas SHA-256 detectam um download corrompido, mas, publicadas no mesmo lugar do arquivo, não protegem contra adulteração.
+O instalador e o app não têm certificado de assinatura de código (a assinatura das atualizações, abaixo, é outra coisa: só o app a confere). Na primeira execução o Windows SmartScreen mostra "O Windows protegeu o computador": clique em **Mais informações** e **Executar assim mesmo**. A assinatura exige certificado pago (opção futura). As somas SHA-256 sozinhas detectam um download corrompido, mas, publicadas no mesmo lugar do arquivo, não protegem contra adulteração.
+
+## Assinatura das atualizações
+
+O app só instala uma versão se o `SHA256SUMS.txt` tiver uma assinatura válida da chave embutida (DECISIONS D-62). Esta é a conferência que o botão "Atualizar agora" depende.
+
+### Configurar a chave (uma vez)
+
+1. Gere a chave, numa pasta **fora do repositório**. O comando imprime só a chave pública:
+
+   ```powershell
+   cd tool\signing; dart pub get; dart run bin\generate_key.dart C:\caminho\patrion-update-key.txt
+   ```
+
+2. Grave o segredo no ambiente `release` do GitHub:
+
+   ```powershell
+   Get-Content C:\caminho\patrion-update-key.txt -Raw | gh secret set PATRION_UPDATE_SIGNING_KEY --env release
+   ```
+
+3. Ponha a chave pública em `AppInfo.updatePublicKeys` (`lib/core/config/app_info.dart`).
+4. Guarde o arquivo da chave **fora do PC** (gerenciador de senhas ou pendrive criptografado), como a chave de recuperação, e apague-o do PC. O GitHub não deixa ler o segredo de volta.
+
+### Ambiente `release`
+
+Criado no repositório com aprovação manual e só para tags `v*`. Cada tag para no job `sign` até a aprovação em Actions.
+
+### Conferir uma Release por fora do app
+
+Com o [minisign](https://jedisct1.github.io/minisign/) e a chave pública de `AppInfo.updatePublicKeys`:
+
+```powershell
+minisign -Vm SHA256SUMS.txt -P <chave pública>
+```
+
+### Chave perdida ou vazada
+
+Gerar outra chave, publicar uma versão com a pública nova e instalá-la **manualmente** nos PCs. Os passos estão em DECISIONS D-62.
 
 ## Gerar uma Release
 
@@ -72,8 +112,9 @@ Gera `dist\` com o instalador, o ZIP, `SHA256SUMS.txt` e `RELEASE_NOTES.md`. Usa
 1. `CHANGELOG.md` com a seção `## [X.Y.Z] - AAAA-MM-DD` (as notas saem dela) e `version: X.Y.Z+N` no `pubspec.yaml` (um teste confere `AppInfo.version`).
 2. Commit, push e CI verde.
 3. `git tag vX.Y.Z` e `git push origin vX.Y.Z`.
-4. O workflow `Release` (`.github/workflows/release.yml`) confere a tag com o `pubspec.yaml`, roda formatação, análise e testes, instala o Inno Setup se preciso, gera os arquivos e cria a **Release em rascunho**. Tags com `-beta` ou `-rc` viram pré-lançamento.
-5. Revisar o rascunho no GitHub e publicar.
+4. O workflow `Release` (`.github/workflows/release.yml`) confere a tag com o `pubspec.yaml`, roda formatação, análise e testes, instala o Inno Setup se preciso e gera os arquivos.
+5. Aprovar o job `sign` em Actions (ambiente `release`). Ele assina as somas e cria a **Release em rascunho**. Tags com `-beta` ou `-rc` viram pré-lançamento.
+6. Revisar o rascunho no GitHub e publicar.
 
 "Run workflow" no workflow `Release` faz um ensaio: gera os arquivos e guarda como artefato do workflow por 7 dias, sem criar Release.
 

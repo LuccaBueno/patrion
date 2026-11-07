@@ -50,6 +50,13 @@ jobs:
 
       - name: Análise
         run: flutter analyze
+      - name: Análise da ferramenta de assinatura
+        working-directory: tool/signing
+        shell: pwsh
+        run: |
+          dart pub get --enforce-lockfile
+          if ($LASTEXITCODE -ne 0) { throw 'pub get falhou.' }
+          dart analyze --fatal-infos
 
       - name: Testes
         run: flutter test --timeout 2m

@@ -112,4 +112,5 @@ flutter run -d windows
 flutter build windows --release
 powershell -ExecutionPolicy Bypass -File tool\release\build_release.ps1   # instalador e ZIP em dist\
 powershell -ExecutionPolicy Bypass -File tool\release\test_install.ps1    # teste de instalação (docs/DISTRIBUICAO.md)
+cd tool\signing; dart pub get; dart analyze --fatal-infos                  # pacote de assinatura (DECISIONS D-62)
 ```

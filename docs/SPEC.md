@@ -791,9 +791,9 @@ Sem assinatura, o Windows SmartScreen mostra um aviso na instalação; isso deve
 
 Atenção: Releases de repositório privado não podem ser consultadas sem autenticação. A estratégia é decidida em `DECISIONS.md`.
 
-### Atualização automática (v2)
+### Atualização pelo app (M-14, versão 1.5.0; DECISIONS D-62)
 
-Só pode ser implementada com:
+Exigências, todas atendidas:
 
 - verificação de integridade e autenticidade;
 - preservação dos dados;
@@ -801,6 +801,15 @@ Só pode ser implementada com:
 - modelo de confiança documentado.
 
 Um hash publicado no mesmo lugar do arquivo não protege contra adulteração.
+
+Como funciona:
+
+- **Assinatura própria:** o workflow de release assina o `SHA256SUMS.txt` (Ed25519, formato minisign) num job separado, com aprovação manual no ambiente `release`. A chave privada fica só nos segredos do GitHub e numa cópia do dono fora do PC; a pública vai embutida no app.
+- **"Atualizar agora"** (Configurações > Sobre e aviso do Painel): baixa as somas e a assinatura, confere a assinatura, exige a linha do instalador da versão, baixa o instalador com barra de progresso e cancelar, confere o SHA-256, faz um backup `pre-atualizacao`, fecha o banco e o app, instala em modo silencioso, por usuário, e reabre o app. Na abertura, mostra "Atualizado para a versão X" com as notas.
+- **Falhas:** sem internet, download interrompido, assinatura inválida ou hash errado deixam a versão atual aberta, com mensagem clara, e nada fica no disco. Se o instalador falhar, ele mesmo reabre a versão anterior, que avisa e mostra o log. Se a versão nova não abrir, a orientação é reinstalar a anterior pela página de Releases; o backup continua disponível.
+- **Opções:** verificar ao abrir (ligado), versões de teste (desligado) e baixar em segundo plano e instalar ao fechar (desligado).
+- **Versão portátil:** não se atualiza; o botão leva à página de download.
+- A F15 continua com o que sobrou: instalação sem nenhum clique.
 
 ### Testes de distribuição
 
@@ -1034,6 +1043,6 @@ Exportação e alertas de §17.
 
 §13.8.
 
-**F15. Atualização automática**
+**F15. Atualização automática** *(a atualização por um clique foi antecipada no M-14, versão 1.5.0)*
 
 §19.

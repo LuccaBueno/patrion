@@ -1,6 +1,7 @@
-# Release (SPEC §19; DECISIONS D-38). Na tag vX.Y.Z: verificação completa,
-# instalador, ZIP portátil, somas SHA-256 e Release em RASCUNHO no GitHub,
-# para aprovação manual. Tags com -beta ou -rc viram pré-lançamento.
+# Release (SPEC §19; DECISIONS D-38 e D-62). Na tag vX.Y.Z: verificação
+# completa, instalador, ZIP portátil e somas SHA-256; depois, num job separado
+# que espera a aprovação do ambiente "release", assinatura das somas e Release
+# em RASCUNHO no GitHub. Tags com -beta ou -rc viram pré-lançamento.
 #
 # "Run workflow" (workflow_dispatch) faz um ensaio: gera os mesmos arquivos e
 # os guarda como artefato do workflow, sem criar Release.
@@ -19,12 +20,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Instalador, ZIP e Release (rascunho)
+  build:
+    name: Instalador e ZIP
     runs-on: windows-latest
     timeout-minutes: 60
-    permissions:
-      contents: write # criar a Release em rascunho
     steps:
       - name: Baixar o código
         uses: actions/checkout@v7
@@ -79,8 +78,60 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: Criar a Release em rascunho
+      - name: Guardar os arquivos para assinar
         if: github.ref_type == 'tag'
+        uses: actions/upload-artifact@v7
+        with:
+          name: patrion-release
+          path: dist/
+          retention-days: 1
+
+  # A chave privada só existe aqui, e só no passo que assina. Este job não
+  # roda o build nem instala as dependências do app (DECISIONS D-62).
+  sign:
+    name: Assinatura e Release (rascunho)
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    environment: release
+    permissions:
+      contents: write # criar a Release em rascunho
+    steps:
+      - name: Baixar a ferramenta de assinatura
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            tool/signing
+            lib/core/config/app_info.dart
+          sparse-checkout-cone-mode: false
+
+      - name: Instalar o Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.13.5
+
+      - name: Dependências da assinatura
+        working-directory: tool/signing
+        run: dart pub get --enforce-lockfile
+
+      - name: Baixar os arquivos da Release
+        uses: actions/download-artifact@v7
+        with:
+          name: patrion-release
+          path: dist
+
+      - name: Assinar as somas
+        working-directory: tool/signing
+        shell: pwsh
+        env:
+          PATRION_UPDATE_SIGNING_KEY: ${{ secrets.PATRION_UPDATE_SIGNING_KEY }}
+        run: |
+          dart run bin/sign_file.dart ../../dist/SHA256SUMS.txt ../../lib/core/config/app_info.dart 'patrion ${{ github.ref_name }}'
+          if ($LASTEXITCODE -ne 0) { throw 'A assinatura falhou.' }
+
+      - name: Criar a Release em rascunho
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,4 +143,5 @@ jobs:
           gh release create $tag @flags `
             "dist/Patrion-$version-instalador.exe" `
             "dist/Patrion-$version-portatil.zip" `
-            'dist/SHA256SUMS.txt'
+            'dist/SHA256SUMS.txt' `
+            'dist/SHA256SUMS.txt.minisig'

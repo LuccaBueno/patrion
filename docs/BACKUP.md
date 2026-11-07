@@ -31,6 +31,7 @@ O nome traz a data e hora **UTC** (ordenável), o motivo, a versão do schema e 
 | `pre-restauracao` | antes de restaurar um backup | 10 mais recentes |
 | `pre-bloqueio` | antes de ativar o bloqueio (banco ainda sem criptografia) | 10 mais recentes |
 | `pre-desbloqueio` | antes de desativar o bloqueio (criptografado) | 10 mais recentes |
+| `pre-atualizacao` | antes de instalar uma versão nova pelo "Atualizar agora" | 10 mais recentes |
 
 ## Como o backup é feito
 

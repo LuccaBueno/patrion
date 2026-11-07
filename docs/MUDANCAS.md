@@ -12,6 +12,7 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 | Fase 8 | **Feita** na versão 1.3.0 |
 | M-10 a M-12 | **Feitos** na versão 1.4.0 |
 | M-13 | **Feito** na versão 1.4.1 |
+| M-14 | **Pendente** |
 
 ---
 
@@ -272,22 +273,49 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 
 ---
 
-## Prompt sugerido para enviar ao Claude Code (M-13)
+### M-14 — Atualizar o app por dentro, com um botão (sem sair do app)
+- **Onde:** Configurações → Sobre (nova área "Atualizações") e aviso de versão nova no Painel
+- **Problema:** hoje o app só avisa que há uma versão nova e abre a página do GitHub; o usuário precisa baixar o instalador, fechar o app, instalar e reabrir.
+- **Mudança:** (antecipa a atualização automática prevista na F15, seguindo as regras de segurança da SPEC §19)
+  1. **Área "Atualizações"** em Configurações → Sobre: versão instalada, versão mais recente, data da verificação, notas da versão nova e os botões **"Verificar agora"** e **"Atualizar agora"**. O aviso do Painel ganha o mesmo botão "Atualizar agora".
+  2. **"Atualizar agora":**
+     - baixa o instalador da Release dentro do app, com barra de progresso e opção de cancelar;
+     - **verifica o arquivo antes de executar** (ver item 4); se a verificação falhar, apaga o arquivo e não instala;
+     - faz um **backup automático** do banco antes de instalar;
+     - fecha o banco com segurança, fecha o app, roda o instalador em modo silencioso (Inno Setup `/SILENT`, por usuário, sem pedir administrador) e **reabre o app sozinho** na versão nova;
+     - na reabertura, mostra "Atualizado para a versão X" com as notas.
+  3. **Opções** (Configurações → Sobre): "Verificar atualizações automaticamente" (ligado) e "Baixar em segundo plano e instalar ao fechar o app" (desligado por padrão). Pré-lançamentos continuam ignorados, salvo escolha explícita.
+  4. **Segurança (obrigatório):**
+     - download só por HTTPS, do repositório configurado no app;
+     - **assinatura digital própria** dos arquivos da Release: o workflow de release assina o `SHA256SUMS.txt` com uma chave privada (Ed25519, por exemplo no formato minisign) guardada só nos **segredos do GitHub**; a **chave pública vai embutida no app**. O app confere a assinatura e depois o SHA-256 do instalador. Um hash publicado sozinho, no mesmo lugar do arquivo, não basta (SPEC §19);
+     - registrar em DECISIONS.md o modelo de confiança e o procedimento se a chave for perdida ou vazar (gerar nova chave e publicar uma versão manual com a chave pública nova);
+     - instruir o usuário a guardar uma cópia da chave privada fora do PC (como a chave de recuperação).
+  5. **Falhas:** sem internet, download interrompido, assinatura inválida ou instalador com erro deixam a versão atual funcionando, com mensagem clara. Se a versão nova não abrir, o app orienta a reinstalar a anterior pela página de Releases; o backup do item 2 continua disponível.
+  6. Funciona também na **versão portátil**? Não: na portátil, o botão leva à página de download (o ZIP não tem instalador). A tela explica isso.
+- **Critério de pronto:** com a versão X instalada e uma Release X+1 publicada e assinada, clicar em "Atualizar agora" baixa, verifica, faz backup, instala e reabre o app na X+1 sem nenhuma ação manual, mantendo todos os dados; um instalador com um byte alterado ou com assinatura inválida é recusado; testado de verdade entre duas versões publicadas (por exemplo, uma pré-lançamento de teste).
+- **Prioridade:** média
+- **Fase:** ajuste avulso (antecipa parte da F15)
+
+---
+
+## Prompt sugerido para enviar ao Claude Code (M-14)
 
 Salve este arquivo em `C:\dev\patrion\docs\MUDANCAS.md`, abra uma conversa nova (`/clear`) e cole:
 
 ```
 Leia CLAUDE.md, docs/PROGRESS.md e docs/MUDANCAS.md. Implemente o item
-M-13 (criptomoedas). Antes, descubra por que o BTC que eu cadastrei pelo
-"Adicionar ativo" ficou sem cotação e sem histórico, e corrija a causa.
+M-14 (atualizar o app por dentro). Antes de escrever código, PARE e me
+mostre: o modelo de assinatura escolhido, onde fica a chave privada, o que
+eu preciso guardar e o passo a passo de como você vai testar a atualização
+de uma versão para outra de verdade. Só continue depois da minha aprovação.
 
-- Atualize SPEC e DECISIONS.md se alguma regra mudar.
-- Inclua testes (inclusive quantidade 0,02111111 sem arredondamento) e
-  confira no app real em 1280 x 800.
-- Use data fixa nos testes que dependem de data.
+- Registre o modelo de confiança em DECISIONS.md e atualize a SPEC §19.
+- Nunca coloque a chave privada no repositório nem no log.
+- Inclua testes (assinatura inválida, hash errado, download interrompido,
+  sem internet) e use data fixa nos testes que dependem de data.
 
 Ao final, rode format, analyze, test e build, atualize PROGRESS.md e
-CHANGELOG (1.4.1) e faça push (se for bloqueado, me avise para eu rodar).
-Confirme que o CI ficou verde. Não crie tag nem Release. No relatório,
-inclua um roteiro para eu testar.
+CHANGELOG (1.5.0) e faça push (se for bloqueado, me avise para eu rodar).
+Confirme que o CI ficou verde. Não crie tag nem Release de versão estável
+sem eu pedir. No relatório, inclua um roteiro para eu testar.
 ```

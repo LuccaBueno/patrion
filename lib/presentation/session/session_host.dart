@@ -23,6 +23,7 @@ class SessionHost extends StatelessWidget {
     required this.manager,
     this.logsDir,
     this.openRequests,
+    this.launchArguments = const [],
     super.key,
   });
 
@@ -31,6 +32,9 @@ class SessionHost extends StatelessWidget {
 
   /// Arquivos recebidos para abrir; esperam o desbloqueio, se houver.
   final OpenRequests? openRequests;
+
+  /// Argumentos da linha de comando, para reabrir igual depois de atualizar.
+  final List<String> launchArguments;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +59,7 @@ class SessionHost extends StatelessWidget {
         return ProviderScope(
           key: ValueKey(manager.generation),
           overrides: [
+            launchArgumentsProvider.overrideWithValue(launchArguments),
             appEnvironmentProvider.overrideWithValue(
               AppEnvironment(
                 paths: session.paths,
