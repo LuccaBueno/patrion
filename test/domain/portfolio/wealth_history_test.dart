@@ -222,6 +222,209 @@ void main() {
     expect(s.points.last.value, d('11550'));
   });
 
+  group('TWR com compra a preço diferente do valor do dia', () {
+    const btc = Asset(
+      id: 'btc',
+      symbol: 'BTC',
+      market: Market.crypto,
+      assetClass: AssetClass.crypto,
+      name: 'Bitcoin',
+      currency: 'BRL',
+      country: 'BR',
+      priceSource: PriceSource.market,
+    );
+    final prices = {
+      'petr': closes({
+        '2026-01-05': '10',
+        '2026-01-06': '11',
+        '2026-01-07': '12',
+        '2026-01-08': '12',
+        '2026-01-09': '12',
+      }),
+      'btc': closes({
+        '2026-01-05': '400000',
+        '2026-01-06': '410000',
+        '2026-01-07': '430000',
+        '2026-01-08': '430000',
+        '2026-01-09': '473000',
+      }),
+    };
+    WealthSeries twoAssets(
+      List<Operation> ops, {
+      Map<String, Decimal>? finalValues,
+      String today = '2026-01-09',
+    }) => build(
+      ops,
+      prices: prices,
+      assets: {'petr': _asset, 'btc': btc},
+      finalValues: finalValues,
+      today: today,
+    );
+    Decimal? twr(WealthSeries s) =>
+        s.twrBetween(day('2026-01-05'), day('2026-01-09'));
+
+    test('compra grande abaixo do mercado numa carteira pequena: a diferença '
+        'rende sobre o capital que entrou, não sobre o da véspera', () {
+      final s = twoAssets([
+        op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+        op(
+          OperationType.buy,
+          '2026-01-07',
+          asset: 'btc',
+          qty: '1',
+          price: '350000',
+        ),
+      ]);
+      final day7 = s.points[2];
+      expect(day7.value, d('431200'));
+      expect(day7.flow, d('350000'));
+      expect(day7.entryGain, d('80000'));
+      // Antes: (431.200 − 350.000) ÷ 1.100 = 73,8× só nesse dia. Agora: a
+      // carteira da véspera rende 1.200 ÷ 1.100, e os 80.000 rendem sobre
+      // os 351.200 aplicados: 431.200 ÷ 351.200.
+      final factor = s.twrIndex()[2].$2;
+      expect(factor.toDouble(), closeTo(1.2 * 431200 / 351200, 1e-12));
+      // O dia 9: 1.200 + 473.000 sobre 431.200.
+      expect(
+        twr(s)!.toDouble(),
+        closeTo(1.2 * 431200 / 351200 * 474200 / 431200 - 1, 1e-12),
+      );
+    });
+
+    test('compra acima do mercado é perda sobre o capital que entrou', () {
+      final s = twoAssets([
+        op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+        op(
+          OperationType.buy,
+          '2026-01-07',
+          asset: 'btc',
+          qty: '1',
+          price: '500000',
+        ),
+      ], today: '2026-01-07');
+      expect(s.points.last.entryGain, d('-70000'));
+      expect(
+        s.twrIndex().last.$2.toDouble(),
+        closeTo(1.2 * 431200 / 501200, 1e-12),
+      );
+    });
+
+    test('compra pelo fechamento continua sem diferença', () {
+      final s = twoAssets([
+        op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+        op(
+          OperationType.buy,
+          '2026-01-07',
+          asset: 'btc',
+          qty: '1',
+          price: '430000',
+        ),
+      ], today: '2026-01-07');
+      expect(s.points.last.entryGain, isNull);
+      expect(s.twrIndex().last.$2, d('1.2'));
+    });
+
+    test('compra no último dia usa o valor da Carteira', () {
+      final s = twoAssets(
+        [
+          op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+          op(
+            OperationType.buy,
+            '2026-01-07',
+            asset: 'btc',
+            qty: '1',
+            price: '350000',
+          ),
+        ],
+        finalValues: {'petr': d('1200'), 'btc': d('440000')},
+        today: '2026-01-07',
+      );
+      expect(s.points.last.entryGain, d('90000'));
+      expect(
+        s.twrIndex().last.$2.toDouble(),
+        closeTo(1.2 * 441200 / 351200, 1e-12),
+      );
+    });
+
+    test('custos da compra pesam sobre o capital que entrou', () {
+      final s = twoAssets([
+        op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+        op(
+          OperationType.buy,
+          '2026-01-07',
+          asset: 'btc',
+          qty: '1',
+          price: '430000',
+          fees: '1000',
+        ),
+      ], today: '2026-01-07');
+      expect(s.points.last.entryGain, d('-1000'));
+      expect(
+        s.twrIndex().last.$2.toDouble(),
+        closeTo(1.2 * 431200 / 432200, 1e-12),
+      );
+    });
+
+    test('só a quantidade líquida comprada no dia conta', () {
+      final s = twoAssets([
+        op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+        // Compra 100 a 8 e vende 50 a 12, com o fechamento a 12.
+        op(OperationType.buy, '2026-01-07', qty: '100', price: '8'),
+        op(OperationType.sell, '2026-01-07', qty: '50', price: '12'),
+      ], today: '2026-01-07');
+      // Sobram 50 das compradas, com custo 400 e valor 600.
+      expect(s.points.last.entryGain, d('200'));
+    });
+
+    test('venda a preço diferente do fechamento não muda: o capital da '
+        'véspera já inclui o ativo vendido', () {
+      final s = twoAssets([
+        op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+        op(OperationType.sell, '2026-01-07', qty: '100', price: '15'),
+      ], today: '2026-01-07');
+      expect(s.points.last.entryGain, isNull);
+      expect(s.twrIndex().last.$2.toDouble(), closeTo(1.5, 1e-12));
+    });
+
+    test('saldo informado não tem preço unitário: fica como estava', () {
+      const cdb = Asset(
+        id: 'cdb',
+        symbol: 'CDB',
+        market: Market.manual,
+        assetClass: AssetClass.fixedIncome,
+        name: 'CDB',
+        currency: 'BRL',
+        country: 'BR',
+      );
+      final s = build(
+        [
+          op(OperationType.buy, '2026-01-05', qty: '100', price: '10'),
+          op(
+            OperationType.buy,
+            '2026-01-07',
+            asset: 'cdb',
+            qty: '1',
+            price: '1000',
+          ),
+        ],
+        assets: {'petr': _asset, 'cdb': cdb},
+        valuations: [
+          ManualValuation(
+            id: 'v',
+            accountId: 'conta',
+            assetId: 'cdb',
+            kind: ValuationKind.balance,
+            refDate: day('2026-01-07'),
+            value: d('1100'),
+            currency: 'BRL',
+          ),
+        ],
+        today: '2026-01-07',
+      );
+      expect(s.points.last.entryGain, isNull);
+    });
+  });
+
   group('índices', () {
     IndicatorPoint ip(IndicatorSeries s, String date, String v) =>
         IndicatorPoint(

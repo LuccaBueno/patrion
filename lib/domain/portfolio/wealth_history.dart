@@ -23,6 +23,7 @@ class WealthPoint {
     required this.buys,
     required this.sells,
     this.missing = const {},
+    this.entryGain,
   });
 
   final LocalDate date;
@@ -46,6 +47,11 @@ class WealthPoint {
 
   /// Ativos com posição e sem preço nesse dia (fora do valor e do aplicado).
   final Set<String> missing;
+
+  /// Diferença entre o valor de fim do dia do que foi comprado hoje e o
+  /// custo da compra (preço diferente da cotação, custos); nula sem compra
+  /// ou sem diferença. Não é retorno do capital da véspera (TWR).
+  final Decimal? entryGain;
 
   Decimal get gain => value - invested;
 
@@ -77,7 +83,10 @@ class WealthSeries {
 
   /// Índice do TWR (1 no primeiro ponto). Os fluxos contam no fim do dia;
   /// os proventos saem como retirada (entram no retorno). Dia que começa
-  /// sem capital (véspera vazia) não tem retorno: o fator fica igual.
+  /// sem capital (véspera vazia) não tem retorno: o fator fica igual. A
+  /// diferença entre o custo de uma compra e o valor dela no fim do dia
+  /// ([WealthPoint.entryGain]) rende sobre o capital depois do aporte, nunca
+  /// sobre o da véspera.
   List<(LocalDate, Decimal)> twrIndex() => _twr;
 
   late final List<(LocalDate, Decimal)> _twr = _computeTwr();
@@ -88,13 +97,21 @@ class WealthSeries {
     Decimal? previousAfter;
     for (final p in points) {
       final after = p.value;
-      // Valor antes do fluxo: o fim do dia sem o dinheiro que entrou, mais
+      final entryGain = p.entryGain ?? Decimal.zero;
+      // Valor antes do fluxo: o fim do dia sem o que entrou (a mercado), mais
       // os proventos que saíram.
-      final before = after - p.flow + p.income;
+      final before = after - p.flow - entryGain + p.income;
       if (previousAfter != null && previousAfter > Decimal.zero) {
         factor = DecimalMath.rescale(
           factor * DecimalMath.divide(before, previousAfter),
         );
+        // Capital logo depois do aporte, com a compra ainda pelo custo.
+        final entered = after - entryGain;
+        if (entryGain != Decimal.zero && entered > Decimal.zero) {
+          factor = DecimalMath.rescale(
+            factor * DecimalMath.divide(after, entered),
+          );
+        }
       }
       result.add((p.date, factor));
       previousAfter = after;
@@ -226,6 +243,9 @@ abstract final class WealthHistory {
       final incomeOf = <String, Decimal>{};
       final buysOf = <String, Decimal>{};
       final sellsOf = <String, Decimal>{};
+      final boughtQty = <String, Decimal>{};
+      final boughtCost = <String, Decimal>{};
+      final soldQty = <String, Decimal>{};
       for (final o in todayOps) {
         final id = o.assetId;
         if (id == null || excluded.contains(id)) continue;
@@ -240,10 +260,17 @@ abstract final class WealthHistory {
             final v = amount + charges;
             tradeFlow[id] = (tradeFlow[id] ?? Decimal.zero) + v;
             buysOf[id] = (buysOf[id] ?? Decimal.zero) + v;
+            if (o.quantity case final q?) {
+              boughtQty[id] = (boughtQty[id] ?? Decimal.zero) + q;
+              boughtCost[id] = (boughtCost[id] ?? Decimal.zero) + v;
+            }
           case _Flow.redemption:
             final v = amount - charges;
             tradeFlow[id] = (tradeFlow[id] ?? Decimal.zero) - v;
             sellsOf[id] = (sellsOf[id] ?? Decimal.zero) + v;
+            if (o.quantity case final q?) {
+              soldQty[id] = (soldQty[id] ?? Decimal.zero) + q;
+            }
           case _Flow.income:
             incomeOf[id] = (incomeOf[id] ?? Decimal.zero) + amount - charges;
           case _Flow.none:
@@ -257,6 +284,9 @@ abstract final class WealthHistory {
       // Valor de cada ativo no fim do dia.
       final perAsset = <String, Decimal>{};
       final missing = <String>{};
+      // Ativos avaliados por quantidade × preço (saldo informado não tem
+      // preço unitário: a parte comprada não dá para separar).
+      final unitValued = <String>{};
       final held = {
         for (final p in state.positions)
           if (p.isOpen && !excluded.contains(p.assetId)) p.assetId,
@@ -268,6 +298,9 @@ abstract final class WealthHistory {
             missing.add(id);
           } else {
             perAsset[id] = v;
+            if (assets[id]?.priceSource == PriceSource.market) {
+              unitValued.add(id);
+            }
           }
         }
       } else {
@@ -294,6 +327,7 @@ abstract final class WealthHistory {
           asOf: d,
           marketPrices: prices,
         );
+        final balanced = <String>{};
         for (final v in valued) {
           final id = v.position.assetId;
           if (!held.contains(id)) continue;
@@ -304,13 +338,37 @@ abstract final class WealthHistory {
             continue;
           }
           perAsset[id] = (perAsset[id] ?? Decimal.zero) + mv * rate;
+          if (v.position.isOpen) {
+            (v.unitPrice == null ? balanced : unitValued).add(id);
+          }
         }
+        unitValued.removeAll(balanced);
         // Uma conta sem preço deixa o ativo inteiro sem valor no dia.
         missing.forEach(perAsset.remove);
       }
 
+      // Valor de fim do dia da quantidade líquida comprada hoje menos o que
+      // ela custou.
+      Decimal entryGainOf(String id) {
+        final bought = boughtQty[id];
+        final value = perAsset[id];
+        if (bought == null || value == null || !unitValued.contains(id)) {
+          return Decimal.zero;
+        }
+        var heldQty = Decimal.zero;
+        for (final p in state.positions) {
+          if (p.assetId == id) heldQty += p.quantity;
+        }
+        var net = bought - (soldQty[id] ?? Decimal.zero);
+        if (net > heldQty) net = heldQty;
+        if (net <= Decimal.zero) return Decimal.zero;
+        return DecimalMath.divide(value * net, heldQty) -
+            DecimalMath.divide(boughtCost[id]! * net, bought);
+      }
+
       // Entradas e saídas da avaliação, e o fluxo do TWR.
       var flow = Decimal.zero;
+      var entryGain = Decimal.zero;
       var income = Decimal.zero;
       var buys = Decimal.zero;
       var sells = Decimal.zero;
@@ -324,6 +382,7 @@ abstract final class WealthHistory {
             entries.putIfAbsent(id, () => d);
           } else {
             flow += tradeFlow[id] ?? Decimal.zero;
+            entryGain += entryGainOf(id);
           }
           inValuation.add(id);
           everIn.add(id);
@@ -337,6 +396,7 @@ abstract final class WealthHistory {
           inValuation.remove(id);
         } else if (wasIn) {
           flow += tradeFlow[id] ?? Decimal.zero;
+          entryGain += entryGainOf(id);
         }
         if (everIn.contains(id)) {
           income += incomeOf[id] ?? Decimal.zero;
@@ -365,6 +425,7 @@ abstract final class WealthHistory {
           buys: buys,
           sells: sells,
           missing: missing,
+          entryGain: entryGain == Decimal.zero ? null : entryGain,
         ),
       );
     }
