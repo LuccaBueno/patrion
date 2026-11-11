@@ -4,6 +4,10 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+## [1.4.2] - 2026-11-10
+
+Correção do TWR e link fixo para baixar a versão mais recente (ajuste M-15).
+
 ### Adicionado
 
 - **Link fixo de download:** cada Release traz também `Patrion-instalador.exe`, e o link no topo do README sempre baixa a versão estável mais recente (ajuste M-15).

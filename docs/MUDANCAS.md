@@ -13,7 +13,7 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 | M-10 a M-12 | **Feitos** na versão 1.4.0 |
 | M-13 | **Feito** na versão 1.4.1 |
 | M-14 | **Cancelado** (decisão do usuário em 10/11/2026: sem chave de assinatura; o app continua só avisando e o usuário instala por cima) |
-| M-15 | **Feito** (sem versão lançada ainda) |
+| M-15 | **Feito** na versão 1.4.2 |
 
 ---
 
