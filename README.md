@@ -1,5 +1,19 @@
 # Patrion — Investimentos e Patrimônio
 
+## Baixar
+
+### [⬇ Baixar o Patrion para Windows](https://github.com/LuccaBueno/patrion/releases/latest/download/Patrion-instalador.exe)
+
+Windows 10 ou 11, 64 bits. O link sempre baixa a versão estável mais recente.
+
+1. Clique no link acima e salve o `Patrion-instalador.exe`.
+2. Abra o arquivo. O Windows pode mostrar "O Windows protegeu o computador", porque o instalador não tem certificado pago: clique em **Mais informações** → **Executar assim mesmo**.
+3. Siga o instalador (não pede administrador) e abra o Patrion pelo Menu Iniciar. Para atualizar, quando o app avisar de uma versão nova, feche o app e instale a nova por cima pelo mesmo link: os dados ficam onde estão.
+
+Outras versões e o ZIP portátil ficam em [Releases](https://github.com/LuccaBueno/patrion/releases).
+
+## Sobre
+
 Aplicativo desktop pessoal para Windows 10 e 11 que registra, acompanha, analisa e simula investimentos. Os dados ficam no computador e são sincronizados entre PCs por arquivo (`.invsave`), sem servidor.
 
 O app não é corretora, não executa ordens e não faz recomendações de investimento. Simulações e projeções são sempre hipotéticas.

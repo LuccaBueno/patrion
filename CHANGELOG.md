@@ -4,6 +4,14 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Link fixo de download:** cada Release traz também `Patrion-instalador.exe`, e o link no topo do README sempre baixa a versão estável mais recente (ajuste M-15).
+
+### Corrigido
+
+- **"No ano +1.494,50%" no Painel:** numa compra a preço diferente da cotação do dia, a diferença virava retorno do capital que já estava na carteira. Uma compra grande numa carteira pequena multiplicava o TWR. Agora ela rende sobre o capital que entrou. O ganho total não muda; a rentabilidade (TWR) de quem tem compras assim muda.
+
 ## [1.4.1] - 2026-11-04
 
 Criptomoedas com cotação automática e tipos de custódia (ajuste M-13).

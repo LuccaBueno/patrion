@@ -7,6 +7,7 @@ Como o Patrion é empacotado, publicado, instalado, atualizado e removido (SPEC 
 | Arquivo | Conteúdo |
 |---|---|
 | `Patrion-X.Y.Z-instalador.exe` | Instalador do Inno Setup 6 |
+| `Patrion-instalador.exe` | Cópia idêntica do instalador com nome fixo, para o link [`releases/latest/download/Patrion-instalador.exe`](https://github.com/LuccaBueno/patrion/releases/latest/download/Patrion-instalador.exe) do README (feita pelo workflow; a soma é a da linha do nome com versão; D-64) |
 | `Patrion-X.Y.Z-portatil.zip` | Pasta `Patrion\` com o app e um `LEIA-ME.txt` |
 | `SHA256SUMS.txt` | Somas SHA-256 dos dois arquivos |
 | Notas | Seção da versão no `CHANGELOG.md` + requisitos, instalação, atualização e desinstalação (`installer/RELEASE_TEMPLATE.md`) |

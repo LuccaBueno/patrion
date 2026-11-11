@@ -12,7 +12,8 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 | Fase 8 | **Feita** na versão 1.3.0 |
 | M-10 a M-12 | **Feitos** na versão 1.4.0 |
 | M-13 | **Feito** na versão 1.4.1 |
-| M-14 | **Pendente** |
+| M-14 | **Cancelado** (decisão do usuário em 10/11/2026: sem chave de assinatura; o app continua só avisando e o usuário instala por cima) |
+| M-15 | **Feito** (sem versão lançada ainda) |
 
 ---
 
@@ -295,6 +296,19 @@ Ao enviar ao Claude Code, cole esta lista no início do prompt da fase e peça: 
 - **Critério de pronto:** com a versão X instalada e uma Release X+1 publicada e assinada, clicar em "Atualizar agora" baixa, verifica, faz backup, instala e reabre o app na X+1 sem nenhuma ação manual, mantendo todos os dados; um instalador com um byte alterado ou com assinatura inválida é recusado; testado de verdade entre duas versões publicadas (por exemplo, uma pré-lançamento de teste).
 - **Prioridade:** média
 - **Fase:** ajuste avulso (antecipa parte da F15)
+
+---
+
+### M-15 — Link fixo para baixar a versão mais recente
+- **Onde:** workflow de Release, `README.md` e "About" do repositório
+- **Problema:** o nome do instalador muda a cada versão, então não existe um link que sempre baixe a última.
+- **Mudança:**
+  1. Cada Release publica também uma cópia do instalador com o nome fixo `Patrion-instalador.exe`, para que https://github.com/LuccaBueno/patrion/releases/latest/download/Patrion-instalador.exe sempre baixe a versão estável mais recente. O nome com versão continua existindo.
+  2. Seção **"Baixar"** no topo do `README.md`, com esse link em destaque e 3 passos de instalação (incluindo o aviso do SmartScreen: "Mais informações" → "Executar assim mesmo").
+  3. "About" do repositório com o link de https://github.com/LuccaBueno/patrion/releases/latest.
+- **Critério de pronto:** depois da próxima Release estável publicada, o link baixa o instalador dela.
+- **Prioridade:** baixa
+- **Fase:** ajuste avulso
 
 ---
 

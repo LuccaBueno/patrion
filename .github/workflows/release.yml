@@ -89,7 +89,10 @@ jobs:
           $version = $tag.Substring(1)
           $flags = @('--draft', '--verify-tag', '--title', "Patrion $version", '--notes-file', 'dist/RELEASE_NOTES.md')
           if ($tag -match '-(beta|rc)') { $flags += '--prerelease' }
+          # Cópia com nome fixo para o link releases/latest/download (README, D-64).
+          Copy-Item "dist/Patrion-$version-instalador.exe" 'dist/Patrion-instalador.exe'
           gh release create $tag @flags `
             "dist/Patrion-$version-instalador.exe" `
+            'dist/Patrion-instalador.exe' `
             "dist/Patrion-$version-portatil.zip" `
             'dist/SHA256SUMS.txt'

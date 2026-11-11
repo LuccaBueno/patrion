@@ -793,3 +793,17 @@ Detalhes, testes e riscos em `FONTES_DE_DADOS.md`.
   - **Relógio das telas:** `wallClockProvider` alimenta o retrato da carteira, os serviços de mercado e a tela Fontes de dados; os testes usam uma data fixa.
 - Alternativas: corrigir o BTC por migração automática (mudaria dado do usuário sem ele ver); gravar o tipo de custódia em coluna nova (mudaria o schema sem necessidade); guardar só o preço unitário (o total deixaria de ser exato).
 - Motivo: M-13 (`docs/MUDANCAS.md`); regras 1, 2, 6, 8 e 10.
+
+### 2026-11-06 — D-63: TWR com compra a preço diferente do valor do dia (corrige D-51)
+
+- Causa de "No ano +1.494,50%": o fluxo do dia entrava pelo custo e o patrimônio pelo valor de fim do dia, então a diferença entre os dois virava retorno do capital da véspera. Uma compra grande numa carteira pequena multiplicava o índice (o BTC comprado a R$ 350.000 com fechamento de R$ 431.463, sobre R$ 5,6 mil de carteira, fez o índice ir de 1,04 a 16,05 num dia). Na compra acima do mercado, o índice podia ficar negativo.
+- Decisão: a diferença da compra (`WealthPoint.entryGain`) rende sobre o capital depois do aporte, como um subperíodo próprio (`FORMULAS.md` §3.2). Compra pelo fechamento não muda; venda não precisa de ajuste, porque o capital da véspera já inclui o ativo vendido.
+- Alternativas: fluxo no início do dia (erra o caso normal: compra pelo fechamento num dia de alta daria +4,8% em vez de +10%); ignorar a diferença (o TWR esconderia um ganho que aparece no "Ganho total"); Modified Dietz diário (muda todos os resultados).
+- Motivo: regra 10; pedido do usuário em 06/11/2026.
+
+### 2026-11-10 — D-64: Sem atualização por dentro do app (M-14 cancelado); link fixo de download (M-15)
+
+- Decisão do usuário: o M-14 (baixar, conferir a assinatura e instalar por dentro do app) foi cancelado. O projeto é simples e o usuário não quer gerenciar uma chave de assinatura. O commit `73ac62f` foi desfeito com `git revert`; o ambiente `release` do GitHub foi apagado (não havia segredo de assinatura).
+- Continua o modelo da SPEC §19: o app só **avisa** que há versão nova e abre a página da Release; o usuário baixa e instala por cima. A atualização automática da F15 fica como estava na SPEC, sem data.
+- **Link fixo:** o workflow `Release` publica também `Patrion-instalador.exe`, cópia byte a byte do `Patrion-X.Y.Z-instalador.exe`, para que `releases/latest/download/Patrion-instalador.exe` (README) sempre baixe a versão estável mais recente (o `/latest` do GitHub ignora rascunhos e pré-lançamentos). A cópia fica fora do `SHA256SUMS.txt`, gerado pelo `build_release.ps1`; a soma dela é a da linha do nome com versão. O "About" do repositório aponta para `releases/latest`.
+- Motivo: decisão do usuário em 10/11/2026; M-15 (`docs/MUDANCAS.md`).
