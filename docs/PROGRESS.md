@@ -8,6 +8,18 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
 
 ## Concluído
 
+### M-14 cancelado, correção do TWR e M-15 (10/11/2026; sem versão lançada)
+
+1. **Implementado:**
+   - M-14 desfeito (`85960d1`, revert de `73ac62f`) por decisão sua: o app continua só avisando da versão nova (D-64). O ambiente `release` do GitHub foi apagado; não havia segredo de assinatura.
+   - Correção do TWR (`d371a61`) mantida; o D-63 e a entrada no CHANGELOG, que saíram com o revert, foram repostos.
+   - M-15: o workflow `Release` publica também `Patrion-instalador.exe`; seção "Baixar" no topo do README; "About" do repositório apontando para `releases/latest` (feito com `gh repo edit`).
+2. **Arquivos:** `.github/workflows/release.yml`, `README.md`, `CHANGELOG.md` (em "Não lançado"), `DECISIONS.md`, `DISTRIBUICAO.md`, `MUDANCAS.md`.
+3. **Testes:** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com 614 passando (8 capturas manuais puladas); `flutter build windows --release` compilou. O workflow de Release com a cópia ainda não rodou.
+4. **Limitações:** o link do README só funciona depois da próxima Release **estável publicada**. Hoje a última publicada é a 1.4.0, que não tem a cópia, então o link dá 404.
+5. **Pendências:** decidir a versão (1.4.2 ou 1.5.0) e quando publicar; push dos commits locais; publicar o rascunho da 1.4.1; Fase 9.
+6. **Como testar:** depois da próxima Release publicada, abra o link do README numa janela anônima e confira que ele baixa o instalador dessa versão.
+
 ### Ajuste M-13 — versão 1.4.1 (04/11/2026)
 
 **Causa do BTC sem cotação:** no seu banco, o ativo estava como `market: B3`, `asset_class: crypto`. O "Adicionar ativo" gravava tudo na B3, e o cadastro completo, para onde ele mandava a cripto, abria com mercado B3 e não mudava ao escolher a classe Cripto. As fontes de cripto só atendem o mercado Cripto, as da B3 não conhecem o código, e o app não avisa "sem fonte" para ativos da B3. A falha era silenciosa.
