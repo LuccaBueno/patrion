@@ -1,6 +1,3 @@
-# Chave de assinatura das Releases (DECISIONS D-62): nunca no repositório.
-patrion-update-key*
-
 # Miscellaneous
 *.class
 *.log

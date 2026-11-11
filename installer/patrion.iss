@@ -87,9 +87,6 @@ Type: filesandordirs; Name: "{app}\data"
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "AVISOS_DE_TERCEIROS.txt"; DestDir: "{app}"; Flags: ignoreversion
-; Marca a instalação: sem este arquivo (versão portátil, build de
-; desenvolvimento), o app não atualiza por dentro (DECISIONS D-62).
-Source: "patrion.instalado"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
@@ -112,60 +109,6 @@ Root: HKA; Subkey: "Software\Classes\Applications\{#AppExe}\SupportedTypes"; Val
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
-const
-  AppMutexes = 'PatrionAppMutex,Global\PatrionAppMutex';
-  WaitAppTries = 150; // 30 segundos, de 200 em 200 ms
-
-function HasParam(const Name: String): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  for I := 1 to ParamCount do
-    if CompareText(ParamStr(I), Name) = 0 then
-      Result := True;
-end;
-
-// Atualização pelo app (/WAITAPP; DECISIONS D-62): o app inicia o instalador
-// e fecha em seguida. Sem esta espera, o instalador silencioso encontraria o
-// mutex e sairia com erro.
-function InitializeSetup(): Boolean;
-var
-  Tries: Integer;
-begin
-  Result := True;
-  if HasParam('/WAITAPP') then
-  begin
-    Tries := 0;
-    while CheckForMutexes(AppMutexes) and (Tries < WaitAppTries) do
-    begin
-      Sleep(200);
-      Tries := Tries + 1;
-    end;
-    Log('Esperou o app fechar por ' + IntToStr(Tries * 200) + ' ms');
-  end;
-end;
-
-// Reabre o app (/RELAUNCH=<patrion.exe>), tenha instalado ou não: se a
-// instalação falhou, a versão anterior volta e o app avisa.
-procedure DeinitializeSetup();
-var
-  Exe, DataDir, CacheDir, Args: String;
-  Code: Integer;
-begin
-  Exe := ExpandConstant('{param:RELAUNCH|}');
-  if Exe = '' then
-    Exit;
-  Args := '';
-  DataDir := ExpandConstant('{param:DATADIR|}');
-  if DataDir <> '' then
-    Args := Args + ' --data-dir "' + DataDir + '"';
-  CacheDir := ExpandConstant('{param:CACHEDIR|}');
-  if CacheDir <> '' then
-    Args := Args + ' --cache-dir "' + CacheDir + '"';
-  ExecAsOriginalUser(Exe, Args, '', SW_SHOW, ewNoWait, Code);
-end;
-
 // Ao terminar a desinstalação, lembra onde os dados ficaram (não são
 // apagados; SPEC §19).
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);

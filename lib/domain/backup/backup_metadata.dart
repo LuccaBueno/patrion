@@ -8,8 +8,7 @@ enum BackupReason {
   preImport('pre-importacao', 'Antes de importar um save'),
   preRestore('pre-restauracao', 'Antes de restaurar um backup'),
   preLock('pre-bloqueio', 'Antes de ativar o bloqueio'),
-  preUnlock('pre-desbloqueio', 'Antes de desativar o bloqueio'),
-  preUpdate('pre-atualizacao', 'Antes de atualizar o app');
+  preUnlock('pre-desbloqueio', 'Antes de desativar o bloqueio');
 
   const BackupReason(this.code, this.label);
 

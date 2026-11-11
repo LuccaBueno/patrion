@@ -167,9 +167,9 @@ O `PortfolioQuery` lê o preço de mercado do banco e recalcula a carteira quand
 | Camada | Arquivos | Papel |
 |---|---|---|
 | `core/config/` | `app_info.dart`, `launch_options.dart` | Versão, repositório das Releases (único lugar), arquivos recebidos pela linha de comando |
-| `application/updates/` | `update_checker.dart`, `update_installer.dart` | Verificador de atualizações: comparação SemVer, pré-lançamentos, versão ignorada, frequência e estado em `dev_settings` (D-40). Atualização pelo app: conferência da assinatura e do hash, backup e instalador (D-62) |
-| `infrastructure/updates/` | `github_release_feed.dart`, `github_release_downloads.dart`, `minisign.dart` | Adaptadores das Releases do GitHub (sem token) e conferência da assinatura |
+| `application/updates/` | `update_checker.dart` | Verificador de atualizações: comparação SemVer, pré-lançamentos, versão ignorada, frequência e estado em `dev_settings` (D-40) |
+| `infrastructure/updates/` | `github_release_feed.dart` | Adaptador das Releases do GitHub (sem token) |
 | `infrastructure/system/` | `single_instance.dart`, `window_setup.dart` | Uma instância por pasta de dados, encaminhamento de arquivos e janela para a frente (D-39) |
-| `presentation/` | `services/open_requests.dart`, `services/update_task.dart`, `screens/updates/update_widgets.dart` | Fila dos `.invsave` recebidos; andamento do "Atualizar agora"; seção "Atualizações" (em Configurações > Sobre), aviso no Painel e consulta automática |
+| `presentation/` | `services/open_requests.dart`, `screens/updates/update_widgets.dart` | Fila dos `.invsave` recebidos; seção "Atualizações" (em Configurações > Sobre), aviso no Painel e consulta automática |
 | `windows/runner/main.cpp` | — | Mutex `PatrionAppMutex`, que o instalador usa para saber se o app está aberto |
 | `installer/`, `tool/release/` | `patrion.iss`, `*.ps1` | Instalador, ZIP portátil, notas e testes de instalação (`DISTRIBUICAO.md`) |

@@ -6,13 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
 import '../../../application/updates/update_checker.dart';
-import '../../../application/updates/update_installer.dart';
-import '../../../core/config/app_info.dart';
 import '../../../core/time/instant_format.dart';
 import '../../format/sync_labels.dart';
 import '../../providers.dart';
 import '../../router/app_router.dart';
-import '../../services/update_task.dart';
 
 final _log = Logger('updates');
 
@@ -44,16 +41,7 @@ class _UpdateAutoCheckState extends ConsumerState<UpdateAutoCheck> {
   Future<void> _check() async {
     if (!mounted) return;
     try {
-      final state = await ref.read(updateCheckerProvider).checkIfDue();
-      final release = state.available;
-      if (mounted &&
-          state.installOnClose &&
-          release != null &&
-          ref.read(selfUpdateAvailableProvider)) {
-        await ref
-            .read(updateTaskProvider.notifier)
-            .prepareInBackground(release);
-      }
+      await ref.read(updateCheckerProvider).checkIfDue();
     } on Object catch (error) {
       _log.fine('Verificação automática falhou', error);
     }
@@ -69,226 +57,37 @@ class _UpdateAutoCheckState extends ConsumerState<UpdateAutoCheck> {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// Aviso no Início: o resultado da última atualização e a versão nova não
-/// ignorada, com "Atualizar agora".
+/// Aviso no Início quando há uma versão nova não ignorada.
 class UpdateReminder extends ConsumerWidget {
   const UpdateReminder({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final outcome = ref.watch(updateOutcomeProvider).value;
     final release = ref.watch(updateSnapshotProvider).value?.available;
-    final task = ref.watch(updateTaskProvider);
+    if (release == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (outcome != null) _OutcomeCard(outcome),
-        if (release != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Card(
-              key: const Key('update-reminder'),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Icon(
-                      Icons.system_update_alt,
-                      color: theme.colorScheme.primary,
-                      semanticLabel: 'Atualização disponível',
-                    ),
-                    title: Text(
-                      'Nova versão disponível: ${release.version}'
-                      '${release.prerelease ? ' (versão de teste)' : ''}.',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    trailing: Wrap(
-                      spacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        if (ref.watch(selfUpdateAvailableProvider))
-                          _UpdateNowButton(release),
-                        TextButton(
-                          onPressed: () =>
-                              GoRouter.of(context).go(Routes.about),
-                          child: const Text('Ver detalhes'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (task.busy || task.phase == UpdatePhase.failed)
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: _UpdateProgress(),
-                    ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// Resultado da atualização: versão nova com as notas, ou o que fazer.
-class _OutcomeCard extends ConsumerWidget {
-  const _OutcomeCard(this.outcome);
-
-  final UpdateOutcome outcome;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final notes = outcome.notes.trim();
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
-        key: const Key('update-outcome'),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 8, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    outcome.updated ? Icons.check_circle : Icons.error_outline,
-                    color: outcome.updated
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.error,
-                    semanticLabel: outcome.updated
-                        ? 'Atualizado'
-                        : 'Atualização não concluída',
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      outcome.updated
-                          ? 'Atualizado para a versão ${outcome.to}.'
-                          : 'A atualização para a versão ${outcome.to} não '
-                                'foi concluída.',
-                      style: theme.textTheme.titleSmall,
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Fechar',
-                    icon: const Icon(Icons.close),
-                    onPressed: () =>
-                        ref.read(updateOutcomeProvider.notifier).dismiss(),
-                  ),
-                ],
-              ),
-              if (!outcome.updated)
-                SelectableText(
-                  'Sua versão continua funcionando, com os dados como '
-                  'estavam. O backup feito antes de atualizar está em Backup. '
-                  'Detalhes: ${outcome.log ?? 'sem log'}.',
-                  style: theme.textTheme.bodySmall,
-                )
-              else if (notes.isNotEmpty)
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 160),
-                  child: SingleChildScrollView(
-                    child: SelectableText(
-                      notes,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
-                ),
-            ],
+        key: const Key('update-reminder'),
+        child: ListTile(
+          leading: Icon(
+            Icons.system_update_alt,
+            color: theme.colorScheme.primary,
+            semanticLabel: 'Atualização disponível',
+          ),
+          title: Text(
+            'Nova versão disponível: ${release.version}'
+            '${release.prerelease ? ' (versão de teste)' : ''}.',
+            style: theme.textTheme.bodyMedium,
+          ),
+          trailing: TextButton(
+            onPressed: () => GoRouter.of(context).go(Routes.about),
+            child: const Text('Ver detalhes'),
           ),
         ),
       ),
     );
-  }
-}
-
-/// "Atualizar agora": desabilitado enquanto outra atualização anda.
-class _UpdateNowButton extends ConsumerWidget {
-  const _UpdateNowButton(this.release);
-
-  final ReleaseInfo release;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final busy = ref.watch(updateTaskProvider).busy;
-    return FilledButton.icon(
-      key: const Key('update-now'),
-      onPressed: busy
-          ? null
-          : () => ref.read(updateTaskProvider.notifier).updateNow(release),
-      icon: const Icon(Icons.system_update_alt),
-      label: const Text('Atualizar agora'),
-    );
-  }
-}
-
-/// Barra de progresso do download, com cancelar, e a mensagem de falha.
-class _UpdateProgress extends ConsumerWidget {
-  const _UpdateProgress();
-
-  static String _megabytes(int bytes) =>
-      (bytes / (1024 * 1024)).toStringAsFixed(1).replaceAll('.', ',');
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final task = ref.watch(updateTaskProvider);
-    final theme = Theme.of(context);
-    switch (task.phase) {
-      case UpdatePhase.idle:
-        return const SizedBox.shrink();
-      case UpdatePhase.failed:
-        return Text(
-          task.message ?? 'Não foi possível atualizar.',
-          key: const Key('update-error'),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.error,
-          ),
-        );
-      case UpdatePhase.installing:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const LinearProgressIndicator(),
-            const SizedBox(height: 4),
-            Text(
-              'Fazendo o backup e abrindo o instalador. O app fecha e reabre '
-              'sozinho.',
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
-        );
-      case UpdatePhase.downloading:
-        final total = task.total;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LinearProgressIndicator(
-              key: const Key('update-progress'),
-              value: task.fraction,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    total == null
-                        ? 'Baixando: ${_megabytes(task.received)} MB'
-                        : 'Baixando: ${_megabytes(task.received)} de '
-                              '${_megabytes(total)} MB',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ),
-                TextButton(
-                  key: const Key('update-cancel'),
-                  onPressed: () =>
-                      ref.read(updateTaskProvider.notifier).cancel(),
-                  child: const Text('Cancelar'),
-                ),
-              ],
-            ),
-          ],
-        );
-    }
   }
 }
 
@@ -352,26 +151,9 @@ class _UpdateSettingsSectionState extends ConsumerState<UpdateSettingsSection> {
           : 'Verificado em $when.';
     }
 
-    final selfUpdate = ref.watch(selfUpdateAvailableProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Versão instalada: ${AppInfo.version}'
-          '${snapshot?.latest == null ? '' : ' · Mais recente: ${snapshot!.latest!.version}'}',
-          key: const Key('updates-versions'),
-          style: theme.textTheme.bodyMedium,
-        ),
-        if (!selfUpdate)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              'Esta cópia não veio do instalador (versão portátil), então '
-              'não se atualiza sozinha: baixe o ZIP novo na página da versão.',
-              key: const Key('updates-portable'),
-              style: muted,
-            ),
-          ),
         SwitchListTile(
           key: const Key('updates-automatic'),
           contentPadding: EdgeInsets.zero,
@@ -390,20 +172,6 @@ class _UpdateSettingsSectionState extends ConsumerState<UpdateSettingsSection> {
           value: snapshot?.includePrerelease ?? false,
           onChanged: (v) => checker.setIncludePrerelease(v),
         ),
-        if (selfUpdate)
-          SwitchListTile(
-            key: const Key('updates-install-on-close'),
-            contentPadding: EdgeInsets.zero,
-            title: const Text(
-              'Baixar em segundo plano e instalar ao fechar o app',
-            ),
-            subtitle: const Text(
-              'A versão nova é conferida como no "Atualizar agora" e entra '
-              'na próxima vez que você abrir o app.',
-            ),
-            value: snapshot?.installOnClose ?? false,
-            onChanged: (v) => checker.setInstallOnClose(v),
-          ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 12,
@@ -448,7 +216,7 @@ class _UpdateSettingsSectionState extends ConsumerState<UpdateSettingsSection> {
   }
 }
 
-class _ReleaseCard extends ConsumerWidget {
+class _ReleaseCard extends StatelessWidget {
   const _ReleaseCard({
     required this.release,
     required this.skipped,
@@ -462,9 +230,8 @@ class _ReleaseCard extends ConsumerWidget {
   final VoidCallback onSkip;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selfUpdate = ref.watch(selfUpdateAvailableProvider);
     final published = release.publishedAt == null
         ? ''
         : ', publicada em '
@@ -504,24 +271,16 @@ class _ReleaseCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            selfUpdate
-                ? 'O app baixa a versão, confere a assinatura, faz um backup, '
-                      'fecha e reabre atualizado. Os dados ficam onde estão. '
-                      'Se a versão nova não abrir, reinstale a anterior pela '
-                      'página de Releases; o backup fica em Backup.'
-                : 'Para atualizar, baixe o ZIP na página da versão. Os dados '
-                      'ficam onde estão.',
+            'Para atualizar, baixe o instalador na página da versão e '
+            'execute-o com o Patrion fechado. Os dados ficam onde estão.',
             style: theme.textTheme.bodySmall,
           ),
-          const SizedBox(height: 8),
-          const _UpdateProgress(),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              if (selfUpdate) _UpdateNowButton(release),
-              (selfUpdate ? OutlinedButton.icon : FilledButton.icon)(
+              FilledButton.icon(
                 onPressed: onOpen,
                 icon: const Icon(Icons.open_in_new),
                 label: const Text('Abrir página de download'),

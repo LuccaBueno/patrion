@@ -80,7 +80,6 @@ Future<void> main(List<String> args) async {
         manager: manager,
         logsDir: paths.logsDir,
         openRequests: openRequests,
-        launchArguments: args,
       ),
     );
   } catch (error, stack) {

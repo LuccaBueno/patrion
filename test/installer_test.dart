@@ -50,50 +50,6 @@ void main() {
     }
   });
 
-  test('atualização pelo app: espera o app fechar e reabre', () {
-    final appInfo = File('lib/application/updates/update_installer.dart')
-        .readAsStringSync();
-    expect(appInfo, contains("'/WAITAPP'"));
-    expect(iss, contains("HasParam('/WAITAPP')"));
-    expect(iss, contains('CheckForMutexes(AppMutexes)'));
-    // Os mesmos mutexes do AppMutex, que o runner cria.
-    final mutex = RegExp(
-      r'^AppMutex=(.+)$',
-      multiLine: true,
-    ).firstMatch(iss)!.group(1)!.trim();
-    expect(iss, contains("AppMutexes = '$mutex'"));
-    expect(iss, contains('{param:RELAUNCH|}'));
-    expect(
-      File('lib/presentation/providers.dart').readAsStringSync(),
-      contains('/RELAUNCH='),
-    );
-  });
-
-  test('só o instalador leva o marcador; o ZIP portátil não', () {
-    expect(section('Files').join(), contains('patrion.instalado'));
-    expect(File('installer/patrion.instalado').existsSync(), isTrue);
-    expect(
-      File('tool/release/build_release.ps1').readAsStringSync(),
-      isNot(contains('patrion.instalado')),
-    );
-  });
-
-  test('a chave de assinatura só existe no passo que assina', () {
-    final workflow = File('.github/workflows/release.yml').readAsStringSync();
-    final secret = 'secrets.PATRION_UPDATE_SIGNING_KEY';
-    expect(secret.allMatches(workflow), hasLength(1));
-    final jobs = workflow.split(
-      RegExp(r'^  (?=[a-z]+:\r?\n    name:)', multiLine: true),
-    );
-    final sign = jobs.singleWhere((j) => j.contains(secret));
-    expect(sign, contains('environment: release'));
-    expect(sign, isNot(contains('flutter')));
-    // O job de build não recebe o segredo nem o ambiente.
-    final build = jobs.singleWhere((j) => j.startsWith('build:'));
-    expect(build, isNot(contains('environment: release')));
-    expect(sign, contains('SHA256SUMS.txt.minisig'));
-  });
-
   test('instala por usuário e associa o .invsave', () {
     expect(iss, contains('PrivilegesRequired=lowest'));
     expect(iss, contains(r'DefaultDirName={autopf}\{#AppName}'));

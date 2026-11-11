@@ -4,7 +4,7 @@
 abstract final class AppInfo {
   static const name = 'Patrion';
   static const subtitle = 'Investimentos e Patrimônio';
-  static const version = '1.5.0';
+  static const version = '1.4.1';
 
   /// Repositório do GitHub com as Releases, no formato `dono/nome`. É o
   /// único lugar do código com o repositório (SPEC §19; DECISIONS D-07).
@@ -12,9 +12,4 @@ abstract final class AppInfo {
 
   /// Página das Releases, para quem quiser baixar manualmente.
   static const releasesPage = 'https://github.com/$releasesRepository/releases';
-
-  /// Chaves públicas que assinam as Releases, no formato do minisign. A
-  /// privada fica só nos segredos do GitHub e na cópia do dono (DECISIONS
-  /// D-62). Mais de uma só durante uma troca planejada de chave.
-  static const updatePublicKeys = <String>[];
 }

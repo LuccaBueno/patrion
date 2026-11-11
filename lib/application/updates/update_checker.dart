@@ -78,7 +78,6 @@ class UpdateSnapshot {
     required this.current,
     this.automatic = true,
     this.includePrerelease = false,
-    this.installOnClose = false,
     this.checkedAt,
     this.latest,
     this.skipped,
@@ -91,9 +90,6 @@ class UpdateSnapshot {
 
   /// Considerar versões de teste (`-beta`, `-rc`).
   final bool includePrerelease;
-
-  /// Baixar em segundo plano e instalar ao fechar o app (M-14).
-  final bool installOnClose;
 
   /// Última consulta bem-sucedida.
   final DateTime? checkedAt;
@@ -194,7 +190,6 @@ class UpdateChecker {
       current: _current,
       automatic: state.automatic,
       includePrerelease: state.includePrerelease,
-      installOnClose: state.installOnClose,
       checkedAt: _clock.now(),
       latest: latest,
       skipped: state.skipped,
@@ -210,7 +205,6 @@ class UpdateChecker {
         current: _current,
         automatic: s.automatic,
         includePrerelease: s.includePrerelease,
-        installOnClose: s.installOnClose,
         checkedAt: s.checkedAt,
         latest: s.latest,
         skipped: version,
@@ -225,22 +219,6 @@ class UpdateChecker {
         current: _current,
         automatic: value,
         includePrerelease: s.includePrerelease,
-        installOnClose: s.installOnClose,
-        checkedAt: s.checkedAt,
-        latest: s.latest,
-        skipped: s.skipped,
-      ),
-    );
-  }
-
-  Future<void> setInstallOnClose(bool value) async {
-    final s = await snapshot();
-    await _save(
-      UpdateSnapshot(
-        current: _current,
-        automatic: s.automatic,
-        includePrerelease: s.includePrerelease,
-        installOnClose: value,
         checkedAt: s.checkedAt,
         latest: s.latest,
         skipped: s.skipped,
@@ -257,7 +235,6 @@ class UpdateChecker {
         current: _current,
         automatic: s.automatic,
         includePrerelease: value,
-        installOnClose: s.installOnClose,
         skipped: s.skipped,
       ),
     );
@@ -268,7 +245,6 @@ class UpdateChecker {
     jsonEncode({
       'automatic': s.automatic,
       'includePrerelease': s.includePrerelease,
-      'installOnClose': s.installOnClose,
       if (s.checkedAt != null) 'checkedAt': formatInstant(s.checkedAt!),
       if (s.latest != null) 'latest': s.latest!.toJson(),
       if (s.skipped != null) 'skipped': s.skipped.toString(),
@@ -283,7 +259,6 @@ class UpdateChecker {
         current: _current,
         automatic: m['automatic'] as bool? ?? true,
         includePrerelease: m['includePrerelease'] as bool? ?? false,
-        installOnClose: m['installOnClose'] as bool? ?? false,
         checkedAt: switch (m['checkedAt']) {
           final String s => parseInstant(s),
           _ => null,

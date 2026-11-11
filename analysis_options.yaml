@@ -6,7 +6,6 @@ analyzer:
     - windows/**
     - "**/*.g.dart"
     - test/**/generated/**
-    - tool/signing/** # pacote próprio, analisado no CI
   language:
     strict-casts: true
     strict-inference: true
