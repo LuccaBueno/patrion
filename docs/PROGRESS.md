@@ -16,8 +16,8 @@ Atualizado pelo Claude ao final de cada fase ou sessão.
    - M-15: o workflow `Release` publica também `Patrion-instalador.exe`; seção "Baixar" no topo do README; "About" do repositório apontando para `releases/latest` (feito com `gh repo edit`).
 2. **Arquivos:** `.github/workflows/release.yml`, `README.md`, `CHANGELOG.md` (em "Não lançado"), `DECISIONS.md`, `DISTRIBUICAO.md`, `MUDANCAS.md`.
 3. **Testes:** `dart format` sem mudanças; `flutter analyze` sem problemas; `flutter test` com 614 passando (8 capturas manuais puladas); `flutter build windows --release` compilou. O workflow de Release com a cópia ainda não rodou.
-4. **Limitações:** o link do README só funciona depois da próxima Release **estável publicada**. Hoje a última publicada é a 1.4.0, que não tem a cópia, então o link dá 404.
-5. **Pendências:** decidir a versão (1.4.2 ou 1.5.0) e quando publicar; push dos commits locais; publicar o rascunho da 1.4.1; Fase 9.
+4. **Limitações:** o link do README só funciona depois da próxima Release **estável publicada**. Hoje a última publicada é a 1.4.1, que não tem a cópia, então o link dá 404.
+5. **Pendências:** decidir a versão (1.4.2 ou 1.5.0) e quando publicar; push dos commits locais; Fase 9.
 6. **Como testar:** depois da próxima Release publicada, abra o link do README numa janela anônima e confira que ele baixa o instalador dessa versão.
 
 ### Ajuste M-13 — versão 1.4.1 (04/11/2026)
