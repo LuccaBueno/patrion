@@ -2,13 +2,17 @@
 
 ## Baixar
 
-### [⬇ Baixar o Patrion para Windows](https://github.com/LuccaBueno/patrion/releases/latest/download/Patrion-instalador.exe)
+<p align="center">
+  <a href="https://github.com/LuccaBueno/patrion/releases/latest/download/Patrion-instalador.exe">
+    <img alt="Baixar o Patrion" src="https://img.shields.io/badge/BAIXAR%20O%20PATRION-WINDOWS%2010%20E%2011-1F6B4F?style=for-the-badge&labelColor=0F1113&logo=windows&logoColor=C9A86A">
+  </a>
+</p>
 
-Windows 10 ou 11, 64 bits. O link sempre baixa a versão estável mais recente.
+1. Clique no botão acima para baixar o `Patrion-instalador.exe`.
+2. Abra o arquivo baixado. Se aparecer "O Windows protegeu o computador", clique em **Mais informações** > **Executar assim mesmo**.
+3. Siga o instalador e abra o Patrion pelo Menu Iniciar.
 
-1. Clique no link acima e salve o `Patrion-instalador.exe`.
-2. Abra o arquivo. O Windows pode mostrar "O Windows protegeu o computador", porque o instalador não tem certificado pago: clique em **Mais informações** → **Executar assim mesmo**.
-3. Siga o instalador (não pede administrador) e abra o Patrion pelo Menu Iniciar. Para atualizar, quando o app avisar de uma versão nova, feche o app e instale a nova por cima pelo mesmo link: os dados ficam onde estão.
+> **Atenção:** não baixe "Source code (zip)" nem "Source code (tar.gz)": é o código-fonte para programadores, não o app.
 
 Outras versões e o ZIP portátil ficam em [Releases](https://github.com/LuccaBueno/patrion/releases).
 
